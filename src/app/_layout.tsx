@@ -66,6 +66,7 @@ export default function RootLayout() {
           <Stack.Screen name="lesson/[id]" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
           <Stack.Screen name="unit/[id]" />
           <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+          <Stack.Screen name="debug" />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -15,6 +15,7 @@ export type PlotLabProps = {
   view: View2D;
   equalAspect?: boolean;
   grid?: boolean;
+  axes?: boolean;
   tickLabels?: boolean;
   params?: ParamSpec[];
   points?: DragSpec[];
@@ -73,6 +74,7 @@ export function PlotLab(props: PlotLabProps) {
         {...view}
         equalAspect={props.equalAspect}
         grid={props.grid ?? true}
+        axes={props.axes ?? true}
         tickLabels={props.tickLabels ?? true}
         draggables={draggables.length ? draggables : undefined}
         onDrag={draggables.length ? onDrag : undefined}

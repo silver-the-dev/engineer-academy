@@ -76,6 +76,8 @@ export function texToSvg(tex: string, display = false): TexSvg {
     const w = parseFloat((svg.match(/width="([\d.]+)ex"/) || [])[1] || '1');
     const h = parseFloat((svg.match(/height="([\d.]+)ex"/) || [])[1] || '1');
     const va = parseFloat((svg.match(/vertical-align:\s*(-?[\d.]+)ex/) || [])[1] || '0');
+    // errors (merror) and undefined macros (noundefined paints them red)
+    const hasError = /data-mjx-error|"merror"|fill="red"|stroke="red"|mathcolor="red"/.test(svg);
     // Strip attributes react-native-svg does not need
     svg = svg
       .replace(/\sstyle="[^"]*"/g, '')
@@ -84,7 +86,6 @@ export function texToSvg(tex: string, display = false): TexSvg {
       .replace(/\sdata-[a-z-]+="[^"]*"/g, '')
       .replace(/\saria-[a-z-]+="[^"]*"/g, '')
       .replace(/<title>[\s\S]*?<\/title>/g, '');
-    const hasError = /data-mjx-error|merror/.test(svg);
     out = { xml: svg, wEx: w, hEx: h, vaEx: va, error: hasError };
   } catch (e) {
     out = { xml: '', wEx: 0, hEx: 0, vaEx: 0, error: true };
