@@ -19,9 +19,12 @@ export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
     return { correct: sel === ex.answer, answer: ex.options[ex.answer] };
   });
   const many = ex.options.length > 4 || ex.options.every((o) => o.length < 14);
+  const seed = useRef(Math.floor(Math.random() * 1e9)).current;
+  const orderIdx = useMemo(() => shuffle(makeRng(seed), ex.options.map((_, i) => i)), [ex, seed]);
   return (
     <View style={{ flexDirection: many ? 'row' : 'column', flexWrap: 'wrap', marginHorizontal: many ? -5 : 0 }}>
-      {ex.options.map((o, i) => {
+      {orderIdx.map((i) => {
+        const o = ex.options[i];
         let st: ChoiceState = sel === i ? 'selected' : 'idle';
         if (checked) st = i === ex.answer ? 'correct' : sel === i ? 'wrong' : 'dim';
         return (
@@ -44,6 +47,8 @@ export function MultiView({ ex, locked, onReady, registerCheck }: ExProps<MultiS
   const [sel, setSel] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
   useEffect(() => onReady(sel.length > 0), [sel, onReady]);
+  const seed = useRef(Math.floor(Math.random() * 1e9)).current;
+  const orderIdx = useMemo(() => shuffle(makeRng(seed), ex.options.map((_, i) => i)), [ex, seed]);
   registerCheck(() => {
     setChecked(true);
     const a = [...ex.answers].sort().join(',');
@@ -53,7 +58,8 @@ export function MultiView({ ex, locked, onReady, registerCheck }: ExProps<MultiS
   return (
     <View>
       <Text style={{ color: C.textMuted, fontFamily: F.bold, marginBottom: 8 }}>Selecione todas as corretas</Text>
-      {ex.options.map((o, i) => {
+      {orderIdx.map((i) => {
+        const o = ex.options[i];
         const on = sel.includes(i);
         let st: ChoiceState = on ? 'selected' : 'idle';
         if (checked) st = ex.answers.includes(i) ? 'correct' : on ? 'wrong' : 'dim';

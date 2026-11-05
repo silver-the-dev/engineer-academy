@@ -13,6 +13,7 @@ import { variaveis, duplas } from './calc/variaveis';
 import { vetoresGeo, vetoresAlg } from './gaal/vetores';
 import { escalar, vetorial } from './gaal/produtos';
 import { reta, plano, transformacoes } from './gaal/retaplano';
+import { erros, zeros, sistemasNum } from './num/numerico1';
 
 export const SECTIONS: Section[] = [
   {
@@ -38,5 +39,13 @@ export const SECTIONS: Section[] = [
     color: '#00B4D8',
     emoji: '🧭',
     units: [vetoresGeo, vetoresAlg, escalar, vetorial, reta, plano, transformacoes],
+  },
+  {
+    id: 'num',
+    title: 'Cálculo Numérico',
+    subtitle: 'Erros, raízes, sistemas, interpolação, integração e EDOs',
+    color: '#2BD576',
+    emoji: '💻',
+    units: [erros, zeros, sistemasNum],
   },
 ];
