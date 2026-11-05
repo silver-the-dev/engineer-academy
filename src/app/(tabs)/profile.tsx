@@ -86,7 +86,7 @@ export default function ProfileScreen() {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
           <Stat icon="🔥" value={`${streak}`} label="ofensiva atual" color={C.fire} />
           <Stat icon="🏔️" value={`${Math.max(streak, longestStreak(s.days, s.frozenDays))}`} label="maior ofensiva" color={C.gold} />
-          <Stat icon="📅" value={`${studied}`} label="dias estudados" color={C.success} />
+          <Stat icon="📅" value={`${studied}`} label={studied === 1 ? "dia estudado" : "dias estudados"} color={C.success} />
           <Stat icon="📘" value={`${s.stats.lessonsDone}`} label="lições" color={C.primary} />
           <Stat icon="🎯" value={`${acc}%`} label="precisão" color={C.cyan} />
           <Stat icon="⏱️" value={`${mins} min`} label="tempo estudando" color={C.p5} />

@@ -71,6 +71,14 @@ export function fracTex(p: number, q: number): string {
 }
 
 /** Polynomial to TeX: coeffs[i] is coefficient of x^i. */
+/** Signed monomial for TeX: term(-1, 'x^2', true) = '-x^2', term(3, 'y') = '+3y', term(0, …) = ''. */
+export function term(c: number, body: string, first = false): string {
+  if (!c) return '';
+  const abs = Math.abs(c);
+  const coef = body && abs === 1 ? '' : fmt(abs);
+  return (c < 0 ? '-' : first ? '' : '+') + coef + body;
+}
+
 export function polyTex(coeffs: number[], v = 'x'): string {
   const terms: string[] = [];
   for (let i = coeffs.length - 1; i >= 0; i--) {

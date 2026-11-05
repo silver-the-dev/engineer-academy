@@ -3,7 +3,7 @@ import type { Unit } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { AreaUnder, FnCurve, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, polyTex, fracTex } from '../../../lib/random';
+import { fmt, pick, randInt, randNZ, polyTex, fracTex, term } from '../../../lib/random';
 import { areaLab, betweenLab, fnLab, riemannLab } from '../../visuals';
 
 const t = String.raw;
@@ -204,7 +204,7 @@ Arraste o limite superior $b$ e veja a área acumulada:`,
           const m = randNZ(rng, -3, 4);
           const k = randInt(rng, -3, 3);
           const val = (m / 2) * (b * b - a * a) + k * (b - a);
-          return num(t`Calcule $\int_{${a}}^{${b}}(${m}x${k < 0 ? '' : '+'}${k})\,dx$.`, val, t`$\left[\frac{${m}x^2}{2}${k < 0 ? '' : '+'}${k}x\right]_{${a}}^{${b}}=${fmt(val)}$.`);
+          return num(t`Calcule $\int_{${a}}^{${b}}(${term(m, 'x', true)}${term(k, '')})\,dx$.`, val, t`$\left[\frac{${term(m, 'x^2', true)}}{2}${term(k, 'x')}\right]_{${a}}^{${b}}=${fmt(val)}$.`);
         }),
         num(t`Calcule $\int_0^{\pi}\operatorname{sen}x\,dx$.`, 2, t`$[-\cos x]_0^\pi=-(-1)-(-1)=2$.`),
         num(t`Calcule $\int_1^{e}\frac{1}{x}\,dx$.`, 1, t`$[\ln x]_1^e=1-0$.`),

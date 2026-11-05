@@ -105,7 +105,7 @@ object HeatmapRenderer {
 
     var top = headerBaseline + dp(if (compact) 6f else 8f)
     if (!compact) {
-      val sub = "$total dias estudados · nível ${snap.level} · ${snap.totalXp} XP"
+      val sub = "$total ${if (total == 1) "dia estudado" else "dias estudados"} · nível ${snap.level} · ${snap.totalXp} XP"
       c.drawText(sub, pad, top + subPaint.textSize, subPaint)
       top += subPaint.textSize + dp(8f)
     }

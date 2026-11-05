@@ -3,7 +3,7 @@ import type { Unit } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { Arrow, CircleW, Pt } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ } from '../../../lib/random';
+import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 import { doubleIntegralLab, surfaceLab } from '../../visuals3d';
 
 const t = String.raw;
@@ -77,7 +77,7 @@ $g=e^{xy}$: $g_x=y\,e^{xy}$ · $g_y=x\,e^{xy}$.`,
         gen((rng) => {
           const a = randNZ(rng, -4, 4);
           const b = randNZ(rng, -4, 4);
-          return rmcq(rng, t`Calcule $\frac{\partial f}{\partial x}$ de $f(x,y)=${a}x^2y${b < 0 ? '' : '+'}${b}y^3$.`, t`$${2 * a}xy$`, [t`$${a}x^2+${3 * b}y^2$`, t`$${2 * a}x$`, t`$${2 * a}xy+${3 * b}y^2$`], t`$y$ é constante: $${a}y\cdot2x$, e $${b}y^3$ some.`);
+          return rmcq(rng, t`Calcule $\frac{\partial f}{\partial x}$ de $f(x,y)=${term(a, 'x^2y', true)}${term(b, 'y^3')}$.`, t`$${term(2 * a, 'xy', true)}$`, [t`$${term(a, 'x^2', true)}${term(3 * b, 'y^2')}$`, t`$${term(2 * a, 'x', true)}$`, t`$${term(2 * a, 'xy', true)}${term(3 * b, 'y^2')}$`], t`$y$ é constante: $${term(a, 'y', true)}\cdot2x$, e $${term(b, 'y^3', true)}$ some.`);
         }),
         gen((rng) => {
           const x = randInt(rng, -2, 3);

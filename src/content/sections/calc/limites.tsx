@@ -85,7 +85,7 @@ As restrições clássicas:
           const a = randInt(rng, -4, 4);
           const b = randInt(rng, 1, 5);
           const x = randInt(rng, -3, 3);
-          return num(t`Se $f(x)=x^2${a < 0 ? '' : '+'}${a}x+${b}$, quanto vale $f(${x})$?`, x * x + a * x + b, t`$(${x})^2${a < 0 ? '' : '+'}${a}\cdot(${x})+${b}=${x * x + a * x + b}$.`);
+          return num(t`Se $f(x)=${polyTex([b, a, 1])}$, quanto vale $f(${x})$?`, x * x + a * x + b, t`$(${x})^2${a < 0 ? '' : '+'}${a}\cdot(${x})+${b}=${x * x + a * x + b}$.`);
         }),
       ],
     },
