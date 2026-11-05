@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="study_widget_label">Engineer Academy · Dias de estudo</string>
+  <string name="study_widget_description">Mapa de calor dos dias em que você estudou, no estilo GitHub, com a sua ofensiva atual.</string>
+</resources>
