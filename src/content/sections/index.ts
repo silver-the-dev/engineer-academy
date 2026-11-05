@@ -10,6 +10,9 @@ import { funcoesCalc, limites } from './calc/limites';
 import { derivadas, aplicacoes } from './calc/derivadas';
 import { integrais, integralDefinida } from './calc/integrais';
 import { variaveis, duplas } from './calc/variaveis';
+import { vetoresGeo, vetoresAlg } from './gaal/vetores';
+import { escalar, vetorial } from './gaal/produtos';
+import { reta, plano, transformacoes } from './gaal/retaplano';
 
 export const SECTIONS: Section[] = [
   {
@@ -27,5 +30,13 @@ export const SECTIONS: Section[] = [
     color: '#7C5CFF',
     emoji: '∫',
     units: [funcoesCalc, limites, derivadas, aplicacoes, integrais, integralDefinida, variaveis, duplas],
+  },
+  {
+    id: 'gaal',
+    title: 'GA e Álgebra Linear',
+    subtitle: 'Vetores, produtos, retas, planos e transformações',
+    color: '#00B4D8',
+    emoji: '🧭',
+    units: [vetoresGeo, vetoresAlg, escalar, vetorial, reta, plano, transformacoes],
   },
 ];
