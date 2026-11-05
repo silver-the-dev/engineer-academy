@@ -14,6 +14,9 @@ import { vetoresGeo, vetoresAlg } from './gaal/vetores';
 import { escalar, vetorial } from './gaal/produtos';
 import { reta, plano, transformacoes } from './gaal/retaplano';
 import { erros, zeros, sistemasNum } from './num/numerico1';
+import { interpolacao, ajuste, integracaoNum, edos } from './num/numerico2';
+import { conceitos, tabelas, posicao, dispersao } from './est/estatistica1';
+import { probabilidade, pesquisa, distribuicoes, regressao } from './est/estatistica2';
 
 export const SECTIONS: Section[] = [
   {
@@ -46,6 +49,14 @@ export const SECTIONS: Section[] = [
     subtitle: 'Erros, raízes, sistemas, interpolação, integração e EDOs',
     color: '#2BD576',
     emoji: '💻',
-    units: [erros, zeros, sistemasNum],
+    units: [erros, zeros, sistemasNum, interpolacao, ajuste, integracaoNum, edos],
+  },
+  {
+    id: 'est',
+    title: 'Probabilidade e Estatística',
+    subtitle: 'Dados, gráficos, medidas, probabilidade e pesquisas',
+    color: '#FF5A9E',
+    emoji: '📊',
+    units: [conceitos, tabelas, posicao, dispersao, probabilidade, pesquisa, distribuicoes, regressao],
   },
 ];
