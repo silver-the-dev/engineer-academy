@@ -49,7 +49,7 @@ export default function QuestsScreen() {
           const done = q.progress >= q.target;
           return (
             <View key={q.id} style={{ flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 18, backgroundColor: C.surface, borderWidth: 2, borderColor: done && !q.claimed ? C.gold : C.border, marginBottom: 10 }}>
-              <Text style={{ fontSize: 30, marginRight: 12 }}>{QUEST_ICON[q.kind]}</Text>
+              <Text style={{ color: C.text, fontSize: 30, marginRight: 12 }}>{QUEST_ICON[q.kind]}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.text, fontFamily: F.black, fontSize: 15, marginBottom: 6 }}>{QUEST_TEXT[q.kind](q.target)}</Text>
                 <ProgressBar value={q.progress / q.target} color={done ? C.gold : C.primary} height={12} />
@@ -59,12 +59,12 @@ export default function QuestsScreen() {
               </View>
               {done ? (
                 q.claimed ? (
-                  <Text style={{ fontSize: 26, marginLeft: 8 }}>✅</Text>
+                  <Text style={{ color: C.text, fontSize: 26, marginLeft: 8 }}>✅</Text>
                 ) : (
                   <Button small title="Pegar" color={C.gold} textColor={C.bg} style={{ alignSelf: 'center', marginLeft: 8 }} onPress={() => { claim(q.id); unlockFeedback(); }} />
                 )
               ) : (
-                <Text style={{ fontSize: 26, marginLeft: 8, opacity: 0.5 }}>🎁</Text>
+                <Text style={{ color: C.text, fontSize: 26, marginLeft: 8, opacity: 0.5 }}>🎁</Text>
               )}
             </View>
           );

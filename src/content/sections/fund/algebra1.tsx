@@ -141,7 +141,7 @@ $$\mathbb N\subset\mathbb Z\subset\mathbb Q\subset\mathbb R\subset\mathbb C$$
         },
         {
           title: 'Operando com intervalos',
-          body: t`Faça um desenho! Para $A=[0,4]$ e $B=(2,6)$:
+          body: t`Faça um desenho! Para $A=[0, 4]$ e $B=(2, 6)$:
 
 • $A\cap B=(2,\,4]$ — onde as duas faixas se sobrepõem
 • $A\cup B=[0,\,6)$ — tudo coberto por pelo menos uma`,
@@ -162,8 +162,8 @@ $$\mathbb N\subset\mathbb Z\subset\mathbb Q\subset\mathbb R\subset\mathbb C$$
       exercises: [
         mcq(t`Qual intervalo representa $\{x\in\mathbb R\mid 2< x\le 7\}$?`, ['$(2,\\,7]$', '$[2,\\,7)$', '$[2,\\,7]$', '$(2,\\,7)$'], 0, t`$2$ é excluído (parêntese) e $7$ é incluído (colchete).`),
         tf(t`O intervalo $[3,\infty]$ está escrito corretamente.`, false, t`O infinito não é um número: o lado do $\infty$ é sempre aberto, $[3,\infty)$.`),
-        mcqS(t`Quanto é $[0,4]\cap(2,6)$?`, t`$(2,\,4]$`, [t`$[0,\,6)$`, t`$[2,\,4]$`, t`$(2,\,4)$`], t`A sobreposição começa logo depois de $2$ (aberto) e termina em $4$ (fechado, pois $4\in[0,4]$ e $4\in(2,6)$).`),
-        inter(t`Arraste o marcador até um número que pertença a $(-2,\,1]$ **e** seja inteiro negativo.`, 'numberline', { min: -5, max: 5, step: 1, value: 3, intervals: [{ a: -2, b: 1, openA: true, color: C.success }] }, (v: number) => v === -1, '$-1$', t`Os inteiros em $(-2,1]$ são $-1,0,1$. O único negativo é $-1$ ($-2$ está excluído!).`),
+        mcqS(t`Quanto é $[0, 4]\cap(2, 6)$?`, t`$(2,\,4]$`, [t`$[0,\,6)$`, t`$[2,\,4]$`, t`$(2,\,4)$`], t`A sobreposição começa logo depois de $2$ (aberto) e termina em $4$ (fechado, pois $4\in[0, 4]$ e $4\in(2, 6)$).`),
+        inter(t`Arraste o marcador até um número que pertença a $(-2,\,1]$ **e** seja inteiro negativo.`, 'numberline', { min: -5, max: 5, step: 1, value: 3, intervals: [{ a: -2, b: 1, openA: true, color: C.success }] }, (v: number) => v === -1, '$-1$', t`Os inteiros em $(-2, 1]$ são $-1,0,1$. O único negativo é $-1$ ($-2$ está excluído!).`),
         gen((rng) => {
           const a = randInt(rng, -5, 0);
           const b = randInt(rng, 2, 8);

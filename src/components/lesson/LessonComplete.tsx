@@ -48,7 +48,7 @@ export function LessonComplete({ summary, durationMs, onContinue, title }: { sum
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 24, alignSelf: 'stretch' }}>
           <Stat label="XP" value={`+${summary.xp}`} color={C.gold} icon="⚡" />
           <Stat label="PRECISÃO" value={`${Math.round(summary.accuracy * 100)}%`} color={C.success} icon="🎯" />
-          <Stat label="TEMPO" value={`${mins}:${String(secs).padStart(2, '0')}`} color={C.cyan} icon="⏱" />
+          <Stat label="TEMPO" value={`${mins}:${String(secs).padStart(2, '0')}`} color={C.cyan} icon="⏱️" />
         </View>
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 12, alignSelf: 'stretch' }}>
           <Stat label="GEMAS" value={`+${summary.gems}`} color={C.gem} icon="💎" />
@@ -71,7 +71,7 @@ export function LessonComplete({ summary, durationMs, onContinue, title }: { sum
           if (!a) return null;
           return (
             <View key={id} style={{ marginTop: 12, padding: 14, borderRadius: 18, backgroundColor: alpha(C.primary, 0.14), borderWidth: 2, borderColor: alpha(C.primary, 0.6), alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: 34, marginRight: 12 }}>{a.icon}</Text>
+              <Text style={{ color: C.text, fontSize: 34, marginRight: 12 }}>{a.icon}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: C.primary, fontFamily: F.black, fontSize: 12, letterSpacing: 1 }}>CONQUISTA DESBLOQUEADA · +20 💎</Text>
                 <Text style={{ color: C.text, fontFamily: F.black, fontSize: 17 }}>{a.title}</Text>

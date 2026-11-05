@@ -59,7 +59,7 @@ export const interpolacao: Unit = {
           body: t`Para 3 pontos, $P(x)=a_0+a_1x+a_2x^2$ e
 $$\begin{cases}a_0+a_1x_0+a_2x_0^2=y_0\\a_0+a_1x_1+a_2x_1^2=y_1\\a_0+a_1x_2+a_2x_2^2=y_2\end{cases}$$
 Funciona, mas é caro e mal-condicionado para muitos pontos.`,
-          example: t`Pontos $(0,1)$, $(1,3)$, $(2,7)$: $a_0=1$, $a_1+a_2=2$, $2a_1+4a_2=6$ ⟹ $a_2=1$, $a_1=1$: $P=x^2+x+1$.`,
+          example: t`Pontos $(0, 1)$, $(1, 3)$, $(2, 7)$: $a_0=1$, $a_1+a_2=2$, $2a_1+4a_2=6$ ⟹ $a_2=1$, $a_1=1$: $P=x^2+x+1$.`,
         },
       ],
       exercises: [
@@ -92,7 +92,7 @@ Funciona, mas é caro e mal-condicionado para muitos pontos.`,
           title: 'Polinômios que valem 1 num ponto e 0 nos outros',
           body: t`$$L_i(x)=\prod_{j\ne i}\frac{x-x_j}{x_i-x_j}\qquad P(x)=\sum_{i=0}^n y_i\,L_i(x)$$
 Como $L_i(x_i)=1$ e $L_i(x_j)=0$, a soma passa por todos os pontos — sem resolver sistema!`,
-          example: t`Pontos $(1,2)$, $(3,4)$: $L_0=\frac{x-3}{1-3}$, $L_1=\frac{x-1}{3-1}$. $P(2)=2\cdot\frac12+4\cdot\frac12=3$.`,
+          example: t`Pontos $(1, 2)$, $(3, 4)$: $L_0=\frac{x-3}{1-3}$, $L_1=\frac{x-1}{3-1}$. $P(2)=2\cdot\frac12+4\cdot\frac12=3$.`,
         },
       ],
       exercises: [
@@ -127,7 +127,7 @@ Acrescentar um ponto só adiciona **um termo**.`,
       ],
       exercises: [
         num(t`Calcule a diferença dividida $f[1,\,3]$ para $f(1)=2$ e $f(3)=10$.`, 4, t`$\frac{10-2}{3-1}=4$.`),
-        num(t`Para $f(0)=1$, $f(1)=3$, $f(2)=7$, qual é $f[0,\,1,\,2]$?`, 1, t`$f[0,1]=2$, $f[1,2]=4$, $f[0,1,2]=\frac{4-2}{2-0}=1$.`),
+        num(t`Para $f(0)=1$, $f(1)=3$, $f(2)=7$, qual é $f[0,\,1,\,2]$?`, 1, t`$f[0, 1]=2$, $f[1, 2]=4$, $f[0,1,2]=\frac{4-2}{2-0}=1$.`),
         inter(t`Aumente $n$ até ver o polinômio (vermelho) passar de $1{,}2$ nas bordas.`, 'plot', runge().props, (v: any) => v && v.p.n >= 10, '$n\\ge10$', t`É o fenômeno de Runge: grau alto + nós equiespaçados = oscilação.`),
         mcq(t`Uma boa alternativa para muitos pontos experimentais é…`, ['splines (interpolação por partes)', 'aumentar ainda mais o grau', 'usar só o primeiro e o último ponto', 'trocar por um polinômio de grau 0'], 0),
       ],
@@ -156,7 +156,7 @@ export const ajuste: Unit = {
           title: 'Equações normais',
           body: t`Derivando $S$ em $a$ e $b$ e igualando a zero:
 $$\begin{cases}a\sum x_i^2+b\sum x_i=\sum x_iy_i\\a\sum x_i+n\,b=\sum y_i\end{cases}$$`,
-          example: t`Pontos $(1,1)$, $(2,2)$, $(3,2)$: $\sum x=6$, $\sum y=5$, $\sum x^2=14$, $\sum xy=11$, $n=3$ ⟹ $a=0{,}5$, $b=\frac23$.`,
+          example: t`Pontos $(1, 1)$, $(2, 2)$, $(3, 2)$: $\sum x=6$, $\sum y=5$, $\sum x^2=14$, $\sum xy=11$, $n=3$ ⟹ $a=0{,}5$, $b=\frac23$.`,
         },
       ],
       exercises: [
@@ -165,7 +165,7 @@ $$\begin{cases}a\sum x_i^2+b\sum x_i=\sum x_iy_i\\a\sum x_i+n\,b=\sum y_i\end{ca
           const ps = Object.values(v.pts) as { x: number; y: number }[];
           return ps.reduce((s, q) => s + (q.y - (v.p.a * q.x + v.p.b)) ** 2, 0) < 0.6;
         }, t`perto de $y\approx0{,}9x+0{,}6$`),
-        num(t`Para $(1,1)$, $(2,2)$, $(3,2)$, a reta de mínimos quadrados tem inclinação $a=$?`, 0.5, t`$\begin{cases}14a+6b=11\\6a+3b=5\end{cases}$ ⟹ $a=0{,}5$.`),
+        num(t`Para $(1, 1)$, $(2, 2)$, $(3, 2)$, a reta de mínimos quadrados tem inclinação $a=$?`, 0.5, t`$\begin{cases}14a+6b=11\\6a+3b=5\end{cases}$ ⟹ $a=0{,}5$.`),
         gen((rng) => {
           const a = randNZ(rng, -2, 3);
           const b = randInt(rng, -3, 3);

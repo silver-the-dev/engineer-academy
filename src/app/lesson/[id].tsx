@@ -269,7 +269,7 @@ export default function LessonScreen() {
           <Modal visible={quitOpen} transparent animationType="fade" onRequestClose={() => setQuitOpen(false)}>
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' }}>
               <View style={{ backgroundColor: C.surface, padding: 22, paddingBottom: insets.bottom + 22, borderTopLeftRadius: 24, borderTopRightRadius: 24 }}>
-                <Text style={{ fontSize: 46, textAlign: 'center' }}>🥺</Text>
+                <Text style={{ color: C.text, fontSize: 46, textAlign: 'center' }}>🥺</Text>
                 <Text style={{ color: C.text, fontFamily: F.black, fontSize: 20, textAlign: 'center', marginVertical: 8 }}>Quer mesmo sair?</Text>
                 <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 15, textAlign: 'center', marginBottom: 18 }}>Você vai perder o progresso desta lição.</Text>
                 <Button title="Continuar estudando" onPress={() => setQuitOpen(false)} color={C.primary} />
@@ -282,7 +282,7 @@ export default function LessonScreen() {
           <Modal visible={noHearts} transparent animationType="fade">
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
               <View style={{ backgroundColor: C.surface, padding: 22, paddingBottom: insets.bottom + 22, borderTopLeftRadius: 24, borderTopRightRadius: 24 }}>
-                <Text style={{ fontSize: 50, textAlign: 'center' }}>💔</Text>
+                <Text style={{ color: C.text, fontSize: 50, textAlign: 'center' }}>💔</Text>
                 <Text style={{ color: C.text, fontFamily: F.black, fontSize: 21, textAlign: 'center', marginVertical: 8 }}>Suas vidas acabaram</Text>
                 <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 15, textAlign: 'center', marginBottom: 18 }}>
                   Elas recarregam com o tempo (1 a cada 20 min). Você pode recarregar com gemas ou ganhar vidas no Treino.

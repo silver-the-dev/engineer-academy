@@ -35,7 +35,7 @@ const meanValueLab = () =>
         <FnCurve f={(x) => x * x} color={C.p1} />
       </>
     ),
-    info: ({ p }: any) => t`Área sob $x^2$ em $[0,3]$: $9$ · área do retângulo: $3\cdot${fmt(p.h, 1)}=${fmt(3 * p.h, 1)}$`,
+    info: ({ p }: any) => t`Área sob $x^2$ em $[0, 3]$: $9$ · área do retângulo: $3\cdot${fmt(p.h, 1)}=${fmt(3 * p.h, 1)}$`,
   });
 
 export const integrais: Unit = {
@@ -243,8 +243,8 @@ Os limites $a$ e $b$ costumam ser os pontos onde as curvas se cruzam.`,
         },
       ],
       exercises: [
-        inter(t`Ajuste $h$ para que o retângulo tenha a mesma área da região sob $x^2$ em $[0,3]$.`, 'plot', meanValueLab().props, (v: any) => v && near(v.p.h, 3, 0.051), t`$h=3$ (valor médio)`),
-        num(t`Qual o valor médio de $f(x)=2x$ em $[0,4]$?`, 4, t`$\frac14\int_0^42x\,dx=\frac{16}{4}=4$.`),
+        inter(t`Ajuste $h$ para que o retângulo tenha a mesma área da região sob $x^2$ em $[0, 3]$.`, 'plot', meanValueLab().props, (v: any) => v && near(v.p.h, 3, 0.051), t`$h=3$ (valor médio)`),
+        num(t`Qual o valor médio de $f(x)=2x$ em $[0, 4]$?`, 4, t`$\frac14\int_0^42x\,dx=\frac{16}{4}=4$.`),
         num(t`O custo marginal é $C'(q)=10+2q$. Quanto aumenta o custo ao produzir de $q=0$ até $q=10$?`, 200, t`$\int_0^{10}(10+2q)\,dq=100+100=200$.`),
         num(t`Uma vazão de $v(t)=3t^2$ L/min enche um tanque. Quantos litros entram entre $t=0$ e $t=2$?`, 8, t`$\int_0^23t^2dt=8$ L.`, { unit: 'L' }),
       ],

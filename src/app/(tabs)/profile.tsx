@@ -14,7 +14,7 @@ import { tapFeedback } from '../../lib/feedback';
 function Stat({ icon, value, label, color }: { icon: string; value: string; label: string; color: string }) {
   return (
     <View style={{ width: '48%', padding: 12, borderRadius: 16, borderWidth: 2, borderColor: C.border, backgroundColor: C.surface, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
-      <Text style={{ fontSize: 24, marginRight: 8 }}>{icon}</Text>
+      <Text style={{ color: C.text, fontSize: 24, marginRight: 8 }}>{icon}</Text>
       <View>
         <Text style={{ color, fontFamily: F.black, fontSize: 19 }}>{value}</Text>
         <Text style={{ color: C.textMuted, fontFamily: F.bold, fontSize: 12 }}>{label}</Text>
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
           <Stat icon="📅" value={`${studied}`} label="dias estudados" color={C.success} />
           <Stat icon="📘" value={`${s.stats.lessonsDone}`} label="lições" color={C.primary} />
           <Stat icon="🎯" value={`${acc}%`} label="precisão" color={C.cyan} />
-          <Stat icon="⏱" value={`${mins} min`} label="tempo estudando" color={C.p5} />
+          <Stat icon="⏱️" value={`${mins} min`} label="tempo estudando" color={C.p5} />
         </View>
 
         <Text style={{ color: C.text, fontFamily: F.black, fontSize: 19, marginTop: 10, marginBottom: 10 }}>Mapa de estudos</Text>
@@ -110,7 +110,7 @@ export default function ProfileScreen() {
             const got = !!s.achievements[a.id];
             return (
               <View key={a.id} style={{ width: '31.5%', padding: 10, borderRadius: 16, marginBottom: 10, alignItems: 'center', backgroundColor: got ? alpha(C.gold, 0.12) : C.surface, borderWidth: 2, borderColor: got ? alpha(C.gold, 0.6) : C.border }}>
-                <Text style={{ fontSize: 30, opacity: got ? 1 : 0.25 }}>{a.icon}</Text>
+                <Text style={{ color: C.text, fontSize: 30, opacity: got ? 1 : 0.25 }}>{a.icon}</Text>
                 <Text style={{ color: got ? C.gold : C.textDim, fontFamily: F.black, fontSize: 12, textAlign: 'center', marginTop: 4 }} numberOfLines={2}>
                   {a.title}
                 </Text>

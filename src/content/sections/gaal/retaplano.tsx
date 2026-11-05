@@ -194,7 +194,7 @@ Gire e mexa nos coeficientes (normal dourada):`,
 $$P=A+h\,\vec u+t\,\vec v$$
 A normal é $\vec n=\vec u\times\vec v$ — conecta com o produto vetorial!
 
-Com $h,t\in[0,1]$, $P$ percorre o **paralelogramo** de lados $\vec u$ e $\vec v$.`,
+Com $h,t\in[0, 1]$, $P$ percorre o **paralelogramo** de lados $\vec u$ e $\vec v$.`,
           example: t`Plano por $A(1,0,0)$, $B(0,1,0)$, $C(0,0,1)$: $\vec u=B-A$, $\vec v=C-A$, $\vec n=\vec u\times\vec v=(1,1,1)$ ⟹ $x+y+z-1=0$.`,
         },
       ],

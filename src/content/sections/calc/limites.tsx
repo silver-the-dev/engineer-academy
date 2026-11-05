@@ -72,7 +72,7 @@ As restrições clássicas:
 • denominador $\ne0$: $f(x)=\frac{1}{x-2}$ ⟹ $x\ne2$
 • raiz par de algo $\ge0$: $\sqrt{x+3}$ ⟹ $x\ge-3$
 • logaritmo de algo $>0$: $\ln(5-x)$ ⟹ $x<5$`,
-          example: t`$f(x)=\dfrac{\sqrt{x}}{x-4}$: precisa $x\ge0$ e $x\ne4$ ⟹ $D=[0,4)\cup(4,\infty)$.`,
+          example: t`$f(x)=\dfrac{\sqrt{x}}{x-4}$: precisa $x\ge0$ e $x\ne4$ ⟹ $D=[0, 4)\cup(4,\infty)$.`,
         },
       ],
       exercises: [

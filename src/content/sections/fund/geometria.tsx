@@ -173,7 +173,7 @@ A hipotenusa ao quadrado é a soma dos quadrados dos catetos. Triângulos famoso
           body: t`Todos os pontos à distância $r$ do centro $(a,b)$:
 $$(x-a)^2+(y-b)^2=r^2$$`,
           visual: circleLab(),
-          tip: t`Para achar centro e raio de $x^2+y^2-4x+6y-3=0$, **complete quadrados**: $(x-2)^2+(y+3)^2=16$ ⟹ centro $(2,-3)$, $r=4$.`,
+          tip: t`Para achar centro e raio de $x^2+y^2-4x+6y-3=0$, **complete quadrados**: $(x-2)^2+(y+3)^2=16$ ⟹ centro $(2, -3)$, $r=4$.`,
         },
       ],
       exercises: [

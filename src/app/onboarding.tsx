@@ -30,7 +30,7 @@ export default function Onboarding() {
       <ScrollView contentContainerStyle={{ padding: 22, flexGrow: 1 }}>
         {step === 0 && (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 90 }}>∫</Text>
+            <Text style={{ fontSize: 90, color: C.primary, fontFamily: F.black }}>∫</Text>
             <Text style={{ color: C.text, fontFamily: F.black, fontSize: 32, textAlign: 'center' }}>Engineer Academy</Text>
             <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 17, textAlign: 'center', marginTop: 10 }}>
               Matemática de Engenharia em lições curtas, visuais e interativas. Cálculo, Álgebra Linear, Numérico e Estatística — um pouquinho todo dia.
@@ -70,7 +70,7 @@ export default function Onboarding() {
             <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 15, marginBottom: 14 }}>Você pode trocar de matéria a qualquer momento.</Text>
             {SECTIONS.map((sec) => (
               <Pressable key={sec.id} onPress={() => setSection(sec.id)} style={{ flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 16, marginBottom: 8, borderWidth: 2, borderColor: section === sec.id ? sec.color : C.border, backgroundColor: section === sec.id ? alpha(sec.color, 0.14) : C.surface }}>
-                <Text style={{ fontSize: 30, marginRight: 12 }}>{sec.emoji}</Text>
+                <Text style={{ fontSize: 30, marginRight: 12, width: 44, textAlign: 'center', color: sec.color, fontFamily: F.black }}>{sec.emoji}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: sec.color, fontFamily: F.black, fontSize: 17 }}>{sec.title}</Text>
                   <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 13 }}>{sec.subtitle}</Text>
@@ -81,7 +81,7 @@ export default function Onboarding() {
         )}
         {step === 3 && (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: 80 }}>🔔</Text>
+            <Text style={{ fontSize: 80, color: C.text }}>🔔</Text>
             <Text style={{ color: C.text, fontFamily: F.black, fontSize: 26, textAlign: 'center', marginTop: 10 }}>Lembretes diários</Text>
             <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 16, textAlign: 'center', marginTop: 10 }}>
               Vamos te lembrar todo dia às 19h (dá para mudar no Perfil) e avisar se a ofensiva estiver em risco. Permita as notificações na próxima tela.

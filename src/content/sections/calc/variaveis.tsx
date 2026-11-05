@@ -143,7 +143,7 @@ export const duplas: Unit = {
       exercises: [
         inter(t`Aumente a malha para $n\ge6$ e observe a soma convergir.`, 'space3d', doubleIntegralLab((x, y) => 0.6 + 0.35 * x * y, 0, 2, 0, 2, 3.8).props!, (v: any) => v && v.p.n >= 6, '$n\\ge6$'),
         mcq(t`Se $f(x,y)=1$ em toda a região $R$, $\iint_R f\,dA$ é…`, ['a área de R', 'zero', 'o perímetro de R', 'o volume de uma esfera'], 0),
-        num(t`Calcule $\iint_R 3\,dA$ com $R=[0,2]\times[0,5]$.`, 30, t`Altura constante 3 sobre área $10$: volume $30$.`),
+        num(t`Calcule $\iint_R 3\,dA$ com $R=[0, 2]\times[0, 5]$.`, 30, t`Altura constante 3 sobre área $10$: volume $30$.`),
         tf(t`Se $f\ge0$ em $R$, a integral dupla é o volume do sólido sob a superfície.`, true),
       ],
     },
@@ -186,8 +186,8 @@ Com $f=1$, isso dá a **área** entre $g_1$ e $g_2$ — conectando com a área e
       exercises: [
         num(t`Calcule $\int_0^1\int_0^{x} 1\,dy\,dx$ (área de um triângulo).`, 0.5),
         num(t`Calcule $\int_0^2\int_0^{x} y\,dy\,dx$.`, 4 / 3, t`$\int_0^2\frac{x^2}{2}dx=\frac{8}{6}=\frac43$.`, { tol: 0.005 }),
-        mcqS(t`A região entre $y=0$, $y=\sqrt{x}$ e $x\in[0,4]$ tem área dada por:`, t`$\int_0^4\int_0^{\sqrt x}dy\,dx$`, [t`$\int_0^4\int_0^{4}dy\,dx$`, t`$\int_0^{\sqrt x}\int_0^4dx\,dy$`, t`$\int_0^2\int_0^{x}dy\,dx$`]),
-        num(t`Uma placa ocupa $[0,1]\times[0,1]$ com densidade $\rho(x,y)=x+y$. Qual sua massa?`, 1, t`$\int_0^1\int_0^1(x+y)\,dy\,dx=\frac12+\frac12=1$.`),
+        mcqS(t`A região entre $y=0$, $y=\sqrt{x}$ e $x\in[0, 4]$ tem área dada por:`, t`$\int_0^4\int_0^{\sqrt x}dy\,dx$`, [t`$\int_0^4\int_0^{4}dy\,dx$`, t`$\int_0^{\sqrt x}\int_0^4dx\,dy$`, t`$\int_0^2\int_0^{x}dy\,dx$`]),
+        num(t`Uma placa ocupa $[0, 1]\times[0, 1]$ com densidade $\rho(x,y)=x+y$. Qual sua massa?`, 1, t`$\int_0^1\int_0^1(x+y)\,dy\,dx=\frac12+\frac12=1$.`),
       ],
     },
   ],

@@ -67,7 +67,11 @@ export function texToSvg(tex: string, display = false): TexSvg {
   try {
     // pt-BR decimal comma: "0,5" must not get the punctuation space TeX adds after commas.
     // (Coordinates/lists are written with ", " so they are not affected.)
-    const src = tex.replace(/(\d),(?=\d)/g, '$1{,}');
+    // Integer runs with 2+ commas (lists/tuples like -1,0,1 or (1,0,2)) are never decimals.
+    const src = tex
+      .replace(/-?\d+(?:,-?\d+){2,}/g, (run) => run.replace(/,/g, '\u0001'))
+      .replace(/(\d),(?=\d)/g, '$1{,}')
+      .replace(/\u0001/g, ',');
     const node = doc.convert(src, { display });
     let svg: string = adaptor.innerHTML(node);
     // MathJax wraps in <mjx-container> when display; innerHTML gives the <svg>

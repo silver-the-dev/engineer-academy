@@ -126,7 +126,7 @@ export const vetoresAlg: Unit = {
       cards: [
         {
           title: 'Base canônica',
-          body: t`$\vec i=(1,0)$ e $\vec j=(0,1)$. Então $\vec v=(x,y)=x\vec i+y\vec j$.
+          body: t`$\vec i=(1, 0)$ e $\vec j=(0, 1)$. Então $\vec v=(x,y)=x\vec i+y\vec j$.
 
 $$(x_1,y_1)+(x_2,y_2)=(x_1+x_2,\ y_1+y_2)\qquad k(x,y)=(kx,\ ky)$$
 
@@ -159,7 +159,7 @@ Igualdade: $(a,b)=(c,d)\iff a=c$ e $b=d$.`,
           body: t`$$\vec{AB}=B-A=(x_B-x_A,\ y_B-y_A)$$
 $$|\vec v|=\sqrt{x^2+y^2}\qquad M=\frac{A+B}{2}$$`,
           visual: vectorLab('module', { snap: 1 }),
-          example: t`$A(1,2)$, $B(4,6)$: $\vec{AB}=(3,4)$, $|\vec{AB}|=5$, $M=(2{,}5;\ 4)$.`,
+          example: t`$A(1, 2)$, $B(4, 6)$: $\vec{AB}=(3, 4)$, $|\vec{AB}|=5$, $M=(2{,}5;\ 4)$.`,
         },
       ],
       exercises: [
@@ -184,7 +184,7 @@ $$|\vec v|=\sqrt{x^2+y^2}\qquad M=\frac{A+B}{2}$$`,
         {
           title: 'Paralelismo',
           body: t`$\vec u\parallel\vec v\iff\vec u=k\vec v\iff\frac{x_1}{x_2}=\frac{y_1}{y_2}$ (coordenadas proporcionais).`,
-          example: t`$(2,-3)\parallel(-4,6)$, pois $(-4,6)=-2(2,-3)$.`,
+          example: t`$(2, -3)\parallel(-4, 6)$, pois $(-4, 6)=-2(2, -3)$.`,
         },
         {
           title: 'No espaço R³',

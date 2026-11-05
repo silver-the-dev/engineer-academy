@@ -30,7 +30,7 @@ export default function UnitGuide() {
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 50 }}>
         <View style={{ padding: 16, borderRadius: 20, backgroundColor: alpha(section.color, 0.14), borderWidth: 2, borderColor: alpha(section.color, 0.5), marginBottom: 18 }}>
-          <Text style={{ fontSize: 36 }}>{unit.icon}</Text>
+          <Text style={{ fontSize: 36, color: C.text }}>{unit.icon}</Text>
           <Text style={{ color: section.color, fontFamily: F.black, fontSize: 22 }}>{unit.title}</Text>
           <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 14, marginBottom: 6 }}>{unit.subtitle}</Text>
           {unit.source ? <Text style={{ color: C.textDim, fontFamily: F.bold, fontSize: 12 }}>📚 Material: {unit.source}</Text> : null}

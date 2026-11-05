@@ -83,7 +83,7 @@ export const probabilidade: Unit = {
   subtitle: 'Eventos, regras, condicional, independência e Bayes',
   icon: '🎲',
   source: 'Probabilidade e Estatística · Unidade V — Introdução à teoria das probabilidades',
-  guide: t`$P(A)\in[0,1]$. União: some e desconte a interseção. Condicional: o universo encolhe para $B$. Independentes: $P(A\cap B)=P(A)P(B)$. Bayes "inverte" a condicional.`,
+  guide: t`$P(A)\in[0, 1]$. União: some e desconte a interseção. Condicional: o universo encolhe para $B$. Independentes: $P(A\cap B)=P(A)P(B)$. Bayes "inverte" a condicional.`,
   lessons: [
     {
       id: 'e-prob-ev',
@@ -305,7 +305,7 @@ export const regressao: Unit = {
   icon: '📈',
   extra: true,
   source: 'Tópico extra (Probabilidade e Estatística)',
-  guide: t`O coeficiente de Pearson $r\in[-1,1]$ mede a força da relação **linear**. A reta de regressão é a de mínimos quadrados. Correlação não implica causalidade!`,
+  guide: t`O coeficiente de Pearson $r\in[-1, 1]$ mede a força da relação **linear**. A reta de regressão é a de mínimos quadrados. Correlação não implica causalidade!`,
   lessons: [
     {
       id: 'e-reg-corr',

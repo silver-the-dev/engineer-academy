@@ -166,7 +166,7 @@ Lance o dado muitas vezes e veja a frequência se aproximar de $\frac16$ (lei do
           const b = randInt(rng, 2, 6);
           return num(t`Uma urna tem $${r}$ bolas vermelhas e $${b}$ azuis. Qual a probabilidade de tirar uma vermelha? (responda como fração ou decimal)`, r / (r + b), t`$\frac{${r}}{${r + b}}$.`, { tol: 0.005 });
         }),
-        num(t`Qual a probabilidade de a soma de dois dados ser 7?`, 1 / 6, t`$(1,6),(2,5),(3,4),(4,3),(5,2),(6,1)$: $\frac{6}{36}=\frac16$.`, { tol: 0.005 }),
+        num(t`Qual a probabilidade de a soma de dois dados ser 7?`, 1 / 6, t`$(1, 6),(2, 5),(3, 4),(4, 3),(5, 2),(6, 1)$: $\frac{6}{36}=\frac16$.`, { tol: 0.005 }),
         num(t`Qual a probabilidade de sair pelo menos uma cara em 3 lançamentos de moeda?`, 7 / 8, t`Complementar: $1-P(\text{nenhuma})=1-\left(\frac12\right)^3=\frac78$.`, { tol: 0.005 }),
         mcqS(t`Retirando uma carta de um baralho de 52, qual a chance de ser ás?`, t`$\frac{1}{13}$`, [t`$\frac{1}{52}$`, t`$\frac{4}{13}$`, t`$\frac{1}{4}$`], t`$\frac{4}{52}=\frac{1}{13}$.`),
         tf(t`Se uma moeda deu cara 5 vezes seguidas, a próxima tem mais chance de dar coroa.`, false, t`Lançamentos são **independentes**: continua $\frac12$ (falácia do apostador).`),

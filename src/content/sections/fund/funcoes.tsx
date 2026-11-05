@@ -56,7 +56,7 @@ $b$ é o **coeficiente linear**: onde a reta corta o eixo $y$.
           body: t`Dados $(x_1,y_1)$ e $(x_2,y_2)$:
 $$a=\frac{y_2-y_1}{x_2-x_1}=\frac{\Delta y}{\Delta x}$$
 Depois, $b=y_1-a\,x_1$.`,
-          example: t`Pontos $(1,3)$ e $(3,7)$: $a=\frac{7-3}{3-1}=2$, $b=3-2=1$ ⟹ $f(x)=2x+1$.`,
+          example: t`Pontos $(1, 3)$ e $(3, 7)$: $a=\frac{7-3}{3-1}=2$, $b=3-2=1$ ⟹ $f(x)=2x+1$.`,
         },
       ],
       exercises: [
@@ -183,7 +183,7 @@ Para $x^2-c<0$, veja o trecho vermelho:`,
           body: t`$f(x)=a^x$ com $a>0$, $a\ne1$.
 
 • $a>1$: crescente (bactérias, juros) · $0<a<1$: decrescente (decaimento radioativo)
-• Sempre passa por $(0,1)$ e nunca toca o eixo $x$.`,
+• Sempre passa por $(0, 1)$ e nunca toca o eixo $x$.`,
           visual: expLogLab(),
         },
         {

@@ -45,7 +45,7 @@ function Node({ state, color, icon, onPress, bounce }: { state: 'locked' | 'open
                 transform: [{ translateY: pressed ? 5 : 0 }],
               }}
             >
-              <Text style={{ fontSize: 30, opacity: state === 'locked' ? 0.5 : 1 }}>{state === 'locked' ? '🔒' : state === 'done' ? '✔️' : icon}</Text>
+              <Text style={{ color: C.text, fontSize: 30, opacity: state === 'locked' ? 0.5 : 1 }}>{state === 'locked' ? '🔒' : state === 'done' ? '✔️' : icon}</Text>
             </View>
           </View>
         )}
@@ -88,7 +88,7 @@ export default function PathScreen() {
         onLeftPress={() => setPicker(true)}
         left={
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: alpha(section.color, 0.15), paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, borderWidth: 2, borderColor: alpha(section.color, 0.5) }}>
-            <Text style={{ fontSize: 18 }}>{section.emoji}</Text>
+            <Text style={{ fontSize: 18, color: section.color, fontFamily: F.black }}>{section.emoji}</Text>
             <Text style={{ color: section.color, fontFamily: F.black, fontSize: 14, marginLeft: 6 }} numberOfLines={1}>
               {section.title.length > 14 ? section.title.slice(0, 13) + '…' : section.title} ▾
             </Text>
@@ -128,7 +128,7 @@ export default function PathScreen() {
                   }}
                   style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, backgroundColor: alpha(section.color, 0.18), borderWidth: 2, borderColor: alpha(section.color, 0.6) }}
                 >
-                  <Text style={{ fontSize: 20 }}>📖</Text>
+                  <Text style={{ fontSize: 20, color: C.text }}>📖</Text>
                 </Pressable>
               </View>
               <View style={{ alignItems: 'center', paddingTop: 26 }}>
@@ -195,7 +195,7 @@ export default function PathScreen() {
                   }}
                   style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 16, marginBottom: 8, borderWidth: 2, borderColor: s.id === section.id ? s.color : C.border, backgroundColor: s.id === section.id ? alpha(s.color, 0.12) : C.surface2 }}
                 >
-                  <Text style={{ fontSize: 30, marginRight: 12 }}>{s.emoji}</Text>
+                  <Text style={{ fontSize: 30, marginRight: 12, width: 44, textAlign: 'center', color: s.color, fontFamily: F.black }}>{s.emoji}</Text>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: s.color, fontFamily: F.black, fontSize: 16 }}>{s.title}</Text>
                     <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 12, marginBottom: 6 }}>
@@ -220,7 +220,7 @@ export default function PathScreen() {
                 <Text style={{ color: C.text, fontFamily: F.black, fontSize: 22, marginVertical: 6 }}>{popup.review ? '🏆 Revisão da unidade' : popup.lesson?.title}</Text>
                 {popup.lesson ? (
                   <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 14, marginBottom: 16 }}>
-                    {popup.lesson.cards.length} cards de teoria · {popup.lesson.exercises.length} exercícios
+                    {popup.lesson.cards.length} {popup.lesson.cards.length === 1 ? "card" : "cards"} de teoria · {popup.lesson.exercises.length} {popup.lesson.exercises.length === 1 ? "exercício" : "exercícios"}
                     {lessons[popup.lesson.id] ? ` · melhor: ${Math.round(lessons[popup.lesson.id].best * 100)}%` : ''}
                   </Text>
                 ) : (

@@ -143,7 +143,7 @@ export const zeros: Unit = {
         }),
         num(t`Quantas bisseções (mínimo) garantem erro $<0{,}001$ partindo de $[0,\,1]$?`, 10, t`$2^{-n}<10^{-3}\Rightarrow n>9{,}97$ ⟹ $n=10$.`),
         mcq(t`Em qual intervalo $f(x)=x^2-3$ tem raiz?`, ['$[1,\\ 2]$', '$[2,\\ 3]$', '$[0,\\ 1]$', '$[-1,\\ 0]$'], 0, t`$f(1)=-2<0$ e $f(2)=1>0$.`),
-        tf(t`Se $f(a)f(b)>0$, não há raízes em $[a,b]$.`, false, t`Pode haver um número **par** de raízes (ex.: $x^2-0{,}25$ em $[-1,1]$).`),
+        tf(t`Se $f(a)f(b)>0$, não há raízes em $[a,b]$.`, false, t`Pode haver um número **par** de raízes (ex.: $x^2-0{,}25$ em $[-1, 1]$).`),
       ],
     },
     {
@@ -272,13 +272,13 @@ $$x=\frac{9-y}{4},\qquad y=\frac{5-x}{3}$$
 • **Jacobi**: usa os valores da iteração anterior
 • **Gauss-Seidel**: usa sempre o valor **mais recente** (converge mais rápido)
 
-Acompanhe o zigue-zague até a solução $(2,1)$:`,
+Acompanhe o zigue-zague até a solução $(2, 1)$:`,
           visual: gaussSeidelStepper(),
           tip: t`**Critério das linhas** (diagonal dominante): $|a_{ii}|>\sum_{j\ne i}|a_{ij}|$ em todas as linhas garante convergência.`,
         },
       ],
       exercises: [
-        num(t`Gauss-Seidel em $4x+y=9$, $x+3y=5$ partindo de $(0,0)$: qual $x^{(1)}$?`, 2.25, t`$x=\frac{9-0}{4}=2{,}25$.`),
+        num(t`Gauss-Seidel em $4x+y=9$, $x+3y=5$ partindo de $(0, 0)$: qual $x^{(1)}$?`, 2.25, t`$x=\frac{9-0}{4}=2{,}25$.`),
         num(t`Continuando: com $x^{(1)}=2{,}25$, qual $y^{(1)}$ (Gauss-Seidel)?`, 0.9167, t`$y=\frac{5-2{,}25}{3}\approx0{,}9167$.`, { tol: 0.001 }),
         mcq(t`A matriz $\begin{pmatrix}5&1&2\\1&4&1\\2&1&6\end{pmatrix}$ é diagonalmente dominante?`, ['Sim', 'Não, falha na linha 1', 'Não, falha na linha 2', 'Não, falha na linha 3'], 0, t`$5>3$, $4>2$, $6>3$.`),
         tf(t`Gauss-Seidel costuma convergir mais rápido que Jacobi.`, true),

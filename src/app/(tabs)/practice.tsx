@@ -17,7 +17,7 @@ export default function PracticeScreen() {
       <TopBar left={<Text style={{ color: C.text, fontFamily: F.black, fontSize: 22 }}>Treinar</Text>} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <View style={{ padding: 18, borderRadius: 22, backgroundColor: alpha(C.cyan, 0.12), borderWidth: 2, borderColor: alpha(C.cyan, 0.5) }}>
-          <Text style={{ fontSize: 40 }}>🧠</Text>
+          <Text style={{ fontSize: 40, color: C.text }}>🧠</Text>
           <Text style={{ color: C.cyan, fontFamily: F.black, fontSize: 22, marginTop: 4 }}>Treino inteligente</Text>
           <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 14, marginVertical: 8 }}>
             Revisa os exercícios em que você errou ({nMistakes} pendentes) e mistura questões das lições já feitas. Não gasta vidas — e se você for bem, ganha uma ❤️.
@@ -39,7 +39,7 @@ export default function PracticeScreen() {
                 const n = u.lessons.filter((l) => lessons[l.id]).length;
                 return (
                   <View key={u.id} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 16, backgroundColor: C.surface, marginBottom: 8, borderWidth: 2, borderColor: C.border }}>
-                    <Text style={{ fontSize: 26, marginRight: 10 }}>{u.icon}</Text>
+                    <Text style={{ fontSize: 26, marginRight: 10, color: C.text }}>{u.icon}</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: C.text, fontFamily: F.black, fontSize: 15 }}>{u.title}</Text>
                       <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 12 }}>
