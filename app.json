@@ -27,8 +27,7 @@
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.VIBRATE"
       ],
-      "predictiveBackGestureEnabled": false,
-      "edgeToEdgeEnabled": true
+      "predictiveBackGestureEnabled": false
     },
     "plugins": [
       "expo-router",
@@ -54,7 +53,10 @@
         "expo-build-properties",
         {
           "android": {
-            "enableProguardInReleaseBuilds": false
+            "buildArchs": [
+              "arm64-v8a"
+            ],
+            "enableMinifyInReleaseBuilds": false
           }
         }
       ]
