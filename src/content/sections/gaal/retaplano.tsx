@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { Arrow, InfLine, Pt, Seg } from '../../../components/plot/Plot';
 import { Arrow3, Axes3, Line3, Point3, Poly3, type V3 as V3T } from '../../../components/visuals/Space3D';
@@ -60,7 +60,7 @@ const line3D = () => ({
   },
 });
 
-export const reta: Unit = {
+export const reta: UnitDef = {
   id: 'g-reta',
   title: 'A reta',
   subtitle: 'Equação vetorial, paramétrica, ângulo e ortogonalidade',
@@ -149,7 +149,7 @@ Usamos o módulo porque o ângulo entre retas é sempre o menor.
   ],
 };
 
-export const plano: Unit = {
+export const plano: UnitDef = {
   id: 'g-plano',
   title: 'O plano',
   subtitle: 'Equação geral, paramétrica, ângulos e interseções',
@@ -230,7 +230,7 @@ Com $h,t\in[0, 1]$, $P$ percorre o **paralelogramo** de lados $\vec u$ e $\vec v
   ],
 };
 
-export const transformacoes: Unit = {
+export const transformacoes: UnitDef = {
   id: 'g-trans',
   title: 'Matrizes como transformações',
   subtitle: 'Determinante como área, inversa e autovalores',

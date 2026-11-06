@@ -3,7 +3,7 @@ import { Animated, BackHandler, Modal, Pressable, ScrollView, Text, View, useWin
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, F, alpha } from '../../theme';
-import { buildPractice, buildQueue, buildUnitReview, findLesson, findUnit, QueueItem } from '../../content';
+import { buildPractice, buildQueue, buildUnitReview, findLesson, findUnit, partsDone, QueueItem } from '../../content';
 import { useApp, MAX_HEARTS, REFILL_PRICE, type CompleteSummary } from '../../state/store';
 import { Button, ProgressBar } from '../../components/ui/Button';
 import { CardView } from '../../components/lesson/CardView';
@@ -20,7 +20,7 @@ import type { Card } from '../../content/types';
 const PRAISE = ['Muito bem!', 'Correto!', 'Isso aí!', 'Perfeito!', 'Mandou bem!', 'Exato!', 'Brilhante!', 'Na mosca! 🎯'];
 
 export default function LessonScreen() {
-  const { id, mode } = useLocalSearchParams<{ id: string; mode?: string }>();
+  const { id, mode, part } = useLocalSearchParams<{ id: string; mode?: string; part?: string }>();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const contentW = Math.min(width, 700) - 32;
@@ -32,7 +32,8 @@ export default function LessonScreen() {
   const session = useMemo(() => {
     const seed = Date.now();
     if (mode === 'practice') {
-      const completed = Object.keys(useApp.getState().lessons);
+      const st = useApp.getState();
+      const completed = [...Object.keys(st.lessons), ...Object.keys(st.parts)];
       return { title: 'Treino inteligente', color: C.cyan, cards: [] as Card[], queue: buildPractice(useApp.getState().mistakes, completed, seed, 10), lessonId: null as string | null, practice: true };
     }
     if (mode === 'review') {
@@ -41,9 +42,15 @@ export default function LessonScreen() {
     }
     const loc = findLesson(id!);
     if (!loc) return null;
-    const replay = (useApp.getState().lessons[loc.lesson.id]?.done ?? 0) > 0;
-    return { title: loc.lesson.title, color: loc.section.color, cards: loc.lesson.cards, queue: buildQueue(loc.lesson, seed), lessonId: loc.lesson.id, practice: false, replay };
-  }, [id, mode]);
+    const st = useApp.getState();
+    const total = loc.lesson.parts.length;
+    const doneParts = partsDone(loc.lesson, st.lessons, st.parts);
+    const asked = part != null ? Number(part) : NaN;
+    const partIdx = Number.isFinite(asked) ? Math.min(Math.max(0, asked), total - 1) : doneParts < total ? doneParts : 0;
+    const replay = partIdx < doneParts;
+    const p = loc.lesson.parts[partIdx];
+    return { title: loc.lesson.title, color: loc.section.color, cards: p.cards, queue: buildQueue(loc.lesson, partIdx, seed), lessonId: loc.lesson.id, practice: false, replay, partIdx, partsTotal: total };
+  }, [id, mode, part]);
 
   const [phase, setPhase] = useState<'cards' | 'ex' | 'done'>(session && session.cards.length ? 'cards' : 'ex');
   const [cardIdx, setCardIdx] = useState(0);
@@ -96,6 +103,8 @@ export default function LessonScreen() {
       bestCombo: st.best,
       durationMs: Date.now() - st.start,
       practice: session.practice,
+      part: (session as any).partIdx,
+      partsTotal: (session as any).partsTotal,
     });
     if (mode === 'practice' && st.firstCorrect >= 6) useApp.getState().gainHeart();
     setSummary(s);
@@ -156,7 +165,19 @@ export default function LessonScreen() {
   };
 
   if (phase === 'done' && summary) {
-    return <LessonComplete summary={summary} durationMs={Date.now() - stats.current.start} onContinue={() => router.back()} title={mode === 'practice' ? 'Treino concluído! 💪' : undefined} />;
+    const pi: number | undefined = (session as any).partIdx;
+    const pt: number | undefined = (session as any).partsTotal;
+    const hasNext = pi != null && pt != null && pi + 1 < pt && !(session as any).replay;
+    return (
+      <LessonComplete
+        summary={summary}
+        durationMs={Date.now() - stats.current.start}
+        color={session.color}
+        onContinue={() => router.back()}
+        onNext={hasNext ? () => router.replace({ pathname: '/lesson/[id]', params: { id: id!, part: String(pi! + 1) } }) : undefined}
+        title={mode === 'practice' ? 'Treino concluído! 💪' : undefined}
+      />
+    );
   }
 
   const fbColor = feedback?.correct ? C.success : C.danger;
@@ -188,7 +209,9 @@ export default function LessonScreen() {
             {phase === 'cards' ? (
               <>
                 <Text style={{ color: C.textMuted, fontFamily: F.black, fontSize: 12, letterSpacing: 1.2, marginBottom: 6 }}>
-                  {session.title.toUpperCase()} · TEORIA {cardIdx + 1}/{session.cards.length}
+                  {session.title.toUpperCase()}
+                  {(session as any).partsTotal > 1 ? ` · PARTE ${(session as any).partIdx + 1}/${(session as any).partsTotal}` : ''}
+                  {session.cards.length > 1 ? ` · TEORIA ${cardIdx + 1}/${session.cards.length}` : ' · TEORIA'}
                 </Text>
                 <CardView key={cardIdx} card={session.cards[cardIdx]} width={contentW} color={session.color} />
               </>

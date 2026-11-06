@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { AreaUnder, FnCurve, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -38,7 +38,7 @@ const meanValueLab = () =>
     info: ({ p }: any) => t`Área sob $x^2$ em $[0, 3]$: $9$ · área do retângulo: $3\cdot${fmt(p.h, 1)}=${fmt(3 * p.h, 1)}$`,
   });
 
-export const integrais: Unit = {
+export const integrais: UnitDef = {
   id: 'c-int',
   title: 'Integrais indefinidas',
   subtitle: 'Primitivas, valor inicial, substituição e por partes',
@@ -153,7 +153,7 @@ $$xe^x-\int e^xdx=xe^x-e^x+C$$`,
   ],
 };
 
-export const integralDefinida: Unit = {
+export const integralDefinida: UnitDef = {
   id: 'c-def',
   title: 'Integral definida',
   subtitle: 'Somas de Riemann, TFC, áreas e valor médio',

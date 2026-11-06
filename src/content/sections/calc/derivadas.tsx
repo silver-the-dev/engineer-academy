@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { FnCurve, InfLine, Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -27,7 +27,7 @@ const boxLab = () =>
     info: ({ p }: any) => t`Folha $12\times12$, corte $c=${fmt(p.c, 1)}$: $V=c(12-2c)^2=${fmt(p.c * (12 - 2 * p.c) ** 2, 1)}$`,
   });
 
-export const derivadas: Unit = {
+export const derivadas: UnitDef = {
   id: 'c-der',
   title: 'Derivadas',
   subtitle: 'Taxa de variação, regras e regra da cadeia',
@@ -189,7 +189,7 @@ $$(\ln x)'=\frac1x\qquad(\log_a x)'=\frac{1}{x\ln a}$$`,
   ],
 };
 
-export const aplicacoes: Unit = {
+export const aplicacoes: UnitDef = {
   id: 'c-apl',
   title: 'Aplicações da derivada',
   subtitle: 'Crescimento, máximos e mínimos, otimização e L’Hôpital',

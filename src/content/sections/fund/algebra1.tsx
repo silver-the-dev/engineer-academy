@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { Arrow, CircleW, FnCurve, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -64,7 +64,7 @@ const squareIdentity = () =>
     280,
   );
 
-export const algebra1: Unit = {
+export const algebra1: UnitDef = {
   id: 'f-alg1',
   title: 'Álgebra I',
   subtitle: 'Conjuntos, intervalos, complexos e polinômios',

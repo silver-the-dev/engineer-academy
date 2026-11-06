@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi, table } from '../../helpers';
 import { FnCurve, Pt } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -37,7 +37,7 @@ const runge = () =>
     info: ({ p }: any) => t`Função $\frac{1}{1+25x^2}$ (azul) e polinômio de grau $${p.n}$ com nós igualmente espaçados (vermelho)`,
   });
 
-export const interpolacao: Unit = {
+export const interpolacao: UnitDef = {
   id: 'n-int',
   title: 'Interpolação polinomial',
   subtitle: 'Sistema linear, Lagrange, Newton e o fenômeno de Runge',
@@ -135,7 +135,7 @@ Acrescentar um ponto só adiciona **um termo**.`,
   ],
 };
 
-export const ajuste: Unit = {
+export const ajuste: UnitDef = {
   id: 'n-aju',
   title: 'Ajuste de curvas',
   subtitle: 'Mínimos quadrados e linearização',
@@ -198,7 +198,7 @@ $$\begin{cases}a\sum x_i^2+b\sum x_i=\sum x_iy_i\\a\sum x_i+n\,b=\sum y_i\end{ca
   ],
 };
 
-export const integracaoNum: Unit = {
+export const integracaoNum: UnitDef = {
   id: 'n-inum',
   title: 'Integração numérica',
   subtitle: 'Trapézios, Simpson e erro',
@@ -256,7 +256,7 @@ Pesos $1,4,2,4,\ldots,4,1$. Alterne para Simpson ($S$) e compare o erro:`,
   ],
 };
 
-export const edos: Unit = {
+export const edos: UnitDef = {
   id: 'n-edo',
   title: 'Equações diferenciais (numérico)',
   subtitle: 'Euler, Euler melhorado e Runge-Kutta',

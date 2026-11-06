@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi, table } from '../../helpers';
 import { FnCurve, InfLine, PolylineW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -40,7 +40,7 @@ const gaussSeidelStepper = () => {
   };
 };
 
-export const erros: Unit = {
+export const erros: UnitDef = {
   id: 'n-err',
   title: 'Erros e aritmética do computador',
   subtitle: 'Arredondamento, truncamento, erro absoluto e relativo',
@@ -107,7 +107,7 @@ O relativo diz se o erro é **grande em proporção**: errar 1 m em 1 km ($0{,}1
   ],
 };
 
-export const zeros: Unit = {
+export const zeros: UnitDef = {
   id: 'n-zer',
   title: 'Zeros de funções',
   subtitle: 'Isolamento, bisseção, Newton e secante',
@@ -200,7 +200,7 @@ $$x_{k+1}=x_k-f(x_k)\frac{x_k-x_{k-1}}{f(x_k)-f(x_{k-1})}$$
   ],
 };
 
-export const sistemasNum: Unit = {
+export const sistemasNum: UnitDef = {
   id: 'n-sis',
   title: 'Sistemas lineares (numérico)',
   subtitle: 'Eliminação de Gauss, pivotamento, Jacobi e Gauss-Seidel',

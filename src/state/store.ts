@@ -45,6 +45,9 @@ export type CompleteInput = {
   bestCombo: number;
   durationMs: number;
   practice?: boolean;
+  /** sub-lesson index and how many the lesson has */
+  part?: number;
+  partsTotal?: number;
 };
 
 export type CompleteSummary = {
@@ -58,6 +61,8 @@ export type CompleteSummary = {
   levelBefore: number;
   levelAfter: number;
   newAchievements: string[];
+  /** set for path lessons: which sub-lesson was finished and whether the whole lesson is now done */
+  part?: { index: number; total: number; lessonDone: boolean };
 };
 
 type State = {
@@ -71,6 +76,8 @@ type State = {
   frozenDays: string[];
   days: Record<string, number>;
   lessons: Record<string, LessonProgress>;
+  /** sub-lessons finished in lessons not completed yet */
+  parts: Record<string, number>;
   mistakes: Record<string, Mistake>;
   achievements: Record<string, number>;
   quests: { date: string; list: Quest[] };
@@ -134,6 +141,7 @@ function initial(): State {
     frozenDays: [],
     days: {},
     lessons: {},
+    parts: {},
     mistakes: {},
     achievements: {},
     quests: { date: '', list: [] },
@@ -261,7 +269,13 @@ export const useApp = create<State & Actions>()(
         const today = dateKey();
         const accuracy = inp.total ? inp.correct / inp.total : 1;
         const perfect = inp.total > 0 && inp.correct === inp.total;
-        const replay = inp.lessonId ? (s.lessons[inp.lessonId]?.done ?? 0) > 0 : false;
+        const wasDone = inp.lessonId ? (s.lessons[inp.lessonId]?.done ?? 0) > 0 : false;
+        const total = Math.max(1, inp.partsTotal ?? 1);
+        const partIdx = inp.part ?? 0;
+        const prevParts = inp.lessonId ? s.parts[inp.lessonId] ?? 0 : 0;
+        const replay = wasDone || (inp.lessonId != null && partIdx < prevParts);
+        const newParts = wasDone ? prevParts : Math.max(prevParts, partIdx + 1);
+        const lessonDoneNow = !!inp.lessonId && !wasDone && newParts >= total;
         let xp = Math.round(inp.correct * 10 * (replay ? 0.6 : 1));
         if (perfect) xp += 10;
         if (inp.bestCombo >= 5) xp += 5;
@@ -276,7 +290,10 @@ export const useApp = create<State & Actions>()(
         const goalReachedNow = todayBefore < s.settings.dailyGoal && todayBefore + xp >= s.settings.dailyGoal;
         if (goalReachedNow) gems += 10;
         const lessons = { ...s.lessons };
-        if (inp.lessonId) {
+        const parts = { ...s.parts };
+        if (inp.lessonId && !wasDone && !lessonDoneNow) parts[inp.lessonId] = newParts;
+        if (lessonDoneNow) delete parts[inp.lessonId!];
+        if (inp.lessonId && (wasDone || lessonDoneNow)) {
           const prev = lessons[inp.lessonId];
           lessons[inp.lessonId] = {
             done: (prev?.done ?? 0) + 1,
@@ -310,7 +327,7 @@ export const useApp = create<State & Actions>()(
           }),
         };
         const newXp = s.xp + xp;
-        set({ xp: newXp, gems: s.gems + gems, days, lessons, stats, quests });
+        set({ xp: newXp, gems: s.gems + gems, days, lessons, parts, stats, quests });
         // achievements
         const { checkAchievements } = require('../content/achievements');
         const unlocked: string[] = checkAchievements(get());
@@ -334,6 +351,7 @@ export const useApp = create<State & Actions>()(
           levelBefore,
           levelAfter: levelFromXp(newXp).level,
           newAchievements: unlocked,
+          part: inp.lessonId ? { index: partIdx, total, lessonDone: lessonDoneNow || wasDone } : undefined,
         };
       },
 

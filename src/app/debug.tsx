@@ -59,10 +59,25 @@ export default function Debug() {
         if (r.error) errors.push(`${where}: TeX inválido: ${tex}`);
       }
     };
-    for (const sec of SECTIONS)
+    const warnings: string[] = [];
+    const bySection: string[] = [];
+    let nItems = 0;
+    let nParts = 0;
+    for (const sec of SECTIONS) {
+      let secLessons = 0;
+      let secSplit = 0;
+      let secParts = 0;
+      let secItems = 0;
       for (const u of sec.units)
         for (const l of u.lessons) {
           nLessons++;
+          secLessons++;
+          secParts += l.parts.length;
+          secItems += l.exercises.length;
+          nParts += l.parts.length;
+          nItems += l.exercises.length;
+          if (l.parts.length > 1) secSplit++;
+          if (l.parts.length > 1) l.parts.forEach((p, pi) => p.count < 6 && warnings.push(`${l.id} parte ${pi + 1}: só ${p.count} exercícios`));
           l.cards.forEach((c, i) => {
             checkStr(`${l.id} card${i}`, c.body);
             if (c.formula) {
@@ -85,23 +100,36 @@ export default function Debug() {
               nEx++;
               const st = structural(e);
               if (st) errors.push(`${l.id}#${idx}: ${st}`);
+              if (e.kind === 'mcq' && e.options.length < 3 && !e.options.includes('Direta')) warnings.push(`${l.id}#${idx} (seed ${sd}): múltipla escolha com só ${e.options.length} opções`);
               exStrings(e).forEach((s) => checkStr(`${l.id}#${idx}`, s));
             }
           });
         }
+      bySection.push(`${sec.id}: ${secSplit}/${secLessons} lições com partes · ${secParts} partes · ${secItems} exercícios (${(secItems / secParts).toFixed(1)}/parte)`);
+    }
     const selfTest = [texToSvg('\\macroinexistente x').error, texToSvg('\\frac{1}{').error, texToSvg('x^2').error];
     errors.unshift(`autoteste detector (esperado true,true,false): ${selfTest.join(',')}`);
-    return { errors, nTex, nEx, nLessons };
+    return { errors, warnings, bySection, nTex, nEx, nLessons, nItems, nParts };
   }, []);
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ padding: 16 }}>
       <Text style={{ color: C.text, fontFamily: F.black, fontSize: 20 }}>QA de conteúdo</Text>
       <Text nativeID="qa-summary" style={{ color: C.textMuted, fontFamily: F.bold, marginVertical: 8 }}>
-        {`lições=${report.nLessons} exercícios=${report.nEx} fórmulas=${report.nTex} erros=${report.errors.length}`}
+        {`lições=${report.nLessons} partes=${report.nParts} exercícios=${report.nItems} (testados=${report.nEx}) fórmulas=${report.nTex} erros=${report.errors.length} avisos=${report.warnings.length}`}
       </Text>
+      {report.bySection.map((s) => (
+        <Text key={s} style={{ color: C.text, fontFamily: F.semibold, fontSize: 12 }}>
+          {s}
+        </Text>
+      ))}
       {report.errors.map((e, i) => (
         <View key={i} style={{ paddingVertical: 4, borderBottomWidth: 1, borderColor: C.surface2 }}>
           <Text style={{ color: C.danger, fontFamily: F.semibold, fontSize: 12 }}>{e}</Text>
+        </View>
+      ))}
+      {report.warnings.map((e, i) => (
+        <View key={'w' + i} style={{ paddingVertical: 4, borderBottomWidth: 1, borderColor: C.surface2 }}>
+          <Text style={{ color: C.gold, fontFamily: F.semibold, fontSize: 12 }}>{e}</Text>
         </View>
       ))}
     </ScrollView>

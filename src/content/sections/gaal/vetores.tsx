@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { Arrow, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -25,7 +25,7 @@ const vecTarget = (tx: number, ty: number) =>
     info: ({ pts }: any) => t`$\vec u=(${fmt(pts.u.x)},\,${fmt(pts.u.y)})$`,
   });
 
-export const vetoresGeo: Unit = {
+export const vetoresGeo: UnitDef = {
   id: 'g-vgeo',
   title: 'Vetores: visão geométrica',
   subtitle: 'Soma, subtração, escalar, versor e ângulo',
@@ -112,7 +112,7 @@ O **ângulo** entre dois vetores (com origens juntas) fica em $[0^\circ,\,180^\c
   ],
 };
 
-export const vetoresAlg: Unit = {
+export const vetoresAlg: UnitDef = {
   id: 'g-valg',
   title: 'Vetores: visão algébrica',
   subtitle: 'Coordenadas, módulo, ponto médio, paralelismo e R³',

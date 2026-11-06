@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, table } from '../../helpers';
 import { FnCurve, InfLine, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -61,7 +61,7 @@ const systemLab = () =>
     },
   });
 
-export const algebra2: Unit = {
+export const algebra2: UnitDef = {
   id: 'f-alg2',
   title: 'Álgebra II',
   subtitle: 'Progressões, matrizes e sistemas lineares',

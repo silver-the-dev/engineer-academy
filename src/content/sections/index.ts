@@ -1,4 +1,4 @@
-import type { Section } from '../types';
+import { normalizeSection, type Section, type SectionDef } from '../types';
 import { elementar } from './fund/elementar';
 import { algebra1 } from './fund/algebra1';
 import { algebra2 } from './fund/algebra2';
@@ -18,7 +18,7 @@ import { interpolacao, ajuste, integracaoNum, edos } from './num/numerico2';
 import { conceitos, tabelas, posicao, dispersao } from './est/estatistica1';
 import { probabilidade, pesquisa, distribuicoes, regressao } from './est/estatistica2';
 
-export const SECTIONS: Section[] = [
+const DEFS: SectionDef[] = [
   {
     id: 'fund',
     title: 'Fundamentos',
@@ -60,3 +60,5 @@ export const SECTIONS: Section[] = [
     units: [conceitos, tabelas, posicao, dispersao, probabilidade, pesquisa, distribuicoes, regressao],
   },
 ];
+
+export const SECTIONS: Section[] = DEFS.map(normalizeSection);

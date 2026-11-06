@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near } from '../../helpers';
 import { Label, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -42,7 +42,7 @@ const treeLab = () =>
     260,
   );
 
-export const combinatoria: Unit = {
+export const combinatoria: UnitDef = {
   id: 'f-comb',
   title: 'Combinatória',
   subtitle: 'Contagem, permutações, combinações e probabilidade',

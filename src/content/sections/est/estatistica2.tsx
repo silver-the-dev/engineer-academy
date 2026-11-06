@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi, table } from '../../helpers';
 import { Label, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -77,7 +77,7 @@ const corrLab = () =>
     },
   });
 
-export const probabilidade: Unit = {
+export const probabilidade: UnitDef = {
   id: 'e-prob',
   title: 'Probabilidade',
   subtitle: 'Eventos, regras, condicional, independência e Bayes',
@@ -182,7 +182,7 @@ com $P(B)=P(B\mid A)P(A)+P(B\mid\bar A)P(\bar A)$ (probabilidade total).`,
   ],
 };
 
-export const pesquisa: Unit = {
+export const pesquisa: UnitDef = {
   id: 'e-pesq',
   title: 'Pesquisa de opinião',
   subtitle: 'Planejamento, margem de erro e tamanho de amostra',
@@ -239,7 +239,7 @@ Tamanho para margem $e$: $$n\approx\frac{1}{e^2}$$`,
   ],
 };
 
-export const distribuicoes: Unit = {
+export const distribuicoes: UnitDef = {
   id: 'e-dist',
   title: 'Distribuições de probabilidade',
   subtitle: 'Binomial, normal e escore z',
@@ -298,7 +298,7 @@ Média $\mu=np$ e desvio $\sigma=\sqrt{np(1-p)}$. Mude $n$ e $p$:`,
   ],
 };
 
-export const regressao: Unit = {
+export const regressao: UnitDef = {
   id: 'e-reg',
   title: 'Correlação e regressão',
   subtitle: 'Coeficiente de Pearson e reta de regressão',

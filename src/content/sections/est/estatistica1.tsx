@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi, table } from '../../helpers';
 import { Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -54,7 +54,7 @@ const deviationLab = () =>
     240,
   );
 
-export const conceitos: Unit = {
+export const conceitos: UnitDef = {
   id: 'e-conc',
   title: 'Conceitos fundamentais',
   subtitle: 'População, amostra, variáveis e amostragem',
@@ -125,7 +125,7 @@ Amostras por **conveniência** (quem estiver por perto) costumam ter **viés**.`
   ],
 };
 
-export const tabelas: Unit = {
+export const tabelas: UnitDef = {
   id: 'e-tab',
   title: 'Tabelas e gráficos',
   subtitle: 'Distribuição de frequências e histogramas',
@@ -201,7 +201,7 @@ export const tabelas: Unit = {
   ],
 };
 
-export const posicao: Unit = {
+export const posicao: UnitDef = {
   id: 'e-pos',
   title: 'Medidas de posição',
   subtitle: 'Média, mediana, moda, quartis e boxplot',
@@ -288,7 +288,7 @@ O **boxplot** desenha caixa ($Q_1$ a $Q_3$), linha da mediana e "bigodes".`,
   ],
 };
 
-export const dispersao: Unit = {
+export const dispersao: UnitDef = {
   id: 'e-disp',
   title: 'Medidas de dispersão',
   subtitle: 'Amplitude, variância, desvio padrão e CV',

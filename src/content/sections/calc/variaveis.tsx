@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { Arrow, CircleW, Pt } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -24,7 +24,7 @@ const levelLab = () =>
     info: ({ pts }: any) => t`$f=x^2+y^2$ · $\nabla f(${fmt(pts.P.x, 1)},\,${fmt(pts.P.y, 1)})=(${fmt(2 * pts.P.x, 1)},\,${fmt(2 * pts.P.y, 1)})$ — perpendicular à curva de nível`,
   });
 
-export const variaveis: Unit = {
+export const variaveis: UnitDef = {
   id: 'c-var',
   title: 'Funções de várias variáveis',
   subtitle: 'Superfícies, curvas de nível e derivadas parciais',
@@ -121,7 +121,7 @@ Somamos a contribuição de cada "caminho" de $t$ até $z$.`,
   ],
 };
 
-export const duplas: Unit = {
+export const duplas: UnitDef = {
   id: 'c-dupla',
   title: 'Integrais duplas',
   subtitle: 'Volume, integrais iteradas e áreas',

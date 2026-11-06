@@ -27,8 +27,18 @@ export function resolve(src: ExerciseSource, seed: number): Exercise {
   return src;
 }
 
-export function buildQueue(lesson: Lesson, seed = Date.now()): QueueItem[] {
-  return lesson.exercises.map((src, idx) => ({ ex: resolve(src, seed + idx * 7919), lessonId: lesson.id, idx }));
+/** Exercises of one sub-lesson, kept in authored order (easy -> hard). */
+export function buildQueue(lesson: Lesson, part = 0, seed = Date.now()): QueueItem[] {
+  const p = lesson.parts[Math.min(Math.max(0, part), lesson.parts.length - 1)];
+  const out: QueueItem[] = [];
+  for (let idx = p.start; idx < p.start + p.count; idx++) out.push({ ex: resolve(lesson.exercises[idx], seed + idx * 7919), lessonId: lesson.id, idx });
+  return out;
+}
+
+/** How many sub-lessons of a lesson are finished (all of them once the lesson is done). */
+export function partsDone(lesson: Lesson, done: Record<string, unknown>, parts: Record<string, number>): number {
+  if (done[lesson.id]) return lesson.parts.length;
+  return Math.min(lesson.parts.length, parts[lesson.id] ?? 0);
 }
 
 /** Checkpoint for a unit: samples exercises from every lesson. */

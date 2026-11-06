@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { CircleW, FnCurve, InfLine, Label, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -52,7 +52,7 @@ const jumpLab = () =>
     info: ({ p }: any) => (p.L === 1 ? t`$\lim_{x\to1^-}=1=\lim_{x\to1^+}$ ⟹ o limite **existe** (e a função é contínua)` : t`$\lim_{x\to1^-}f=1\ne\lim_{x\to1^+}f=${fmt(p.L)}$ ⟹ limite **não existe**`),
   });
 
-export const funcoesCalc: Unit = {
+export const funcoesCalc: UnitDef = {
   id: 'c-func',
   title: 'Funções (revisão para Cálculo)',
   subtitle: 'Domínio, composição, inversa e transformações',
@@ -155,7 +155,7 @@ Mexa em $a$, $h$ e $k$ partindo de $y=x^2$:`,
   ],
 };
 
-export const limites: Unit = {
+export const limites: UnitDef = {
   id: 'c-lim',
   title: 'Limites',
   subtitle: 'Aproximação, laterais, infinito e continuidade',

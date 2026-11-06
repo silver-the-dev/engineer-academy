@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near } from '../../helpers';
 import { CircleW, FnCurve, InfLine, Label, PolygonW, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -73,7 +73,7 @@ const circleLab = () =>
     },
   });
 
-export const geometria: Unit = {
+export const geometria: UnitDef = {
   id: 'f-geo',
   title: 'Geometria',
   subtitle: 'Áreas, volumes e geometria analítica',

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near } from '../../helpers';
 import { ArcW, FnCurve, Label, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -36,7 +36,7 @@ const rightTriangle = () =>
     },
   });
 
-export const trigonometria: Unit = {
+export const trigonometria: UnitDef = {
   id: 'f-trig',
   title: 'Trigonometria',
   subtitle: 'Triângulo retângulo, ciclo trigonométrico e funções',

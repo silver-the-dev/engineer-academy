@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { AreaUnder, FnCurve, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -30,7 +30,7 @@ const ineqLab = () =>
     info: ({ p }: any) => (p.c > 0 ? t`$x^2-${fmt(p.c)}<0 \iff -${fmt(Math.sqrt(p.c), 2)}<x<${fmt(Math.sqrt(p.c), 2)}$` : t`$x^2-(${fmt(p.c)})<0$ não tem solução real: a parábola nunca fica abaixo do eixo.`),
   });
 
-export const funcoes: Unit = {
+export const funcoes: UnitDef = {
   id: 'f-func',
   title: 'Funções',
   subtitle: 'Afim, quadrática, inequações, exponencial e logaritmo',

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Unit } from '../../types';
+import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ } from '../../../lib/random';
@@ -10,7 +10,7 @@ const V3 = (a: number[]) => t`(${a[0]},\,${a[1]},\,${a[2]})`;
 const dot = (a: number[], b: number[]) => a.reduce((s, v, i) => s + v * b[i], 0);
 const cross = (a: number[], b: number[]) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
-export const escalar: Unit = {
+export const escalar: UnitDef = {
   id: 'g-esc',
   title: 'Produto escalar',
   subtitle: 'Definição, ângulo, ortogonalidade e projeção',
@@ -110,7 +110,7 @@ Mexa nos vetores e veja o sinal do produto: positivo (ângulo agudo), zero (reto
   ],
 };
 
-export const vetorial: Unit = {
+export const vetorial: UnitDef = {
   id: 'g-vet',
   title: 'Produto vetorial e misto',
   subtitle: 'Vetor normal, áreas e volumes',

@@ -45,11 +45,22 @@ export type Exercise = MCQ | MultiSelect | Numeric | TrueFalse | Match | Order |
 export type Generator = { gen: (rng: Rng) => Exercise };
 export type ExerciseSource = Exercise | Generator;
 
+/** Sub-lesson (one segment of the ring around a path node): theory, then exercises from easy to hard. */
+export type Part = { card: Card | Card[]; exercises: ExerciseSource[] };
+
+/** Authoring shape: `parts` (sub-lessons) or the older single block of cards + exercises. */
+export type LessonDef = { id: string; title: string; parts?: Part[]; cards?: Card[]; exercises?: ExerciseSource[] };
+
+/** Runtime index of a sub-lesson inside the lesson's flat exercise list. */
+export type LessonPart = { title: string; cards: Card[]; start: number; count: number };
+
+/** Runtime lesson: flat cards/exercises (exercise idx = position here) plus the sub-lesson index. */
 export type Lesson = {
   id: string;
   title: string;
   cards: Card[];
   exercises: ExerciseSource[];
+  parts: LessonPart[];
 };
 
 export type Unit = {
@@ -63,6 +74,8 @@ export type Unit = {
   lessons: Lesson[];
 };
 
+export type UnitDef = Omit<Unit, 'lessons'> & { lessons: LessonDef[] };
+
 export type Section = {
   id: string;
   title: string;
@@ -74,4 +87,28 @@ export type Section = {
 
 export function isGenerator(e: ExerciseSource): e is Generator {
   return typeof (e as Generator).gen === 'function';
+}
+
+export type SectionDef = Omit<Section, 'units'> & { units: UnitDef[] };
+
+export function normalizeLesson(def: LessonDef): Lesson {
+  if (!def.parts) {
+    const cards = def.cards ?? [];
+    const exercises = def.exercises ?? [];
+    return { id: def.id, title: def.title, cards, exercises, parts: [{ title: def.title, cards, start: 0, count: exercises.length }] };
+  }
+  const cards: Card[] = [];
+  const exercises: ExerciseSource[] = [];
+  const parts: LessonPart[] = def.parts.map((p) => {
+    const pc = Array.isArray(p.card) ? p.card : [p.card];
+    const part = { title: pc[0]?.title ?? def.title, cards: pc, start: exercises.length, count: p.exercises.length };
+    cards.push(...pc);
+    exercises.push(...p.exercises);
+    return part;
+  });
+  return { id: def.id, title: def.title, cards, exercises, parts };
+}
+
+export function normalizeSection(def: SectionDef): Section {
+  return { ...def, units: def.units.map((u) => ({ ...u, lessons: u.lessons.map(normalizeLesson) })) };
 }

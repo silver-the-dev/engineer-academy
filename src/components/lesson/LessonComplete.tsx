@@ -23,7 +23,7 @@ function Stat({ label, value, color, icon }: { label: string; value: string; col
 
 const TITLES = ['Lição concluída!', 'Mandou bem!', 'Excelente!', 'Que cérebro!', 'Arrasou!'];
 
-export function LessonComplete({ summary, durationMs, onContinue, title }: { summary: CompleteSummary; durationMs: number; onContinue: () => void; title?: string }) {
+export function LessonComplete({ summary, durationMs, onContinue, onNext, title, color = C.gold }: { summary: CompleteSummary; durationMs: number; onContinue: () => void; onNext?: () => void; title?: string; color?: string }) {
   const scale = useRef(new Animated.Value(0.3)).current;
   const flame = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -36,12 +36,34 @@ export function LessonComplete({ summary, durationMs, onContinue, title }: { sum
   const mins = Math.floor(durationMs / 60000);
   const secs = Math.floor((durationMs % 60000) / 1000);
   const streakUp = summary.streakAfter > summary.streakBefore;
-  const t = title ?? (summary.perfect ? 'Perfeito! 🎯' : TITLES[Math.floor(Math.random() * TITLES.length)]);
+  const part = summary.part && summary.part.total > 1 ? summary.part : null;
+  const t =
+    title ??
+    (part
+      ? part.lessonDone
+        ? 'Lição completa! 🎉'
+        : `Parte ${part.index + 1} de ${part.total} concluída!`
+      : summary.perfect
+        ? 'Perfeito! 🎯'
+        : TITLES[Math.floor(Math.random() * TITLES.length)]);
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 50, alignItems: 'center' }}>
         <Animated.Text style={{ fontSize: 90, transform: [{ scale }] }}>{summary.perfect ? '🏆' : '🎉'}</Animated.Text>
         <Text style={{ color: C.gold, fontFamily: F.black, fontSize: 30, marginTop: 8, textAlign: 'center' }}>{t}</Text>
+        {part ? (
+          <View style={{ flexDirection: 'row', gap: 6, marginTop: 12, width: Math.min(260, part.total * 70) }}>
+            {Array.from({ length: part.total }, (_, i) => {
+              const filled = part.lessonDone || i <= part.index;
+              return <View key={i} style={{ flex: 1, height: 10, borderRadius: 5, backgroundColor: filled ? color : C.surface3 }} />;
+            })}
+          </View>
+        ) : null}
+        {part && !part.lessonDone ? (
+          <Text style={{ color: C.textMuted, fontFamily: F.bold, fontSize: 14, marginTop: 8 }}>
+            {part.total - part.index - 1 === 1 ? 'Falta 1 parte para completar a lição' : `Faltam ${part.total - part.index - 1} partes para completar a lição`}
+          </Text>
+        ) : null}
         {summary.levelAfter > summary.levelBefore ? (
           <Text style={{ color: C.cyan, fontFamily: F.black, fontSize: 18, marginTop: 6 }}>⬆️ Subiu para o nível {summary.levelAfter}!</Text>
         ) : null}
@@ -80,10 +102,11 @@ export function LessonComplete({ summary, durationMs, onContinue, title }: { sum
             </View>
           );
         })}
-        <View style={{ height: 110 }} />
+        <View style={{ height: onNext ? 170 : 110 }} />
       </ScrollView>
-      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 28 }}>
-        <Button title="Continuar" onPress={onContinue} color={C.success} />
+      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 28, gap: 10 }}>
+        {onNext ? <Button title="Próxima parte →" onPress={onNext} color={color} /> : null}
+        <Button title={onNext ? 'Voltar ao caminho' : 'Continuar'} onPress={onContinue} color={onNext ? C.surface3 : C.success} />
       </View>
       <Confetti />
     </View>
