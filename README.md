@@ -148,3 +148,9 @@ O modelo de conteúdo, as convenções para escrever exercícios (TeX, vírgula 
 1. `npx tsc --noEmit` sem erros;
 2. `/debug` sem erros ou avisos novos;
 3. não altere o `id` de lições existentes (é a chave do progresso salvo nos aparelhos).
+
+## Licença
+
+Copyright (C) 2026 silveriodev
+
+Este programa é software livre, distribuído sob a [GNU General Public License, versão 3](LICENSE) (GPL-3.0). Você pode usá-lo, estudá-lo, modificá-lo e redistribuí-lo; quem distribuir versões modificadas precisa mantê-las sob a mesma licença e com o código-fonte disponível. O programa é fornecido sem nenhuma garantia; veja o arquivo [`LICENSE`](LICENSE) para os termos completos.
