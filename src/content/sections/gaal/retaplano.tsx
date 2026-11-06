@@ -4,7 +4,7 @@ import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, m
 import { Arrow, InfLine, Pt, Seg } from '../../../components/plot/Plot';
 import { Arrow3, Axes3, Line3, Point3, Poly3, type V3 as V3T } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ } from '../../../lib/random';
+import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 import { matrixLab, plane3DLab } from '../../visuals';
 
 const t = String.raw;
@@ -60,6 +60,11 @@ const line3D = () => ({
   },
 });
 
+const r3 = (rng: () => number, lo: number, hi: number) => [randInt(rng, lo, hi), randInt(rng, lo, hi), randInt(rng, lo, hi)];
+const nz3 = (rng: () => number, lo: number, hi: number) => [randNZ(rng, lo, hi), randNZ(rng, lo, hi), randNZ(rng, lo, hi)];
+const dot3 = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross3 = (a: number[], b: number[]) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
 export const reta: UnitDef = {
   id: 'g-reta',
   title: 'A reta',
@@ -71,56 +76,137 @@ export const reta: UnitDef = {
     {
       id: 'g-reta-vet',
       title: 'Equação vetorial e paramétricas',
-      cards: [
+      parts: [
         {
-          title: 'P = A + t v',
-          body: t`Cada valor de $t$ dá um ponto da reta. Arraste $A$, a ponta do diretor e mude $t$:`,
-          visual: paramLine(),
+          card: {
+            title: 'P = A + t v',
+            body: t`Uma reta fica determinada por um **ponto** $A$ e uma **direção** $\vec v$ (o vetor diretor):
+
+$$P=A+t\,\vec v,\quad t\in\mathbb R$$
+
+Cada valor de $t$ dá um ponto da reta. Arraste $A$, a ponta do diretor e mude $t$:`,
+            visual: paramLine(),
+          },
+          exercises: [
+            mcq(t`Na equação $P=A+t\vec v$, o vetor $\vec v$ é chamado de…`, ['vetor diretor', 'vetor normal', 'ponto inicial', 'parâmetro'], 0, t`Ele dá a direção da reta.`),
+            gen((rng) => {
+              const A = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
+              const v = [randNZ(rng, -3, 3), randNZ(rng, -3, 3)];
+              const tt = randInt(rng, -2, 3);
+              return rmcq(rng, t`Na reta $P=(${A[0]},\,${A[1]})+t\,(${v[0]},\,${v[1]})$, qual ponto corresponde a $t=${tt}$?`, `$(${A[0] + tt * v[0]},\\,${A[1] + tt * v[1]})$`, [`$(${A[0] - tt * v[0]},\\,${A[1] - tt * v[1]})$`, `$(${v[0] + tt * A[0]},\\,${v[1] + tt * A[1]})$`, `$(${A[0] + tt * v[0]},\\,${A[1] + tt * v[1] + 1})$`], t`$(${A[0]},\,${A[1]})+${tt}\cdot(${v[0]},\,${v[1]})$.`);
+            }),
+            tf(t`O ponto $A$ corresponde a $t=0$ na equação $P=A+t\vec v$.`, true, t`$A+0\cdot\vec v=A$.`),
+            inter(t`Monte a reta que passa por $A(0,\,1)$ com diretor $\vec v=(2,\,-1)$.`, 'plot', paramLine().props, (v: any) => v && v.pts.A.x === 0 && v.pts.A.y === 1 && near(v.pts.V.x - v.pts.A.x, 2, 0.01) && near(v.pts.V.y - v.pts.A.y, -1, 0.01), t`$A=(0,\,1)$ e ponta em $(2,\,0)$`),
+            tf(t`Os vetores $(1,\,2)$ e $(-2,\,-4)$ servem como diretores da mesma reta.`, true, t`São paralelos: qualquer múltiplo não nulo do diretor também é diretor.`),
+            gen((rng) => {
+              const A = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
+              const v = [randNZ(rng, -3, 3), randNZ(rng, -3, 3)];
+              const tt = randInt(rng, -3, 4);
+              return num(t`O ponto $(${A[0] + tt * v[0]},\,${A[1] + tt * v[1]})$ está na reta $P=(${A[0]},\,${A[1]})+t\,(${v[0]},\,${v[1]})$. Para qual valor de $t$?`, tt, t`$${A[0]}+${v[0]}t=${A[0] + tt * v[0]}\Rightarrow t=${tt}$.`);
+            }),
+            num(t`A reta $P=(1,\,2)+t\,(2,\,1)$ corta o eixo $x$ (onde $y=0$) em qual valor de $x$?`, -3, t`$2+t=0\Rightarrow t=-2$; $x=1+2(-2)=-3$.`),
+          ],
         },
         {
-          title: 'No espaço',
-          body: t`$$r:\ \begin{cases}x=x_0+a\,t\\y=y_0+b\,t\\z=z_0+c\,t\end{cases}$$
+          card: {
+            title: 'No espaço: equações paramétricas',
+            body: t`Separando as coordenadas de $P=(x_0,y_0,z_0)+t\,(a,b,c)$:
+
+$$r:\ \begin{cases}x=x_0+a\,t\\y=y_0+b\,t\\z=z_0+c\,t\end{cases}$$
+
 Gire a cena e percorra a reta com $t$:`,
-          visual: line3D(),
-          tip: t`Para saber se um ponto $Q$ está na reta, ache $t$ pela 1ª equação e confira nas outras.`,
+            visual: line3D(),
+            tip: t`Para saber se um ponto $Q$ está na reta, ache $t$ pela 1ª equação e confira nas outras.`,
+          },
+          exercises: [
+            mcqS(t`Qual é um vetor diretor da reta $\begin{cases}x=2+3t\\y=-1+t\\z=5-2t\end{cases}$?`, t`$(3,\,1,\,-2)$`, [t`$(2,\,-1,\,5)$`, t`$(3,\,-1,\,2)$`, t`$(5,\,0,\,3)$`], t`São os coeficientes do $t$.`),
+            mcqS(t`Qual ponto pertence à reta $\begin{cases}x=2+3t\\y=-1+t\\z=5-2t\end{cases}$ com certeza?`, t`$(2,\,-1,\,5)$`, [t`$(3,\,1,\,-2)$`, t`$(0,\,0,\,0)$`, t`$(5,\,0,\,7)$`], t`Com $t=0$.`),
+            gen((rng) => {
+              const A = r3(rng, -3, 3);
+              const v = nz3(rng, -3, 3);
+              const tt = randInt(rng, -2, 3);
+              const P = A.map((a, i) => a + tt * v[i]);
+              return rmcq(rng, t`A reta $r: P=${V3(A)}+t\,${V3(v)}$ passa por qual ponto quando $t=${tt}$?`, `$${V3(P)}$`, [`$${V3(A.map((a, i) => a - tt * v[i]))}$`, `$${V3(v.map((x, i) => x + tt * A[i]))}$`, `$${V3(P.map((x, i) => (i === 1 ? x + 1 : x)))}$`], t`$${V3(A)}+${tt}\cdot${V3(v)}=${V3(P)}$.`);
+            }),
+            num(t`O ponto $Q(7,\,a,\,1)$ pertence à reta $x=1+2t$, $y=3-t$, $z=-5+2t$. Quanto vale $a$?`, 0, t`$7=1+2t\Rightarrow t=3$; $z=-5+6=1$ ✓; $a=3-3=0$.`),
+            gen((rng) => {
+              const A = r3(rng, -3, 3);
+              const v = nz3(rng, -3, 3);
+              const tt = randInt(rng, -2, 2);
+              const P = A.map((a, i) => a + tt * v[i]);
+              const on = rng() < 0.5;
+              const Q = on ? P : [P[0], P[1], P[2] + 1];
+              return tf(t`O ponto $${V3(Q)}$ pertence à reta $P=${V3(A)}+t\,${V3(v)}$.`, on, on ? t`Com $t=${tt}$ as três coordenadas batem.` : t`A 1ª coordenada dá $t=${tt}$, mas aí $z=${P[2]}\neq${Q[2]}$.`);
+            }),
+            mcq(t`A reta $x=1+t$, $y=2$, $z=3$ é paralela a qual eixo?`, ['eixo $x$', 'eixo $y$', 'eixo $z$', 'nenhum'], 0, t`Só o $x$ varia: diretor $(1,\,0,\,0)=\vec i$.`),
+            num(t`Em que valor de $z$ a reta $x=t$, $y=2t$, $z=4-t$ fura o plano $x=3$?`, 1, t`$x=3\Rightarrow t=3$, então $z=4-3=1$.`),
+          ],
         },
-      ],
-      exercises: [
-        gen((rng) => {
-          const A = [randInt(rng, -3, 3), randInt(rng, -3, 3), randInt(rng, -3, 3)];
-          const v = [randNZ(rng, -3, 3), randNZ(rng, -3, 3), randNZ(rng, -3, 3)];
-          const tt = randInt(rng, -2, 3);
-          const P = A.map((a, i) => a + tt * v[i]);
-          return rmcq(rng, t`A reta $r: P=${V3(A)}+t\,${V3(v)}$ passa por qual ponto quando $t=${tt}$?`, `$${V3(P)}$`, [`$${V3(A.map((a, i) => a - tt * v[i]))}$`, `$${V3(v.map((x, i) => x + tt * A[i]))}$`, `$${V3(P.map((x, i) => (i === 1 ? x + 1 : x)))}$`]);
-        }),
-        mcqS(t`Qual é um vetor diretor da reta $\begin{cases}x=2+3t\\y=-1+t\\z=5-2t\end{cases}$?`, t`$(3,\,1,\,-2)$`, [t`$(2,\,-1,\,5)$`, t`$(3,\,-1,\,2)$`, t`$(5,\,0,\,3)$`]),
-        num(t`O ponto $Q(7,\,a,\,1)$ pertence à reta $x=1+2t$, $y=3-t$, $z=-5+2t$. Quanto vale $a$?`, 0, t`$7=1+2t\Rightarrow t=3$; $z=-5+6=1$ ✓; $a=3-3=0$.`),
-        inter(t`Monte a reta que passa por $A(0,\,1)$ com diretor $\vec v=(2,\,-1)$.`, 'plot', paramLine().props, (v: any) => v && v.pts.A.x === 0 && v.pts.A.y === 1 && near(v.pts.V.x - v.pts.A.x, 2, 0.01) && near(v.pts.V.y - v.pts.A.y, -1, 0.01), t`$A=(0,\,1)$ e ponta em $(2,\,0)$`),
       ],
     },
     {
       id: 'g-reta-2p',
       title: 'Reta por dois pontos e posições',
-      cards: [
+      parts: [
         {
-          title: 'Dois pontos bastam',
-          body: t`Por $A$ e $B$: diretor $\vec v=\vec{AB}=B-A$ e $P=A+t\,(B-A)$.
+          card: {
+            title: 'Dois pontos bastam',
+            body: t`Por $A$ e $B$: diretor $\vec v=\vec{AB}=B-A$ e $P=A+t\,(B-A)$.
 
-**Retas paralelas aos eixos**: diretor $\vec i$, $\vec j$ ou $\vec k$ (duas coordenadas constantes).
-
-**Posições relativas** no espaço: concorrentes, paralelas, coincidentes ou **reversas** (não se cruzam e não são paralelas).`,
-          example: t`$A(1,2,3)$, $B(4,0,5)$: $\vec v=(3,-2,2)$, $r:(1,2,3)+t(3,-2,2)$.`,
+**Retas paralelas aos eixos** têm diretor $\vec i$, $\vec j$ ou $\vec k$: duas coordenadas ficam constantes.`,
+            example: t`$A(1,\,2,\,3)$, $B(4,\,0,\,5)$: $\vec v=(3,\,-2,\,2)$, $r:\ (1,\,2,\,3)+t\,(3,\,-2,\,2)$.`,
+          },
+          exercises: [
+            gen((rng) => {
+              const A = r3(rng, -3, 3);
+              const B = r3(rng, -3, 3);
+              return rmcq(rng, t`Qual o diretor da reta por $A=${V3(A)}$ e $B=${V3(B)}$?`, `$${V3(B.map((b, i) => b - A[i]))}$`, [`$${V3(A.map((a, i) => a + B[i]))}$`, `$${V3(A)}$`, `$${V3(B.map((b, i) => (b - A[i]) * (i === 2 ? -1 : 1)))}$`], t`$B-A$.`);
+            }),
+            mcq(t`A reta $x=2$, $y=3$, $z=t$ é paralela a qual eixo?`, ['eixo z', 'eixo x', 'eixo y', 'nenhum'], 0, t`Só o $z$ varia.`),
+            tf(t`Por dois pontos distintos passa exatamente uma reta.`, true, t`O diretor $B-A$ e o ponto $A$ a determinam.`),
+            gen((rng) => {
+              const A = r3(rng, -3, 3);
+              const v = nz3(rng, -2, 2);
+              const B = A.map((a, i) => a + v[i]);
+              return rmcq(rng, t`Qual equação representa a reta por $A=${V3(A)}$ e $B=${V3(B)}$?`, `$P=${V3(A)}+t\\,${V3(v)}$`, [`$P=${V3(v)}+t\\,${V3(A)}$`, `$P=${V3(A)}+t\\,${V3(B)}$`, `$P=${V3(A)}+t\\,${V3(v.map((x) => x + 1))}$`], t`Ponto $A$ e diretor $B-A=${V3(v)}$.`);
+            }),
+            mcq(t`Os pontos $(1,\,2,\,0)$ e $(1,\,5,\,0)$ determinam uma reta paralela a qual eixo?`, ['eixo $y$', 'eixo $x$', 'eixo $z$', 'nenhum'], 0, t`Diretor $(0,\,3,\,0)$, múltiplo de $\vec j$.`),
+            gen((rng) => {
+              const A = r3(rng, -3, 3);
+              const v = nz3(rng, -2, 2);
+              const k = randInt(rng, 2, 3);
+              const C = A.map((a, i) => a + k * v[i]);
+              return num(t`Os pontos $A=${V3(A)}$, $B=${V3(A.map((a, i) => a + v[i]))}$ e $C=(${C[0]},\,${C[1]},\,m)$ estão alinhados. Quanto vale $m$?`, C[2], t`$\vec{AC}$ precisa ser múltiplo de $\vec{AB}=${V3(v)}$: pela 1ª coordenada o fator é $${k}$, então $m=${A[2]}+${k}\cdot(${v[2]})=${C[2]}$.`);
+            }),
+            num(t`O ponto médio do segmento $AB$, com $A(1,\,0,\,2)$ e $B(3,\,4,\,6)$, corresponde a qual valor de $t$ em $P=A+t(B-A)$?`, 0.5, t`$t=0$ dá $A$, $t=1$ dá $B$; o meio é $t=\frac12$.`),
+          ],
         },
-      ],
-      exercises: [
-        gen((rng) => {
-          const A = [randInt(rng, -3, 3), randInt(rng, -3, 3), randInt(rng, -3, 3)];
-          const B = [randInt(rng, -3, 3), randInt(rng, -3, 3), randInt(rng, -3, 3)];
-          return rmcq(rng, t`Qual o diretor da reta por $A=${V3(A)}$ e $B=${V3(B)}$?`, `$${V3(B.map((b, i) => b - A[i]))}$`, [`$${V3(A.map((a, i) => a + B[i]))}$`, `$${V3(A)}$`, `$${V3(B.map((b, i) => (b - A[i]) * (i === 2 ? -1 : 1)))}$`]);
-        }),
-        mcq(t`A reta $x=2$, $y=3$, $z=t$ é paralela a qual eixo?`, ['eixo z', 'eixo x', 'eixo y', 'nenhum'], 0),
-        tf(t`No espaço, duas retas que não se cruzam são necessariamente paralelas.`, false, t`Podem ser **reversas**: em planos diferentes, sem direção comum.`),
-        mcqS(t`As retas com diretores $(1,\,2,\,-1)$ e $(-2,\,-4,\,2)$ são:`, 'paralelas ou coincidentes', ['perpendiculares', 'reversas com certeza', 'concorrentes com certeza'], t`Diretores proporcionais ($k=-2$).`),
+        {
+          card: {
+            title: 'Posições relativas',
+            body: t`Duas retas no espaço podem ser:
+
+• **coincidentes** ou **paralelas** — diretores proporcionais
+• **concorrentes** — se cruzam em um ponto
+• **reversas** — não se cruzam e não são paralelas (estão em planos diferentes)`,
+            tip: t`No plano não existem retas reversas: ou se cruzam ou são paralelas.`,
+          },
+          exercises: [
+            tf(t`No espaço, duas retas que não se cruzam são necessariamente paralelas.`, false, t`Podem ser **reversas**: em planos diferentes, sem direção comum.`),
+            mcqS(t`As retas com diretores $(1,\,2,\,-1)$ e $(-2,\,-4,\,2)$ são:`, 'paralelas ou coincidentes', ['perpendiculares', 'reversas com certeza', 'concorrentes com certeza'], t`Diretores proporcionais ($k=-2$).`),
+            mcq(t`No **plano**, duas retas distintas e não paralelas são sempre…`, ['concorrentes', 'reversas', 'coincidentes', 'ortogonais'], 0, t`No plano, direções diferentes sempre se encontram.`),
+            gen((rng) => {
+              const v = nz3(rng, -3, 3);
+              const k = pick(rng, [2, -2, 3]);
+              const par = rng() < 0.5;
+              const w = par ? v.map((x) => k * x) : [k * v[0], k * v[1], k * v[2] + 1];
+              return tf(t`Retas com diretores $${V3(v)}$ e $${V3(w)}$ são paralelas (ou coincidentes).`, par, par ? t`O segundo é $${k}$ vezes o primeiro.` : t`As razões das coordenadas não são todas iguais.`);
+            }),
+            mcq(t`As retas $r: (0,0,0)+t(1,0,0)$ e $s: (0,0,1)+t(0,1,0)$ são…`, ['reversas', 'concorrentes', 'paralelas', 'coincidentes'], 0, t`Diretores não proporcionais, e $r$ fica em $z=0$ enquanto $s$ fica em $z=1$: nunca se cruzam.`),
+            mcq(t`As retas $r: (0,0,0)+t(1,0,0)$ e $s: (0,0,0)+t(0,1,0)$ são…`, ['concorrentes (na origem)', 'reversas', 'paralelas', 'coincidentes'], 0, t`As duas passam pela origem com direções diferentes.`),
+            num(t`As retas $r: (t,\,t,\,0)$ e $s: (2,\,2+u,\,u)$ se cruzam. Em que valor de $x$?`, 2, t`Igualando: $t=2$, $t=2+u$, $0=u$. Logo $u=0$, $t=2$: ponto $(2,\,2,\,0)$.`),
+          ],
+        },
       ],
     },
     {
