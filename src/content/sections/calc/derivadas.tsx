@@ -56,7 +56,7 @@ export const derivadas: UnitDef = {
         inter(t`Leve $h$ até perto de zero ($h<0{,}05$) e veja a secante coincidir com a tangente.`, 'plot', tangentLab((x) => 0.5 * x * x, (x) => x, 1).props, (v: any) => v && v.p.h < 0.05, t`$h\to0$`),
         num(t`Pela definição, a derivada de $f(x)=x^2$ em $x=3$ é:`, 6, t`$\frac{(3+h)^2-9}{h}=\frac{6h+h^2}{h}=6+h\to6$.`),
         gen((rng) => {
-          const a = randInt(rng, -3, 4);
+          const a = randNZ(rng, -3, 4);
           return rmcq(rng, t`Qual a reta tangente a $y=x^2$ em $x=${a}$?`, t`$y=${2 * a}x${-a * a < 0 ? '' : '+'}${-a * a}$`, [t`$y=${2 * a}x$`, t`$y=${a}x${-a * a < 0 ? '' : '+'}${-a * a}$`, t`$y=${2 * a}x+${a * a}$`], t`$f'(${a})=${2 * a}$, ponto $(${a},\,${a * a})$: $y=${2 * a}(x-${a})+${a * a}$.`);
         }),
         tf(t`A derivada de uma função num ponto é a inclinação da reta tangente ao gráfico nesse ponto.`, true),
