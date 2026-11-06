@@ -9,6 +9,10 @@ App Android para estudar a matemática dos primeiros anos de Engenharia de forma
 - **Lembretes** diários por notificação e **widget** de tela inicial com o mapa de dias estudados
 - Fórmulas renderizadas com MathJax, tudo funcionando **offline**; o progresso fica salvo no aparelho
 
+## Baixar
+
+Os APKs prontos para instalar (Android 7.0 ou mais novo, arm64) ficam na pasta [`releases/`](releases/), um por versão. A lista com datas e checksums está em [`releases/README.md`](releases/README.md).
+
 ## Stack
 
 | | |
@@ -121,6 +125,8 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64
 
 **Assinatura**: o build de release usa a keystore de debug gerada pelo template do Expo, suficiente para instalar e testar. Para publicar em loja, configure a sua própria assinatura.
 
+**Publicar uma versão**: suba `version` e `android.versionCode` no `app.json`, gere o APK com `APK_OUT_DIR=releases` e acrescente a linha da versão (versionCode, data e SHA-256) na tabela de [`releases/README.md`](releases/README.md).
+
 ## Estrutura
 
 ```
@@ -138,6 +144,7 @@ src/
 ├── lib/                    aleatoriedade/formatação, notificações, widget, feedback
 └── state/store.ts          estado persistido (XP, progresso, vidas, missões…)
 modules/streak-widget/      widget de tela inicial (Kotlin)
+releases/                   APKs publicados, um por versão
 scripts/                    build do APK e geração de assets
 ```
 
