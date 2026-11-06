@@ -44,14 +44,12 @@ Docs: https://docs.expo.dev/eas/index.md
 
 # Engineer Academy — instruções específicas do projeto (pt-BR)
 
-Leia também [`../AGENTES.md`](../AGENTES.md) (regras do dono, ambiente da máquina, vídeo) e [`../PROGRESS.md`](../PROGRESS.md) (status).
+Veja o [`README.md`](README.md) para dependências e configuração do ambiente.
 
-## Regras deste repositório
+## Build
 
-- Converse com o usuário em **português do Brasil**.
-- **Commits sim, push nunca** (o usuário adiciona o remote do GitLab dele). Termine as mensagens de commit com a linha de coautoria que o seu ambiente pedir.
-- **Build é local, não EAS**: a seção "Building with EAS" acima não se aplica aqui. Use `bash scripts/build-apk.sh [--clean]`, que usa JDK 17, Android SDK e Gradle de `../Dependencias/` e copia o APK para `../Entregas/EngineerAcademy-v<versão>.apk`. A pasta `android/` é gerada pelo `expo prebuild --clean` dentro do script.
-- A cada entrega para o usuário, suba `expo.version` **e** `android.versionCode` em `app.json`.
+- O projeto não usa EAS: o APK é gerado localmente com `bash scripts/build-apk.sh [--clean]` (detalhes e variáveis de ambiente no README). A pasta `android/` é gerada pelo `expo prebuild --clean` dentro do script.
+- Ao publicar uma versão nova, suba `expo.version` **e** `android.versionCode` em `app.json`.
 
 ## Stack
 
@@ -103,7 +101,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 
 ## Fluxo de trabalho recomendado
 
-1. Preview web: `preview_start` com `engineer-academy-web` (config em `../.claude/launch.json`, porta 8081).
+1. Preview web: `npx expo start --web` (o QA fica em `/debug`).
 2. Edite um arquivo de conteúdo por vez.
 3. `npx tsc --noEmit -p .` precisa passar.
 4. Abra `/debug`. O esperado é `erros=1` (a linha "autoteste detector", que é o teste do próprio detector) e nenhum aviso novo. Avisos comuns: "múltipla escolha com só 2 opções" (faltaram distratores) e "parte com só N exercícios".

@@ -43,3 +43,7 @@ yarn-error.*
 # build output of local native modules
 modules/*/android/build/
 modules/*/android/.gradle/
+
+# personal / local files (never commit)
+scripts/env.local.sh
+.claude/
