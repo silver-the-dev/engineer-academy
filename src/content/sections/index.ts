@@ -10,6 +10,7 @@ import { geometria } from './fund/geometria';
 import { trigonometria } from './fund/trigonometria';
 import { classesFuncoes } from './pre/funcoes';
 import { trigAvancada } from './pre/trigonometria';
+import { geoAnalitica } from './pre/geoanalitica';
 import { funcoesCalc, limites } from './calc/limites';
 import { derivadas, aplicacoes } from './calc/derivadas';
 import { taxas } from './calc/taxas';
@@ -40,7 +41,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Famílias de funções, trigonometria avançada e geometria analítica',
     color: '#FFD166',
     emoji: '📐',
-    units: [classesFuncoes, trigAvancada],
+    units: [classesFuncoes, trigAvancada, geoAnalitica],
   },
   {
     id: 'calc',
