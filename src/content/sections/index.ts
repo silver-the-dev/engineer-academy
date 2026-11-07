@@ -7,6 +7,7 @@ import { funcoes } from './fund/funcoes';
 import { combinatoria } from './fund/combinatoria';
 import { geometria } from './fund/geometria';
 import { trigonometria } from './fund/trigonometria';
+import { trigAvancada } from './pre/trigonometria';
 import { funcoesCalc, limites } from './calc/limites';
 import { derivadas, aplicacoes } from './calc/derivadas';
 import { taxas } from './calc/taxas';
@@ -28,6 +29,14 @@ const DEFS: SectionDef[] = [
     color: '#FF9F1C',
     emoji: '🧱',
     units: [aritmetica, elementar, algebra1, algebra2, funcoes, combinatoria, geometria, trigonometria],
+  },
+  {
+    id: 'pre',
+    title: 'Pré-Cálculo',
+    subtitle: 'Famílias de funções, trigonometria avançada e geometria analítica',
+    color: '#FFD166',
+    emoji: '📐',
+    units: [trigAvancada],
   },
   {
     id: 'calc',
