@@ -1,7 +1,7 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { CircleW, FnCurve, InfLine, Label, Pt, Seg } from '../../../components/plot/Plot';
+import { CircleW, FnCurve, InfLine, Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
 import { fnLab } from '../../visuals';
@@ -50,6 +50,80 @@ const jumpLab = () =>
       </>
     ),
     info: ({ p }: any) => (p.L === 1 ? t`$\lim_{x\to1^-}=1=\lim_{x\to1^+}$ ⟹ o limite **existe** (e a função é contínua)` : t`$\lim_{x\to1^-}f=1\ne\lim_{x\to1^+}f=${fmt(p.L)}$ ⟹ limite **não existe**`),
+  });
+
+const epsDeltaLab = () =>
+  plot({
+    view: { xMin: -0.5, xMax: 2.5, yMin: 0.5, yMax: 5.5 },
+    params: [
+      { key: 'eps', label: '\\varepsilon', min: 0.2, max: 1.6, step: 0.1, value: 0.6, color: C.gold },
+      { key: 'd', label: '\\delta', min: 0.05, max: 1.0, step: 0.05, value: 0.6, color: C.p2 },
+    ],
+    render: ({ p }: any) => {
+      const ok = 2 * p.d <= p.eps + 1e-6;
+      const col = ok ? C.success : C.danger;
+      return (
+        <>
+          <RectW x={-0.5} y={3 - p.eps} w={3} h={2 * p.eps} color={C.gold} opacity={0.12} stroke="none" />
+          <Seg x1={-0.5} y1={3 - p.eps} x2={2.5} y2={3 - p.eps} color={C.gold} dash="5 4" width={1.5} />
+          <Seg x1={-0.5} y1={3 + p.eps} x2={2.5} y2={3 + p.eps} color={C.gold} dash="5 4" width={1.5} />
+          <RectW x={1 - p.d} y={0.5} w={2 * p.d} h={5} color={C.p2} opacity={0.1} stroke="none" />
+          <Seg x1={1 - p.d} y1={0.5} x2={1 - p.d} y2={5.5} color={C.p2} dash="5 4" width={1.5} />
+          <Seg x1={1 + p.d} y1={0.5} x2={1 + p.d} y2={5.5} color={C.p2} dash="5 4" width={1.5} />
+          <RectW x={1 - p.d} y={3 - p.eps} w={2 * p.d} h={2 * p.eps} color={col} opacity={0.22} stroke={col} />
+          <FnCurve f={(x) => 2 * x + 1} color={C.p1} width={2} opacity={0.45} />
+          <FnCurve f={(x) => 2 * x + 1} from={1 - p.d} to={1 + p.d} color={col} width={4.5} />
+          <CircleW cx={1} cy={3} r={0.05} color={C.gold} fill={C.bgDeep} fillOpacity={1} width={2.5} />
+        </>
+      );
+    },
+    info: ({ p }: any) =>
+      2 * p.d <= p.eps + 1e-6
+        ? t`$\varepsilon=${fmt(p.eps, 2)}$, $\delta=${fmt(p.d, 2)}$: $|f(x)-3|\le ${fmt(2 * p.d, 2)}\le\varepsilon$ — **dentro da faixa!**`
+        : t`$\varepsilon=${fmt(p.eps, 2)}$, $\delta=${fmt(p.d, 2)}$: $|f(x)-3|$ chega a $${fmt(2 * p.d, 2)}>\varepsilon$ — **escapa da faixa!**`,
+  });
+
+const oscLab = () =>
+  plot({
+    view: { xMin: -0.6, xMax: 0.6, yMin: -1.4, yMax: 1.4 },
+    params: [{ key: 'd', label: '\\delta', min: 0.05, max: 0.5, step: 0.05, value: 0.35, color: C.p2 }],
+    render: ({ p }: any) => (
+      <>
+        <RectW x={-p.d} y={-1.4} w={2 * p.d} h={2.8} color={C.danger} opacity={0.14} stroke="none" />
+        <Seg x1={-p.d} y1={-1.4} x2={-p.d} y2={1.4} color={C.p2} dash="5 4" width={1.5} />
+        <Seg x1={p.d} y1={-1.4} x2={p.d} y2={1.4} color={C.p2} dash="5 4" width={1.5} />
+        <FnCurve f={(x) => (Math.abs(x) < 0.008 ? NaN : Math.sin(1 / x))} samples={400} color={C.p5} width={2} />
+      </>
+    ),
+    info: ({ p }: any) => t`Mesmo em $(-${fmt(p.d, 2)},\,${fmt(p.d, 2)})$, $\operatorname{sen}(1/x)$ atinge $-1$ e $+1$: nenhum $\delta$ prende o gráfico!`,
+  });
+
+const tviLab = () =>
+  plot({
+    view: { xMin: -0.6, xMax: 2.6, yMin: -1.8, yMax: 3.8 },
+    params: [{ key: 'N', label: 'N', min: -1, max: 3, step: 0.1, value: 1.6, color: C.gold }],
+    render: ({ p }: any) => {
+      const f = (x: number) => x * x - 1;
+      const c = Math.sqrt(Math.max(0, p.N + 1));
+      return (
+        <>
+          <Seg x1={0} y1={-1} x2={2} y2={-1} color={C.textDim} dash="4 4" width={1} />
+          <Seg x1={0} y1={3} x2={2} y2={3} color={C.textDim} dash="4 4" width={1} />
+          <FnCurve f={f} color={C.p1} width={2} opacity={0.3} />
+          <FnCurve f={f} from={0} to={2} color={C.p1} width={4} />
+          <Pt x={0} y={-1} color={C.p2} r={5} label="f(a)" dx={-32} dy={4} />
+          <Pt x={2} y={3} color={C.p2} r={5} label="f(b)" dx={8} dy={4} />
+          <Seg x1={-0.6} y1={p.N} x2={2.6} y2={p.N} color={C.gold} width={2.5} dash="6 4" />
+          <Seg x1={c} y1={0} x2={c} y2={p.N} color={C.p4} width={2} dash="4 4" />
+          <Pt x={c} y={p.N} color={C.gold} r={6} />
+          <Pt x={c} y={0} color={C.p4} r={5} label="c" dy={18} dx={-4} />
+        </>
+      );
+    },
+    info: ({ p }: any) => {
+      const c = Math.sqrt(Math.max(0, p.N + 1));
+      return t`$N=${fmt(p.N, 1)}\in[-1,\,3]$ ⟹ existe $c=${fmt(c, 3)}\in[0,\,2]$ com $f(c)=${fmt(p.N, 1)}$`;
+    },
   });
 
 const iv = (a: number | string, b: number | string, oa: boolean, ob: boolean) => `${oa ? '(' : '['}${a},\\,${b}${ob ? ')' : ']'}`;
@@ -760,6 +834,297 @@ Em especial: se $f(a)$ e $f(b)$ têm **sinais opostos**, existe $c\in(a,\,b)$ co
               return num(t`Calcule $\lim_{x\to0}\dfrac{\operatorname{tg}(${k}x)}{x}$.`, k, t`$\frac{\operatorname{tg}(${k}x)}{x}=\frac{\operatorname{sen}(${k}x)}{x}\cdot\frac{1}{\cos(${k}x)}\to${k}\cdot1$.`);
             }),
             num(t`Calcule $\lim_{x\to0}\dfrac{1-\cos x}{x^2}$.`, 0.5, t`Multiplique por $1+\cos x$: $\frac{\operatorname{sen}^2x}{x^2(1+\cos x)}\to1\cdot\frac12$.`),
+          ],
+        },
+      ],
+    },
+    {
+      id: 'c-lim-eps',
+      title: 'Definição formal e TVI',
+      parts: [
+        {
+          card: {
+            title: 'O jogo do ε e do δ',
+            body: t`Dizer que $\lim_{x\to a}f(x)=L$ é vencer um jogo de **desafio e resposta**:
+
+1. Alguém desafia com uma tolerância vertical $\varepsilon>0$ (a faixa $L-\varepsilon < y < L+\varepsilon$).
+2. Você responde com um raio horizontal $\delta>0$ ao redor de $a$ tal que, se $0<|x-a|<\delta$ ($x$ perto de $a$, mas $x\ne a$), então $|f(x)-L|<\varepsilon$.
+
+Veja em $f(x)=2x+1$ perto de $a=1$ ($L=3$):`,
+            formula: t`\forall\varepsilon>0,\,\exists\delta>0:\;0<|x-a|<\delta \Rightarrow |f(x)-L|<\varepsilon`,
+            visual: epsDeltaLab(),
+            tip: t`Se um $\delta$ funciona para um certo $\varepsilon$, qualquer valor menor $0<\delta'<\delta$ também funciona!`,
+          },
+          exercises: [
+            fill(
+              t`Complete os papéis na definição formal de $\lim_{x\to a}f(x)=L$:`,
+              t`A tolerância no eixo $y$ (em torno de $L$) é ___ e o raio no eixo $x$ (em torno de $a$) é ___.`,
+              ['$\\varepsilon$', '$\\delta$'],
+              ['$L$', '$a$'],
+              t`$\varepsilon$ controla o erro na saída $f(x)$ e $\delta$ controla a proximidade na entrada $x$.`,
+            ),
+            tf(
+              t`Na condição $0<|x-a|<\delta$, a desigualdade "$0<$" serve exatamente para excluir o ponto $x=a$.`,
+              true,
+              t`$|x-a|>0\iff x\ne a$: o limite analisa a vizinhança de $a$, nunca o valor em $x=a$.`,
+            ),
+            inter(
+              t`Para $f(x)=2x+1$ em $a=1$ ($L=3$), mantenha $\varepsilon=0{,}6$ e ajuste $\delta$ para que o gráfico fique inteiramente dentro do retângulo (verde).`,
+              'plot',
+              epsDeltaLab().props,
+              (v: any) => v && near(v.p.eps, 0.6, 0.01) && v.p.d > 0 && 2 * v.p.d <= v.p.eps + 1e-6,
+              t`$\delta\le 0{,}3$ (com $\varepsilon=0{,}6$)`,
+              t`Como $|f(x)-3|=2|x-1|$, para ficar abaixo de $\varepsilon=0{,}6$ basta $\delta\le\frac{0{,}6}{2}=0{,}3$.`,
+            ),
+            mcqS(
+              t`A condição $|f(x)-5|<0{,}1$ equivale a qual intervalo para $f(x)$?`,
+              t`$(4{,}9,\,5{,}1)$`,
+              [t`$(-0{,}1,\,0{,}1)$`, t`$[5,\,5{,}1]$`, t`$(4{,}5,\,5{,}5)$`, t`$(0{,}1,\,5)$`],
+              t`$|f(x)-L|<\varepsilon\iff L-\varepsilon<f(x)<L+\varepsilon$, logo $5-0{,}1<f(x)<5+0{,}1$.`,
+            ),
+            gen((rng) => {
+              const a = randInt(rng, 2, 7);
+              const k = randInt(rng, 1, 4);
+              const lo = fmt(a - k / 10);
+              const hi = fmt(a + k / 10);
+              const dStr = fmt(k / 10);
+              return rmcq(
+                rng,
+                t`A condição $0<|x-${a}|<${dStr}$ representa qual conjunto de valores de $x$?`,
+                t`$(${lo},\,${hi})-\{${a}\}$`,
+                [t`$(${lo},\,${hi})$`, t`$[${lo},\,${hi}]-\{${a}\}$`, t`$(0,\,${dStr})$`, t`$(-${dStr},\,${dStr})-\{0\}$`],
+                t`$|x-${a}|<${dStr}$ define o intervalo aberto $(${lo},\,${hi})$, e $0<|x-${a}|$ retira o centro $x=${a}$.`,
+              );
+            }),
+            tf(
+              t`Se $\delta=0{,}04$ satisfaz a definição de limite para um certo $\varepsilon>0$, então $\delta=0{,}01$ também satisfaz para esse mesmo $\varepsilon$.`,
+              true,
+              t`Todo $x$ com $0<|x-a|<0{,}01$ também cumpre $0<|x-a|<0{,}04$, logo $|f(x)-L|<\varepsilon$ continua valendo.`,
+            ),
+            match(
+              t`Ligue cada parte da definição $\varepsilon$–$\delta$ ao seu significado geométrico:`,
+              [
+                [t`$\varepsilon>0$`, t`Raio da faixa horizontal em torno de $L$`],
+                [t`$\delta>0$`, t`Raio da faixa vertical em torno de $a$`],
+                [t`$0<|x-a|<\delta$`, t`$x$ está perto de $a$, mas $x\ne a$`],
+                [t`$|f(x)-L|<\varepsilon$`, t`$f(x)$ cai dentro da tolerância em torno de $L$`],
+              ],
+              t`A definição traduz "proximidade no gráfico" em duas faixas: uma de entrada ($\delta$) e outra de saída ($\varepsilon$).`,
+            ),
+            gen((rng) => {
+              const a = randInt(rng, 2, 5);
+              const d1 = randInt(rng, 1, 3) / 10;
+              const d2 = randInt(rng, 4, 7) / 10;
+              const xMin = a - d1;
+              const xMax = a + d2;
+              return num(
+                t`Para garantir $|f(x)-L|<\varepsilon$ perto de $a=${a}$, descobrimos que basta $x\in(${fmt(xMin)},\,${fmt(xMax)})$, com $x\ne ${a}$. Qual é o maior $\delta>0$ simétrico ($0<|x-${a}|<\delta$) que podemos escolher?`,
+                d1,
+                t`As distâncias até as bordas são $${fmt(d1)}$ à esquerda e $${fmt(d2)}$ à direita; para caber dos dois lados, tomamos $\delta=\min(${fmt(d1)},\,${fmt(d2)})=${fmt(d1)}$.`,
+              );
+            }),
+          ],
+        },
+        {
+          card: [
+            {
+              title: 'Encontrando δ na prática',
+              body: t`• **Função afim** $f(x)=mx+b$ ($m\ne 0$) em $x=a$, com $L=ma+b$:
+$$|f(x)-L|=|m(x-a)|=|m|\cdot|x-a|$$
+Para ficar menor que $\varepsilon$, basta tomar $\delta=\dfrac{\varepsilon}{|m|}$.
+
+• **Quadrática** $f(x)=x^2$ em $x=a$: fatoramos $|x^2-a^2|=|x-a|\cdot|x+a|$. Impondo primeiro $\delta\le 1$, temos $|x+a|<2|a|+1$, e escolhemos $\delta=\min\!\left(1,\,\dfrac{\varepsilon}{2|a|+1}\right)$.`,
+              example: t`Provar $\lim_{x\to 2}(3x-1)=5$: dado $\varepsilon>0$, tome $\delta=\frac{\varepsilon}{3}$. Se $0<|x-2|<\delta$, então $|(3x-1)-5|=3|x-2|<3\delta=\varepsilon$.`,
+            },
+            {
+              title: 'Quando nenhum δ funciona',
+              body: t`Por que $\lim_{x\to 0}\operatorname{sen}\!\left(\frac{1}{x}\right)$ **não existe**?
+
+Perto de $0$, $\frac{1}{x}$ passa por infinitos múltiplos de $\frac{\pi}{2}$. Em **qualquer** vizinhança $(-\delta,\,\delta)$, a função atinge tanto $+1$ quanto $-1$: para $\varepsilon=\frac{1}{2}$, nenhuma faixa horizontal de raio $\frac{1}{2}$ contém o gráfico.`,
+              visual: oscLab(),
+            },
+          ],
+          exercises: [
+            mcqS(
+              t`Para provar que $\lim_{x\to a}(mx+b)=ma+b$ com $m\ne 0$, qual escolha de $\delta$ em função de $\varepsilon$ sempre funciona?`,
+              t`$\delta=\dfrac{\varepsilon}{|m|}$`,
+              [t`$\delta=|m|\,\varepsilon$`, t`$\delta=\dfrac{\varepsilon}{|b|}$`, t`$\delta=\varepsilon-|m|$`, t`$\delta=\dfrac{|m|}{\varepsilon}$`],
+              t`$|(mx+b)-(ma+b)|=|m|\cdot|x-a|<\varepsilon\iff |x-a|<\dfrac{\varepsilon}{|m|}$.`,
+            ),
+            gen((rng) => {
+              const m = pick(rng, [-5, -4, -2, 2, 4, 5] as const);
+              const b = randInt(rng, -6, 6);
+              const a = randInt(rng, -3, 4);
+              const L = m * a + b;
+              const k = randInt(rng, 1, 4);
+              const eps = (Math.abs(m) * k) / 100;
+              return num(
+                t`Na definição de $\lim_{x\to ${a}}(${lin(m, b)})=${L}$, qual é o maior $\delta$ que garante $|f(x)-(${L})|<${fmt(eps)}$?`,
+                k / 100,
+                t`$|(${lin(m, b)})-(${L})|=${Math.abs(m)}|${xm(a)}|<${fmt(eps)}\iff |${xm(a)}|<\frac{${fmt(eps)}}{${Math.abs(m)}}=${fmt(k / 100)}$.`,
+              );
+            }),
+            order(
+              t`Ordene os passos da demonstração formal de que $\lim_{x\to 3}(4x-5)=7$:`,
+              [
+                t`Seja $\varepsilon>0$ dado arbitrariamente.`,
+                t`Escolhemos $\delta=\dfrac{\varepsilon}{4}>0$.`,
+                t`Suponha que $0<|x-3|<\delta$.`,
+                t`Então $|(4x-5)-7|=|4x-12|=4|x-3|<4\delta=\varepsilon$.`,
+              ],
+              t`Toda prova $\varepsilon$–$\delta$ segue o roteiro: receber $\varepsilon>0$, exibir $\delta>0$, assumir $0<|x-a|<\delta$ e deduzir $|f(x)-L|<\varepsilon$.`,
+            ),
+            gen((rng) => {
+              const k = randInt(rng, 1, 6);
+              const d = k / 10;
+              const eps = (k * k) / 100;
+              return num(
+                t`Para $\lim_{x\to 0}x^2=0$, qual é o maior $\delta>0$ tal que $0<|x|<\delta\Rightarrow |x^2-0|<${fmt(eps)}$?`,
+                d,
+                t`$|x^2|<${fmt(eps)}\iff |x|<\sqrt{${fmt(eps)}}=${fmt(d)}$.`,
+              );
+            }),
+            order(
+              t`Ordene os passos para encontrar $\delta$ na prova de que $\lim_{x\to 2}x^2=4$:`,
+              [
+                t`Fatorar o erro: $|x^2-4|=|x-2|\cdot|x+2|$.`,
+                t`Impor primeiro $\delta\le 1$, o que garante $1<x<3$ e portanto $|x+2|<5$.`,
+                t`Estimar: $|x^2-4|=|x-2|\cdot|x+2|<5|x-2|$.`,
+                t`Escolher $\delta=\min\!\left(1,\,\dfrac{\varepsilon}{5}\right)$ para ter $5|x-2|<\varepsilon$.`,
+              ],
+              t`Em funções não lineares, limitamos primeiro $\delta\le 1$ para dominar o fator $|x+a|$ por uma constante.`,
+            ),
+            gen((rng) => {
+              const a = randInt(rng, 1, 5);
+              const M = 2 * a + 1;
+              return rmcq(
+                rng,
+                t`Ao provar $\lim_{x\to ${a}}x^2=${a * a}$, se impusermos $|x-${a}|<1$, qual cota superior vale para $|x+${a}|$ e qual $\delta$ escolhemos?`,
+                t`$|x+${a}|<${M}$ e $\delta=\min\!\left(1,\,\dfrac{\varepsilon}{${M}}\right)$`,
+                [
+                  t`$|x+${a}|<${2 * a}$ e $\delta=\dfrac{\varepsilon}{${2 * a}}$`,
+                  t`$|x+${a}|<${a + 1}$ e $\delta=\min\!\left(1,\,\dfrac{\varepsilon}{${a + 1}}\right)$`,
+                  t`$|x+${a}|<1$ e $\delta=\varepsilon$`,
+                  t`$|x+${a}|<${a * a}$ e $\delta=\dfrac{\varepsilon}{${a * a}}$`,
+                ],
+                t`$|x-${a}|<1\Rightarrow ${a - 1}<x<${a + 1}\Rightarrow ${2 * a - 1}<x+${a}<${M}$. Logo $|x^2-${a * a}|<${M}|x-${a}|$, bastando $\delta=\min(1,\,\varepsilon/${M})$.`,
+              );
+            }),
+            mcqS(
+              t`Pela definição $\varepsilon$–$\delta$, por que $\lim_{x\to 0}\operatorname{sen}\!\left(\frac{1}{x}\right)$ não existe?`,
+              t`Para $\varepsilon=\frac{1}{2}$, em qualquer intervalo $(-\delta,\,\delta)$ a função assume tanto $1$ quanto $-1$, escapando de $(L-\varepsilon,\,L+\varepsilon)$`,
+              [
+                t`Porque $\operatorname{sen}(1/x)$ tende a $+\infty$ quando $x\to 0$`,
+                t`Porque a função não está definida em $x=0$`,
+                t`Porque $\delta$ precisaria ser igual a $\pi$`,
+                t`Porque o limite pela direita é $1$ e pela esquerda é $-1$`,
+              ],
+              t`Um intervalo $(L-1/2,\,L+1/2)$ tem comprimento $1$, mas em qualquer vizinhança de $0$ o seno varia de $-1$ a $1$ (distância $2$).`,
+            ),
+            tf(
+              t`Diferente de $\operatorname{sen}(1/x)$, o limite $\lim_{x\to 0}x\operatorname{sen}\!\left(\frac{1}{x}\right)$ existe e vale $0$ (basta tomar $\delta=\varepsilon$).`,
+              true,
+              t`Como $|\operatorname{sen}(1/x)|\le 1$, temos $|x\operatorname{sen}(1/x)-0|\le |x|<\delta=\varepsilon$.`,
+            ),
+          ],
+        },
+        {
+          card: [
+            {
+              title: 'TVI geral e bisseção',
+              body: t`Se $f$ é **contínua** em $[a,\,b]$ e $N$ está entre $f(a)$ e $f(b)$, existe $c\in(a,\,b)$ tal que $f(c)=N$.
+
+• **Raízes ($N=0$)**: se $f(a)$ e $f(b)$ têm sinais opostos, existe raiz em $(a,\,b)$.
+• **Bisseção**: cortando o intervalo ao meio $n$ vezes e mantendo a metade com troca de sinal, o tamanho do intervalo cai para $\dfrac{b-a}{2^n}$.
+
+Mova a reta $y=N$ em $f(x)=x^2-1$ no intervalo $[0,\,2]$:`,
+              visual: tviLab(),
+            },
+            {
+              title: 'Teorema de Weierstrass',
+              body: t`Toda função **contínua** num intervalo **fechado e limitado** $[a,\,b]$ atinge um **máximo absoluto** e um **mínimo absoluto** em $[a,\,b]$.
+
+Se o intervalo não for fechado (como $(0,\,1]$) ou se houver descontinuidade, os extremos podem não existir!`,
+              example: t`$f(x)=\frac{1}{x}$ em $(0,\,1]$ é contínua, mas não tem máximo porque explode quando $x\to 0^+$.`,
+              tip: t`Juntando Weierstrass e o TVI: a imagem de $[a,\,b]$ por uma função contínua é sempre um intervalo fechado $[m,\,M]$.`,
+            },
+          ],
+          exercises: [
+            inter(
+              t`No gráfico de $f(x)=x^2-1$ em $[0,\,2]$, mova a reta horizontal $y=N$ até $N=0$ para localizar a raiz $c\in(0,\,2)$.`,
+              'plot',
+              tviLab().props,
+              (v: any) => v && near(v.p.N, 0, 0.05),
+              t`$N=0$ (dando $c=1$)`,
+              t`Para $N=0\in[-1,\,3]$, a reta $y=0$ corta a curva em $c=1\in(0,\,2)$.`,
+            ),
+            gen((rng) => {
+              const c = randInt(rng, 1, 3);
+              const k = randInt(rng, -4, 5);
+              const N = c * c + k;
+              return num(
+                t`Seja $f(x)=x^2${term(k, '')}$ em $[0,\,4]$ (onde $f(0)=${k}$ e $f(4)=${16 + k}$). Qual é o valor de $c\in(0,\,4)$ garantido pelo TVI tal que $f(c)=${N}$?`,
+                c,
+                t`Queremos $c^2${term(k, '')}=${N}\Rightarrow c^2=${c * c}$. Como $c\in(0,\,4)$, temos $c=${c}$.`,
+              );
+            }),
+            mcqS(
+              t`Para provar pelo TVI que a equação $\cos x = x$ tem solução em $\left[0,\,\frac{\pi}{2}\right]$, qual função auxiliar $f(x)$ analisamos?`,
+              t`$f(x)=\cos x - x$, pois $f(0)=1>0$ e $f(\pi/2)=-\pi/2<0$`,
+              [
+                t`$f(x)=\frac{\cos x}{x}$, pois $f(0)=0$`,
+                t`$f(x)=\cos x + x$, pois $f(0)>0$ e $f(\pi/2)>0$`,
+                t`$f(x)=x\cos x$, pois se anula nos dois extremos`,
+                t`Não é possível usar o TVI em equações com $\cos x$`,
+              ],
+              t`Transformamos $g(x)=h(x)$ em $f(x)=g(x)-h(x)=0$. Como $f$ é contínua e troca de sinal entre $0$ e $\pi/2$, existe $c$ com $\cos c = c$.`,
+            ),
+            gen((rng) => {
+              const a = randInt(rng, 0, 3);
+              const len = pick(rng, [1, 2, 4] as const);
+              const b = a + len;
+              const n = randInt(rng, 2, 4);
+              const ans = len / Math.pow(2, n);
+              return num(
+                t`Aplicando o método da bisseção ao intervalo inicial $[${a},\,${b}]$ por $n=${n}$ iterações, qual passa a ser o comprimento do subintervalo que contém a raiz?`,
+                ans,
+                t`Cada passo divide o tamanho por $2$: $\dfrac{${b}-${a}}{2^{${n}}}=\dfrac{${len}}{${Math.pow(2, n)}}=${fmt(ans)}$.`,
+              );
+            }),
+            fill(
+              t`Complete as hipóteses do Teorema de Weierstrass (Valor Extremo):`,
+              t`Toda função ___ num intervalo ___ e limitado $[a,\,b]$ atinge valor máximo e valor mínimo absolutos.`,
+              ['contínua', 'fechado'],
+              ['derivável', 'aberto', 'ilimitado'],
+              t`Continuidade evita explosões internas e o intervalo fechado $[a,\,b]$ inclui as bordas, garantindo que máximo e mínimo sejam atingidos.`,
+            ),
+            multi(
+              t`Em quais casos o Teorema de Weierstrass garante que $f$ atinge máximo e mínimo absolutos no intervalo dado?`,
+              [
+                t`$f(x)=e^x\cos x$ em $[0,\,\pi]$`,
+                t`$f(x)=x^3-3x$ em $[-2,\,2]$`,
+                t`$f(x)=\dfrac{1}{x}$ em $(0,\,1]$`,
+                t`$f(x)=\operatorname{tg}x$ em $[0,\,\pi]$`,
+                t`$f(x)=\sqrt{x+1}$ em $[0,\,8]$`,
+              ],
+              [0, 1, 4],
+              t`Nos itens 1, 2 e 5 a função é contínua e o intervalo é fechado e limitado. Em $(0,\,1]$ falta fechar o $0$; $\operatorname{tg}x$ é descontínua em $\frac{\pi}{2}\in[0,\,\pi]$.`,
+            ),
+            match(
+              t`Ligue cada contraexemplo à hipótese de TVI ou Weierstrass que foi violada:`,
+              [
+                [t`$f(x)=x$ em $(0,\,1)$ não tem máximo nem mínimo`, t`O intervalo não é fechado`],
+                [t`$f(x)=\frac{1}{x}$ em $[-1,\,1]$ não tem raiz mesmo com $f(-1)<0<f(1)$`, t`Descontinuidade no interior do intervalo`],
+                [t`$f(x)=e^{-x}$ em $[0,\,\infty)$ não atinge valor mínimo`, t`O intervalo não é limitado`],
+                [t`$f(x)=x^2+1$ em $[-1,\,2]$ não tem raiz em $(-1,\,2)$`, t`$0$ não está entre $f(-1)$ e $f(2)$`],
+              ],
+              t`Os teoremas de existência exigem função contínua em intervalo fechado e limitado $[a,\,b]$ (e, para raízes no TVI, troca de sinal).`,
+            ),
+            tf(
+              t`Se $f:[0,\,1]\to[0,\,1]$ é contínua, então existe pelo menos um "ponto fixo" $c\in[0,\,1]$ tal que $f(c)=c$.`,
+              true,
+              t`Aplique o TVI a $g(x)=f(x)-x$: como $0\le f(x)\le 1$, temos $g(0)=f(0)\ge 0$ e $g(1)=f(1)-1\le 0$, logo $g(c)=0$ para algum $c\in[0,\,1]$.`,
+            ),
           ],
         },
       ],
