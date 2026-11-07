@@ -2,6 +2,7 @@ import { normalizeSection, type Section, type SectionDef } from '../types';
 import { aritmetica } from './fund/aritmetica';
 import { elementar } from './fund/elementar';
 import { algebra1 } from './fund/algebra1';
+import { fatoracao, equacoes } from './fund/fatoracao';
 import { algebra2 } from './fund/algebra2';
 import { funcoes } from './fund/funcoes';
 import { combinatoria } from './fund/combinatoria';
@@ -13,6 +14,7 @@ import { funcoesCalc, limites } from './calc/limites';
 import { derivadas, aplicacoes } from './calc/derivadas';
 import { taxas } from './calc/taxas';
 import { integrais, integralDefinida } from './calc/integrais';
+import { tecnicas } from './calc/tecnicas';
 import { variaveis, duplas } from './calc/variaveis';
 import { vetoresGeo, vetoresAlg } from './gaal/vetores';
 import { escalar, vetorial } from './gaal/produtos';
@@ -29,7 +31,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Competências básicas: álgebra, funções, geometria e trigonometria',
     color: '#FF9F1C',
     emoji: '🧱',
-    units: [aritmetica, elementar, algebra1, algebra2, funcoes, combinatoria, geometria, trigonometria],
+    units: [aritmetica, elementar, algebra1, fatoracao, equacoes, algebra2, funcoes, combinatoria, geometria, trigonometria],
   },
   {
     id: 'pre',
@@ -45,7 +47,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Cálculo Diferencial e Integral: limites, derivadas e integrais',
     color: '#7C5CFF',
     emoji: '∫',
-    units: [funcoesCalc, limites, derivadas, taxas, aplicacoes, integrais, integralDefinida, variaveis, duplas],
+    units: [funcoesCalc, limites, derivadas, taxas, aplicacoes, integrais, integralDefinida, tecnicas, variaveis, duplas],
   },
   {
     id: 'gaal',
