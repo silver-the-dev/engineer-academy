@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, order, inter, plot, rmcq, near } from '../../helpers';
 import { Arrow, CircleW } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, term } from '../../../lib/random';
 import { doubleIntegralLab, surfaceLab } from '../../visuals3d';
 
 const t = String.raw;
@@ -190,7 +190,7 @@ Somamos a contribuição de cada "caminho" de $t$ até $z$.`,
             gen((rng) => {
               const [a, b] = [randNZ(rng, -3, 3), randNZ(rng, -3, 3)];
               const [p, q] = [randNZ(rng, -3, 3), randNZ(rng, -3, 3)];
-              return num(t`$z=${term(a, 'x', true)}${term(b, 'y')}$ com $x=${term(p, 't', true)}$ e $y=${term(q, 't', true)}$. Quanto vale $\frac{dz}{dt}$?`, a * p + b * q, t`$z_x x'+z_y y'=${a}\cdot${p}+(${b})\cdot(${q})=${a * p + b * q}$.`);
+              return num(t`$z=${term(a, 'x', true)}${term(b, 'y')}$ com $x=${term(p, 't', true)}$ e $y=${term(q, 't', true)}$. Quanto vale $\frac{dz}{dt}$?`, a * p + b * q, t`$z_x x'+z_y y'=${a}\cdot${par(p)}+${par(b)}\cdot${par(q)}=${a * p + b * q}$.`);
             }),
             gen((rng) => {
               const t0 = randInt(rng, 1, 3);

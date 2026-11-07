@@ -409,10 +409,10 @@ export const sequencias: UnitDef = {
               const k = randNZ(rng, -5, 6);
               return rmcq(
                 rng,
-                t`Qual é o valor do limite fundamental $\lim_{n\to\infty}\left(1+\dfrac{${k}}{n}\right)^n$?`,
-                t`$e^{${k}}$`,
-                [t`$1$`, t`$${k}e$`, t`$e^{${-k}}$`, t`$\infty$`],
-                t`Pelo limite exponencial fundamental, $\lim_{n\to\infty}\left(1+\frac{k}{n}\right)^n=e^k$.`,
+                t`Qual é o valor do limite fundamental $\lim_{n\to\infty}\left(1${k < 0 ? '-' : '+'}\dfrac{${Math.abs(k)}}{n}\right)^n$?`,
+                k === 1 ? t`$e$` : t`$e^{${k}}$`,
+                [t`$1$`, k === 1 ? t`$e^2$` : t`$${k === -1 ? '-' : k}e$`, k === -1 ? t`$e$` : t`$e^{${-k}}$`, t`$\infty$`],
+                t`Pelo limite exponencial fundamental, $\lim_{n\to\infty}\left(1+\frac{k}{n}\right)^n=e^k$; aqui $k=${k}$.`,
               );
             }),
             mcqS(
@@ -796,16 +796,19 @@ export const sequencias: UnitDef = {
               const p = pick(rng, [2, 3, 4]);
               const q = randInt(rng, 1, 5);
               const conv = q > p;
+              const g = q % p === 0 ? p : q % 2 === 0 && p % 2 === 0 ? 2 : 1;
+              const pq = p / g === 1 ? `${q / g}` : `\\frac{${q / g}}{${p / g}}`; // q/p in lowest terms
+              const root = p === 2 ? `\\sqrt{n^{${q}}}` : `\\sqrt[${p}]{n^{${q}}}`;
               return rmcq(
                 rng,
-                t`Classifique a série $\sum_{n=1}^{\infty}\dfrac{1}{\sqrt[${p}]{n^{${q}}}}$.`,
-                conv ? t`Converge, pois é série $p$ com $p=\frac{${q}}{${p}}>1$` : t`Diverge, pois é série $p$ com $p=\frac{${q}}{${p}}\le 1$`,
+                t`Classifique a série $\sum_{n=1}^{\infty}\dfrac{1}{${root}}$.`,
+                conv ? t`Converge, pois é série $p$ com $p=${pq}>1$` : t`Diverge, pois é série $p$ com $p=${pq}\le 1$`,
                 [
-                  conv ? t`Diverge, pois é série $p$ com $p=\frac{${q}}{${p}}\le 1$` : t`Converge, pois é série $p$ com $p=\frac{${q}}{${p}}>1$`,
+                  conv ? t`Diverge, pois é série $p$ com $p=${pq}\le 1$` : t`Converge, pois é série $p$ com $p=${pq}>1$`,
                   t`Diverge pelo Teste da Divergência ($\lim a_n\ne 0$)`,
                   t`Converge por ser série geométrica`,
                 ],
-                t`$\frac{1}{\sqrt[${p}]{n^{${q}}}}=\frac{1}{n^{${q}/${p}}}$: converge se e só se $\frac{${q}}{${p}}>1$.`,
+                t`$\frac{1}{${root}}=\frac{1}{n^{${q}/${p}}}$: série $p$ com $p=${pq}$, que converge se e só se $p>1$.`,
               );
             }),
             multi(
@@ -985,7 +988,7 @@ export const sequencias: UnitDef = {
             gen((rng) => {
               const p = pick(rng, [2, 3, 4]);
               const isAbs = rng() < 0.5;
-              const termTex = isAbs ? `n^{${p}}` : `\\sqrt[${p}]{n}`;
+              const termTex = isAbs ? `n^{${p}}` : p === 2 ? '\\sqrt{n}' : `\\sqrt[${p}]{n}`;
               return rmcq(
                 rng,
                 t`Classifique a série alternada $\sum_{n=1}^{\infty}\dfrac{(-1)^{n-1}}{${termTex}}$.`,
@@ -997,14 +1000,14 @@ export const sequencias: UnitDef = {
                 ],
                 isAbs
                   ? t`Em módulo, $\sum\frac{1}{n^{${p}}}$ converge ($p=${p}>1$).`
-                  : t`Converge por Leibniz ($\frac{1}{\sqrt[${p}]{n}}\downarrow 0$), mas em módulo diverge ($p=\frac{1}{${p}}\le 1$).`,
+                  : t`Converge por Leibniz ($\frac{1}{${termTex}}\downarrow 0$), mas em módulo diverge ($p=\frac{1}{${p}}\le 1$).`,
               );
             }),
             gen((rng) => {
               const N = pick(rng, [1, 3, 4, 9]);
               const bNext = 1 / ((N + 1) * (N + 1));
               return num(
-                t`Na série alternada $\sum_{n=1}^{\infty}\dfrac{(-1)^{n-1}}{n^2}$, qual é a cota máxima do erro $|S-S_{${N}}|$ dada por $b_{${N + 1}}$ ao somar apenas os $${N}$ primeiros termos?`,
+                t`Na série alternada $\sum_{n=1}^{\infty}\dfrac{(-1)^{n-1}}{n^2}$, qual é a cota máxima do erro $|S-S_{${N}}|$ dada por $b_{${N + 1}}$ ao somar apenas ${N === 1 ? 'o primeiro termo' : `os $${N}$ primeiros termos`}?`,
                 bNext,
                 t`Pelo teorema de Leibniz, $|S-S_{${N}}|\le b_{${N + 1}}=\frac{1}{(${N}+1)^2}=\frac{1}{${(N + 1) * (N + 1)}}=${fmt(bNext)}$.`,
               );
@@ -1260,7 +1263,7 @@ export const potencias: UnitDef = {
               return num(
                 t`Sabendo que $\sum_{n=1}^{\infty}n x^{n-1}=\dfrac{1}{(1-x)^2}$ para $|x|<1$, calcule o valor exato de $\sum_{n=1}^{\infty}\dfrac{n}{${k}^{n-1}}$.`,
                 ans,
-                t`Basta substituir $x=\frac{1}{${k}}$: $\frac{1}{(1-1/${k})^2}=\frac{1}{((${k - 1})/${k})^2}=\frac{${k * k}}{${(k - 1) * (k - 1)}}=${fmt(ans)}$.`,
+                t`Basta substituir $x=\frac{1}{${k}}$: $\frac{1}{\left(1-\frac{1}{${k}}\right)^2}=\frac{1}{\left(\frac{${k - 1}}{${k}}\right)^2}=\frac{${k * k}}{${(k - 1) * (k - 1)}}=${fmt(ans)}$.`,
                 { tol: 0.005 },
               );
             }),
@@ -1422,10 +1425,11 @@ export const potencias: UnitDef = {
               return rmcq(
                 rng,
                 t`Qual é o polinômio de Maclaurin de grau $2$ de $f(x)=\cos(${k}x)$?`,
-                t`$1-\dfrac{${k * k}}{2}x^2$`,
+                // k = 2 used to show 1 - 4/2 x^2 next to the distractor 1 - 2x^2 (the same polynomial)
+                k % 2 ? t`$1-\dfrac{${k * k}}{2}x^2$` : t`$1-${(k * k) / 2}x^2$`,
                 [
-                  t`$1-${k}x^2$`,
-                  t`$1+\dfrac{${k * k}}{2}x^2$`,
+                  t`$1-${k * k}x^2$`,
+                  k % 2 ? t`$1+\dfrac{${k * k}}{2}x^2$` : t`$1+${(k * k) / 2}x^2$`,
                   t`$${k}x-\dfrac{${k ** 3}}{6}x^3$`,
                 ],
                 t`Substituindo $u=${k}x$ em $\cos u\approx 1-\frac{u^2}{2}$: $1-\frac{(${k}x)^2}{2}=1-\frac{${k * k}}{2}x^2$.`,

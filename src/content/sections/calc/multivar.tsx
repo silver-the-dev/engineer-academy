@@ -4,7 +4,7 @@ import { gen, mcq, mcqS, num, tf, fill, order, inter, plot, rmcq, near, multi } 
 import { Arrow, CircleW, FnCurve, InfLine, ParamCurve, Pt } from '../../../components/plot/Plot';
 import { Axes3, Line3, Point3, Poly3, type V3 } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, term } from '../../../lib/random';
 
 const t = String.raw;
 type Spec = VisualSpec & { props: Record<string, any> };
@@ -320,7 +320,9 @@ Isso descreve não só a forma da curva, mas **como** ela é percorrida (sentido
               const A = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
               const B = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
               if (A[0] === B[0] && A[1] === B[1]) B[0] += 2;
-              return rmcq(rng, t`Parametrização do segmento de $A(${A[0]},\,${A[1]})$ a $B(${B[0]},\,${B[1]})$, $0\le t\le1$:`, `$(${A[0]}${term(B[0] - A[0], 't')},\\,${A[1]}${term(B[1] - A[1], 't')})$`, [`$(${B[0]}${term(A[0] - B[0], 't')},\\,${B[1]}${term(A[1] - B[1], 't')})$`, `$(${A[0]}${term(B[0], 't')},\\,${A[1]}${term(B[1], 't')})$`, `$(${A[0] + B[0]}t,\\,${A[1] + B[1]}t)$`], t`$\vec r(t)=A+t(B-A)$ começa em $A$ e termina em $B$.`);
+              // c + k t without "0+t" or "+0t"
+              const lin = (c: number, k: number) => (c === 0 ? term(k, 't', true) || '0' : `${c}${term(k, 't')}`);
+              return rmcq(rng, t`Parametrização do segmento de $A(${A[0]},\,${A[1]})$ a $B(${B[0]},\,${B[1]})$, $0\le t\le1$:`, `$(${lin(A[0], B[0] - A[0])},\\,${lin(A[1], B[1] - A[1])})$`, [`$(${lin(B[0], A[0] - B[0])},\\,${lin(B[1], A[1] - B[1])})$`, `$(${lin(A[0], B[0])},\\,${lin(A[1], B[1])})$`, `$(${lin(0, A[0] + B[0])},\\,${lin(0, A[1] + B[1])})$`], t`$\vec r(t)=A+t(B-A)$ começa em $A$ (em $t=0$) e termina em $B$ (em $t=1$).`);
             }),
             num(t`Em que valor de $t$ a curva $\vec r(t)=(t^2-1,\,t+2)$ cruza o eixo $y$ com $t>0$?`, 1, t`Eixo $y$: $x=0\Rightarrow t^2=1\Rightarrow t=1$.`),
           ],
@@ -598,7 +600,7 @@ Arraste $P$ e gire $\vec u$ (azul):`,
               const gx = randNZ(rng, -5, 5);
               const gy = randNZ(rng, -5, 5);
               const [ux, uy] = pick(rng, [[1, 0], [0, 1], [0.6, 0.8], [0.8, -0.6], [-0.6, 0.8]] as const);
-              return num(t`Se $\nabla f(P)=(${gx},\,${gy})$ e $\vec u=(${fmt(ux)},\,${fmt(uy)})$, quanto vale $D_{\vec u}f(P)$?`, gx * ux + gy * uy, t`$${gx}\cdot${fmt(ux)}+${gy}\cdot${fmt(uy)}=${fmt(gx * ux + gy * uy)}$.`, { tol: 0.001 });
+              return num(t`Se $\nabla f(P)=(${gx},\,${gy})$ e $\vec u=(${fmt(ux)};\ ${fmt(uy)})$, quanto vale $D_{\vec u}f(P)$?`, gx * ux + gy * uy, t`$D_{\vec u}f=\nabla f\cdot\vec u=${par(gx)}\cdot${par(ux)}+${par(gy)}\cdot${par(uy)}=${fmt(gx * ux + gy * uy)}$.`, { tol: 0.001 });
             }),
             gen((rng) => {
               const [a, b, c] = pick(rng, [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10]] as const);

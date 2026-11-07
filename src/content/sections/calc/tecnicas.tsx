@@ -305,7 +305,7 @@ Veja que $\operatorname{sen}^2 x$ oscila entre $0$ e $1$ em torno da reta média
             mcqS(
               t`Ao calcular $\int\cos^4 x\,dx = \int\left(\frac{1+\cos(2x)}{2}\right)^2 dx$, expandimos o quadrado e trocamos $\cos^2(2x)$ por:`,
               t`$\frac{1+\cos(4x)}{2}$`,
-              [t`$\frac{1+\cos(2x)}{2}$`, t`$\frac{1-\cos(4x)}{2}$`, t`$1-\operatorname{sen}^2(2x)$`, t`$\frac{1+\cos(4x)}{4}$`],
+              [t`$\frac{1+\cos(2x)}{2}$`, t`$\frac{1-\cos(4x)}{2}$`, t`$\cos(4x)$`, t`$\frac{1+\cos(4x)}{4}$`],
               t`Aplicando novamente a redução de potência com o dobro do ângulo ($2x\to 4x$), obtemos $\frac{1+\cos(4x)}{2}$.`,
             ),
           ],
