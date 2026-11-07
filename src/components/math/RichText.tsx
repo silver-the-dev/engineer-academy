@@ -1,7 +1,7 @@
-import React, { memo, useMemo } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { LayoutChangeEvent, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { C, F } from '../../theme';
-import { MathView } from './Math';
+import { FitMath, MathView } from './Math';
 import { texToSvg } from './tex';
 
 /**
@@ -75,10 +75,18 @@ type Props = {
 
 export const RichText = memo(function RichText({ children, size = 17, color = C.text, align = 'left', hlColor = C.gold, style, maxWidth }: Props) {
   const { width } = useWindowDimensions();
-  const avail = maxWidth ?? width - 48;
+  // The real width of the box we are in (cards, info panels, options are narrower than the screen).
+  // A content-sized parent reports the content width, which never makes a formula shrink further.
+  const [measured, setMeasured] = useState(0);
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    const w = Math.floor(e.nativeEvent.layout.width);
+    setMeasured((old) => (Math.abs(old - w) > 1 ? w : old));
+  }, []);
+  const screenAvail = width - 48;
+  const avail = maxWidth ?? (measured > 0 ? Math.min(measured, screenAvail) : screenAvail);
   const paragraphs = useMemo(() => (children || '').split(/\n\s*\n/), [children]);
   return (
-    <View style={style}>
+    <View style={style} onLayout={maxWidth ? undefined : onLayout}>
       {paragraphs.map((p, pi) => (
         <View key={pi} style={{ marginBottom: pi < paragraphs.length - 1 ? size * 0.7 : 0 }}>
           {p.split('\n').map((line, li) => (
@@ -115,19 +123,13 @@ function Line({ line, size, color, align, hlColor, avail }: { line: string; size
   segs.forEach((sg, si) => {
     if (sg.t === 'dmath') {
       pushRow();
-      // shrink display math if too wide
-      const t = texToSvg(sg.s, true);
-      const natural = t.wEx * size * 1.15 * 0.5;
-      const dsize = natural > avail ? (size * 1.15 * avail) / natural : size * 1.15;
-      rows.push(
-        <View key={'d' + k++} style={{ alignItems: 'center', marginVertical: size * 0.45 }}>
-          <MathView tex={sg.s} size={dsize} color={color} display />
-        </View>,
-      );
+      rows.push(<FitMath key={'d' + k++} tex={sg.s} size={size * 1.15} color={color} avail={avail} style={{ marginVertical: size * 0.45 }} />);
     } else if (sg.t === 'math') {
       const t = texToSvg(sg.s, false);
       const natural = t.wEx * size * 0.5;
-      const msize = natural > avail ? (size * avail) / natural : size;
+      // inline formulas leave a little room so they never touch the box edge
+      const room = avail - 5;
+      const msize = natural > room ? (size * room) / natural : size;
       current.push(<MathView key={'m' + si} tex={sg.s} size={msize} color={color} />);
     } else {
       const parts = sg.s.split(/(\s+)/);

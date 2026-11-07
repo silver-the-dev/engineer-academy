@@ -1,5 +1,5 @@
-import React, { memo, useMemo } from 'react';
-import { Text, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { LayoutChangeEvent, ScrollView, Text, View, ViewStyle } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { C, F } from '../../theme';
 import { sizedSvg, texToSvg } from './tex';
@@ -39,10 +39,38 @@ export const MathView = memo(function MathView({ tex, size = 18, color = C.text,
   );
 });
 
-export const DisplayMath = memo(function DisplayMath({ tex, size = 20, color = C.text }: Omit<Props, 'display'>) {
+/** Smallest scale a display formula is shrunk to; anything wider scrolls sideways instead of becoming unreadable. */
+const MIN_SCALE = 0.62;
+
+/** Display formula that fits `avail` px: shrinks it, and past MIN_SCALE lets it scroll horizontally. */
+export const FitMath = memo(function FitMath({ tex, size, color = C.text, avail, style }: { tex: string; size: number; color?: string; avail: number; style?: ViewStyle }) {
+  const t = useMemo(() => texToSvg(tex, true), [tex]);
+  const room = Math.max(40, avail - 4);
+  const natural = t.wEx * size * 0.5;
+  const scale = natural > room ? room / natural : 1;
+  if (scale >= MIN_SCALE) {
+    return (
+      <View style={[{ alignItems: 'center' }, style]}>
+        <MathView tex={tex} size={size * scale} color={color} display />
+      </View>
+    );
+  }
   return (
-    <View style={{ alignItems: 'center', marginVertical: 8, maxWidth: '100%' }}>
-      <MathView tex={tex} size={size} color={color} display />
+    <ScrollView horizontal showsHorizontalScrollIndicator style={[{ maxWidth: avail, alignSelf: 'center' }, style]} contentContainerStyle={{ paddingBottom: 6 }}>
+      <MathView tex={tex} size={size * MIN_SCALE} color={color} display />
+    </ScrollView>
+  );
+});
+
+export const DisplayMath = memo(function DisplayMath({ tex, size = 20, color = C.text }: Omit<Props, 'display'>) {
+  const [w, setW] = useState(0);
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    const nw = Math.floor(e.nativeEvent.layout.width);
+    setW((old) => (Math.abs(old - nw) > 1 ? nw : old));
+  }, []);
+  return (
+    <View style={{ alignSelf: 'stretch', marginVertical: 8 }} onLayout={onLayout}>
+      {w > 0 ? <FitMath tex={tex} size={size} color={color} avail={w} /> : null}
     </View>
   );
 });

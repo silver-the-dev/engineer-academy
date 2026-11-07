@@ -38,10 +38,48 @@ function structural(e: Exercise): string | null {
     const slots = e.template.split('___').length - 1;
     if (slots !== e.answers.length) return `fill slots ${slots} != answers ${e.answers.length}`;
     for (const a of e.answers) if (!e.bank.includes(a)) return 'fill answer not in bank';
+    // the screen renders each piece between blanks on its own: a blank inside $…$ breaks the formula
+    const dollars = (p: string) => (p.match(/(^|[^\\])\$/g) ?? []).length;
+    if (e.template.split('___').some((p) => dollars(p) % 2)) return 'fill: lacuna ___ dentro de $…$';
   }
   if (e.kind === 'match' && new Set(e.pairs.map((p) => p[1])).size !== e.pairs.length) return 'match duplicate right side';
   if (e.kind === 'order' && new Set(e.items).size !== e.items.length) return 'order duplicate items';
   return null;
+}
+
+/** Numeric value of a plain option such as "$-\dfrac{3}{4}$", "0,75" or "$2{,}5$" (null for anything else). */
+export function optionValue(s: string): number | null {
+  let t = s.trim();
+  if (/^\$[^$]*\$$/.test(t)) t = t.slice(1, -1);
+  t = t
+    .replace(/\\[dt]?frac\{([^{}]+)\}\{([^{}]+)\}/g, '$1/$2')
+    .replace(/\{,\}/g, '.')
+    .replace(/(\d),(\d)/g, '$1.$2')
+    .replace(/\\[,;!]|\s/g, '')
+    .replace(/−/g, '-');
+  const m = t.match(/^([+-]?)(\d+(?:\.\d+)?)(?:\/(\d+(?:\.\d+)?))?$/);
+  if (!m) return null;
+  const v = parseFloat(m[2]) / (m[3] ? parseFloat(m[3]) : 1);
+  return isFinite(v) ? (m[1] === '-' ? -v : v) : null;
+}
+
+/** Problems that only show up for some random draws: equivalent options, "-0", doubled signs. */
+function drawIssues(e: Exercise): string[] {
+  const out: string[] = [];
+  if (e.kind === 'mcq') {
+    const vals = e.options.map(optionValue);
+    const a = vals[e.answer];
+    if (a !== null) vals.forEach((v, i) => i !== e.answer && v !== null && Math.abs(v - a) < 1e-9 && out.push(`opção errada "${e.options[i]}" vale o mesmo que a resposta "${e.options[e.answer]}"`));
+  }
+  for (const str of exStrings(e)) {
+    for (const tex of extractMath(str)) {
+      if (tex.startsWith('__UNBALANCED__')) continue;
+      // "−0" written as a value (after "=", "(", "," or at the start), not "a−0"
+      if (/(^|[=(,]|\\cdot|\\left\()\s*[-−]\s*0(?![\d.,{])/.test(tex)) out.push(`"−0" em $${tex}$`);
+      if (/[+-]\s*[+-]\s*\d/.test(tex.replace(/\\pm|\\mp/g, ''))) out.push(`sinal duplo em $${tex}$`);
+    }
+  }
+  return out;
 }
 
 export type QAReport = { errors: string[]; warnings: string[]; bySection: string[]; nTex: number; nEx: number; nLessons: number; nItems: number; nParts: number };
@@ -98,7 +136,8 @@ export function runContentQA(sections: Section[]): QAReport {
           if (c.example) checkStr(`${l.id} card${i} ex`, c.example);
         });
         l.exercises.forEach((src, idx) => {
-          const seeds = isGenerator(src) ? [1, 2, 3, 4, 5, 6] : [0];
+          // TeX is checked on the first 6 draws; the cheap checks run on 30 draws to catch rare edge cases
+          const seeds = isGenerator(src) ? Array.from({ length: 30 }, (_, i) => i + 1) : [0];
           for (const sd of seeds) {
             let e: Exercise;
             try {
@@ -111,7 +150,11 @@ export function runContentQA(sections: Section[]): QAReport {
             const st = structural(e);
             if (st) errors.push(`${l.id}#${idx}: ${st}`);
             if (e.kind === 'mcq' && e.options.length < 3 && !e.options.includes('Direta')) warnings.push(`${l.id}#${idx} (seed ${sd}): múltipla escolha com só ${e.options.length} opções`);
-            exStrings(e).forEach((s) => checkStr(`${l.id}#${idx}`, s));
+            for (const d of drawIssues(e)) {
+              const msg = `${l.id}#${idx}: ${d}`;
+              if (!warnings.includes(msg)) warnings.push(msg);
+            }
+            if (sd <= 6) exStrings(e).forEach((s) => checkStr(`${l.id}#${idx}`, s));
           }
         });
       }

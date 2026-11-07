@@ -3,6 +3,7 @@ import { LayoutChangeEvent, PanResponder, Text, View } from 'react-native';
 import { C, F, alpha } from '../../theme';
 import { useScrollLock } from '../ScrollLock';
 import { MathView } from '../math/Math';
+import { texToSvg } from '../math/tex';
 import { tick } from '../../lib/feedback';
 
 type Props = {
@@ -64,13 +65,41 @@ export function Slider({ label, value, min, max, step = 0.1, onChange, color = C
     [lock],
   );
 
+  // "h", "\\omega_0" → TeX; "curva", "col 1" → plain words; "k (fator externo)" → TeX symbol + small note
+  const lab = useMemo(() => {
+    if (!label) return null;
+    const wordy = (x: string) => !x.includes('\\') && /[A-Za-zÀ-ú]{3,}|\s/.test(x);
+    const m = label.match(/^([^\s()]+)\s+\((.+)\)$/);
+    const texBox = (tex: string) => {
+      const nat = texToSvg(tex, false).wEx * 18 * 0.5;
+      return nat <= 92 ? { w: Math.ceil(nat), size: 18 } : { w: 92, size: (18 * 92) / nat };
+    };
+    const noteW = (x: string) => Math.min(92, Math.ceil(x.length * 6.4));
+    if (m && !wordy(m[1])) {
+      const b = texBox(m[1]);
+      return { tex: m[1], size: b.size, note: m[2], w: Math.max(34, b.w + 4, noteW(m[2])) };
+    }
+    if (wordy(label)) return { text: label, w: Math.max(34, Math.min(92, Math.ceil(label.length * 8.6) + 4)) };
+    const b = texBox(label);
+    return { tex: label, size: b.size, w: Math.max(34, b.w + 4) };
+  }, [label]);
   const t = (value - min) / (max - min || 1);
   const shown = format ? format(value) : (Math.round(value * 100) / 100).toString().replace('.', ',');
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 6, opacity: disabled ? 0.5 : 1 }}>
-      {label ? (
-        <View style={{ width: 34, alignItems: 'center' }}>
-          <MathView tex={label} size={18} color={color} />
+      {lab ? (
+        <View style={{ width: lab.w, alignItems: 'center', marginRight: lab.w > 34 ? 6 : 0 }}>
+          {lab.tex ? <MathView tex={lab.tex} size={lab.size} color={color} /> : null}
+          {lab.text ? (
+            <Text style={{ color, fontFamily: F.heavy, fontSize: 13, textAlign: 'center' }} numberOfLines={2}>
+              {lab.text}
+            </Text>
+          ) : null}
+          {lab.note ? (
+            <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 10.5, lineHeight: 12, textAlign: 'center' }} numberOfLines={2}>
+              {lab.note}
+            </Text>
+          ) : null}
         </View>
       ) : null}
       <View style={{ flex: 1, height: 40, justifyContent: 'center' }} onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)} {...pan.panHandlers}>

@@ -1,19 +1,20 @@
 import React, { createContext, useContext, useMemo, useRef, useState } from 'react';
 import { PanResponder, Text, View } from 'react-native';
-import Svg, { Circle, G, Line, Polygon, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line, Polygon } from 'react-native-svg';
 import { C, F } from '../../theme';
 import { useScrollLock } from '../ScrollLock';
+import { HaloText } from '../plot/Plot';
 import { Slider } from '../ui/Slider';
 import { RichText } from '../math/RichText';
 import type { ParamSpec } from './PlotLab';
 
 export type V3 = [number, number, number];
-type Proj = { p: (v: V3) => [number, number]; depth: (v: V3) => number };
+type Proj = { p: (v: V3) => [number, number]; depth: (v: V3) => number; w: number; h: number };
 const Ctx3 = createContext<Proj | null>(null);
 const use3 = () => useContext(Ctx3)!;
 
 export function Arrow3({ from = [0, 0, 0], to, color = C.p1, width = 3.5, label }: { from?: V3; to: V3; color?: string; width?: number; label?: string }) {
-  const { p } = use3();
+  const { p, w, h } = use3();
   const [x1, y1] = p(from);
   const [x2, y2] = p(to);
   const ang = Math.atan2(y2 - y1, x2 - x1);
@@ -26,11 +27,7 @@ export function Arrow3({ from = [0, 0, 0], to, color = C.p1, width = 3.5, label 
     <G>
       <Line x1={x1} y1={y1} x2={bx} y2={by} stroke={color} strokeWidth={width} strokeLinecap="round" />
       {len > 3 && <Polygon points={pts} fill={color} />}
-      {label ? (
-        <SvgText x={x2 + 6} y={y2 - 6} fill={color} fontSize={15} fontFamily={F.black}>
-          {label}
-        </SvgText>
-      ) : null}
+      {label ? <HaloText x={x2 + 6} y={y2 - 6} text={label} color={color} size={15} font={F.black} w={w} h={h} bg={C.bgDeep} /> : null}
     </G>
   );
 }
@@ -43,16 +40,12 @@ export function Line3({ a, b, color = C.textMuted, width = 2, dash }: { a: V3; b
 }
 
 export function Point3({ at, color = C.gold, r = 5, label }: { at: V3; color?: string; r?: number; label?: string }) {
-  const { p } = use3();
+  const { p, w, h } = use3();
   const [x, y] = p(at);
   return (
     <G>
       <Circle cx={x} cy={y} r={r} fill={color} stroke={C.white} strokeWidth={1.5} />
-      {label ? (
-        <SvgText x={x + 8} y={y - 8} fill={color} fontSize={13} fontFamily={F.heavy}>
-          {label}
-        </SvgText>
-      ) : null}
+      {label ? <HaloText x={x + 8} y={y - 8} text={label} color={color} w={w} h={h} bg={C.bgDeep} /> : null}
     </G>
   );
 }
@@ -63,7 +56,7 @@ export function Poly3({ pts, color = C.p2, opacity = 0.25, stroke }: { pts: V3[]
 }
 
 export function Axes3({ size = 4, labels = true }: { size?: number; labels?: boolean }) {
-  const { p } = use3();
+  const { p, w, h } = use3();
   const ax: [V3, string, string][] = [
     [[size, 0, 0], 'x', '#FF6B6B'],
     [[0, size, 0], 'y', '#51CF66'],
@@ -79,11 +72,7 @@ export function Axes3({ size = 4, labels = true }: { size?: number; labels?: boo
           <G key={n}>
             <Line x1={xn} y1={yn} x2={x0} y2={y0} stroke={col} strokeWidth={1} strokeOpacity={0.35} strokeDasharray="4 4" />
             <Line x1={x0} y1={y0} x2={x1} y2={y1} stroke={col} strokeWidth={1.6} strokeOpacity={0.8} />
-            {labels && (
-              <SvgText x={x1 + 4} y={y1 + 4} fill={col} fontSize={13} fontFamily={F.heavy}>
-                {n}
-              </SvgText>
-            )}
+            {labels && <HaloText x={x1 + 4} y={y1 + 4} text={n} color={col} w={w} h={h} bg={C.bgDeep} />}
           </G>
         );
       })}
@@ -170,6 +159,8 @@ export function Space3D({
         return [r.sx, r.sy];
       },
       depth: (v) => f(v).d,
+      w: width,
+      h: H,
     };
   }, [yaw, pitch, width, H, scale]);
   const s: Space3DState = { p, yaw, pitch };

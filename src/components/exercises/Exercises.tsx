@@ -21,7 +21,7 @@ export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
   const seed = useRef(Math.floor(Math.random() * 1e9)).current;
   const orderIdx = useMemo(() => shuffle(makeRng(seed), ex.options.map((_, i) => i)), [ex, seed]);
   return (
-    <View style={{ flexDirection: many ? 'row' : 'column', flexWrap: 'wrap', marginHorizontal: many ? -5 : 0 }}>
+    <View style={{ flexDirection: many ? 'row' : 'column', flexWrap: 'wrap', justifyContent: many ? 'space-between' : undefined }}>
       {orderIdx.map((i) => {
         const o = ex.options[i];
         let st: ChoiceState = sel === i ? 'selected' : 'idle';
@@ -33,7 +33,7 @@ export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
             state={st}
             center={many}
             onPress={locked ? undefined : () => setSel(i)}
-            style={many ? { width: '46%', margin: '2%' } : { marginBottom: 10 }}
+            style={many ? { width: '48.5%', marginBottom: 10 } : { marginBottom: 10 }}
           />
         );
       })}
@@ -281,7 +281,11 @@ export function FillView({ ex, locked, onReady, registerCheck }: ExProps<Fill>) 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginBottom: 18, padding: 12, borderRadius: 16, backgroundColor: C.surface }}>
         {parts.map((p, k) => (
           <React.Fragment key={k}>
-            {p ? <RichText size={18}>{p}</RichText> : null}
+            {p ? (
+              <RichText size={18} style={{ flexShrink: 1, maxWidth: '100%' }}>
+                {p}
+              </RichText>
+            ) : null}
             {k < slots ? (
               <Pressable
                 onPress={locked ? undefined : () => {

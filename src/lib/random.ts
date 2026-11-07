@@ -99,3 +99,9 @@ export function polyTex(coeffs: number[], v = 'x'): string {
 
 /** Signed term helper: "+ 3" / "- 3" for building expressions. */
 export const sgn = (n: number) => (n < 0 ? `- ${fmt(-n)}` : `+ ${fmt(n)}`);
+
+/** Number as a factor inside a worked computation: negatives get parentheses ("2+(-3)", "(-1)^2"). */
+export const par = (n: number) => (n < 0 ? `(${fmt(n)})` : fmt(n));
+
+/** "x - a" with the sign folded: xm(2) = "x-2", xm(-3) = "x+3", xm(0) = "x". */
+export const xm = (a: number, v = 'x') => (a === 0 ? v : a > 0 ? `${v}-${fmt(a)}` : `${v}+${fmt(-a)}`);

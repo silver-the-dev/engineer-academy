@@ -292,7 +292,7 @@ export function NumberLine({
         {marker && (
           <G>
             <Path d={`M${sx(v)} ${H / 2 - 6} l-10 -18 h20 z`} fill={C.gold} />
-            <SvgText x={sx(v)} y={14} fill={C.gold} fontSize={14} textAnchor="middle" fontFamily={F.black}>
+            <SvgText x={Math.max(16, Math.min(width - 16, sx(v)))} y={14} fill={C.gold} fontSize={14} textAnchor="middle" fontFamily={F.black}>
               {String(Math.round(v * 100) / 100).replace('.', ',')}
             </SvgText>
           </G>
