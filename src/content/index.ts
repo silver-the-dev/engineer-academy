@@ -82,6 +82,13 @@ export function isLessonUnlocked(lessonId: string, done: Record<string, unknown>
   if (!loc) return false;
   const { section, unitIndex, lessonIndex } = loc;
   if (unitIndex === 0 && lessonIndex === 0) return true;
+  if (done[lessonId]) return true;
+  // New units/lessons may be inserted in the middle of a path: if the user already finished
+  // something further ahead in this section, keep everything up to it open.
+  for (let u = unitIndex; u < section.units.length; u++) {
+    const ls = section.units[u].lessons;
+    for (let l = u === unitIndex ? lessonIndex + 1 : 0; l < ls.length; l++) if (done[ls[l].id]) return true;
+  }
   // previous lesson in path
   let prev: Lesson | undefined;
   if (lessonIndex > 0) prev = section.units[unitIndex].lessons[lessonIndex - 1];
