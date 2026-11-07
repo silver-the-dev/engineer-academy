@@ -141,7 +141,7 @@ Cada valor de $t$ dá um ponto da reta. Arraste $A$, a ponta do diretor e mude $
               return rmcq(rng, t`Na reta $P=(${A[0]},\,${A[1]})+t\,(${v[0]},\,${v[1]})$, qual ponto corresponde a $t=${tt}$?`, `$(${A[0] + tt * v[0]},\\,${A[1] + tt * v[1]})$`, [`$(${A[0] - tt * v[0]},\\,${A[1] - tt * v[1]})$`, `$(${v[0] + tt * A[0]},\\,${v[1] + tt * A[1]})$`, `$(${A[0] + tt * v[0]},\\,${A[1] + tt * v[1] + 1})$`], t`$(${A[0]},\,${A[1]})+${tt}\cdot(${v[0]},\,${v[1]})$.`);
             }),
             tf(t`O ponto $A$ corresponde a $t=0$ na equação $P=A+t\vec v$.`, true, t`$A+0\cdot\vec v=A$.`),
-            inter(t`Monte a reta que passa por $A(0,\,1)$ com diretor $\vec v=(2,\,-1)$.`, 'plot', paramLine().props, (v: any) => v && v.pts.A.x === 0 && v.pts.A.y === 1 && near(v.pts.V.x - v.pts.A.x, 2, 0.01) && near(v.pts.V.y - v.pts.A.y, -1, 0.01), t`$A=(0,\,1)$ e ponta em $(2,\,0)$`),
+            inter(t`Monte a reta que passa por $A(0,\,1)$ com diretor $\vec v=(2,\,-1)$.`, 'plot', paramLine().props, (v: any) => v && v.pts.A.x === 0 && v.pts.A.y === 1 && near(v.pts.V.x - v.pts.A.x, 2, 0.01) && near(v.pts.V.y - v.pts.A.y, -1, 0.01), t`$A=(0,\,1)$ e ponta em $(2,\,0)$`, t`$P=A+t\vec v=(0,\,1)+t(2,\,-1)$; em $t=1$ a ponta do diretor fica em $(2,\,0)$.`),
             tf(t`Os vetores $(1,\,2)$ e $(-2,\,-4)$ servem como diretores da mesma reta.`, true, t`São paralelos: qualquer múltiplo não nulo do diretor também é diretor.`),
             gen((rng) => {
               const A = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
@@ -273,7 +273,7 @@ Arraste as pontas dos diretores: quando o ângulo entre os **vetores** passa de 
             num(t`Calcule o ângulo (graus) entre as retas de diretores $(1,\,0,\,0)$ e $(1,\,1,\,0)$.`, 45, t`$\cos\theta=\frac{1}{1\cdot\sqrt2}$ ⟹ $45^\circ$.`, { unit: '°' }),
             num(t`Calcule o ângulo (graus) entre as retas de diretores $(1,\,1,\,0)$ e $(-1,\,0,\,0)$.`, 45, t`$\cos\theta=\frac{|-1|}{\sqrt2\cdot1}$ ⟹ $45^\circ$ (o ângulo entre **retas** é o menor).`, { unit: '°' }),
             mcqS(t`Por que a fórmula do ângulo entre retas usa $|\vec v_1\cdot\vec v_2|$?`, 'para obter sempre o ângulo agudo', ['para o cosseno nunca passar de 1', 'porque o produto escalar é sempre negativo', 'para o ângulo dar em radianos', 'porque as retas são reversas'], t`Trocar $\vec v_2$ por $-\vec v_2$ descreve a mesma reta e muda o sinal do produto escalar; o módulo elimina essa ambiguidade.`),
-            inter(t`Arraste os diretores para que as **retas** formem $45^\circ$.`, 'plot', lineAngleLab().props, (v: any) => v && near(lineAngle(v.pts.U, v.pts.V), 45, 1.5), t`Por exemplo $\vec u=(2,\,0)$ e $\vec v=(2,\,2)$.`),
+            inter(t`Arraste os diretores para que as **retas** formem $45^\circ$.`, 'plot', lineAngleLab().props, (v: any) => v && near(lineAngle(v.pts.U, v.pts.V), 45, 1.5), t`Por exemplo $\vec u=(2,\,0)$ e $\vec v=(2,\,2)$.`, t`$\cos\theta=\frac{|\vec u\cdot\vec v|}{|\vec u||\vec v|}=\frac{4}{2\cdot2\sqrt2}=\frac{\sqrt2}{2}\Rightarrow\theta=45^\circ$.`),
             num(t`Qual o ângulo (graus) entre $r:\ (1,\,2,\,3)+t\,(1,\,1,\,0)$ e $s:\ (0,\,0,\,1)+t\,(0,\,1,\,1)$?`, 60, t`$\vec v_1\cdot\vec v_2=1$, $|\vec v_1|=|\vec v_2|=\sqrt2$: $\cos\theta=\frac12$ ⟹ $60^\circ$.`, { unit: '°' }),
             gen((rng) => {
               const [u, v] = pick(rng, [
@@ -323,7 +323,7 @@ $$d(P,r)=\frac{|\vec{AP}\times\vec v|}{|\vec v|}$$`,
               const ok = dot3(u, w) === 0;
               return tf(t`As retas de diretores $${V3(u)}$ e $${V3(w)}$ são ortogonais.`, ok, t`$${V3(u)}\cdot${V3(w)}=${dot3(u, w)}$${ok ? ' ⟹ ortogonais.' : ' ≠ 0 ⟹ não são ortogonais.'}`);
             }),
-            inter(t`Com $\vec u=(2,\,1)$, arraste $\vec v$ para que as retas fiquem **ortogonais**.`, 'plot', lineAngleLab([2, 1], [1, 2]).props, (v: any) => v && near(v.pts.U.x, 2, 0.01) && near(v.pts.U.y, 1, 0.01) && Math.hypot(v.pts.V.x, v.pts.V.y) > 0.1 && near(v.pts.U.x * v.pts.V.x + v.pts.U.y * v.pts.V.y, 0, 0.01), t`$\vec v=(-1,\,2)$ ou $(1,\,-2)$, por exemplo: $2\cdot(-1)+1\cdot2=0$.`),
+            inter(t`Com $\vec u=(2,\,1)$, arraste $\vec v$ para que as retas fiquem **ortogonais**.`, 'plot', lineAngleLab([2, 1], [1, 2]).props, (v: any) => v && near(v.pts.U.x, 2, 0.01) && near(v.pts.U.y, 1, 0.01) && Math.hypot(v.pts.V.x, v.pts.V.y) > 0.1 && near(v.pts.U.x * v.pts.V.x + v.pts.U.y * v.pts.V.y, 0, 0.01), t`$\vec v=(-1,\,2)$ ou $(1,\,-2)$, por exemplo: $2\cdot(-1)+1\cdot2=0$.`, t`Retas ortogonais têm diretores com produto escalar nulo: $(2,\,1)\cdot(-1,\,2)=-2+2=0$.`),
             multi(t`Quais pares de diretores dão retas **ortogonais**?`, [t`$(1,\,0,\,0)$ e $(0,\,5,\,-2)$`, t`$(1,\,1,\,1)$ e $(1,\,-2,\,1)$`, t`$(2,\,1,\,0)$ e $(1,\,2,\,0)$`, t`$(1,\,2,\,3)$ e $(-2,\,-4,\,-6)$`], [0, 1], t`Produto escalar zero: $0$ e $1-2+1=0$. Os outros dão $4$ e $-28$.`),
             num(t`Qual a distância do ponto $P(3,\,4,\,0)$ ao eixo $x$?`, 4, t`O pé da perpendicular é $(3,\,0,\,0)$; a distância é $|(0,\,4,\,0)|=4$.`),
             gen((rng) => {
@@ -378,7 +378,7 @@ Gire e mexa nos coeficientes (normal dourada):`,
               const val = dot3(n, P) + d;
               return tf(t`O ponto $${V3(P)}$ pertence ao plano $${planeEq(n, d)}$.`, val === 0, t`Substituindo: $${val}${val === 0 ? '=0' : '\\neq0'}$.`);
             }),
-            inter(t`Ajuste o plano para que fique **horizontal** ($\vec n$ vertical) na altura $z=2$.`, 'space3d', plane3DLab().props!, (v: any) => v && near(v.p.a, 0, 0.01) && near(v.p.b, 0, 0.01) && near(v.p.d, 2, 0.01), t`$a=b=0$, $d=2$`),
+            inter(t`Ajuste o plano para que fique **horizontal** ($\vec n$ vertical) na altura $z=2$.`, 'space3d', plane3DLab().props!, (v: any) => v && near(v.p.a, 0, 0.01) && near(v.p.b, 0, 0.01) && near(v.p.d, 2, 0.01), t`$a=b=0$, $d=2$`, t`Plano horizontal tem normal $(0,\,0,\,1)$: $a=b=0$, e a equação vira $z=2$.`),
             tf(t`Multiplicar toda a equação de um plano por $2$ muda o plano.`, false, t`$2x+2y=2$ e $x+y=1$ são o mesmo plano: a normal só muda de tamanho.`),
             num(t`O plano $2x+y-z+d=0$ passa pela origem. Quanto vale $d$?`, 0, t`$(0,0,0)$ na equação: $d=0$.`),
           ],
@@ -458,9 +458,10 @@ Com $h,t\in[0,\,1]$, $P$ percorre o **paralelogramo** de lados $\vec u$ e $\vec 
           exercises: [
             mcqS(t`Qual a equação do plano por $(1,0,0)$, $(0,1,0)$ e $(0,0,1)$?`, t`$x+y+z=1$`, [t`$x+y+z=0$`, t`$x-y+z=1$`, t`$xyz=1$`], t`Normal $(1,1,1)$ e $d=-1$.`),
             tf(t`Três pontos colineares determinam um único plano.`, false, t`Pontos colineares estão em infinitos planos; é preciso 3 pontos **não** colineares.`),
-            order(t`Ordene os passos para obter a equação geral pelo método dos três pontos:`, [t`Calcular $\vec u=B-A$ e $\vec v=C-A$`, t`Calcular $\vec n=\vec u\times\vec v$`, t`Escrever $ax+by+cz+d=0$ com $\vec n=(a,b,c)$`, t`Substituir $A$ para achar $d$`]),
+            order(t`Ordene os passos para obter a equação geral pelo método dos três pontos:`, [t`Calcular $\vec u=B-A$ e $\vec v=C-A$`, t`Calcular $\vec n=\vec u\times\vec v$`, t`Escrever $ax+by+cz+d=0$ com $\vec n=(a,b,c)$`, t`Substituir $A$ para achar $d$`], t`Dois vetores no plano ($B-A$ e $C-A$) dão a normal pelo produto vetorial; a normal fornece $a,b,c$ e o ponto $A$ fixa $d$.`),
             gen((rng) => {
-              const [a, b, c] = [randInt(rng, 1, 4), randInt(rng, 1, 4), randInt(rng, 1, 4)];
+              // distinct intercepts: with a = c the swapped-coefficient distractor equals the answer
+              const [a, b, c] = pick(rng, [[1, 2, 3], [2, 1, 4], [3, 1, 2], [1, 4, 2], [2, 3, 1], [4, 2, 1], [1, 3, 4], [3, 4, 2]] as const);
               const k = a * b * c;
               return rmcq(rng, t`Qual o plano que passa por $(${a},0,0)$, $(0,${b},0)$ e $(0,0,${c})$?`, `$${b * c}x+${a * c}y+${a * b}z=${k}$`, [`$${a}x+${b}y+${c}z=1$`, `$x+y+z=${a + b + c}$`, `$${a * b}x+${a * c}y+${b * c}z=${k}$`], t`Forma segmentária $\frac{x}{${a}}+\frac{y}{${b}}+\frac{z}{${c}}=1$; multiplicando por $${k}$.`);
             }),
@@ -579,7 +580,7 @@ export const transformacoes: UnitDef = {
             }),
             mcq(t`Uma matriz leva $\vec i$ em $(2,\,1)$ e $\vec j$ em $(0,\,3)$. Qual é ela?`, [`$${m2(2, 0, 1, 3)}$`, `$${m2(2, 1, 0, 3)}$`, `$${m2(0, 2, 3, 1)}$`, `$${m2(1, 2, 3, 0)}$`], 0, t`As imagens viram as **colunas**.`),
             tf(t`Uma transformação linear sempre leva retas em retas (ou num ponto).`, true, t`É uma das marcas das transformações lineares.`),
-            inter(t`Monte uma matriz que **dobra** todos os vetores (escala por 2).`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && near(v.p.a, 2, 0.01) && near(v.p.b, 0, 0.01) && near(v.p.c, 0, 0.01) && near(v.p.d, 2, 0.01), `$${m2(2, 0, 0, 2)}$`),
+            inter(t`Monte uma matriz que **dobra** todos os vetores (escala por 2).`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && near(v.p.a, 2, 0.01) && near(v.p.b, 0, 0.01) && near(v.p.c, 0, 0.01) && near(v.p.d, 2, 0.01), `$${m2(2, 0, 0, 2)}$`, t`$\begin{pmatrix}2&0\\0&2\end{pmatrix}(x,\,y)=(2x,\,2y)$: cada vetor mantém a direção e dobra o tamanho.`),
           ],
         },
         {
@@ -594,8 +595,8 @@ export const transformacoes: UnitDef = {
             visual: matrixLab([0, -1, 1, 0]),
           },
           exercises: [
-            inter(t`Monte a **rotação de 90°** anti-horária.`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && near(v.p.a, 0, 0.01) && near(v.p.c, 1, 0.01) && near(v.p.b, -1, 0.01) && near(v.p.d, 0, 0.01), t`$${m2(0, -1, 1, 0)}$`),
-            inter(t`Monte a reflexão no eixo $y$ (espelho vertical).`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && near(v.p.a, -1, 0.01) && near(v.p.c, 0, 0.01) && near(v.p.b, 0, 0.01) && near(v.p.d, 1, 0.01), t`$${m2(-1, 0, 0, 1)}$`),
+            inter(t`Monte a **rotação de 90°** anti-horária.`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && near(v.p.a, 0, 0.01) && near(v.p.c, 1, 0.01) && near(v.p.b, -1, 0.01) && near(v.p.d, 0, 0.01), t`$${m2(0, -1, 1, 0)}$`, t`As colunas são as imagens de $\vec i$ e $\vec j$: girando $90^\circ$, $\vec i\mapsto(0,\,1)$ e $\vec j\mapsto(-1,\,0)$.`),
+            inter(t`Monte a reflexão no eixo $y$ (espelho vertical).`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && near(v.p.a, -1, 0.01) && near(v.p.c, 0, 0.01) && near(v.p.b, 0, 0.01) && near(v.p.d, 1, 0.01), t`$${m2(-1, 0, 0, 1)}$`, t`Refletir no eixo $y$ troca o sinal de $x$ e mantém $y$: $\vec i\mapsto(-1,\,0)$ e $\vec j\mapsto(0,\,1)$.`),
             gen((rng) => {
               const x = randNZ(rng, -4, 4);
               const y = randNZ(rng, -4, 4);
@@ -634,7 +635,7 @@ export const transformacoes: UnitDef = {
               const c = randInt(rng, -2, 2);
               return num(t`Um quadrado de área 1 é transformado por $${m2(a, b, c, d)}$. Qual a nova área?`, Math.abs(a * d - b * c), t`$|\det|=|${a * d}-(${b * c})|=${Math.abs(a * d - b * c)}$.`);
             }),
-            inter(t`Faça a transformação **achatar** o plano ($\det A=0$) sem zerar a matriz.`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && Math.abs(v.p.a * v.p.d - v.p.b * v.p.c) < 0.02 && Math.abs(v.p.a) + Math.abs(v.p.b) + Math.abs(v.p.c) + Math.abs(v.p.d) > 0.5, t`colunas paralelas, ex.: $${m2(1, 2, 1, 2)}$`),
+            inter(t`Faça a transformação **achatar** o plano ($\det A=0$) sem zerar a matriz.`, 'plot', matrixLab([1, 0, 0, 1]).props, (v: any) => v && Math.abs(v.p.a * v.p.d - v.p.b * v.p.c) < 0.02 && Math.abs(v.p.a) + Math.abs(v.p.b) + Math.abs(v.p.c) + Math.abs(v.p.d) > 0.5, t`colunas paralelas, ex.: $${m2(1, 2, 1, 2)}$`, t`$\det A=0$ quando as colunas são paralelas: tudo cai sobre uma reta e a área de qualquer figura vira zero.`),
             tf(t`$\det(AB)=\det A\cdot\det B$`, true, t`Aplicar $B$ e depois $A$ multiplica as áreas pelos dois fatores.`),
             mcq(t`Se $\det A=-2$, a transformação…`, ['dobra as áreas e inverte a orientação', 'reduz as áreas pela metade', 'achata o plano', 'mantém tudo igual'], 0, t`$|\det|=2$ e o sinal negativo é o "espelho".`),
             gen((rng) => {

@@ -159,8 +159,8 @@ Misture fonte ($a$) e rotação ($b$):`,
           },
           exercises: [
             gen((rng) => {
-              const x = randInt(rng, -3, 3);
-              const y = randInt(rng, -3, 3);
+              const x = randNZ(rng, -3, 3);
+              const y = randNZ(rng, -3, 3);
               return rmcq(rng, t`Quanto vale $\vec F(${x},\,${y})$ para $\vec F=(-y,\,x)$?`, `$(${-y},\\,${x})$`, [`$(${y},\\,${-x})$`, `$(${x},\\,${y})$`, `$(${-x},\\,${y})$`, `$(${y},\\,${x})$`], t`Troque as coordenadas e o sinal da primeira.`);
             }),
             match(t`Ligue o campo ao comportamento:`, [
@@ -169,7 +169,7 @@ Misture fonte ($a$) e rotação ($b$):`,
               [t`$(-y,\,x)$`, 'gira no sentido anti-horário'],
               [t`$(2,\,0)$`, 'escoamento uniforme para a direita'],
             ], t`Avalie em alguns pontos e imagine as setas.`),
-            inter(t`No lab, monte um campo de **rotação pura** no sentido anti-horário.`, 'plot', divRotLab(1, 0).props, (v: any) => v && near(v.p.a, 0, 0.01) && v.p.b > 0.05, t`$a=0$ e $b>0$.`),
+            inter(t`No lab, monte um campo de **rotação pura** no sentido anti-horário.`, 'plot', divRotLab(1, 0).props, (v: any) => v && near(v.p.a, 0, 0.01) && v.p.b > 0.05, t`$a=0$ e $b>0$.`, t`O campo $b(-y,\,x)$ gira em torno da origem sem fonte nem sumidouro; $b>0$ dá o sentido anti-horário.`),
             tf(t`No campo $(-y,\,x)$, cada vetor é perpendicular ao vetor posição $(x,\,y)$.`, true, t`$(x,\,y)\cdot(-y,\,x)=0$.`),
             gen((rng) => {
               const x = randNZ(rng, -4, 4);
@@ -231,7 +231,7 @@ Mede a **taxa de expansão** do fluido por unidade de área (volume): positivo =
             }),
             mcqS(t`$\nabla\cdot(x^2,\,xy)=$`, t`$3x$`, [t`$2x+y$`, t`$2x$`, t`$x^2+xy$`, t`$3x^2$`], t`$2x+x=3x$.`),
             tf(t`O campo de rotação $(-y,\,x)$ tem divergente zero.`, true, t`$\partial_x(-y)+\partial_y(x)=0$: gira sem comprimir.`),
-            inter(t`No lab, deixe o campo **incompressível** mas girando.`, 'plot', divRotLab(0.6, 0.4).props, (v: any) => v && near(v.p.a, 0, 0.01) && Math.abs(v.p.b) > 0.05, t`$a=0$ (divergente nulo), $b\ne0$.`),
+            inter(t`No lab, deixe o campo **incompressível** mas girando.`, 'plot', divRotLab(0.6, 0.4).props, (v: any) => v && near(v.p.a, 0, 0.01) && Math.abs(v.p.b) > 0.05, t`$a=0$ (divergente nulo), $b\ne0$.`, t`Incompressível significa $\operatorname{div}\vec F=0$ (parte radial $a=0$); o termo de rotação $b\ne0$ mantém o giro.`),
             num(t`Divergente de $\vec F=(xy,\,yz,\,zx)$ em $(1,\,2,\,3)$:`, 6, t`$y+z+x=2+3+1=6$.`),
             mcq(t`Água saindo de um ralo invertido (fonte) tem divergente…`, ['positivo', 'negativo', 'zero', 'imaginário'], 0, t`O fluido "nasce" ali.`),
             gen((rng) => {
@@ -263,7 +263,7 @@ Imagine uma rodinha de pás no fluido: o rotacional mede com que velocidade ela 
             }),
             tf(t`Todo campo gradiente tem rotacional zero.`, true, t`$\partial_x f_y-\partial_y f_x=0$ (derivadas mistas iguais).`),
             mcqS(t`$\nabla\times(yz,\,xz,\,xy)=$`, t`$\vec 0$`, [t`$(1,\,1,\,1)$`, t`$(x,\,y,\,z)$`, t`$(z,\,x,\,y)$`, t`$(0,\,0,\,2z)$`], t`É $\nabla(xyz)$: gradientes não giram.`),
-            inter(t`No lab, crie um escoamento uniforme para a direita **sem** rotação nem fonte.`, 'plot', divRotLab(0, 0.7, true).props, (v: any) => v && near(v.p.a, 0, 0.01) && near(v.p.b, 0, 0.01) && v.p.c > 0.05, t`$a=b=0$, $c>0$.`),
+            inter(t`No lab, crie um escoamento uniforme para a direita **sem** rotação nem fonte.`, 'plot', divRotLab(0, 0.7, true).props, (v: any) => v && near(v.p.a, 0, 0.01) && near(v.p.b, 0, 0.01) && v.p.c > 0.05, t`$a=b=0$, $c>0$.`, t`Campo constante $(c,\,0)$ com $c>0$: divergente e rotacional nulos, pois nenhuma componente varia.`),
             mcq(t`Um rio onde a água é mais rápida no meio do que nas margens tem rotacional…`, ['não nulo (uma rodinha perto da margem gira)', 'zero, pois a água anda em linha reta', 'sempre negativo', 'infinito'], 0, t`Mesmo com linhas de fluxo retas, a diferença de velocidade entre as pás faz a rodinha girar.`),
             num(t`$\vec F=(x^2,\,y^2,\,z^2)$: quanto vale $\nabla\cdot\vec F$ em $(1,\,1,\,1)$?`, 6, t`$2x+2y+2z=6$.`),
             match(t`Ligue o campo à descrição:`, [
@@ -293,7 +293,7 @@ Só conta a componente de $\vec F$ **na direção do movimento**. Força a favor
           exercises: [
             num(t`Trabalho de $\vec F=(-y,\,x)$ numa volta completa de $x^2+y^2=1$ (anti-horária) (2 casas):`, 2 * Math.PI, t`$\vec F\cdot\vec r\,'=\operatorname{sen}^2t+\cos^2t=1$; $\int_0^{2\pi}1\,dt=2\pi$.`, { tol: 0.01 }),
             tf(t`O campo radial $(x,\,y)$ realiza trabalho zero ao longo de uma circunferência centrada na origem.`, true, t`Ele é perpendicular ao deslocamento em todo ponto.`),
-            inter(t`No lab, faça uma volta completa no campo $(-y,\,x)$ com $R=2$ e confira $W=8\pi$.`, 'plot', workLab().props, (v: any) => v && Math.round(v.p.k) === 0 && near(v.p.R, 2, 0.01) && v.p.s > 6.2, t`$W=R^2\cdot2\pi=8\pi\approx25{,}13$.`),
+            inter(t`No lab, faça uma volta completa no campo $(-y,\,x)$ com $R=2$ e confira $W=8\pi$.`, 'plot', workLab().props, (v: any) => v && Math.round(v.p.k) === 0 && near(v.p.R, 2, 0.01) && v.p.s > 6.2, t`$W=R^2\cdot2\pi=8\pi\approx25{,}13$.`, t`Na circunferência, $\vec F$ é tangente e $|\vec F|=R$; o trabalho é $|\vec F|\cdot$ comprimento $=R\cdot2\pi R=2\pi R^2=8\pi$.`),
             gen((rng) => {
               const a = randNZ(rng, -4, 4);
               const b = randNZ(rng, -4, 4);
@@ -354,7 +354,7 @@ Só importam as **pontas**: o trabalho **independe do caminho**, e em todo camin
             visual: twoPathsLab(),
           },
           exercises: [
-            inter(t`No lab, escolha o campo $(-y,\,x)$ e ache um $h$ em que os dois caminhos dão trabalhos **diferentes**.`, 'plot', twoPathsLab().props, (v: any) => v && Math.round(v.p.k) === 1 && Math.abs(v.p.h) > 0.15, t`Qualquer $h\ne0$: o campo de rotação não é conservativo.`),
+            inter(t`No lab, escolha o campo $(-y,\,x)$ e ache um $h$ em que os dois caminhos dão trabalhos **diferentes**.`, 'plot', twoPathsLab().props, (v: any) => v && Math.round(v.p.k) === 1 && Math.abs(v.p.h) > 0.15, t`Qualquer $h\ne0$: o campo de rotação não é conservativo.`, t`Se o trabalho depende do caminho, o campo não é conservativo; para $(-y,\,x)$, $\operatorname{rot}\vec F=2\ne0$.`),
             gen((rng) => {
               const A = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
               const B = [randInt(rng, -3, 3), randInt(rng, -3, 3)];

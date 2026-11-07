@@ -345,7 +345,7 @@ Converge se $|\varphi'(x)|<1$ perto da raiz. Quanto menor $|\varphi'|$, mais rá
               ['Newton', 'quadrática, precisa de f′'],
               ['Secante', 'usa dois pontos, sem f′'],
               ['Ponto fixo', 'x = φ(x)'],
-            ]),
+            ], t`Bisseção só usa a troca de sinal (sempre converge, devagar); Newton usa a derivada (convergência quadrática); a secante troca $f'$ por dois pontos; o ponto fixo itera $x=\varphi(x)$.`),
             mcq(t`A iteração $x_{k+1}=3x_k$ a partir de $x_0=1$…`, ['diverge, pois $|\\varphi\'|=3>1$', 'converge para 0', 'converge para 3', 'fica parada em 1'], 0, t`$1,\,3,\,9,\,27,\ldots$: o ponto fixo $0$ repele.`),
           ],
         },
@@ -412,7 +412,7 @@ Para zerar $a_{ij}$ abaixo do pivô $a_{jj}$, use o **multiplicador** $m_{ij}=\f
             example: t`De baixo para cima: $z=-1$; $\frac12y-\frac12=1\Rightarrow y=3$; $2x+3+1=8\Rightarrow x=2$.`,
           },
           exercises: [
-            order(t`Ordene a eliminação de Gauss:`, ['Montar a matriz aumentada', 'Zerar abaixo da diagonal coluna por coluna', 'Obter a matriz triangular superior', 'Resolver por substituição regressiva']),
+            order(t`Ordene a eliminação de Gauss:`, ['Montar a matriz aumentada', 'Zerar abaixo da diagonal coluna por coluna', 'Obter a matriz triangular superior', 'Resolver por substituição regressiva'], t`A eliminação transforma a matriz aumentada em triangular superior; a última equação tem uma incógnita só e a substituição regressiva resolve de baixo para cima.`),
             gen((rng) => {
               const z = randInt(rng, -3, 3);
               const y = randInt(rng, -3, 3);
@@ -517,7 +517,7 @@ Acompanhe o zigue-zague até a solução $(2,\,1)$:`,
               ['Fatoração LU', 'direto (reutilizável)'],
               ['Jacobi', 'iterativo (valores antigos)'],
               ['Gauss-Seidel', 'iterativo (valores novos)'],
-            ]),
+            ], t`Métodos diretos chegam à solução num número finito de passos; os iterativos refinam um palpite (Jacobi usa só valores da iteração anterior; Gauss-Seidel usa os já atualizados).`),
             gen((rng) => {
               const [x, y] = [randInt(rng, 1, 3), randInt(rng, 1, 3)];
               const e1 = 5 * x + y;

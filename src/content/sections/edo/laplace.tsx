@@ -113,7 +113,7 @@ O peso $e^{-st}$ "apaga" o futuro distante; para cada $s$ sai um número — a �
               const a = randNZ(rng, -5, 5);
               return rmcq(rng, t`$\mathcal L\{e^{${a}t}\}=$`, `$\\frac{1}{${sMinus(a)}}$`, [`$\\frac{1}{${sMinus(-a)}}$`, `$\\frac{${a}}{s}$`, `$\\frac{s}{s^2+${a * a}}$`, `$e^{${-a}s}$`], t`Regra $\frac{1}{s-a}$ com $a=${a}$.`);
             }),
-            inter(t`No lab, escolha $f=1$ e ajuste $s$ até a área valer $0{,}5$.`, 'plot', laplaceLab().props, (v: any) => v && Math.round(v.p.fi) === 0 && near(v.p.s, 2, 0.06), t`$\frac1s=0{,}5\Rightarrow s=2$.`),
+            inter(t`No lab, escolha $f=1$ e ajuste $s$ até a área valer $0{,}5$.`, 'plot', laplaceLab().props, (v: any) => v && Math.round(v.p.fi) === 0 && near(v.p.s, 2, 0.06), t`$\frac1s=0{,}5\Rightarrow s=2$.`, t`$\mathcal L\{1\}=\int_0^\infty e^{-st}dt=\frac1s$; a área sob $e^{-st}$ vale $0{,}5$ quando $s=2$.`),
             tf(t`$\mathcal L\{e^{2t}\}$ só existe para $s>2$.`, true, t`Para $s\le2$ a integral $\int_0^\infty e^{(2-s)t}dt$ diverge.`),
             num(t`Use a definição: $\mathcal L\{e^{3t}\}$ em $s=5$ vale quanto?`, 0.5, t`$\frac{1}{5-3}=\frac12$.`),
           ],
@@ -168,7 +168,7 @@ $$\mathcal L\{a\,f+b\,g\}=a\,F(s)+b\,G(s)$$`,
               const A = randNZ(rng, -4, 5);
               const a = randNZ(rng, -3, 3);
               const B = randInt(rng, 1, 5);
-              const s = a + randInt(rng, 1, 3);
+              const s = Math.max(a, 0) + randInt(rng, 1, 3); // s > a and s > 0 (both terms must exist)
               const v = A / (s - a) + B / s;
               return num(t`Calcule $\mathcal L\{${A}e^{${a}t}+${B}\}$ em $s=${s}$ (3 casas).`, v, t`$\frac{${A}}{${s}-(${a})}+\frac{${B}}{${s}}\approx${fmt(v, 3)}$.`, { tol: 0.002 });
             }),
@@ -238,7 +238,7 @@ $$\mathcal L\{u(t-a)\,f(t-a)\}=e^{-as}F(s),\qquad \mathcal L\{u(t-a)\}=\frac{e^{
             }),
             tf(t`$u(t-3)$ vale $0$ para $t<3$ e $1$ para $t\ge3$.`, true, t`É o "interruptor" ligado em $t=3$.`),
             mcqS(t`$\mathcal L\{u(t-4)\}=$`, t`$\frac{e^{-4s}}{s}$`, [t`$\frac{e^{4s}}{s}$`, t`$\frac{1}{s-4}$`, t`$e^{-4s}$`, t`$\frac{4}{s}$`], t`Degrau: $\frac{e^{-as}}{s}$.`),
-            inter(t`Ajuste o lab para representar uma fonte de $3$ V ligada em $t=5$.`, 'plot', stepLab().props, (v: any) => v && near(v.p.a, 5, 0.01) && near(v.p.A, 3, 0.01), t`$3\,u(t-5)$.`),
+            inter(t`Ajuste o lab para representar uma fonte de $3$ V ligada em $t=5$.`, 'plot', stepLab().props, (v: any) => v && near(v.p.a, 5, 0.01) && near(v.p.A, 3, 0.01), t`$3\,u(t-5)$.`, t`O degrau $u(t-5)$ vale $0$ antes de $t=5$ e $1$ depois; multiplicado por $3$, a fonte de $3$ V ligada em $t=5$.`),
             gen((rng) => {
               const a = randInt(rng, 1, 5);
               const A = randInt(rng, 2, 6);
@@ -368,7 +368,7 @@ As raízes do denominador são os **polos**. Sistema **estável** ⟺ todos os p
               return tf(t`$H(s)=\dfrac{1}{(${sMinus(p1)})(${sMinus(p2)})}$ é estável.`, stable, stable ? t`Polos $${p1}$ e $${p2}$, ambos negativos.` : t`Há polo com parte real $\ge0$ (${Math.max(p1, p2)}): a resposta não decai.`);
             }),
             num(t`Quais os polos de $H=\frac{1}{s^2+2s+5}$? Dê a parte real.`, -1, t`$s=-1\pm2i$: parte real $-1<0$ ⟹ estável.`),
-            inter(t`Ajuste os polos para uma resposta **estável** que oscile com $\beta=3$.`, 'plot', polesLab().props, (v: any) => v && v.p.al < -0.01 && near(v.p.be, 3, 0.01), t`Qualquer $\alpha<0$ com $\beta=3$.`),
+            inter(t`Ajuste os polos para uma resposta **estável** que oscile com $\beta=3$.`, 'plot', polesLab().props, (v: any) => v && v.p.al < -0.01 && near(v.p.be, 3, 0.01), t`Qualquer $\alpha<0$ com $\beta=3$.`, t`Polos $\alpha\pm i\beta$ geram $e^{\alpha t}\cos\beta t$: estável exige $\alpha<0$ (decai) e $\beta=3$ fixa a frequência.`),
             mcq(t`Um polo em $s=+0{,}5$ significa que a resposta ao impulso…`, ['cresce como $e^{0{,}5t}$', 'decai', 'oscila com amplitude fixa', 'é zero'], 0, t`$\frac{1}{s-0{,}5}\to e^{0{,}5t}$.`),
             match(t`Ligue os polos ao comportamento:`, [
               [t`$-2$ e $-3$`, 'decai sem oscilar'],

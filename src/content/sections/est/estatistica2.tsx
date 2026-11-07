@@ -117,9 +117,9 @@ Toque nas regiões do diagrama:`,
           },
           exercises: [
             tf(t`Eventos mutuamente exclusivos não podem ocorrer ao mesmo tempo.`, true, t`Sua interseção é vazia.`),
-            inter(t`Pinte o evento "**exatamente um** de $A$ ou $B$ ocorre".`, 'venn', {}, (v: string[]) => vennIs(v, ['A', 'B']), t`$A$ sem $B$ e $B$ sem $A$`),
-            inter(t`Pinte o evento "$A$ **e** $B$ ocorrem".`, 'venn', {}, (v: string[]) => vennIs(v, ['AB']), t`só a interseção`),
-            inter(t`Pinte o evento "**nenhum** dos dois ocorre".`, 'venn', {}, (v: string[]) => vennIs(v, ['U']), t`a região fora dos círculos`),
+            inter(t`Pinte o evento "**exatamente um** de $A$ ou $B$ ocorre".`, 'venn', {}, (v: string[]) => vennIs(v, ['A', 'B']), t`$A$ sem $B$ e $B$ sem $A$`, t`Exatamente um é $(A\cup B)$ sem a interseção: $A\setminus B$ junto com $B\setminus A$ (diferença simétrica).`),
+            inter(t`Pinte o evento "$A$ **e** $B$ ocorrem".`, 'venn', {}, (v: string[]) => vennIs(v, ['AB']), t`só a interseção`, t`"$A$ e $B$" é a interseção $A\cap B$: a região comum aos dois círculos.`),
+            inter(t`Pinte o evento "**nenhum** dos dois ocorre".`, 'venn', {}, (v: string[]) => vennIs(v, ['U']), t`a região fora dos círculos`, t`Nenhum ocorre é o complementar da união, $(A\cup B)^c$: a parte do retângulo fora dos dois círculos.`),
             mcq(t`Num dado, "sair par" e "sair ímpar" são eventos…`, ['mutuamente exclusivos e complementares', 'independentes e iguais', 'mutuamente exclusivos, mas não complementares', 'nenhuma das anteriores'], 0, t`Não ocorrem juntos e, juntos, cobrem todo o $\Omega$.`),
             mcq(t`Num dado, $A=\{1,\ 2,\ 3\}$ e $B=\{2,\ 4,\ 6\}$. Quanto é $A\cap B$?`, ['$\\{2\\}$', '$\\{1,\\ 2,\\ 3,\\ 4,\\ 6\\}$', '$\\varnothing$', '$\\{1,\\ 3\\}$'], 0, t`O único resultado nos dois.`),
             mcq(t`Num dado, $A=\{1,\ 2\}$ e $B=\{5,\ 6\}$. Esses eventos são…`, ['mutuamente exclusivos', 'complementares', 'iguais', 'o espaço amostral'], 0, t`Não têm elementos em comum, mas também não cobrem $\{3,\ 4\}$.`),
@@ -232,7 +232,7 @@ Na **árvore**, multiplique ao longo dos galhos e some os caminhos:`,
               const p = pick(rng, [0.02, 0.03, 0.05, 0.1]);
               return num(t`Uma máquina produz ${fmt(p * 100)}% de peças defeituosas. Escolhendo 2 peças independentes, qual a probabilidade de **ambas serem boas**?`, (1 - p) ** 2, t`$${fmt(1 - p)}^2=${fmt((1 - p) ** 2, 4)}$.`, { tol: 0.0005 });
             }),
-            inter(t`Ajuste a taxa de defeito $p$ para que a chance de ambas as peças serem boas seja $0{,}81$.`, 'plot', treeLab().props, (v: any) => v && near(v.p.p, 0.1, 0.001), t`$p=0{,}1$, pois $0{,}9^2=0{,}81$`),
+            inter(t`Ajuste a taxa de defeito $p$ para que a chance de ambas as peças serem boas seja $0{,}81$.`, 'plot', treeLab().props, (v: any) => v && near(v.p.p, 0.1, 0.001), t`$p=0{,}1$, pois $0{,}9^2=0{,}81$`, t`Peças independentes: $P(\text{ambas boas})=(1-p)^2=0{,}81\Rightarrow 1-p=0{,}9\Rightarrow p=0{,}1$.`),
             gen((rng) => {
               const a = pick(rng, [0.5, 0.4, 0.2]);
               const b = pick(rng, [0.5, 0.3, 0.6]);
@@ -329,7 +329,7 @@ export const pesquisa: UnitDef = {
 6. Relatar com margem de erro e nível de confiança`,
           },
           exercises: [
-            order(t`Ordene as etapas de uma pesquisa de opinião:`, ['Definir objetivo e população', 'Planejar a amostragem', 'Elaborar e testar o questionário', 'Coletar e tabular os dados', 'Analisar e relatar com margem de erro']),
+            order(t`Ordene as etapas de uma pesquisa de opinião:`, ['Definir objetivo e população', 'Planejar a amostragem', 'Elaborar e testar o questionário', 'Coletar e tabular os dados', 'Analisar e relatar com margem de erro'], t`Sem objetivo e população definidos não dá para planejar a amostra; o questionário é testado antes da coleta, e a análise vem por último, com a margem de erro.`),
             tf(t`O pré-teste do questionário serve para encontrar perguntas confusas antes da coleta.`, true, t`É um ensaio em pequena escala.`),
             mcq(t`Qual é a **primeira** etapa de uma pesquisa?`, ['definir objetivo e população', 'coletar os dados', 'calcular a margem de erro', 'fazer gráficos'], 0, t`Sem objetivo claro, não dá para escolher amostra nem perguntas.`),
             mcq(t`Uma pesquisa sobre a satisfação dos alunos de Engenharia de uma universidade tem como população…`, ['todos os alunos de Engenharia daquela universidade', 'todos os brasileiros', 'só os alunos entrevistados', 'os professores'], 0, t`É o grupo sobre o qual queremos concluir algo.`),
@@ -496,7 +496,7 @@ Mude $n$ e $p$ e veja o centro da distribuição andar para $np$:`,
           },
           exercises: [
             mcq(t`Numa normal, a média, a mediana e a moda…`, ['são iguais', 'são sempre diferentes', 'só a média e a moda coincidem', 'dependem de σ'], 0, t`A curva é simétrica com pico no centro.`),
-            inter(t`Ajuste $k$ para que a área dourada seja aproximadamente $95\%$.`, 'plot', normalLab().props, (v: any) => v && near(v.p.k, 2, 0.05), t`$k\approx2$ (mais precisamente $1{,}96$)`),
+            inter(t`Ajuste $k$ para que a área dourada seja aproximadamente $95\%$.`, 'plot', normalLab().props, (v: any) => v && near(v.p.k, 2, 0.05), t`$k\approx2$ (mais precisamente $1{,}96$)`, t`Na normal padrão, $P(-1{,}96<Z<1{,}96)=0{,}95$: cerca de $95\%$ dos dados ficam a até $2$ desvios-padrão da média.`),
             num(t`QI tem $\mu=100$ e $\sigma=15$. Que porcentagem das pessoas tem QI entre 85 e 115?`, 68, t`É $\mu\pm\sigma$: cerca de $68\%$.`, { tol: 1, unit: '%' }),
             gen((rng) => {
               const mu = pick(rng, [50, 70, 170]);
@@ -576,7 +576,7 @@ Arraste os pontos e observe $r$:`,
           },
           exercises: [
             mcq(t`$r=-0{,}95$ indica…`, ['forte relação linear negativa', 'fraca relação', 'que uma causa a outra', 'relação não linear'], 0, t`Perto de $-1$: pontos quase alinhados numa reta descendente.`),
-            inter(t`Arraste os pontos para obter correlação **negativa** forte ($r<-0{,}8$).`, 'plot', corrLab().props, (v: any) => v && pearson(Object.values(v.pts) as { x: number; y: number }[]) < -0.8, 'pontos descendo da esquerda para a direita'),
+            inter(t`Arraste os pontos para obter correlação **negativa** forte ($r<-0{,}8$).`, 'plot', corrLab().props, (v: any) => v && pearson(Object.values(v.pts) as { x: number; y: number }[]) < -0.8, 'pontos descendo da esquerda para a direita', t`$r$ negativo e perto de $-1$ significa pontos quase alinhados numa reta descendente: quando $x$ cresce, $y$ diminui.`),
             mcq(t`Qual é o intervalo possível para $r$?`, ['$[-1,\\,1]$', '$[0,\\,1]$', '$[0,\\,\\infty)$', '$\\mathbb R$'], 0, t`Por construção, $|r|\le1$.`),
             gen((rng) => {
               const r = pick(rng, [0.92, 0.55, 0.05, -0.6, -0.97]);
@@ -584,7 +584,7 @@ Arraste os pontos e observe $r$:`,
               return mcq(t`Como classificar uma correlação com $r=${fmt(r)}$?`, ['forte e positiva', 'forte e negativa', 'moderada', 'fraca ou inexistente'], k, t`Quanto mais perto de $\pm1$, mais forte; o sinal dá o sentido.`);
             }),
             tf(t`Se $r=1$, todos os pontos estão sobre uma reta crescente.`, true, t`Correlação perfeita positiva.`),
-            inter(t`Arraste os pontos para que fiquem praticamente sem correlação ($|r|<0{,}2$).`, 'plot', corrLab().props, (v: any) => v && Math.abs(pearson(Object.values(v.pts) as { x: number; y: number }[])) < 0.2, 'pontos espalhados sem tendência'),
+            inter(t`Arraste os pontos para que fiquem praticamente sem correlação ($|r|<0{,}2$).`, 'plot', corrLab().props, (v: any) => v && Math.abs(pearson(Object.values(v.pts) as { x: number; y: number }[])) < 0.2, 'pontos espalhados sem tendência', t`$r$ perto de $0$ indica ausência de tendência linear: os pontos ficam espalhados sem subir nem descer.`),
             mcq(t`Horas de estudo e nota numa turma deram $r=0{,}7$. Isso significa que…`, ['quem estuda mais tende a tirar notas maiores', 'estudar causa nota alta com certeza', '70% dos alunos estudaram', 'a nota é 70% das horas'], 0, t`Tendência positiva moderada a forte, sem garantia individual.`),
           ],
         },

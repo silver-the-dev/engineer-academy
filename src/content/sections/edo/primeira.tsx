@@ -229,7 +229,7 @@ Arraste $P$ no campo de $y'=x$: cada posição inicial dá uma parábola $y=\fra
               return num(t`PVI: $y'=${a}x${term(b, '')}$, $y(0)=${y0}$. Quanto vale $y(${x1})$?`, ans, t`$y=\frac{${a}}{2}x^2${term(b, 'x')}${term(y0, '')}$, então $y(${x1})=${fmt(ans)}$.`);
             }),
             mcq(t`Quantas constantes arbitrárias tem a solução geral de uma EDO de **2ª** ordem?`, ['2', '1', '0', 'infinitas'], 0, t`Integra-se "duas vezes": duas constantes.`),
-            inter(t`No campo de $y'=x$, arraste $P$ para que a solução seja $y=\frac{x^2}{2}-1$.`, 'plot', slopeFieldLab((x) => x, { view: { xMin: -3, xMax: 3, yMin: -3, yMax: 4 }, P: [1, 2] }).props, (v: any) => v && near(v.pts.P.y - (v.pts.P.x * v.pts.P.x) / 2, -1, 0.12), t`Qualquer ponto da curva, por exemplo $P=(0,\,-1)$ ou $(2,\,1)$.`),
+            inter(t`No campo de $y'=x$, arraste $P$ para que a solução seja $y=\frac{x^2}{2}-1$.`, 'plot', slopeFieldLab((x) => x, { view: { xMin: -3, xMax: 3, yMin: -3, yMax: 4 }, P: [1, 2] }).props, (v: any) => v && near(v.pts.P.y - (v.pts.P.x * v.pts.P.x) / 2, -1, 0.12), t`Qualquer ponto da curva, por exemplo $P=(0,\,-1)$ ou $(2,\,1)$.`, t`As soluções são $y=\frac{x^2}{2}+C$; a curva pedida tem $C=-1$, então qualquer ponto dela serve, como $(0,\,-1)$.`),
             gen((rng) => {
               const k = randNZ(rng, -3, 3);
               const y0 = randNZ(rng, -4, 6);
@@ -267,7 +267,7 @@ Abaixo, $y'=y(2-y)$: veja as **soluções de equilíbrio** $y=0$ e $y=2$ (onde $
             }),
             tf(t`Em $y'=y(2-y)$, a função constante $y=2$ é uma solução.`, true, t`$y'=0$ e $2(2-2)=0$ ✓: é uma solução de **equilíbrio**.`),
             mcq(t`Em $y'=y(2-y)$, uma solução que começa em $y(0)=1$…`, ['cresce e se aproxima de 2', 'decresce até 0', 'cresce sem limite', 'fica constante em 1'], 0, t`Entre $0$ e $2$, $y'>0$; ao chegar perto de $2$, $y'\to0$.`),
-            inter(t`No campo de $y'=y(2-y)$, arraste $P$ para uma condição inicial que gere uma solução **constante** e **positiva**.`, 'plot', slopeFieldLab((_x, y) => y * (2 - y), { view: { xMin: -2, xMax: 4, yMin: -1.5, yMax: 3.5 }, P: [0, 1] }).props, (v: any) => v && near(v.pts.P.y, 2, 0.08), t`$y=2$, o equilíbrio positivo.`),
+            inter(t`No campo de $y'=y(2-y)$, arraste $P$ para uma condição inicial que gere uma solução **constante** e **positiva**.`, 'plot', slopeFieldLab((_x, y) => y * (2 - y), { view: { xMin: -2, xMax: 4, yMin: -1.5, yMax: 3.5 }, P: [0, 1] }).props, (v: any) => v && near(v.pts.P.y, 2, 0.08), t`$y=2$, o equilíbrio positivo.`, t`Soluções constantes são os equilíbrios: $y(2-y)=0\Rightarrow y=0$ ou $y=2$; a positiva é $y=2$.`),
             gen((rng) => {
               const Ta = pick(rng, [18, 20, 22, 25]);
               const T = Ta + randInt(rng, 20, 70);
@@ -338,7 +338,7 @@ Resfriamento de Newton, $T'=-k(T-T_a)$, também separa: $T(t)=T_a+(T_0-T_a)e^{-k
               return num(t`Uma amostra de $${m0}$ g tem meia-vida de $${T}$ dias. Quantos gramas restam após $${n * T}$ dias?`, m0 / 2 ** n, t`$${n * T}$ dias $=${n}$ meias-vidas: $${m0}\cdot\left(\tfrac12\right)^{${n}}=${fmt(m0 / 2 ** n)}$ g.`);
             }),
             mcqS(t`Um fóssil tem $12{,}5\%$ do carbono-14 original ($T_{1/2}\approx5730$ anos). Sua idade aproximada é:`, '≈ 17 190 anos', ['≈ 11 460 anos', '≈ 5 730 anos', '≈ 22 920 anos', '≈ 716 anos'], t`$12{,}5\%=\left(\frac12\right)^3$: três meias-vidas, $3\cdot5730=17\,190$.`),
-            inter(t`Ajuste os sliders para um **decaimento** com $y_0=4$ e meia-vida $\approx2$ (isto é, $k\approx-0{,}35$).`, 'plot', expLab().props, (v: any) => v && near(v.p.y0, 4, 0.01) && near(v.p.k, -0.35, 0.03), t`$y_0=4$ e $k=-\frac{\ln2}{2}\approx-0{,}35$.`),
+            inter(t`Ajuste os sliders para um **decaimento** com $y_0=4$ e meia-vida $\approx2$ (isto é, $k\approx-0{,}35$).`, 'plot', expLab().props, (v: any) => v && near(v.p.y0, 4, 0.01) && near(v.p.k, -0.35, 0.03), t`$y_0=4$ e $k=-\frac{\ln2}{2}\approx-0{,}35$.`, t`Em $y=y_0e^{kt}$, a meia-vida $T$ cumpre $e^{kT}=\frac12$, logo $k=-\frac{\ln2}{T}=-\frac{\ln 2}{2}\approx-0{,}35$.`),
             gen((rng) => {
               const Ta = pick(rng, [20, 25]);
               const T0 = pick(rng, [80, 90, 100]);
@@ -373,7 +373,7 @@ $K$ é a **capacidade de suporte**. Os equilíbrios são $P=0$ (**instável**: s
               const P0 = pick(rng, [1, 2, 5].filter((x) => x < K));
               return num(t`Logística com $K=${K}$ e $P_0=${P0}$: quanto vale $A$ em $P=\frac{K}{1+Ae^{-rt}}$?`, (K - P0) / P0, t`$A=\frac{K-P_0}{P_0}=\frac{${K - P0}}{${P0}}=${fmt((K - P0) / P0)}$.`);
             }),
-            inter(t`Ajuste a logística para capacidade $K=6$ partindo de $P_0=9$ (acima de $K$).`, 'plot', logisticLab().props, (v: any) => v && near(v.p.K, 6, 0.01) && near(v.p.P0, 9, 0.11), t`$K=6$ e $P_0=9$: a curva **desce** até $6$.`),
+            inter(t`Ajuste a logística para capacidade $K=6$ partindo de $P_0=9$ (acima de $K$).`, 'plot', logisticLab().props, (v: any) => v && near(v.p.K, 6, 0.01) && near(v.p.P0, 9, 0.11), t`$K=6$ e $P_0=9$: a curva **desce** até $6$.`, t`Acima da capacidade $P'=rP\left(1-\frac{P}{K}\right)<0$: a população diminui e se aproxima de $K=6$ por cima.`),
             mcqS(t`Os equilíbrios de $y'=y(y-3)$ são $0$ e $3$. Qual é **estável**?`, t`$y=0$`, [t`$y=3$`, 'os dois', 'nenhum', t`$y=1{,}5$`], t`Entre 0 e 3, $y'<0$ (desce até 0); abaixo de 0, $y'>0$ (sobe até 0). Acima de 3, $y'>0$: foge de 3.`),
             num(t`Logística $P'=0{,}5P(1-P/100)$, $P_0=20$. Quanto vale $P'(0)$, a taxa inicial?`, 8, t`$0{,}5\cdot20\cdot(1-0{,}2)=8$.`),
             gen((rng) => {
@@ -438,7 +438,7 @@ $\frac ba$ é o **equilíbrio** (solução particular constante) e $Ce^{-ax}$ é
               return num(t`Resolva $y'+${a}y=${b}$, $y(0)=${y0}$. Quanto vale $C$ em $y=${b / a}+Ce^{-${a}x}$?`, y0 - b / a, t`$y(0)=${b / a}+C=${y0}\Rightarrow C=${y0 - b / a}$.`);
             }),
             num(t`Para $y'=2-y$, qual o valor de $\lim_{x\to\infty}y(x)$ para qualquer condição inicial?`, 2, t`$y=2+Ce^{-x}\to2$.`),
-            inter(t`No campo de $y'=2-y$, arraste $P$ para a única condição em $x=0$ cuja solução é **constante**.`, 'plot', slopeFieldLab((_x, y) => 2 - y, { view: { xMin: -1, xMax: 5, yMin: -1, yMax: 5 }, P: [0, 4] }).props, (v: any) => v && near(v.pts.P.y, 2, 0.08), t`$y(0)=2$: o equilíbrio.`),
+            inter(t`No campo de $y'=2-y$, arraste $P$ para a única condição em $x=0$ cuja solução é **constante**.`, 'plot', slopeFieldLab((_x, y) => 2 - y, { view: { xMin: -1, xMax: 5, yMin: -1, yMax: 5 }, P: [0, 4] }).props, (v: any) => v && near(v.pts.P.y, 2, 0.08), t`$y(0)=2$: o equilíbrio.`, t`A solução constante é o equilíbrio $2-y=0\Rightarrow y=2$; em $x=0$, isso exige $y(0)=2$.`),
             mcqS(t`Solução de $y'+\frac1xy=x$ ($x>0$):`, t`$y=\frac{x^2}{3}+\frac Cx$`, [t`$y=\frac{x^2}{2}+Cx$`, t`$y=x^2+\frac Cx$`, t`$y=\frac{x^3}{3}+C$`, t`$y=\frac{x}{3}+Ce^{-x}$`], t`$\mu=x$: $(xy)'=x^2\Rightarrow xy=\frac{x^3}{3}+C$.`),
             num(t`Resolva $y'-y=e^{2x}$, $y(0)=2$. Quanto vale $C$ em $y=e^{2x}+Ce^{x}$?`, 1, t`$\mu=e^{-x}$: $(e^{-x}y)'=e^{x}\Rightarrow y=e^{2x}+Ce^x$; $y(0)=1+C=2$.`),
             tf(t`Em $y'+ay=b$ com $a<0$, as soluções convergem para o equilíbrio $b/a$.`, false, t`Com $a<0$, $e^{-ax}$ **cresce**: as soluções se afastam do equilíbrio (instável).`),
@@ -471,7 +471,7 @@ A **constante de tempo** $\tau$ mede a rapidez: em $t=\tau$ chega a $63\%$; em $
               return num(t`Qual a constante de tempo de um circuito RC com $R=${R}\,\text{k}\Omega$ e $C=${fmt(Cc)}\,\text{mF}$ (em segundos)?`, R * Cc, t`$\tau=RC=${R}\cdot10^{3}\cdot${fmt(Cc)}\cdot10^{-3}=${fmt(R * Cc)}$ s.`, { tol: 0.001 });
             }),
             mcq(t`Em $t=\tau$, o capacitor de um RC (partindo descarregado) tem que fração da tensão da fonte?`, ['≈ 63%', '50%', '≈ 37%', '100%'], 0, t`$1-e^{-1}\approx0{,}632$.`),
-            inter(t`Ajuste o circuito para $\tau=RC=4$ com fonte $E=6$.`, 'plot', rcLab().props, (v: any) => v && near(v.p.R * v.p.Cc, 4, 0.06) && near(v.p.E, 6, 0.01), t`Por exemplo $R=4$, $C=1$ e $E=6$.`),
+            inter(t`Ajuste o circuito para $\tau=RC=4$ com fonte $E=6$.`, 'plot', rcLab().props, (v: any) => v && near(v.p.R * v.p.Cc, 4, 0.06) && near(v.p.E, 6, 0.01), t`Por exemplo $R=4$, $C=1$ e $E=6$.`, t`A constante de tempo do circuito RC é $\tau=RC$: por exemplo $R=4$ e $C=1$ dão $\tau=4$.`),
             tf(t`Dobrar a resistência de um circuito RC faz o capacitor carregar mais devagar.`, true, t`$\tau=RC$ dobra.`),
             gen((rng) => {
               const E = pick(rng, [5, 10, 12]);

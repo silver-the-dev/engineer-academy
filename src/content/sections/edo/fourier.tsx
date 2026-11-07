@@ -155,8 +155,8 @@ $\operatorname{sen}(nx)$ e $\cos(nx)$ têm período $\frac{2\pi}{n}$: são os **
             tip: t`$\operatorname{sen}x+\frac13\operatorname{sen}3x$ já parece uma onda quadrada "arredondada".`,
           },
           exercises: [
-            inter(t`Monte o sinal tracejado $\operatorname{sen}x+\frac13\operatorname{sen}3x$.`, 'plot', harmonicLab([1, 0, 1 / 3]).props, (v: any) => v && near(v.p.b1, 1, 0.06) && near(v.p.b2, 0, 0.06) && near(v.p.b3, 1 / 3, 0.06), t`$b_1=1$, $b_2=0$, $b_3\approx0{,}33$.`),
-            inter(t`Monte o sinal tracejado (só o 2º harmônico, com amplitude $-0{,}8$).`, 'plot', harmonicLab([0, -0.8, 0]).props, (v: any) => v && near(v.p.b1, 0, 0.06) && near(v.p.b2, -0.8, 0.06) && near(v.p.b3, 0, 0.06), t`$b_1=0$, $b_2=-0{,}8$, $b_3=0$.`),
+            inter(t`Monte o sinal tracejado $\operatorname{sen}x+\frac13\operatorname{sen}3x$.`, 'plot', harmonicLab([1, 0, 1 / 3]).props, (v: any) => v && near(v.p.b1, 1, 0.06) && near(v.p.b2, 0, 0.06) && near(v.p.b3, 1 / 3, 0.06), t`$b_1=1$, $b_2=0$, $b_3\approx0{,}33$.`, t`Cada $b_n$ é a amplitude de $\operatorname{sen}nx$: aqui $b_1=1$, $b_2=0$ e $b_3=\frac13\approx0{,}33$.`),
+            inter(t`Monte o sinal tracejado (só o 2º harmônico, com amplitude $-0{,}8$).`, 'plot', harmonicLab([0, -0.8, 0]).props, (v: any) => v && near(v.p.b1, 0, 0.06) && near(v.p.b2, -0.8, 0.06) && near(v.p.b3, 0, 0.06), t`$b_1=0$, $b_2=-0{,}8$, $b_3=0$.`, t`Só $\operatorname{sen}2x$ aparece: $b_2=-0{,}8$ e os outros coeficientes são nulos.`),
             tf(t`Somando só senos ($b_n\operatorname{sen}nx$) o resultado é sempre uma função ímpar.`, true, t`Cada $\operatorname{sen}nx$ é ímpar, e soma de ímpares é ímpar.`),
             gen((rng) => {
               const b1 = randNZ(rng, -3, 3);
@@ -256,7 +256,7 @@ Porque $\int_{-\pi}^{\pi}(\text{ímpar})\,dx=0$, e par × ímpar = ímpar.`,
               const even = rng() < 0.5;
               return rmcq(rng, t`A série de Fourier de $f(x)=x^{${even ? 2 * Math.floor(k / 2) : 2 * Math.floor(k / 2) + 1}}$ em $(-\pi,\,\pi)$ tem:`, even ? 'apenas cossenos (e constante)' : 'apenas senos', [even ? 'apenas senos' : 'apenas cossenos (e constante)', 'senos e cossenos', 'nenhum termo'], even ? t`Potência par ⟹ função par.` : t`Potência ímpar ⟹ função ímpar.`);
             }),
-            inter(t`No lab, escolha a onda **triangular** e use harmônicos até $N=5$.`, 'plot', fourierLab(0).props, (v: any) => v && Math.round(v.p.w) === 2 && Math.round(v.p.N) === 5, t`Onda $=2$ (triangular), $N=5$: já fica quase perfeita — os coeficientes caem como $\frac{1}{n^2}$.`),
+            inter(t`No lab, escolha a onda **triangular** e use harmônicos até $N=5$.`, 'plot', fourierLab(0).props, (v: any) => v && Math.round(v.p.w) === 2 && Math.round(v.p.N) === 5, t`Onda $=2$ (triangular), $N=5$: já fica quase perfeita — os coeficientes caem como $\frac{1}{n^2}$.`, t`A onda triangular é contínua e seus coeficientes caem como $\frac{1}{n^2}$; poucos termos já a reproduzem bem (a quadrada cai como $\frac1n$).`),
             mcqS(t`Por que a série da triangular converge mais rápido que a da quadrada?`, t`seus coeficientes caem como $1/n^2$ (a função é contínua)`, [t`porque ela é ímpar`, t`porque tem período maior`, t`porque não tem harmônicos`, t`porque $a_0=0$`], t`Saltos ⟹ $\frac1n$; bicos (contínua) ⟹ $\frac1{n^2}$: quanto mais suave, mais rápido.`),
             num(t`Para $f(x)=|x|$ em $(-\pi,\,\pi)$, quanto vale o valor médio $\frac{a_0}{2}$? (2 casas)`, PI / 2, t`Média de $|x|$ entre $0$ e $\pi$ é $\frac\pi2\approx1{,}57$.`, { tol: 0.01 }),
           ],
@@ -278,7 +278,7 @@ Nos saltos, a série converge para a **média** dos limites laterais ($0$). Pert
             }),
             num(t`Na onda quadrada, quanto vale $b_4$?`, 0, t`Harmônicos pares não aparecem.`),
             num(t`Para que valor converge a série da onda quadrada em $x=0$ (no salto)?`, 0, t`Média de $-1$ e $1$.`),
-            inter(t`Aumente $N$ na onda quadrada até $15$ ou mais e observe o pico perto do salto.`, 'plot', fourierLab(0).props, (v: any) => v && Math.round(v.p.w) === 0 && Math.round(v.p.N) >= 15, t`O pico continua perto de $1{,}18$: Gibbs não desaparece, só fica mais estreito.`),
+            inter(t`Aumente $N$ na onda quadrada até $15$ ou mais e observe o pico perto do salto.`, 'plot', fourierLab(0).props, (v: any) => v && Math.round(v.p.w) === 0 && Math.round(v.p.N) >= 15, t`O pico continua perto de $1{,}18$: Gibbs não desaparece, só fica mais estreito.`, t`Fenômeno de Gibbs: perto de um salto, a soma parcial ultrapassa o valor em cerca de $9\%$ do salto, para qualquer $N$.`),
             tf(t`Com $N$ grande o suficiente, a soma parcial da onda quadrada para de ultrapassar $1$ perto do salto.`, false, t`O excesso de $\approx9\%$ do salto persiste (Gibbs); ele só se concentra mais perto do salto.`),
             mcqS(t`Substituindo $x=\frac\pi2$ na série da onda quadrada, obtém-se a série de Leibniz. Qual?`, t`$1-\frac13+\frac15-\cdots=\frac\pi4$`, [t`$1+\frac12+\frac13+\cdots=\infty$`, t`$1+\frac14+\frac19+\cdots=\frac{\pi^2}{6}$`, t`$1-\frac12+\frac13-\cdots=\ln2$`, t`$\sum\frac{1}{2^n}=1$`], t`$\operatorname{sen}\frac{n\pi}{2}$ alterna $1,-1,\ldots$ nos ímpares: $1=\frac4\pi\left(1-\frac13+\frac15-\cdots\right)$.`),
             gen((rng) => {
@@ -310,7 +310,7 @@ Mova o corte do filtro:`,
           },
           exercises: [
             mcq(t`Um filtro passa-baixas aplicado à onda quadrada a deixa…`, ['mais arredondada', 'com saltos mais bruscos', 'igual', 'com frequência dobrada'], 0, t`Sem os harmônicos altos, não dá para fazer cantos vivos.`),
-            inter(t`Ajuste o filtro para manter só a fundamental.`, 'plot', filterLab().props, (v: any) => v && Math.round(v.p.fc) === 1, t`Corte $=1$: sobra $\frac4\pi\operatorname{sen}x$.`),
+            inter(t`Ajuste o filtro para manter só a fundamental.`, 'plot', filterLab().props, (v: any) => v && Math.round(v.p.fc) === 1, t`Corte $=1$: sobra $\frac4\pi\operatorname{sen}x$.`, t`Um passa-baixas com corte em $n=1$ elimina os harmônicos $3,5,\ldots$ e sobra o primeiro termo da série da onda quadrada.`),
             gen((rng) => {
               const a = randInt(rng, 1, 6);
               const b = randInt(rng, 1, 6);
@@ -344,7 +344,7 @@ onde $b_n$ são os coeficientes do perfil inicial. O fator $e^{-n^2t}$ apaga **p
               return num(t`Na equação do calor, o harmônico $n=${n}$ decai quantas vezes mais rápido (no expoente) que o fundamental?`, n * n, t`Expoentes $-${n * n}t$ contra $-t$: fator $${n * n}$.`);
             }),
             tf(t`Depois de algum tempo, a temperatura na barra fica parecida com $b_1e^{-t}\operatorname{sen}x$.`, true, t`Os outros termos decaem muito mais rápido.`),
-            inter(t`Avance o tempo até o 3º harmônico ter caído abaixo de $1\%$ ($e^{-9t}<0{,}01$).`, 'plot', heatLab().props, (v: any) => v && Math.exp(-9 * v.p.tt) < 0.01, t`$t>\frac{\ln100}{9}\approx0{,}51$.`),
+            inter(t`Avance o tempo até o 3º harmônico ter caído abaixo de $1\%$ ($e^{-9t}<0{,}01$).`, 'plot', heatLab().props, (v: any) => v && Math.exp(-9 * v.p.tt) < 0.01, t`$t>\frac{\ln100}{9}\approx0{,}51$.`, t`Na equação do calor o modo $n$ decai como $e^{-n^2t}$: $e^{-9t}<0{,}01\iff t>\frac{\ln100}{9}\approx0{,}51$.`),
             num(t`Em que instante (2 casas) o harmônico fundamental cai para metade, isto é $e^{-t}=\frac12$?`, Math.log(2), t`$t=\ln2\approx0{,}69$.`, { tol: 0.01 }),
             mcq(t`Por que os cantos do perfil inicial (degrau) somem quase instantaneamente?`, ['são feitos de harmônicos altos, que decaem como $e^{-n^2t}$', 'porque a barra esquenta', 'por causa do fenômeno de Gibbs', 'porque $b_n=0$'], 0, t`Detalhes finos = altas frequências = decaimento rápido.`),
             mcqS(t`Se o perfil inicial é $u(x,0)=3\operatorname{sen}2x$, a solução é:`, t`$3e^{-4t}\operatorname{sen}2x$`, [t`$3e^{-2t}\operatorname{sen}2x$`, t`$3e^{-t}\operatorname{sen}x$`, t`$3\operatorname{sen}2x$`, t`$3e^{4t}\operatorname{sen}2x$`], t`Um só harmônico, $n=2$: fator $e^{-n^2t}=e^{-4t}$.`),

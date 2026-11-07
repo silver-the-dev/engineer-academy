@@ -194,7 +194,7 @@ Mova os sliders e gire a cena com o dedo:`,
             }),
             num(t`Quantos octantes o espaço tem?`, 8, t`$2^3$ combinações de sinais.`),
             tf(t`O ponto $(1,\,-2,\,3)$ está no mesmo octante que $(5,\,-1,\,2)$.`, true, t`Sinais $(+,\,-,\,+)$ nos dois.`),
-            inter(t`Posicione o ponto $P=(-2,\,1,\,3)$.`, 'space3d', pointLab().props, (v: any) => v && near(v.p.x, -2, 0.01) && near(v.p.y, 1, 0.01) && near(v.p.z, 3, 0.01), t`$x=-2$, $y=1$, $z=3$.`),
+            inter(t`Posicione o ponto $P=(-2,\,1,\,3)$.`, 'space3d', pointLab().props, (v: any) => v && near(v.p.x, -2, 0.01) && near(v.p.y, 1, 0.01) && near(v.p.z, 3, 0.01), t`$x=-2$, $y=1$, $z=3$.`, t`Ande $-2$ no eixo $x$, $1$ no eixo $y$ e suba $3$ no eixo $z$.`),
             gen((rng) => {
               const P = [randInt(rng, -4, 4), randInt(rng, -4, 4), randNZ(rng, -5, 5)];
               return num(t`Qual a distância do ponto $${V(P)}$ ao plano $xy$?`, Math.abs(P[2]), t`É $|z|=${Math.abs(P[2])}$.`);
@@ -240,7 +240,7 @@ Na forma expandida, **complete quadrados** para achar centro e raio.`,
               const lin = `${term(-2 * C0[0], 'x')}${term(-2 * C0[1], 'y')}${term(-2 * C0[2], 'z')}`;
               return num(t`Qual o raio da esfera $x^2+y^2+z^2${lin}=${k}$?`, R, t`Completando quadrados: centro $${V(C0)}$ e $R^2=${k}+${C0[0] ** 2 + C0[1] ** 2 + C0[2] ** 2}=${R * R}$.`);
             }),
-            inter(t`Ajuste o lab para a esfera de centro $(-1,\,0,\,1)$ e raio $2$.`, 'space3d', sphereLab().props, (v: any) => v && near(v.p.cx, -1, 0.01) && near(v.p.cz, 1, 0.01) && near(v.p.R, 2, 0.01), t`$x_0=-1$, $z_0=1$, $R=2$.`),
+            inter(t`Ajuste o lab para a esfera de centro $(-1,\,0,\,1)$ e raio $2$.`, 'space3d', sphereLab().props, (v: any) => v && near(v.p.cx, -1, 0.01) && near(v.p.cz, 1, 0.01) && near(v.p.R, 2, 0.01), t`$x_0=-1$, $z_0=1$, $R=2$.`, t`$(x-x_0)^2+(y-y_0)^2+(z-z_0)^2=R^2$ com $(x_0,y_0,z_0)=(-1,0,1)$ e $R=2$.`),
             tf(t`$x^2+y^2+z^2+2x+5=0$ representa uma esfera.`, false, t`$(x+1)^2+y^2+z^2=-4<0$: nenhum ponto satisfaz.`),
             mcqS(t`A esfera de centro $(1,\,2,\,3)$ que tangencia o plano $xy$ tem raio:`, '3', ['1', '2', '√14', '6'], t`O raio é a distância do centro ao plano $z=0$: $|3|$.`),
             num(t`O ponto $(1,\,2,\,2)$ está a que distância da superfície da esfera $x^2+y^2+z^2=16$?`, 1, t`Ele está a $\sqrt{1+4+4}=3$ da origem; a esfera tem raio $4$: falta $1$.`),
@@ -297,7 +297,7 @@ Escolha a superfície e mova o plano de corte $z=k$:`,
           exercises: [
             mcq(t`$z=y^2$ no espaço é um cilindro ao longo de qual eixo?`, ['eixo $x$', 'eixo $y$', 'eixo $z$', 'nenhum'], 0, t`A variável ausente é $x$.`),
             mcqS(t`Qual variável é "livre" em $x^2+z^2=9$?`, t`$y$`, [t`$x$`, t`$z$`, 'nenhuma', 'todas'], t`Cilindro de raio 3 ao longo do eixo $y$.`),
-            inter(t`Escolha a superfície $z=y^2$ (nº 2) e corte com o plano $z=1$.`, 'space3d', cylinderLab(0).props, (v: any) => v && Math.round(v.p.c) === 1 && near(v.p.k, 1, 0.05), t`Superfície 2 e $k=1$: o traço são as duas retas $y=\pm1$.`),
+            inter(t`Escolha a superfície $z=y^2$ (nº 2) e corte com o plano $z=1$.`, 'space3d', cylinderLab(0).props, (v: any) => v && Math.round(v.p.c) === 1 && near(v.p.k, 1, 0.05), t`Superfície 2 e $k=1$: o traço são as duas retas $y=\pm1$.`, t`$z=y^2$ não depende de $x$ (cilindro parabólico); com $z=1$, $y^2=1\Rightarrow y=\pm1$: duas retas paralelas ao eixo $x$.`),
             tf(t`O traço do cilindro $x^2+y^2=4$ em qualquer plano $z=k$ é a mesma circunferência.`, true, t`$z$ não aparece na equação.`),
             gen((rng) => {
               const r = randInt(rng, 2, 6);
@@ -359,7 +359,7 @@ Troque o tipo (1 a 3) e mova o plano de corte:`,
             mcqS(t`$\frac{x^2}{9}+\frac{y^2}{4}+z^2=1$ é um:`, 'elipsoide', ['paraboloide', 'hiperboloide', 'cone', 'cilindro'], t`Três quadrados positivos somando 1.`),
             mcqS(t`$z=x^2+3y^2$ é um:`, 'paraboloide elíptico', ['paraboloide hiperbólico', 'elipsoide', 'cone', 'cilindro'], t`Uma variável no 1º grau e as outras duas ao quadrado com o mesmo sinal.`),
             mcqS(t`$z=y^2-x^2$ é um:`, 'paraboloide hiperbólico (sela)', ['paraboloide elíptico', 'hiperboloide', 'cone', 'elipsoide'], t`Sinais opostos nos quadrados.`),
-            inter(t`Mostre a **sela** no lab e corte em $z=0$.`, 'space3d', quadricLab(0).props, (v: any) => v && Math.round(v.p.q) === 2 && near(v.p.k, 0, 0.05), t`Tipo 3, $k=0$: o traço são duas retas que se cruzam.`),
+            inter(t`Mostre a **sela** no lab e corte em $z=0$.`, 'space3d', quadricLab(0).props, (v: any) => v && Math.round(v.p.q) === 2 && near(v.p.k, 0, 0.05), t`Tipo 3, $k=0$: o traço são duas retas que se cruzam.`, t`Na sela $z=x^2-y^2$, o corte $z=0$ dá $x^2=y^2$, isto é, as retas $y=\pm x$ que se cruzam na origem.`),
             gen((rng) => {
               const a = randInt(rng, 1, 5);
               const b = randInt(rng, 1, 5);
@@ -385,7 +385,7 @@ Dica: conte os sinais. Dois $+$ e um $-$ igualados a $+1$ ⟹ uma folha; um $+$ 
             mcqS(t`$x^2+y^2-z^2=4$ é um:`, 'hiperboloide de uma folha', ['hiperboloide de duas folhas', 'cone', 'elipsoide', 'paraboloide'], t`Dois sinais $+$, um $-$, igual a positivo.`),
             mcqS(t`$z^2-x^2-y^2=4$ é um:`, 'hiperboloide de duas folhas', ['hiperboloide de uma folha', 'cone', 'esfera', 'sela'], t`Só $z^2$ positivo.`),
             mcqS(t`$x^2+y^2-z^2=0$ é um:`, 'cone', ['hiperboloide de uma folha', 'plano', 'cilindro', 'sela'], t`Igualado a zero.`),
-            inter(t`No lab, mostre o hiperboloide de **duas** folhas e escolha um corte $z=k$ que **não** encontra a superfície.`, 'space3d', quadricLab(3).props, (v: any) => v && Math.round(v.p.q) === 4 && Math.abs(v.p.k) < 1 - 1e-9, t`Tipo 5 e $|k|<1$.`),
+            inter(t`No lab, mostre o hiperboloide de **duas** folhas e escolha um corte $z=k$ que **não** encontra a superfície.`, 'space3d', quadricLab(3).props, (v: any) => v && Math.round(v.p.q) === 4 && Math.abs(v.p.k) < 1 - 1e-9, t`Tipo 5 e $|k|<1$.`, t`Em $-x^2-y^2+z^2=1$, o corte $z=k$ dá $x^2+y^2=k^2-1$, que só tem pontos se $|k|\ge1$; com $|k|<1$ o plano passa entre as folhas.`),
             tf(t`O hiperboloide de uma folha pode ser construído só com retas.`, true, t`É uma superfície duplamente regrada — por isso torres de resfriamento são feitas com vigas retas.`),
             gen((rng) => {
               const k = randInt(rng, 2, 6);
@@ -425,7 +425,7 @@ Dica: conte os sinais. Dois $+$ e um $-$ igualados a $+1$ ⟹ uma folha; um $+$ 
               return rmcq(rng, t`Classifique: $${eqs[kind]}$`, names[kind], names.filter((_, i) => i !== kind), t`Grau das variáveis e sinais dos quadrados.`);
             }),
             tf(t`$4x^2+9y^2+36z^2=36$ é um elipsoide com semieixos $3$, $2$ e $1$.`, true, t`Dividindo por 36: $\frac{x^2}{9}+\frac{y^2}{4}+z^2=1$.`),
-            inter(t`Mostre o **paraboloide elíptico** e um traço circular de raio $2$.`, 'space3d', quadricLab(1).props, (v: any) => v && Math.round(v.p.q) === 1 && near(v.p.k, 2, 0.05), t`$z=\frac{x^2+y^2}{2}$: raio $2$ em $z=2$.`),
+            inter(t`Mostre o **paraboloide elíptico** e um traço circular de raio $2$.`, 'space3d', quadricLab(1).props, (v: any) => v && Math.round(v.p.q) === 1 && near(v.p.k, 2, 0.05), t`$z=\frac{x^2+y^2}{2}$: raio $2$ em $z=2$.`, t`Em $z=\frac{x^2+y^2}{2}$, o corte $z=k$ dá $x^2+y^2=2k$; raio $2$ exige $2k=4$, ou seja, $z=2$.`),
             order(t`Ordene o roteiro para reconhecer uma quádrica:`, ['completar quadrados (se preciso)', 'ver se alguma variável aparece só no 1º grau', 'contar os sinais dos termos quadráticos', 'confirmar com dois ou três traços'], t`É o roteiro do card.`),
             mcq(t`Qual quádrica é a única **limitada** (cabe numa caixa)?`, ['elipsoide', 'cone', 'paraboloide', 'hiperboloide'], 0, t`Todas as outras se estendem ao infinito.`),
           ],

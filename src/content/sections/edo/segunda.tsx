@@ -158,7 +158,7 @@ Se as raízes $r_1\ne r_2$ são reais: $y=C_1e^{r_1t}+C_2e^{r_2t}$.
               return num(t`A equação $${ode(-(r1 + r2), r1 * r2)}$ tem raízes características $r_1<r_2$. Quanto vale $r_2$?`, r2, t`$${charPoly(-(r1 + r2), r1 * r2)}=(r${term(-r1, '')})(r${term(-r2, '')})$.`);
             }),
             multi(t`Quais funções resolvem $y''-y=0$?`, [t`$e^t$`, t`$e^{-t}$`, t`$\cosh t=\frac{e^t+e^{-t}}{2}$`, t`$\operatorname{sen}t$`], [0, 1, 2], t`Raízes $\pm1$; $\cosh t$ é combinação das duas. $\operatorname{sen}t$ resolve $y''+y=0$.`),
-            inter(t`No lab, escolha $b$ e $c$ com raízes reais **distintas** e **negativas** (a solução decai sem oscilar).`, 'plot', charLab().props, (v: any) => v && v.p.b * v.p.b - 4 * v.p.c > 0.05 && v.p.b > 0 && v.p.c > 0.01, t`Por exemplo $b=3$, $c=2$: raízes $-1$ e $-2$.`),
+            inter(t`No lab, escolha $b$ e $c$ com raízes reais **distintas** e **negativas** (a solução decai sem oscilar).`, 'plot', charLab().props, (v: any) => v && v.p.b * v.p.b - 4 * v.p.c > 0.05 && v.p.b > 0 && v.p.c > 0.01, t`Por exemplo $b=3$, $c=2$: raízes $-1$ e $-2$.`, t`$r^2+br+c=0$ tem raízes reais distintas se $b^2-4c>0$ e ambas negativas se $b>0$ e $c>0$; com $b=3$, $c=2$: $r=-1$ e $r=-2$.`),
             num(t`Resolva $y''-3y'+2y=0$ com $y(0)=0$, $y'(0)=1$. Quanto vale $C_2$ em $y=C_1e^t+C_2e^{2t}$?`, 1, t`$C_1+C_2=0$ e $C_1+2C_2=1$ ⟹ $C_2=1$, $C_1=-1$.`),
             gen((rng) => {
               const r = randInt(rng, 2, 5);
@@ -189,7 +189,7 @@ Confira: para $y''-4y'+4y=0$, $r=2$ dupla, e $y=te^{2t}$ dá $y'=(1+2t)e^{2t}$, 
             }),
             num(t`Resolva $y''+2y'+y=0$, $y(0)=1$, $y'(0)=0$. Quanto vale $C_2$ em $y=(C_1+C_2t)e^{-t}$?`, 1, t`$C_1=1$; $y'(0)=C_2-C_1=0\Rightarrow C_2=1$.`),
             fill(t`Complete a classificação pelo discriminante de $ar^2+br+c$:`, t`$\Delta>0$: ___ ; $\Delta=0$: ___ ; $\Delta<0$: ___`, [t`$C_1e^{r_1t}+C_2e^{r_2t}$`, t`$(C_1+C_2t)e^{rt}$`, t`$e^{\alpha t}(C_1\cos\beta t+C_2\operatorname{sen}\beta t)$`], [t`$C_1e^{rt}$`, t`$C_1t+C_2$`], t`São os três casos da equação característica.`),
-            inter(t`Ajuste $b$ e $c$ no lab para obter **raiz dupla** (amortecimento crítico) com $b=2$.`, 'plot', charLab().props, (v: any) => v && near(v.p.b, 2, 0.01) && near(v.p.c, 1, 0.01), t`$b=2$, $c=1$: $r^2+2r+1=(r+1)^2$.`),
+            inter(t`Ajuste $b$ e $c$ no lab para obter **raiz dupla** (amortecimento crítico) com $b=2$.`, 'plot', charLab().props, (v: any) => v && near(v.p.b, 2, 0.01) && near(v.p.c, 1, 0.01), t`$b=2$, $c=1$: $r^2+2r+1=(r+1)^2$.`, t`Raiz dupla quando o discriminante zera: $b^2-4c=0\Rightarrow c=\frac{b^2}{4}=1$.`),
             mcq(t`Por que $te^{rt}$ entra na raiz dupla, e não $2e^{rt}$?`, ['$2e^{rt}$ é múltiplo de $e^{rt}$: não traz informação nova', '$2e^{rt}$ não é solução', '$te^{rt}$ é mais simples', 'porque $t$ é o tempo'], 0, t`Precisamos de duas soluções **linearmente independentes** para encaixar duas condições iniciais.`),
           ],
         },
@@ -215,7 +215,7 @@ $\beta$ dá a **frequência** da oscilação e $\alpha$ diz se ela **cresce** ($
             }),
             tf(t`As soluções de $y''-2y'+10y=0$ oscilam com amplitude crescente.`, true, t`$r=1\pm3i$: $\alpha=1>0$, então $e^{t}$ faz a amplitude crescer.`),
             num(t`Qual o período das oscilações de $y''+4y=0$? (2 casas)`, Math.PI, t`$\beta=2\Rightarrow T=\frac{2\pi}{2}=\pi\approx3{,}14$.`, { tol: 0.01 }),
-            inter(t`No lab, deixe $b=0$ e ajuste $c$ para que a solução seja $\cos2t$.`, 'plot', charLab().props, (v: any) => v && near(v.p.b, 0, 0.01) && near(v.p.c, 4, 0.01), t`$y''+4y=0$: $c=4$.`),
+            inter(t`No lab, deixe $b=0$ e ajuste $c$ para que a solução seja $\cos2t$.`, 'plot', charLab().props, (v: any) => v && near(v.p.b, 0, 0.01) && near(v.p.c, 4, 0.01), t`$y''+4y=0$: $c=4$.`, t`$y''+cy=0$ com $c=\omega^2$ tem soluções $\cos\omega t$ e $\operatorname{sen}\omega t$; para $\omega=2$, $c=4$.`),
             num(t`Resolva $y''+y=0$, $y(0)=2$, $y'(0)=3$. Quanto vale $C_2$ em $y=C_1\cos t+C_2\operatorname{sen}t$?`, 3, t`$y(0)=C_1=2$; $y'(0)=C_2=3$.`),
             gen((rng) => {
               const b = randInt(rng, 1, 5);
@@ -250,7 +250,7 @@ Período $T=\frac{2\pi}{\omega_0}$. Mola **mais dura** ⟹ oscila mais rápido; 
             }),
             tf(t`Quadruplicar a massa (mesma mola) dobra o período.`, true, t`$T=2\pi\sqrt{m/k}$: $\sqrt4=2$.`),
             num(t`Qual o período (s) de $x''+16x=0$? (2 casas)`, Math.PI / 2, t`$\omega_0=4$, $T=\frac{2\pi}{4}\approx1{,}57$.`, { tol: 0.01 }),
-            inter(t`No lab (sem atrito, $c=0$), ajuste $m$ e $k$ para $\omega_0=2$ com $m=2$.`, 'plot', springLab({ c: 0 }).props, (v: any) => v && near(v.p.c, 0, 0.01) && near(v.p.m, 2, 0.01) && near(v.p.k, 8, 0.05), t`$\omega_0^2=k/m=4\Rightarrow k=8$.`),
+            inter(t`No lab (sem atrito, $c=0$), ajuste $m$ e $k$ para $\omega_0=2$ com $m=2$.`, 'plot', springLab({ c: 0 }).props, (v: any) => v && near(v.p.c, 0, 0.01) && near(v.p.m, 2, 0.01) && near(v.p.k, 8, 0.05), t`$\omega_0^2=k/m=4\Rightarrow k=8$.`, t`$\omega_0=\sqrt{k/m}$: $\sqrt{k/2}=2\Rightarrow k=8$.`),
             gen((rng) => {
               const w = randInt(rng, 1, 5);
               const x0 = randInt(rng, 1, 4);
@@ -290,7 +290,7 @@ Suspensão de carro e portas com mola são projetadas perto do **crítico**.`,
               const k = pick(rng, [1, 4, 9]);
               return num(t`Qual o amortecimento crítico $c$ para $m=${m}$ e $k=${k}$?`, 2 * Math.sqrt(m * k), t`$c=2\sqrt{mk}=2\sqrt{${m * k}}=${fmt(2 * Math.sqrt(m * k), 2)}$.`, { tol: 0.01 });
             }),
-            inter(t`Ajuste o lab para amortecimento **crítico** com $m=1$ e $k=4$.`, 'plot', springLab({ c: 1 }).props, (v: any) => v && near(v.p.m, 1, 0.01) && near(v.p.k, 4, 0.05) && near(v.p.c, 4, 0.05), t`$c=2\sqrt{1\cdot4}=4$.`),
+            inter(t`Ajuste o lab para amortecimento **crítico** com $m=1$ e $k=4$.`, 'plot', springLab({ c: 1 }).props, (v: any) => v && near(v.p.m, 1, 0.01) && near(v.p.k, 4, 0.05) && near(v.p.c, 4, 0.05), t`$c=2\sqrt{1\cdot4}=4$.`, t`Crítico quando $c^2-4mk=0$: $c=2\sqrt{mk}=2\sqrt{4}=4$.`),
             tf(t`Um sistema superamortecido cruza a posição de equilíbrio várias vezes.`, false, t`Sem raízes complexas não há oscilação: no máximo cruza uma vez.`),
             mcq(t`Um amortecedor de carro gasto ($c$ pequeno) faz o carro…`, ['quicar várias vezes após um buraco', 'ficar mais rígido', 'não se mover', 'voltar mais devagar sem oscilar'], 0, t`$c$ pequeno ⟹ subamortecido: oscila.`),
             gen((rng) => {
@@ -437,7 +437,7 @@ Quando $\omega\approx\omega_0=\sqrt{k/m}$ e $c$ é pequeno, $A$ fica **enorme**:
               const w = randInt(rng, 1, 5);
               return num(t`Uma estrutura com $m=${m}$ e $k=${m * w * w}$ entra em ressonância com qual frequência de forçamento $\omega$?`, w, t`$\omega_0=\sqrt{${m * w * w}/${m}}=${w}$.`);
             }),
-            inter(t`Com $m=1$, $k=4$ e $c$ pequeno, encontre a ressonância ajustando $\omega$.`, 'plot', springLab({ forced: true, c: 0.3, showT: false }).props, (v: any) => v && near(v.p.m, 1, 0.01) && near(v.p.k, 4, 0.05) && near(v.p.w, 2, 0.1) && v.p.c <= 1, t`$\omega=\sqrt{4/1}=2$.`),
+            inter(t`Com $m=1$, $k=4$ e $c$ pequeno, encontre a ressonância ajustando $\omega$.`, 'plot', springLab({ forced: true, c: 0.3, showT: false }).props, (v: any) => v && near(v.p.m, 1, 0.01) && near(v.p.k, 4, 0.05) && near(v.p.w, 2, 0.1) && v.p.c <= 1, t`$\omega=\sqrt{4/1}=2$.`, t`A amplitude explode quando a frequência da força iguala a natural: $\omega_0=\sqrt{k/m}=\sqrt{4}=2$.`),
             gen((rng) => {
               const k = pick(rng, [4, 9, 16]);
               const w = pick(rng, [1, 2, 5].filter((x) => x * x !== k));

@@ -75,7 +75,7 @@ Mexa nos vetores e veja o sinal: **positivo** (ângulo agudo), **zero** (reto), 
               return num(t`$|\vec u|=${m1}$, $|\vec v|=${m2}$ e o ângulo entre eles é $${ang}^\circ$. Quanto vale $\vec u\cdot\vec v$?`, m1 * m2 * cosOf(ang), t`$${m1}\cdot${m2}\cdot\cos${ang}^\circ=${fmt(m1 * m2 * cosOf(ang))}$.`);
             }),
             tf(t`Se dois vetores não nulos são perpendiculares, o produto escalar deles é zero.`, true, t`$\cos90^\circ=0$.`),
-            inter(t`Arraste os vetores para que o produto escalar seja **negativo**.`, 'plot', vectorLab('dot', { snap: 0.5 }).props, (v: any) => v && v.pts.u.x * v.pts.v.x + v.pts.u.y * v.pts.v.y < -1e-9, t`ângulo obtuso entre eles`),
+            inter(t`Arraste os vetores para que o produto escalar seja **negativo**.`, 'plot', vectorLab('dot', { snap: 0.5 }).props, (v: any) => v && v.pts.u.x * v.pts.v.x + v.pts.u.y * v.pts.v.y < -1e-9, t`ângulo obtuso entre eles`, t`$\vec u\cdot\vec v=|\vec u||\vec v|\cos\theta<0\iff\cos\theta<0\iff\theta>90^\circ$: ângulo obtuso.`),
             mcq(t`Para vetores de módulos fixos, o produto escalar é **máximo** quando o ângulo é…`, ['$0^\\circ$', '$90^\\circ$', '$180^\\circ$', '$45^\\circ$'], 0, t`$\cos0^\circ=1$ é o maior valor do cosseno.`),
             gen((rng) => {
               const m1 = randInt(rng, 2, 6);
@@ -111,7 +111,7 @@ $$\cos\theta=\frac{\vec u\cdot\vec v}{|\vec u|\,|\vec v|}$$`,
               const { u, v: w } = v.pts;
               const c = (u.x * w.x + u.y * w.y) / (Math.hypot(u.x, u.y) * Math.hypot(w.x, w.y) || 1);
               return Math.abs((Math.acos(Math.max(-1, Math.min(1, c))) * 180) / Math.PI - 135) < 1;
-            }, t`ex.: $(1,\,0)$ e $(-1,\,1)$`),
+            }, t`ex.: $(1,\,0)$ e $(-1,\,1)$`, t`$\cos\theta=\frac{\vec u\cdot\vec v}{|\vec u||\vec v|}$: com $(1,\,0)$ e $(-1,\,1)$, $\cos\theta=\frac{-1}{\sqrt2}\Rightarrow\theta=135^\circ$.`),
             gen((rng) => {
               const [a, b, c] = pick(rng, [[3, 4, 5], [6, 8, 10], [5, 12, 13]] as const);
               return num(t`Qual o cosseno do ângulo entre $(${a},\,${b})$ e $(1,\,0)$? (decimal)`, a / c, t`$\frac{${a}}{${c}\cdot1}=${fmt(a / c, 4)}$.`, { tol: 0.002 });
@@ -169,11 +169,11 @@ com $\cos^2\alpha+\cos^2\beta+\cos^2\gamma=1$.`,
           exercises: [
             mcqS(t`Qual a projeção de $\vec u=(3,\,4)$ sobre $\vec v=(1,\,0)$?`, t`$(3,\,0)$`, [t`$(0,\,4)$`, t`$(3,\,4)$`, t`$(5,\,0)$`], t`Projetar sobre o eixo $x$ é ficar só com a coordenada $x$.`),
             num(t`Calcule o comprimento da projeção de $\vec u=(2,\,3)$ sobre $\vec v=(4,\,0)$.`, 2, t`$\frac{|\vec u\cdot\vec v|}{|\vec v|}=\frac{8}{4}=2$.`),
-            inter(t`Arraste $\vec u$ de modo que sua projeção sobre $\vec v$ seja o **vetor nulo**.`, 'plot', vectorLab('proj', { u: [2, 2.5], v: [3, 0.5] }).props, (v: any) => v && Math.abs(v.pts.u.x * v.pts.v.x + v.pts.u.y * v.pts.v.y) < 1e-9 && Math.hypot(v.pts.u.x, v.pts.u.y) > 0, t`$\vec u\perp\vec v$`),
+            inter(t`Arraste $\vec u$ de modo que sua projeção sobre $\vec v$ seja o **vetor nulo**.`, 'plot', vectorLab('proj', { u: [2, 2.5], v: [3, 0.5] }).props, (v: any) => v && Math.abs(v.pts.u.x * v.pts.v.x + v.pts.u.y * v.pts.v.y) < 1e-9 && Math.hypot(v.pts.u.x, v.pts.u.y) > 0, t`$\vec u\perp\vec v$`, t`$\operatorname{proj}_{\vec v}\vec u=\frac{\vec u\cdot\vec v}{|\vec v|^2}\vec v$ é nula quando $\vec u\cdot\vec v=0$, isto é, $\vec u\perp\vec v$.`),
             tf(t`A projeção de $\vec u$ sobre $\vec v$ é sempre paralela a $\vec v$.`, true, t`É um múltiplo de $\vec v$.`),
             gen((rng) => {
               const v = pick(rng, [[0, 2], [3, 0], [0, -1]] as const);
-              const u = [randInt(rng, -5, 5), randInt(rng, -5, 5)];
+              const u = [randNZ(rng, -5, 5), randNZ(rng, -5, 5)]; // nonzero components: projection never null
               const k = (u[0] * v[0] + u[1] * v[1]) / (v[0] * v[0] + v[1] * v[1]);
               const p = [k * v[0], k * v[1]];
               return rmcq(rng, t`Qual a projeção de $(${u[0]},\,${u[1]})$ sobre $(${v[0]},\,${v[1]})$?`, `$(${fmt(p[0])},\\,${fmt(p[1])})$`, [`$(${fmt(p[1])},\\,${fmt(p[0])})$`, `$(${u[0]},\\,${u[1]})$`, `$(${fmt(-p[0])},\\,${fmt(-p[1])})$`, `$(${fmt(p[0] + 1)},\\,${fmt(p[1] + 1)})$`], t`$\frac{\vec u\cdot\vec v}{\vec v\cdot\vec v}=${fmt(k)}$, vezes $\vec v$.`);
@@ -243,11 +243,21 @@ O resultado é um **vetor**. Gire a cena:`,
             }),
             gen((rng) => {
               const a = r3(rng, -3, 3);
-              const b = r3(rng, -3, 3);
-              const c = cross(a, b);
+              let b = r3(rng, -3, 3);
+              let c = cross(a, b);
+              // parallel or null vectors give (0,0,0) and every distractor collapses onto it
+              for (let i = 0; i < 20 && c.every((x) => x === 0); i++) {
+                b = r3(rng, -3, 3);
+                c = cross(a, b);
+              }
+              if (c.every((x) => x === 0)) {
+                a[0] = 1;
+                b = [0, 1, 2];
+                c = cross(a, b);
+              }
               return rmcq(rng, t`Calcule $${V3(a)}\times${V3(b)}$.`, `$${V3(c)}$`, [`$${V3(c.map((x) => -x))}$`, `$${V3([a[0] * b[0], a[1] * b[1], a[2] * b[2]])}$`, `$${V3([c[0], -c[1], c[2]])}$`, `$${V3([c[2], c[1], c[0]])}$`], t`Pelo determinante: $${V3(c)}$.`);
             }),
-            inter(t`Ajuste os vetores para que a área do paralelogramo seja $6$.`, 'space3d', cross3DLab().props!, (v: any) => v && near(Math.abs(v.p.ux * v.p.vy), 6, 0.01), t`ex.: $u_x=3$ e $v_y=2$`),
+            inter(t`Ajuste os vetores para que a área do paralelogramo seja $6$.`, 'space3d', cross3DLab().props!, (v: any) => v && near(Math.abs(v.p.ux * v.p.vy), 6, 0.01), t`ex.: $u_x=3$ e $v_y=2$`, t`A área é $|\vec u\times\vec v|$; com $\vec u=(3,0,0)$ e $\vec v=(0,2,0)$, $\vec u\times\vec v=(0,0,6)$ e a área vale $6$.`),
             gen((rng) => {
               const a = r3(rng, -3, 3);
               const b = r3(rng, -3, 3);
@@ -302,7 +312,7 @@ Para um triângulo $ABC$, use $\vec u=\vec{AB}$ e $\vec v=\vec{AC}$.`,
               return num(t`Calcule a área do paralelogramo formado por $${V3(a)}$ e $${V3(b)}$.`, Math.abs(cross(a, b)[2]), t`$\vec u\times\vec v=${V3(cross(a, b))}$, módulo $${Math.abs(cross(a, b)[2])}$.`);
             }),
             num(t`Qual a área do triângulo de vértices $A(0,0,0)$, $B(2,0,0)$ e $C(0,3,0)$?`, 3, t`$\frac12|\vec{AB}\times\vec{AC}|=\frac12|(0,0,6)|=3$.`),
-            inter(t`Arraste os vetores para formar um paralelogramo de área $8$.`, 'plot', vectorLab('area', { snap: 1 }).props, (v: any) => v && near(Math.abs(v.pts.u.x * v.pts.v.y - v.pts.u.y * v.pts.v.x), 8, 0.01), t`ex.: $(4,\,0)$ e $(1,\,2)$`),
+            inter(t`Arraste os vetores para formar um paralelogramo de área $8$.`, 'plot', vectorLab('area', { snap: 1 }).props, (v: any) => v && near(Math.abs(v.pts.u.x * v.pts.v.y - v.pts.u.y * v.pts.v.x), 8, 0.01), t`ex.: $(4,\,0)$ e $(1,\,2)$`, t`Em 2D a área é $|u_xv_y-u_yv_x|$: com $(4,\,0)$ e $(1,\,2)$, $|4\cdot2-0\cdot1|=8$.`),
             tf(t`A área do triângulo formado por $\vec u$ e $\vec v$ é metade da área do paralelogramo.`, true, t`A diagonal divide o paralelogramo em dois triângulos iguais.`),
             gen((rng) => {
               const A = [randInt(rng, -2, 2), randInt(rng, -2, 2)];

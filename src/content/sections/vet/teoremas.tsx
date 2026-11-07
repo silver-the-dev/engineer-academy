@@ -171,7 +171,7 @@ Intuição: divida $D$ em quadradinhos, cada um com sua pequena circulação ("r
               const R = randInt(rng, 1, 4);
               return num(t`Use Green: $\oint_C(-${b}y)\,dx+(${b}x)\,dy$ na circunferência de raio $${R}$ (2 casas).`, 2 * b * PI * R * R, t`$Q_x-P_y=${b}+${b}=${2 * b}$; vezes a área $${R * R}\pi$: $\approx${fmt(2 * b * PI * R * R, 2)}$.`, { tol: 0.03 });
             }),
-            inter(t`No lab, deixe o campo **sem rotação** ($b=0$): a circulação na borda zera.`, 'plot', greenLab().props, (v: any) => v && near(v.p.b, 0, 0.01), t`Rotacional nulo ⟹ circulação nula.`),
+            inter(t`No lab, deixe o campo **sem rotação** ($b=0$): a circulação na borda zera.`, 'plot', greenLab().props, (v: any) => v && near(v.p.b, 0, 0.01), t`Rotacional nulo ⟹ circulação nula.`, t`Pelo Teorema de Green, a circulação na borda é $\iint(Q_x-P_y)\,dA$; sem rotação o integrando é zero.`),
             mcqS(t`$\oint_C x\,dy$ (anti-horário) é igual a:`, 'a área da região', ['zero', 'o perímetro', 'o dobro da área', 'a área com sinal trocado'], t`$P=0$, $Q=x$: $Q_x-P_y=1$.`),
             gen((rng) => {
               const a = randInt(rng, 1, 5);
@@ -259,7 +259,7 @@ Só conta a componente **normal** do campo: um disco paralelo ao escoamento não
             visual: fluxLab(),
           },
           exercises: [
-            inter(t`No lab, ache o ângulo em que o fluxo pelo disco é **zero**.`, 'space3d', fluxLab().props, (v: any) => v && near(v.p.al, 90, 0.5), t`$\alpha=90^\circ$: o disco fica paralelo ao campo.`),
+            inter(t`No lab, ache o ângulo em que o fluxo pelo disco é **zero**.`, 'space3d', fluxLab().props, (v: any) => v && near(v.p.al, 90, 0.5), t`$\alpha=90^\circ$: o disco fica paralelo ao campo.`, t`Fluxo $=\vec F\cdot\vec n\,A=|\vec F|A\cos\alpha$: zera em $\alpha=90^\circ$, quando o campo passa rente ao disco.`),
             gen((rng) => {
               const k = randInt(rng, 1, 5);
               const A = randInt(rng, 1, 6);
@@ -298,7 +298,7 @@ Consequência surpreendente: o lado direito dá **o mesmo valor para qualquer su
             visual: stokesLab(),
           },
           exercises: [
-            inter(t`No lab, achate o chapéu até virar o disco plano ($h=0$). O valor muda?`, 'space3d', stokesLab().props, (v: any) => v && near(v.p.h, 0, 0.01), t`Não: continua $2\pi$, pois a borda é a mesma.`),
+            inter(t`No lab, achate o chapéu até virar o disco plano ($h=0$). O valor muda?`, 'space3d', stokesLab().props, (v: any) => v && near(v.p.h, 0, 0.01), t`Não: continua $2\pi$, pois a borda é a mesma.`, t`Pelo Teorema de Stokes, $\iint_S\operatorname{rot}\vec F\cdot d\vec S=\oint_C\vec F\cdot d\vec r$ só depende da borda $C$, que não mudou.`),
             tf(t`O teorema de Green é o caso particular de Stokes para superfícies planas no plano $xy$.`, true, t`Aí $\vec n=\vec k$ e $(\nabla\times\vec F)\cdot\vec k=Q_x-P_y$.`),
             gen((rng) => {
               const R = randInt(rng, 1, 4);
@@ -368,7 +368,7 @@ O fluxo total que **sai** é a soma das fontes (divergente) **dentro**. Para $\v
               const R = randInt(rng, 1, 3);
               return num(t`Fluxo de $(x,\,y,\,z)$ para fora da esfera de raio $${R}$ via Gauss (2 casas):`, 4 * PI * R ** 3, t`$3\cdot\frac43\pi R^3=4\pi R^3\approx${fmt(4 * PI * R ** 3, 2)}$.`, { tol: 0.05 });
             }),
-            inter(t`No lab, ajuste o raio para o fluxo valer $4\pi\approx12{,}57$.`, 'space3d', gaussLab().props, (v: any) => v && near(v.p.R, 1, 0.01), t`$4\pi R^3=4\pi\Rightarrow R=1$.`),
+            inter(t`No lab, ajuste o raio para o fluxo valer $4\pi\approx12{,}57$.`, 'space3d', gaussLab().props, (v: any) => v && near(v.p.R, 1, 0.01), t`$4\pi R^3=4\pi\Rightarrow R=1$.`, t`Pelo Teorema de Gauss, fluxo $=\iiint\operatorname{div}\vec F\,dV=3\cdot\frac43\pi R^3=4\pi R^3$; vale $4\pi$ com $R=1$.`),
             num(t`Fluxo de $\vec F=(x,\,0,\,0)$ para fora do cubo $[0,\,2]^3$:`, 8, t`$\nabla\cdot\vec F=1$, volume $8$.`),
             gen((rng) => {
               const a = randInt(rng, 1, 3);

@@ -106,7 +106,7 @@ export const conceitos: UnitDef = {
               ['Nível de satisfação (baixo/médio/alto)', 'qualitativa ordinal'],
               ['Número de irmãos', 'quantitativa discreta'],
               ['Altura em cm', 'quantitativa contínua'],
-            ]),
+            ], t`Qualitativas descrevem categorias (nominais sem ordem, ordinais com ordem); quantitativas são números (discretas contam, contínuas medem).`),
             tf(t`"Tempo de reação em milissegundos" é uma variável quantitativa contínua.`, true, t`É uma medida que pode assumir qualquer valor num intervalo.`),
             multi(t`Quais variáveis são **quantitativas**?`, ['peso', 'CEP', 'número de acidentes', 'time de futebol'], [0, 2], t`O CEP é um rótulo (nominal), apesar de ter números.`),
             gen((rng) => {
@@ -147,7 +147,7 @@ export const conceitos: UnitDef = {
               ['Sistemática', 'um a cada k da lista'],
               ['Estratificada', 'sorteio dentro de cada grupo'],
               ['Conglomerados', 'sorteia grupos inteiros'],
-            ]),
+            ], t`Na estratificada sorteia-se dentro de cada grupo (todos os grupos aparecem); nos conglomerados sorteiam-se grupos inteiros e entrevista-se todo mundo deles.`),
             num(t`Numa amostragem sistemática de uma lista de 1.000 nomes para obter 50, a cada quantos nomes escolhemos um?`, 20, t`$k=\frac{1000}{50}=20$.`),
             gen((rng) => {
               const N = pick(rng, [600, 800, 1200, 2000]);
@@ -275,10 +275,10 @@ A notação $160\vdash170$ inclui $160$ e exclui $170$.`,
             visual: { name: 'bars', props: { labels: ['150', '160', '170', '180'], values: [2, 5, 8, 3], max: 20 } },
           },
           exercises: [
-            inter(t`Arraste as barras para formar o histograma da tabela: $4,\ 12,\ 16,\ 8$.`, 'bars', { labels: ['150', '160', '170', '180'], values: [2, 5, 8, 3], max: 20 }, (v: number[]) => Array.isArray(v) && v.join(',') === '4,12,16,8', 'alturas 4, 12, 16, 8'),
+            inter(t`Arraste as barras para formar o histograma da tabela: $4,\ 12,\ 16,\ 8$.`, 'bars', { labels: ['150', '160', '170', '180'], values: [2, 5, 8, 3], max: 20 }, (v: number[]) => Array.isArray(v) && v.join(',') === '4,12,16,8', 'alturas 4, 12, 16, 8', t`No histograma, a altura de cada barra é a frequência da classe: $4$, $12$, $16$ e $8$.`),
             tf(t`Num histograma de variável contínua, as barras ficam separadas por espaços.`, false, t`As classes são contíguas, então as barras se encostam.`),
             mcq(t`Num histograma com classes de mesma largura, a classe modal é…`, ['a de barra mais alta', 'a primeira', 'a do meio', 'a última'], 0, t`Moda = maior frequência.`),
-            inter(t`Monte um histograma **simétrico** com pico no meio: alturas $3,\ 9,\ 9,\ 3$.`, 'bars', { labels: ['1', '2', '3', '4'], values: [1, 1, 1, 1], max: 20 }, (v: number[]) => Array.isArray(v) && v.join(',') === '3,9,9,3', 'alturas 3, 9, 9, 3'),
+            inter(t`Monte um histograma **simétrico** com pico no meio: alturas $3,\ 9,\ 9,\ 3$.`, 'bars', { labels: ['1', '2', '3', '4'], values: [1, 1, 1, 1], max: 20 }, (v: number[]) => Array.isArray(v) && v.join(',') === '3,9,9,3', 'alturas 3, 9, 9, 3', t`Simétrico significa que o lado esquerdo espelha o direito: $3,\ 9\mid 9,\ 3$.`),
             mcq(t`Um histograma com uma "cauda" longa para a direita é chamado de…`, ['assimétrico à direita (positivo)', 'simétrico', 'assimétrico à esquerda', 'bimodal'], 0, t`Poucos valores grandes puxam a cauda para a direita (ex.: salários).`),
             mcq(t`Um histograma com **dois** picos sugere…`, ['dois grupos misturados nos dados (bimodal)', 'erro de digitação', 'dados simétricos', 'que não há moda'], 0, t`Ex.: alturas de homens e mulheres juntas.`),
             tf(t`No histograma, a área de cada barra é proporcional à frequência da classe (com larguras iguais).`, true, t`Com larguras iguais, área e altura contam a mesma história.`),
@@ -300,7 +300,7 @@ A notação $160\vdash170$ inclui $160$ e exclui $170$.`,
               ['Participação de mercado de 4 marcas', 'setores'],
               ['Distribuição de pesos de peças', 'histograma'],
               ['Altura × peso de 50 pessoas', 'dispersão'],
-            ]),
+            ], t`Linhas mostram evolução no tempo; setores, partes de um todo; histograma, a distribuição de uma variável contínua; dispersão, a relação entre duas variáveis.`),
             mcq(t`Para comparar o número de alunos em 6 cursos, o gráfico mais adequado é…`, ['barras', 'linhas', 'dispersão', 'histograma'], 0, t`Categorias lado a lado.`),
             tf(t`Um gráfico de setores com 15 fatias é fácil de ler.`, false, t`Setores funcionam bem com poucas categorias.`),
             mcq(t`Para ver se há relação entre horas de estudo e nota, use…`, ['diagrama de dispersão', 'setores', 'barras empilhadas', 'pictograma'], 0, t`Duas variáveis quantitativas: dispersão.`),
@@ -403,7 +403,7 @@ Arraste o ponto vermelho para longe e veja a média ser "puxada" enquanto a medi
               if (!v) return false;
               const arr = [2, 3, 3, 5, v.pts.X.x];
               return mean(arr) > 6 && median(arr) === 3;
-            }, t`valor extremo, ex.: $x=18$`),
+            }, t`valor extremo, ex.: $x=18$`, t`A média usa o valor de cada dado e é puxada por um extremo; a mediana só depende da posição central, então não muda.`),
             mcq(t`Qual medida faz sentido para a variável "cor preferida"?`, ['moda', 'média', 'mediana', 'desvio padrão'], 0, t`Para dados nominais, só a moda tem sentido.`),
             gen((rng) => {
               const d = [randInt(rng, 1, 5), randInt(rng, 6, 9), randInt(rng, 10, 14), randInt(rng, 15, 20)];

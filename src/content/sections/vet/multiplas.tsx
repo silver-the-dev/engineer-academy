@@ -191,7 +191,7 @@ $$\iint_D f\,dA=\iint f(r\cos\theta,\,r\operatorname{sen}\theta)\;r\,dr\,d\theta
           exercises: [
             mcqS(t`Em coordenadas polares, $dA=$`, t`$r\,dr\,d\theta$`, [t`$dr\,d\theta$`, t`$r^2\,dr\,d\theta$`, t`$\theta\,dr\,d\theta$`, t`$\frac{dr\,d\theta}{r}$`], t`O fator $r$ é o Jacobiano.`),
             tf(t`Em polares, $x^2+y^2=r^2$.`, true, t`$r^2(\cos^2\theta+\operatorname{sen}^2\theta)$.`),
-            inter(t`No lab, ajuste $r=3$, $\Delta r=0{,}2$ e $\Delta\theta=0{,}5$ e compare: a aproximação vale $0{,}3$.`, 'plot', polarRectLab().props, (v: any) => v && near(v.p.r, 3, 0.01) && near(v.p.dr, 0.2, 0.01) && near(v.p.dth, 0.5, 0.01), t`$r\Delta r\Delta\theta=3\cdot0{,}2\cdot0{,}5=0{,}3$.`),
+            inter(t`No lab, ajuste $r=3$, $\Delta r=0{,}2$ e $\Delta\theta=0{,}5$ e compare: a aproximação vale $0{,}3$.`, 'plot', polarRectLab().props, (v: any) => v && near(v.p.r, 3, 0.01) && near(v.p.dr, 0.2, 0.01) && near(v.p.dth, 0.5, 0.01), t`$r\Delta r\Delta\theta=3\cdot0{,}2\cdot0{,}5=0{,}3$.`, t`O setor polar é quase um retângulo de lados $\Delta r$ e $r\,\Delta\theta$ (arco), por isso $dA=r\,dr\,d\theta$.`),
             gen((rng) => {
               const R = randInt(rng, 1, 5);
               return num(t`Área do disco de raio $${R}$ via $\int_0^{2\pi}\!\int_0^{${R}}r\,dr\,d\theta$ (2 casas):`, PI * R * R, t`$2\pi\cdot\frac{${R * R}}{2}=${R * R}\pi\approx${fmt(PI * R * R, 2)}$.`, { tol: 0.02 });
@@ -217,7 +217,7 @@ $$\iint_D f\,dA=\iint f(r\cos\theta,\,r\operatorname{sen}\theta)\;r\,dr\,d\theta
               const a = randInt(rng, 1, 4);
               return num(t`Área da cardioide $r=${a}(1+\cos\theta)$ (2 casas):`, 1.5 * PI * a * a, t`$\frac32\pi a^2=${fmt(1.5 * a * a)}\pi\approx${fmt(1.5 * PI * a * a, 2)}$.`, { tol: 0.03 });
             }),
-            inter(t`No lab, escolha a **rosácea** com $a=2$. Área esperada: $\pi$.`, 'plot', polarRegionLab().props, (v: any) => v && Math.round(v.p.g) === 2 && near(v.p.a, 2, 0.01), t`$\frac{\pi a^2}{4}=\pi$.`),
+            inter(t`No lab, escolha a **rosácea** com $a=2$. Área esperada: $\pi$.`, 'plot', polarRegionLab().props, (v: any) => v && Math.round(v.p.g) === 2 && near(v.p.a, 2, 0.01), t`$\frac{\pi a^2}{4}=\pi$.`, t`A região $r\le a\cos2\theta$ só existe onde $\cos2\theta\ge0$ (duas pétalas, ângulo total $\pi$): $A=\frac12\int a^2\cos^2 2\theta\,d\theta=\frac12a^2\cdot\frac{\pi}{2}=\frac{\pi a^2}{4}$; com $a=2$, dá $\pi$.`),
             mcqS(t`$r=2\cos\theta$ é, em cartesianas:`, t`a circunferência $(x-1)^2+y^2=1$`, [t`a reta $x=2$`, t`$x^2+y^2=4$`, t`uma cardioide`, t`a parábola $y=x^2$`], t`$r^2=2r\cos\theta\Rightarrow x^2+y^2=2x$.`),
             tf(t`A integral $\int_{-\infty}^{\infty}e^{-x^2}dx=\sqrt\pi$ pode ser calculada elevando ao quadrado e passando para polares.`, true, t`$I^2=\iint e^{-(x^2+y^2)}dA=\int_0^{2\pi}\!\int_0^\infty e^{-r^2}r\,dr\,d\theta=\pi$.`),
             num(t`Calcule $\int_0^{2\pi}\!\int_0^\infty e^{-r^2}r\,dr\,d\theta$ (2 casas).`, PI, t`$\int_0^\infty e^{-r^2}r\,dr=\frac12$; vezes $2\pi$: $\pi$.`, { tol: 0.01 }),
@@ -253,7 +253,7 @@ Com $f=1$ dá o **volume** de $E$; com $f=\rho$ (densidade), a **massa**. Calcul
               const c = randInt(rng, 1, 4);
               return num(t`Volume do tetraedro $x+y+z\le${c}$ no 1º octante (3 casas):`, c ** 3 / 6, t`$\frac{c^3}{6}=${fmt(c ** 3 / 6, 3)}$.`, { tol: 0.002 });
             }),
-            inter(t`No lab, monte o tetraedro com volume $1$: $a=1$, $b=2$, $c=3$.`, 'space3d', tetraLab().props, (v: any) => v && near(v.p.a, 1, 0.01) && near(v.p.b, 2, 0.01) && near(v.p.c, 3, 0.01), t`$\frac{1\cdot2\cdot3}{6}=1$.`),
+            inter(t`No lab, monte o tetraedro com volume $1$: $a=1$, $b=2$, $c=3$.`, 'space3d', tetraLab().props, (v: any) => v && near(v.p.a, 1, 0.01) && near(v.p.b, 2, 0.01) && near(v.p.c, 3, 0.01), t`$\frac{1\cdot2\cdot3}{6}=1$.`, t`O tetraedro com vértices na origem e em $(a,0,0)$, $(0,b,0)$, $(0,0,c)$ tem volume $\frac{abc}{6}$: $\frac{1\cdot2\cdot3}{6}=1$.`),
             num(t`$\iiint_{[0,1]^3}(x+y+z)\,dV$:`, 1.5, t`Cada termo dá $\frac12$: total $\frac32$.`),
             mcqS(t`Nos limites de $\int\!\int\!\int dz\,dy\,dx$ sobre o tetraedro $x+y+z\le1$, o limite superior de $z$ é:`, t`$1-x-y$`, [t`$1$`, t`$1-x$`, t`$x+y$`, t`$1-y$`], t`A "tampa" é o plano $z=1-x-y$.`),
             tf(t`Uma integral tripla pode ser feita em 6 ordens diferentes de integração.`, true, t`$3!=6$ permutações de $dx,\,dy,\,dz$.`),
@@ -333,7 +333,7 @@ $$dV=\rho^2\operatorname{sen}\varphi\,d\rho\,d\varphi\,d\theta$$`,
           },
           exercises: [
             num(t`Volume da esfera de raio $2$ via $\int_0^{2\pi}\!\int_0^\pi\!\int_0^2\rho^2\operatorname{sen}\varphi\,d\rho\,d\varphi\,d\theta$ (2 casas):`, (32 * PI) / 3, t`$2\pi\cdot2\cdot\frac83=\frac{32\pi}{3}\approx33{,}51$.`, { tol: 0.03 }),
-            inter(t`No lab, posicione $P$ no **polo norte** de uma esfera de raio $2$.`, 'space3d', sphericalLab().props, (v: any) => v && near(v.p.rho, 2, 0.01) && near(v.p.ph, 0, 0.01), t`$\rho=2$, $\varphi=0$ (qualquer $\theta$).`),
+            inter(t`No lab, posicione $P$ no **polo norte** de uma esfera de raio $2$.`, 'space3d', sphericalLab().props, (v: any) => v && near(v.p.rho, 2, 0.01) && near(v.p.ph, 0, 0.01), t`$\rho=2$, $\varphi=0$ (qualquer $\theta$).`, t`Em esféricas, $\varphi$ mede o ângulo a partir do eixo $z$ positivo: o polo norte tem $\varphi=0$, e com $\rho=2$ fica em $(0,\,0,\,2)$.`),
             mcqS(t`Em esféricas, a esfera $x^2+y^2+z^2=9$ é:`, t`$\rho=3$`, [t`$\rho=9$`, t`$\varphi=3$`, t`$r=3$`, t`$\theta=3$`], t`$\rho$ é a distância à origem.`),
             mcqS(t`O cone $z=\sqrt{x^2+y^2}$ em esféricas é:`, t`$\varphi=\frac\pi4$`, [t`$\rho=1$`, t`$\theta=\frac\pi4$`, t`$\varphi=\frac\pi2$`, t`$\rho=\varphi$`], t`Ângulo de $45^\circ$ com o eixo $z$.`),
             tf(t`O plano $xy$ corresponde a $\varphi=\frac\pi2$.`, true, t`$z=\rho\cos\varphi=0$.`),
@@ -377,7 +377,7 @@ $|J|$ é o quanto um pedacinho de área $du\,dv$ é **esticado**. Para uma trans
               return num(t`Jacobiano de $x=${a}u${b < 0 ? '' : '+'}${b}v$, $y=${c}u${d < 0 ? '' : '+'}${d}v$:`, a * d - b * c, t`$\begin{vmatrix}${a}&${b}\\${c}&${d}\end{vmatrix}=${a * d - b * c}$.`);
             }),
             num(t`Jacobiano de $x=r\cos\theta$, $y=r\operatorname{sen}\theta$ quando $r=5$:`, 5, t`$J=\cos\theta\cdot r\cos\theta-(-r\operatorname{sen}\theta)\operatorname{sen}\theta=r$.`),
-            inter(t`No lab, faça uma transformação que **dobra** as áreas sem girar: $b=c=0$ e $ad=2$.`, 'plot', jacobianLab().props, (v: any) => v && near(v.p.b, 0, 0.01) && near(v.p.c, 0, 0.01) && near(v.p.a * v.p.d, 2, 0.05), t`Por exemplo $a=2$, $d=1$.`),
+            inter(t`No lab, faça uma transformação que **dobra** as áreas sem girar: $b=c=0$ e $ad=2$.`, 'plot', jacobianLab().props, (v: any) => v && near(v.p.b, 0, 0.01) && near(v.p.c, 0, 0.01) && near(v.p.a * v.p.d, 2, 0.05), t`Por exemplo $a=2$, $d=1$.`, t`Para $x=au+bv$, $y=cu+dv$, o fator de área é $|J|=|ad-bc|$; com $b=c=0$, $|J|=ad=2$.`),
             tf(t`Se $J=0$, a transformação "achata" a região (área zero).`, true, t`O quadrado vira um segmento.`),
             mcqS(t`O Jacobiano das coordenadas esféricas vale:`, t`$\rho^2\operatorname{sen}\varphi$`, [t`$\rho$`, t`$\rho^2$`, t`$\operatorname{sen}\varphi$`, t`$r$`], t`É o fator em $dV$.`),
             gen((rng) => {

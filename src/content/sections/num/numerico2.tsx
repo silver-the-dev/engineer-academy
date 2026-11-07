@@ -262,7 +262,7 @@ export const ajuste: UnitDef = {
               if (!v) return false;
               const ps = Object.values(v.pts) as { x: number; y: number }[];
               return ps.reduce((s, q) => s + (q.y - (v.p.a * q.x + v.p.b)) ** 2, 0) < 0.6;
-            }, t`perto de $y\approx0{,}9x+0{,}6$`),
+            }, t`perto de $y\approx0{,}9x+0{,}6$`, t`Os mínimos quadrados escolhem $a$ e $b$ que minimizam $\sum(y_i-ax_i-b)^2$; a reta ótima fica perto de $y\approx0{,}9x+0{,}6$.`),
             gen((rng) => {
               const a = randNZ(rng, -2, 3);
               const b = randInt(rng, -3, 3);
@@ -407,7 +407,7 @@ Teste com $\int_0^1e^{-x^2}dx$, que não tem primitiva elementar:`,
             tip: t`Para funções com concavidade para cima, os trapézios **superestimam** a integral (a reta fica acima da curva).`,
           },
           exercises: [
-            inter(t`Usando trapézios, aumente $n$ até o erro ficar abaixo de $0{,}001$.`, 'plot', QLAB().props, (v: any) => v && v.p.s === 0 && v.p.n >= 8, t`$n\ge8$ com trapézios`),
+            inter(t`Usando trapézios, aumente $n$ até o erro ficar abaixo de $0{,}001$.`, 'plot', QLAB().props, (v: any) => v && v.p.s === 0 && v.p.n >= 8, t`$n\ge8$ com trapézios`, t`O erro do trapézio cai como $h^2$: dobrar $n$ divide o erro por cerca de $4$; com $n\ge8$ fica abaixo de $0{,}001$.`),
             mcq(t`Se com $n=10$ o erro dos trapézios foi $0{,}004$, com $n=20$ espera-se um erro perto de…`, ['$0{,}001$', '$0{,}002$', '$0{,}008$', '$0{,}0005$'], 0, t`Erro $\propto h^2$: metade de $h$ ⟹ erro dividido por 4.`),
             tf(t`Para $f(x)=x^2$ em $[0,\,2]$, a regra dos trapézios dá um valor maior que o exato.`, true, t`Concavidade para cima: as retas ficam acima da curva ($3>2{,}667$).`),
             mcq(t`A regra dos trapézios é especialmente útil quando…`, ['só temos uma tabela de valores medidos', 'a primitiva é fácil', 'a função é constante', 'nunca'], 0, t`Ela só precisa dos valores nos pontos.`),
@@ -458,7 +458,7 @@ Surpresa: Simpson é **exata** para polinômios até grau **3**, mesmo usando pa
             visual: QLAB(),
           },
           exercises: [
-            inter(t`Com Simpson, qual o menor $n$ que dá erro abaixo de $10^{-5}$? Ajuste os controles.`, 'plot', QLAB().props, (v: any) => v && v.p.s === 1 && v.p.n >= 6, t`Simpson com $n=6$`),
+            inter(t`Com Simpson, qual o menor $n$ que dá erro abaixo de $10^{-5}$? Ajuste os controles.`, 'plot', QLAB().props, (v: any) => v && v.p.s === 1 && v.p.n >= 6, t`Simpson com $n=6$`, t`O erro de Simpson cai como $h^4$ (dobrar $n$ divide por $16$), por isso bastam poucos subintervalos: $n=6$.`),
             tf(t`Simpson é exata para qualquer polinômio de grau 3.`, true, t`Os erros do termo cúbico se cancelam por simetria.`),
             mcq(t`Se com $n=4$ o erro de Simpson foi $0{,}0016$, com $n=8$ espera-se um erro perto de…`, ['$0{,}0001$', '$0{,}0008$', '$0{,}0004$', '$0{,}0032$'], 0, t`Erro $\propto h^4$: metade de $h$ ⟹ erro dividido por 16.`),
             mcq(t`Para uma função suave, com o mesmo $n$, qual método costuma errar menos?`, ['Simpson', 'trapézios', 'os dois erram igual', 'depende só do $h$'], 0, t`$h^4$ cai bem mais rápido que $h^2$.`),
@@ -522,7 +522,7 @@ Para $y'=y$, $y(0)=1$ (solução exata $e^x$, verde), diminua $h$ e veja o erro 
             tip: t`Passo grande demais pode deixar a solução numérica instável, oscilando ou explodindo.`,
           },
           exercises: [
-            inter(t`Diminua $h$ (Euler) até o erro em $y(2)$ ficar abaixo de $0{,}7$.`, 'plot', ELAB().props, (v: any) => v && v.p.rk === 0 && v.p.h <= 0.1001, t`$h\le0{,}1$`),
+            inter(t`Diminua $h$ (Euler) até o erro em $y(2)$ ficar abaixo de $0{,}7$.`, 'plot', ELAB().props, (v: any) => v && v.p.rk === 0 && v.p.h <= 0.1001, t`$h\le0{,}1$`, t`Euler tem erro global proporcional a $h$: reduzir o passo pela metade corta o erro mais ou menos pela metade.`),
             mcq(t`Se Euler com $h=0{,}1$ errou $0{,}2$, com $h=0{,}05$ espera-se um erro perto de…`, ['$0{,}1$', '$0{,}05$', '$0{,}2$', '$0{,}4$'], 0, t`Primeira ordem: erro proporcional a $h$.`),
             tf(t`Diminuir o passo $h$ aumenta o número de passos necessários.`, true, t`Para ir de $x_0$ a $X$ são $\frac{X-x_0}{h}$ passos.`),
             gen((rng) => {
@@ -576,7 +576,7 @@ com $k_2,k_3$ no meio do passo e $k_4$ no final. Troque para RK4 e compare:`,
               ['Euler melhorado', '$h^2$'],
               ['RK4', '$h^4$'],
               ['Simpson (integração)', '$h^4$ (fórmula)'],
-            ]),
+            ], t`Euler é de 1ª ordem, Euler melhorado (Heun) de 2ª e RK4 de 4ª; a regra de Simpson também tem erro global da ordem de $h^4$.`),
           ],
         },
         {
