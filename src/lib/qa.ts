@@ -4,6 +4,7 @@
  */
 import { isGenerator, type Exercise, type Section } from '../content/types';
 import { makeRng } from './random';
+import { compareOptions } from './texEval';
 import { texToSvg, tidyOnes } from '../components/math/tex';
 
 function extractMath(s: string): string[] {
@@ -80,6 +81,17 @@ function drawIssues(e: Exercise): string[] {
       const lead = m.match(/^-?\d*/)![0];
       return lead + '|' + (m.slice(lead.length).match(/\([^()]+\)(\^\d+)?/g) ?? []).sort().join('');
     };
+    // options written differently but equal as functions ("1-\frac{4}{2}x^2" vs "1-2x^2"), or two
+    // antiderivatives of an indefinite integral that differ only by a constant
+    const indefinite = /\\int(?![_^])/.test(e.prompt);
+    // factor / simplify / "write in the form" questions list equal expressions on purpose
+    const formQuestion = /fator|simplifi|forma|notação|racionaliz|escrev|decomp|evidência|agrup|potência de|radical/i.test(e.prompt);
+    e.options.forEach((o, i) => {
+      if (i === e.answer || formQuestion) return;
+      const c = compareOptions(e.options[e.answer], o);
+      if (c === 'same') out.push(`opção errada "${o}" é igual à resposta "${e.options[e.answer]}" como expressão`);
+      if (c === 'const' && indefinite && /\+\s*C\s*\$?$/.test(o) && /\+\s*C\s*\$?$/.test(e.options[e.answer])) out.push(`opção errada "${o}" difere da resposta só por uma constante (também é primitiva)`);
+    });
     const pa = prod(e.options[e.answer]);
     if (pa) e.options.forEach((o, i) => i !== e.answer && prod(o) === pa && out.push(`opção errada "${o}" é o mesmo produto da resposta em outra ordem`));
   }
@@ -93,6 +105,7 @@ function drawIssues(e: Exercise): string[] {
       // "−0" written as a value (after "=", "(", "," or at the start), not "a−0"
       if (/(^|[=(,]|\\cdot|\\left\()\s*[-−]\s*0(?![\d.,{])/.test(tex)) out.push(`"−0" em $${tex}$`);
       if (/[+-]\s*[+-]\s*\d/.test(tex.replace(/\\pm|\\mp/g, ''))) out.push(`sinal duplo em $${tex}$`);
+      if (/(\\cdot|\\times)\s*[-−]\s*\d/.test(tex)) out.push(`negativo sem parênteses depois de × em $${tex}$`);
     }
   }
   return out;

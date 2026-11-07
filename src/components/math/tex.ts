@@ -64,10 +64,12 @@ const cache = new Map<string, TexSvg>();
  * "x^{1}", "(x+3)^{1}". Fold doubled signs ("+-" → "-", "--" → "+"; never right after ^ or _,
  * so "0^+" or "x_-" stay), then hide the ones: a coefficient 1 right before a variable/function
  * and a braced exponent 1 on a single-letter variable or a parenthesis (never on digits, so
- * "2^{1}" or "\int_0^{1}" stay).
+ * "2^{1}" or "\int_0^{1}" stay). A negative number right after \cdot/\times gets parentheses
+ * ("4\cdot-3" → "4\cdot(-3)"), unless it carries an exponent ("-2^2" ≠ "(-2)^2").
  */
 export function tidyOnes(tex: string): string {
   return tex
+    .replace(/(\\cdot|\\times)\s*[-−]\s*(\d+(?:(?:[.,]|\{,\})\d+)?)(?![\d.,{^])/g, '$1(-$2)')
     .replace(/(^|[(=$]|\\left\()\s*--(?=\s*[\w\\(])/g, '$1')
     .replace(/(?<![\^_])([+\-−])([+\-−])(?=\s*[\w\\(])/g, (_m, a: string, b: string) => ((a === '+') === (b === '+') ? '+' : '-'))
     .replace(/(^|[\s=(+\-−{&$]|\\,|\\cdot|\\left\()1\s*(?=[xytuzv](?![a-zA-Z])|\\operatorname|\\sqrt|\\ln\b|\\cos\b|\\sin\b|e\^)/g, '$1 ')
