@@ -70,7 +70,7 @@ export const combinatoria: UnitDef = {
               return num(t`Você tem $${a}$ camisas e $${b}$ calças. Quantas combinações de camisa e calça pode montar?`, a * b, t`Para cada camisa, $${b}$ calças: $${a}\cdot${b}=${a * b}$.`);
             }),
             tf(t`Com 3 camisas e 2 calças dá para montar 5 combinações diferentes.`, false, t`Multiplica, não soma: $3\cdot2=6$.`),
-            inter(t`Ajuste a árvore para ter exatamente $12$ caminhos.`, 'plot', treeLab().props, (v: any) => v && v.p.a * v.p.b === 12, t`por exemplo $3\times4$ ou $4\times3$`),
+            inter(t`Ajuste a árvore para ter exatamente $12$ caminhos.`, 'plot', treeLab().props, (v: any) => v && v.p.a * v.p.b === 12, t`por exemplo $3\times4$ ou $4\times3$`, t`Pelo princípio multiplicativo, os caminhos são (ramos do 1º nível) $\times$ (ramos do 2º nível): basta que o produto dê $12$.`),
             gen((rng) => {
               const a = randInt(rng, 2, 6);
               const b = randInt(rng, 2, 6);
@@ -311,7 +311,7 @@ E vale sempre $A_{n,k}=C_{n,k}\cdot k!$.`,
               ['Pódio de uma corrida', 'Arranjo'],
               ['Time de 5 entre 12 jogadores', 'Combinação'],
               ['Senha com repetição', 'PFC'],
-            ]),
+            ], t`Pergunte: a ordem importa? Uso todos os elementos? Pode repetir? Todos em ordem é permutação; parte em ordem é arranjo; parte sem ordem é combinação; com repetição, multiplique as opções (PFC).`),
             mcq(t`Escolher 2 representantes de turma, **com o mesmo cargo**, é um problema de…`, ['combinação', 'arranjo', 'permutação', 'nenhum'], 0, t`"Ana e Beto" é a mesma dupla que "Beto e Ana".`),
             mcq(t`Formar senhas de 4 letras **distintas** é um problema de…`, ['arranjo', 'combinação', 'permutação com repetição', 'nenhum'], 0, t`ABCD e DCBA são senhas diferentes: a ordem importa.`),
             gen((rng) => {
@@ -420,7 +420,7 @@ Lance o dado muitas vezes e veja a frequência se aproximar de $\frac16$ (lei do
             gen((rng) => {
               const s = randInt(rng, 2, 12);
               const c = 6 - Math.abs(s - 7);
-              return num(t`Qual a probabilidade de a soma de dois dados ser $${s}$? (fração ou decimal)`, c / 36, t`Há $${c}$ pares com soma $${s}$: $\frac{${c}}{36}$.`, { tol: 0.005 });
+              return num(t`Qual a probabilidade de a soma de dois dados ser $${s}$? (fração ou decimal)`, c / 36, t`Há $${c}$ ${c === 1 ? 'par' : 'pares'} com soma $${s}$: $\frac{${c}}{36}$.`, { tol: 0.005 });
             }),
             mcqS(t`Qual a probabilidade de os dois dados mostrarem o **mesmo número**?`, t`$\frac16$`, [t`$\frac{1}{36}$`, t`$\frac{1}{12}$`, t`$\frac13$`], t`$6$ duplas iguais em $36$: $\frac16$.`),
             inter(t`Lance os dois dados pelo menos 100 vezes e veja qual soma aparece mais.`, 'simulator', { kind: 'twoDice' }, (v: number) => v >= 100, 'lance mais vezes', t`A soma 7 tende a liderar, perto de $16{,}7\%$.`),

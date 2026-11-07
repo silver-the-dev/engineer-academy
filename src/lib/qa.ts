@@ -66,10 +66,20 @@ export function optionValue(s: string): number | null {
 /** Problems that only show up for some random draws: equivalent options, "-0", doubled signs. */
 function drawIssues(e: Exercise): string[] {
   const out: string[] = [];
+  if (!e.explain?.trim()) out.push('sem explicação (quem erra não vê o porquê)');
   if (e.kind === 'mcq') {
     const vals = e.options.map(optionValue);
     const a = vals[e.answer];
     if (a !== null) vals.forEach((v, i) => i !== e.answer && v !== null && Math.abs(v - a) < 1e-9 && out.push(`opção errada "${e.options[i]}" vale o mesmo que a resposta "${e.options[e.answer]}"`));
+    // "(x+1)(x-1)(x+4)" vs "(x-1)(x+1)(x+4)": the same product with the factors in another order
+    const prod = (o: string) => {
+      const m = o.trim().replace(/^\$|\$$/g, '').replace(/\s/g, '');
+      if (!/^-?\d*(\([^()]+\)(\^\d+)?){2,}$/.test(m)) return null;
+      const lead = m.match(/^-?\d*/)![0];
+      return lead + '|' + (m.slice(lead.length).match(/\([^()]+\)(\^\d+)?/g) ?? []).sort().join('');
+    };
+    const pa = prod(e.options[e.answer]);
+    if (pa) e.options.forEach((o, i) => i !== e.answer && prod(o) === pa && out.push(`opção errada "${o}" é o mesmo produto da resposta em outra ordem`));
   }
   for (const str of exStrings(e)) {
     for (const tex of extractMath(str)) {

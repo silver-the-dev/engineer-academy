@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, match, inter, plot, rmcq, near } from '../../helpers';
 import { FnCurve, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
 import { expLogLab, lineLab, parabolaLab } from '../../visuals';
 
 const t = String.raw;
@@ -76,7 +76,7 @@ $b$ é o **coeficiente linear**: onde a reta corta o eixo $y$.
               const b = -a * r;
               return num(t`Qual é a raiz de $f(x)=${lin(a, b)}$?`, r, t`$${lin(a, b)}=0\Rightarrow x=-\frac{${b}}{${a}}=${r}$.`);
             }),
-            inter(t`Ajuste $a$ e $b$ para a reta coincidir com a tracejada $y=-2x+3$.`, 'plot', lineLab({ a: 0.5, b: 0, target: [-2, 3] }).props, (v: any) => v && near(v.p.a, -2, 0.01) && near(v.p.b, 3, 0.01), t`$a=-2$, $b=3$`),
+            inter(t`Ajuste $a$ e $b$ para a reta coincidir com a tracejada $y=-2x+3$.`, 'plot', lineLab({ a: 0.5, b: 0, target: [-2, 3] }).props, (v: any) => v && near(v.p.a, -2, 0.01) && near(v.p.b, 3, 0.01), t`$a=-2$, $b=3$`, t`Em $y=ax+b$, $a$ é a inclinação e $b$ é onde a reta corta o eixo $y$: para $y=-2x+3$, $a=-2$ e $b=3$.`),
             gen((rng) => {
               const a = randNZ(rng, -4, 4);
               const b = randInt(rng, -6, 6);
@@ -92,7 +92,7 @@ $b$ é o **coeficiente linear**: onde a reta corta o eixo $y$.
             gen((rng) => {
               const a = randNZ(rng, -4, 4);
               const b = randInt(rng, -5, 5);
-              return num(t`Uma função afim tem $f(1)=${a + b}$ e $f(3)=${3 * a + b}$. Quanto vale $f(5)$?`, 5 * a + b, t`De $x=1$ para $x=3$, $y$ variou $${2 * a}$: $a=${a}$. Mais 2 passos: $f(5)=${3 * a + b}+${2 * a}=${5 * a + b}$.`);
+              return num(t`Uma função afim tem $f(1)=${a + b}$ e $f(3)=${3 * a + b}$. Quanto vale $f(5)$?`, 5 * a + b, t`De $x=1$ para $x=3$, $y$ variou $${2 * a}$: $a=${a}$. Mais 2 passos: $f(5)=${3 * a + b}+${par(2 * a)}=${5 * a + b}$.`);
             }),
           ],
         },
@@ -243,7 +243,7 @@ Mexa nos coeficientes:`,
               const ans = D > 0 ? 'Duas' : D === 0 ? 'Uma (raiz dupla)' : 'Nenhuma';
               return rmcq(rng, t`Quantas raízes reais tem $${polyTex([c, b, a])}=0$?`, ans, ['Duas', 'Uma (raiz dupla)', 'Nenhuma', 'Infinitas'].filter((s) => s !== ans), t`$\Delta=(${b})^2-4\cdot(${a})\cdot(${c})=${D}$${D > 0 ? ', positivo.' : D === 0 ? ', zero.' : ', negativo.'}`);
             }),
-            inter(t`Ajuste a parábola para coincidir com a tracejada $y=-x^2+2x+3$.`, 'plot', parabolaLab({ a: 1, b: 0, c: 0, ghost: [-1, 2, 3] }).props, (v: any) => v && near(v.p.a, -1, 0.01) && near(v.p.b, 2, 0.01) && near(v.p.c, 3, 0.01), t`$a=-1,\ b=2,\ c=3$`),
+            inter(t`Ajuste a parábola para coincidir com a tracejada $y=-x^2+2x+3$.`, 'plot', parabolaLab({ a: 1, b: 0, c: 0, ghost: [-1, 2, 3] }).props, (v: any) => v && near(v.p.a, -1, 0.01) && near(v.p.b, 2, 0.01) && near(v.p.c, 3, 0.01), t`$a=-1,\ b=2,\ c=3$`, t`Compare termo a termo com $y=ax^2+bx+c$: em $-x^2+2x+3$, $a=-1$ (concavidade para baixo), $b=2$ e $c=3$ (corte no eixo $y$).`),
             gen((rng) => {
               const [a, b, c] = [randNZ(rng, -3, 3), randInt(rng, -5, 5), randInt(rng, -5, 5)];
               const x = randInt(rng, -3, 3);
@@ -372,7 +372,7 @@ Para $x^2-c<0$, veja o trecho vermelho:`,
             mcq(t`Resolver $f(x)>0$ é achar os $x$ onde o gráfico de $f$ está…`, ['acima do eixo $x$', 'abaixo do eixo $x$', 'sobre o eixo $y$', 'à direita da origem'], 0, t`$f(x)>0$ significa altura positiva.`),
             tf(t`A inequação $x^2+1<0$ não tem solução real.`, true, t`$x^2+1\ge1$ para todo real.`),
             tf(t`$x^2\ge0$ para todo $x$ real.`, true, t`Quadrado de real nunca é negativo.`),
-            inter(t`Ajuste $c$ para que a solução de $x^2-c<0$ seja $-3<x<3$.`, 'plot', ineqLab().props, (v: any) => v && near(v.p.c, 9, 0.01), t`$c=9$`),
+            inter(t`Ajuste $c$ para que a solução de $x^2-c<0$ seja $-3<x<3$.`, 'plot', ineqLab().props, (v: any) => v && near(v.p.c, 9, 0.01), t`$c=9$`, t`$x^2-c<0$ vale entre as raízes $\pm\sqrt{c}$. Para o trecho ser $-3<x<3$, $\sqrt{c}=3$, logo $c=9$.`),
             gen((rng) => {
               const k = randInt(rng, 2, 7);
               return rmcq(rng, t`Resolva $x^2-${k * k}<0$.`, ivx(-k, k), [outside(-k, k), ivx(null, k), ivx(-k, k, true, true)], t`A parábola corta o eixo em $\pm${k}$ e fica abaixo dele **entre** essas raízes.`);
@@ -490,7 +490,7 @@ A raiz do **denominador** nunca entra na solução (não se divide por zero).`,
               const n = randInt(rng, 1, 2);
               return num(t`Calcule $f(-${n})$ para $f(x)=${b}^x$ (pode responder em fração).`, 1 / b ** n, t`$${b}^{-${n}}=\frac{1}{${b ** n}}$.`);
             }),
-            inter(t`Ajuste a base para que a curva verde passe pelo ponto $(2,\ 9)$.`, 'plot', expLogLab().props, (v: any) => v && near(v.p.a, 3, 0.01), t`$a=3$, pois $3^2=9$.`),
+            inter(t`Ajuste a base para que a curva verde passe pelo ponto $(2,\ 9)$.`, 'plot', expLogLab().props, (v: any) => v && near(v.p.a, 3, 0.01), t`$a=3$, pois $3^2=9$.`, t`Passar por $(2,\,9)$ significa $a^2=9$; como a base é positiva, $a=3$.`),
             mcqS(t`Qual é maior: $2^{10}$ ou $10^3$?`, t`$2^{10}$`, [t`$10^3$`, t`são iguais`, t`depende do contexto`], t`$2^{10}=1024>1000=10^3$.`),
             mcq(t`Para $x$ muito grande, qual função fica maior?`, ['$2^x$', '$x^{10}$', '$100x$', '$x^2$'], 0, t`Qualquer exponencial com base $>1$ acaba passando qualquer potência de $x$.`),
           ],
@@ -595,10 +595,18 @@ O gráfico do log é o **espelho** da exponencial na reta $y=x$:`,
               return num(t`Calcule $\log ${k >= 0 ? v : fmt(v, 6)}$ (base 10).`, k, t`$10^{${k}}=${k >= 0 ? v : fmt(v, 6)}$.`);
             }),
             tf(t`$\log_2 0$ é um número real.`, false, t`Nenhuma potência de 2 dá zero: o log de $0$ não existe.`),
-            inter(t`Ajuste a base para que a curva rosa ($\log_a x$) passe pelo ponto $(9,\ 2)$.`, 'plot', expLogLab().props, (v: any) => v && near(v.p.a, 3, 0.01), t`$a=3$, pois $\log_3 9=2$.`),
+            inter(t`Ajuste a base para que a curva rosa ($\log_a x$) passe pelo ponto $(9,\ 2)$.`, 'plot', expLogLab().props, (v: any) => v && near(v.p.a, 3, 0.01), t`$a=3$, pois $\log_3 9=2$.`, t`Passar por $(9,\,2)$ significa $\log_a 9=2$, ou seja, $a^2=9$: a base é $a=3$.`),
             gen((rng) => {
               const [b, x, num_, ans] = pick(rng, [[4, 8, '8', 1.5], [9, 27, '27', 1.5], [8, 4, '4', 2 / 3], [4, 2, '2', 0.5], [27, 9, '9', 2 / 3]] as const);
-              return num(t`Calcule $\log_{${b}} ${num_}$.`, ans, t`Escreva tudo na mesma base: $${b}^{x}=${x}$ dá $x=${fmt(ans, 4)}$.`, { tol: 0.002 });
+              const p = b % 3 === 0 ? 3 : 2;
+              const e1 = Math.round(Math.log(b) / Math.log(p));
+              const e2 = Math.round(Math.log(x) / Math.log(p));
+              return num(
+                t`Calcule $\log_{${b}} ${num_}$. (fração ou decimal)`,
+                ans,
+                t`Escreva tudo na base $${p}$: $${b}^{x}=${x}\Rightarrow ${p}^{${e1}x}=${p}^{${e2}}\Rightarrow ${e1}x=${e2}\Rightarrow x=\frac{${e2}}{${e1}}\approx ${fmt(ans, 4)}$.`,
+                { tol: 0.002 },
+              );
             }),
             gen((rng) => {
               const [b, bt, x, ans] = pick(rng, [[2, '\\frac12', 8, -3], [3, '\\frac13', 9, -2], [2, '\\frac12', 16, -4], [5, '\\frac15', 25, -2]] as const);
@@ -620,7 +628,7 @@ $\ln$ é o log na base $e$; $\log$ sem base costuma ser base 10.`,
               [t`$\log a-\log b$`, t`$\log\frac ab$`],
               [t`$3\log a$`, t`$\log a^3$`],
               [t`$\log_a a$`, '$1$'],
-            ]),
+            ], t`Log transforma produto em soma, quociente em diferença e potência em multiplicação; e $\log_a a=1$ porque $a^1=a$.`),
             tf(t`$\log(a+b)=\log a+\log b$`, false, t`A propriedade é para **produto**: $\log(ab)=\log a+\log b$.`),
             gen((rng) => {
               const m = randInt(rng, 1, 4);

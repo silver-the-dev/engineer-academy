@@ -4,7 +4,7 @@ import { gen, mcq, mcqS, num, tf, match, inter, plot, rmcq, near } from '../../h
 import { cylinder } from '../../visuals3d';
 import { CircleW, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, term } from '../../../lib/random';
 
 const t = String.raw;
 
@@ -44,7 +44,7 @@ const distanceLab = () =>
     info: ({ pts }: any) => {
       const dx = pts.B.x - pts.A.x;
       const dy = pts.B.y - pts.A.y;
-      return t`$d=\sqrt{${fmt(dx)}^2+${fmt(dy)}^2}=${fmt(Math.hypot(dx, dy), 3)}$ · $M=\left(${fmt((pts.A.x + pts.B.x) / 2)},\,${fmt((pts.A.y + pts.B.y) / 2)}\right)$`;
+      return t`$d=\sqrt{${par(dx)}^2+${par(dy)}^2}=${fmt(Math.hypot(dx, dy), 3)}$ · $M=\left(${fmt((pts.A.x + pts.B.x) / 2)},\,${fmt((pts.A.y + pts.B.y) / 2)}\right)$`;
     },
   });
 
@@ -108,7 +108,7 @@ Arraste o vértice do triângulo: base e altura fixas ⟹ área fixa!`,
               ['Trapézio', t`$\frac{(B+b)h}{2}$`],
               ['Losango', t`$\frac{Dd}{2}$`],
               ['Círculo', t`$\pi r^2$`],
-            ]),
+            ], t`Triângulo é metade de um retângulo $b\times h$; trapézio usa a média das bases; losango é metade do retângulo das diagonais; o círculo é $\pi r^2$.`),
             gen((rng) => {
               const b = randInt(rng, 3, 15);
               const h = randInt(rng, 2, 12);
@@ -366,7 +366,7 @@ A **geratriz** do cone (a "lateral") é $g=\sqrt{r^2+h^2}$.`,
             gen((rng) => {
               const x1 = randInt(rng, -6, 6);
               const x2 = randInt(rng, -6, 6);
-              return num(t`A abscissa do ponto médio entre $x_A=${x1}$ e $x_B=${x2}$ é:`, (x1 + x2) / 2, t`$\frac{${x1}+${x2}}{2}=${fmt((x1 + x2) / 2)}$.`);
+              return num(t`A abscissa do ponto médio entre $x_A=${x1}$ e $x_B=${x2}$ é:`, (x1 + x2) / 2, t`$\frac{${x1}+${par(x2)}}{2}=${fmt((x1 + x2) / 2)}$.`);
             }),
             gen((rng) => {
               const [a, b, c] = pick(rng, TRIPLES);
@@ -378,7 +378,7 @@ A **geratriz** do cone (a "lateral") é $g=\sqrt{r^2+h^2}$.`,
               const [dx, dy, d] = pick(rng, [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10]] as const);
               const x = randInt(rng, -4, 4);
               const y = randInt(rng, -4, 4);
-              return num(t`Qual a distância entre $A${pt(x, y)}$ e $B${pt(x + dx, y + dy)}$?`, d, t`$\sqrt{${dx}^2+${dy}^2}=${d}$.`);
+              return num(t`Qual a distância entre $A${pt(x, y)}$ e $B${pt(x + dx, y + dy)}$?`, d, t`$\sqrt{${par(dx)}^2+${par(dy)}^2}=${d}$.`);
             }),
             gen((rng) => {
               const [x1, y1] = [2 * randInt(rng, -3, 3), 2 * randInt(rng, -3, 3)];
@@ -386,7 +386,7 @@ A **geratriz** do cone (a "lateral") é $g=\sqrt{r^2+h^2}$.`,
               const M = pt((x1 + x2) / 2, (y1 + y2) / 2);
               return rmcq(rng, t`Qual o ponto médio entre $A${pt(x1, y1)}$ e $B${pt(x2, y2)}$?`, `$${M}$`, [`$${pt(x1 + x2, y1 + y2)}$`, `$${pt((x2 - x1) / 2, (y2 - y1) / 2)}$`, `$${pt((y1 + y2) / 2, (x1 + x2) / 2)}$`, `$${pt((x1 + x2) / 2 + 1, (y1 + y2) / 2)}$`], t`Média das coordenadas: $${M}$.`);
             }),
-            inter(t`Arraste $A$ e $B$ para que a distância entre eles seja exatamente $5$.`, 'plot', distanceLab().props, (v: any) => v && near(Math.hypot(v.pts.B.x - v.pts.A.x, v.pts.B.y - v.pts.A.y), 5, 0.01), t`ex.: um deslocamento $(3,\,4)$`),
+            inter(t`Arraste $A$ e $B$ para que a distância entre eles seja exatamente $5$.`, 'plot', distanceLab().props, (v: any) => v && near(Math.hypot(v.pts.B.x - v.pts.A.x, v.pts.B.y - v.pts.A.y), 5, 0.01), t`ex.: um deslocamento $(3,\,4)$`, t`A distância é $\sqrt{\Delta x^2+\Delta y^2}$: um deslocamento de $3$ e $4$ dá $\sqrt{9+16}=5$ (o triângulo $3$-$4$-$5$).`),
             gen((rng) => {
               const [ax, ay, mx, my] = [randInt(rng, -5, 5), randInt(rng, -5, 5), randInt(rng, -4, 4), randInt(rng, -4, 4)];
               const B = pt(2 * mx - ax, 2 * my - ay);
@@ -407,9 +407,13 @@ $$(x-a)^2+(y-b)^2=r^2$$`,
           },
           exercises: [
             mcqS(t`Qual o centro e o raio de $(x-3)^2+(y+1)^2=25$?`, t`centro $(3,\,-1)$, raio $5$`, [t`centro $(-3,\,1)$, raio $5$`, t`centro $(3,\,-1)$, raio $25$`, t`centro $(3,\,1)$, raio $5$`], t`Os sinais **dentro** dos parênteses aparecem trocados no centro, e $r=\sqrt{25}$.`),
-            inter(t`Monte a circunferência de centro $(0,\,0)$ e raio $3$.`, 'plot', circleLab().props, (v: any) => v && near(v.pts.O.x, 0, 0.01) && near(v.pts.O.y, 0, 0.01) && near(Math.hypot(v.pts.P.x, v.pts.P.y), 3, 0.01), t`centro na origem e ponto a distância 3`),
+            inter(t`Monte a circunferência de centro $(0,\,0)$ e raio $3$.`, 'plot', circleLab().props, (v: any) => v && near(v.pts.O.x, 0, 0.01) && near(v.pts.O.y, 0, 0.01) && near(Math.hypot(v.pts.P.x, v.pts.P.y), 3, 0.01), t`centro na origem e ponto a distância 3`, t`A circunferência é o conjunto dos pontos a distância $r$ do centro: $O$ em $(0,\,0)$ e $P$ a $3$ de $O$, como $(3,\,0)$.`),
             gen((rng) => {
-              const [a, b, r] = [randInt(rng, -4, 4), randInt(rng, -4, 4), randInt(rng, 1, 6)];
+              // a, b ≠ 0, a ≠ b and r ≥ 2 keep every distractor different from the answer
+              const a = randNZ(rng, -4, 4);
+              let b = randNZ(rng, -4, 4);
+              if (b === a) b = a > 0 ? -a : a - 1;
+              const r = randInt(rng, 2, 6);
               return rmcq(rng, t`Qual é a equação da circunferência de centro $${pt(a, b)}$ e raio $${r}$?`, `$${circEq(a, b, r * r)}$`, [`$${circEq(-a, -b, r * r)}$`, `$${circEq(a, b, r)}$`, `$${circEq(b, a, r * r)}$`, `$${circEq(-a, b, r * r)}$`], t`$(x-a)^2+(y-b)^2=r^2$ com $a=${a}$, $b=${b}$, $r^2=${r * r}$.`);
             }),
             gen((rng) => {
@@ -422,12 +426,12 @@ $$(x-a)^2+(y-b)^2=r^2$$`,
               const [a, b] = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
               const on = rng() < 0.5;
               const P = pt(a + dx, b + dy + (on ? 0 : 1));
-              return tf(t`O ponto $${P}$ pertence à circunferência $${circEq(a, b, r * r)}$.`, on, on ? t`$${dx}^2+${dy}^2=${r * r}$: está exatamente sobre ela.` : t`$${dx}^2+${dy + 1}^2=${dx * dx + (dy + 1) ** 2}\neq${r * r}$.`);
+              return tf(t`O ponto $${P}$ pertence à circunferência $${circEq(a, b, r * r)}$.`, on, on ? t`$${par(dx)}^2+${par(dy)}^2=${r * r}$: está exatamente sobre ela.` : t`$${par(dx)}^2+${par(dy + 1)}^2=${dx * dx + (dy + 1) ** 2}\neq${r * r}$.`);
             }),
             gen((rng) => {
               const [a, b] = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
               const [dx, dy] = [randInt(rng, -4, 4), randInt(rng, 1, 4)];
-              return num(t`Uma circunferência tem centro $${pt(a, b)}$ e passa por $${pt(a + dx, b + dy)}$. Quanto vale $r^2$?`, dx * dx + dy * dy, t`$r^2=${dx}^2+${dy}^2=${dx * dx + dy * dy}$.`);
+              return num(t`Uma circunferência tem centro $${pt(a, b)}$ e passa por $${pt(a + dx, b + dy)}$. Quanto vale $r^2$?`, dx * dx + dy * dy, t`$r^2=${par(dx)}^2+${par(dy)}^2=${dx * dx + dy * dy}$.`);
             }),
             gen((rng) => {
               const [x1, y1, x2, y2] = [2 * randInt(rng, -3, 3), 2 * randInt(rng, -3, 3), 2 * randInt(rng, -3, 3), 2 * randInt(rng, -3, 3)];
@@ -467,7 +471,7 @@ Centro $(2,\,-3)$, raio $4$.`,
               const [x, y] = [randInt(rng, -6, 6), randInt(rng, -6, 6)];
               const d2 = x * x + y * y;
               const ans = d2 < r * r ? 0 : d2 === r * r ? 1 : 2;
-              return mcq(t`O ponto $${pt(x, y)}$ está ___ da circunferência $x^2+y^2=${r * r}$.`, ['dentro', 'sobre', 'fora'], ans, t`$${x}^2+${y}^2=${d2}$, ${ans === 0 ? 'menor que' : ans === 1 ? 'igual a' : 'maior que'} $${r * r}$.`);
+              return mcq(t`O ponto $${pt(x, y)}$ está ___ da circunferência $x^2+y^2=${r * r}$.`, ['dentro', 'sobre', 'fora'], ans, t`$${par(x)}^2+${par(y)}^2=${d2}$, ${ans === 0 ? 'menor que' : ans === 1 ? 'igual a' : 'maior que'} $${r * r}$.`);
             }),
             mcq(t`A reta $x=5$ e a circunferência $x^2+y^2=9$…`, ['não se tocam', 'são tangentes', 'se cortam em 2 pontos', 'coincidem'], 0, t`O raio é $3$ e a reta está a distância $5$ do centro: fica do lado de fora.`),
             gen((rng) => {

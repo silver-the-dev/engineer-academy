@@ -781,7 +781,7 @@ $$\frac{c}{x^n}=c\cdot x^{-n}\qquad\quad \frac{a}{b\,x^n}=\frac{a}{b}\,x^{-n}$$`
               return num(
                 t`Calcule $(${a}^{-1}+${b}^{-1})^{-1}$. (fração ou decimal)`,
                 ans,
-                t`Primeiro somamos as frações dentro dos parênteses: $\frac{1}{${a}}+\frac{1}{${b}}=\frac{${a + b}}{${a * b}}$. Depois invertemos o resultado: $\left(\frac{${a + b}}{${a * b}}\right)^{-1}=\frac{${a * b}}{${a + b}}=${fracTex(a * b, a + b)}$.`,
+                t`Primeiro somamos as frações dentro dos parênteses: $\frac{1}{${a}}+\frac{1}{${b}}=\frac{${a + b}}{${a * b}}$. Depois invertemos o resultado: $\left(\frac{${a + b}}{${a * b}}\right)^{-1}=\frac{${a * b}}{${a + b}}${gcd(a * b, a + b) > 1 ? '=' + fracTex(a * b, a + b) : ''}$.`,
               );
             }),
             fill(
@@ -901,7 +901,7 @@ Isso permite quebrar frações com raízes em somas de potências fáceis de der
                   t`$x^{${m + n}/${q}}$`,
                   t`$x^{${q}/${p}}$`,
                 ],
-                t`Por dentro: $x\cdot x^{1/${n}}=x^{${p}/${n}}$. Tirando a raiz de índice $${m}$ (dividindo o expoente por $${m}$): $x^{${p}/(${m}\cdot ${n})}=x^{${p}/${q}}$.`,
+                t`Por dentro: $x\cdot x^{1/${n}}=x^{${p}/${n}}$. Tirando a raiz de índice $${m}$ (dividindo o expoente por $${m}$): $x^{${p}/(${m}\cdot ${n})}=x^{${p}/${q}}${gcd(p, q) > 1 ? `=x^{${p / gcd(p, q)}/${q / gcd(p, q)}}` : ''}$.`,
               );
             }),
             gen((rng) => {

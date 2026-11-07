@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, multi, inter, plot } from '../../helpers';
 import { CircleW, Label, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt } from '../../../lib/random';
+import { fmt, par, pick, randInt } from '../../../lib/random';
 
 const t = String.raw;
 const fact = (n: number): number => (n <= 1 ? 1 : n * fact(n - 1));
@@ -220,7 +220,7 @@ Os coeficientes são a linha $n$ de Pascal; o expoente de $x$ desce de $n$ a $0$
               const a = randInt(rng, 2, 3);
               const n = randInt(rng, 3, 5);
               const k = randInt(rng, 1, n - 1);
-              return num(t`Em $(x+${a})^{${n}}$, qual o coeficiente de $x^{${n - k}}$?`, Cb(n, k) * a ** k, t`$\binom{${n}}{${k}}\cdot${a}^{${k}}=${Cb(n, k)}\cdot${a ** k}=${Cb(n, k) * a ** k}$.`);
+              return num(t`Em $(x+${a})^{${n}}$, qual o coeficiente de $x^{${n - k}}$?`, Cb(n, k) * a ** k, t`$\binom{${n}}{${k}}\cdot${a}^{${k}}=${Cb(n, k)}\cdot ${par(a ** k)}=${Cb(n, k) * a ** k}$.`);
             }),
             gen((rng) => {
               const a = randInt(rng, 2, 4);
@@ -261,7 +261,7 @@ Para achar um termo específico (por exemplo, o **independente de** $x$), escrev
               const n = randInt(rng, 5, 10);
               const k = randInt(rng, 2, n - 2);
               const a = pick(rng, [2, -2, 3]);
-              return num(t`Coeficiente de $x^{${n - k}}$ em $(x${a < 0 ? '' : '+'}${a})^{${n}}$:`, Cb(n, k) * a ** k, t`$\binom{${n}}{${k}}(${a})^{${k}}=${Cb(n, k)}\cdot${a ** k}=${Cb(n, k) * a ** k}$.`);
+              return num(t`Coeficiente de $x^{${n - k}}$ em $(x${a < 0 ? '' : '+'}${a})^{${n}}$:`, Cb(n, k) * a ** k, t`$\binom{${n}}{${k}}(${a})^{${k}}=${Cb(n, k)}\cdot ${par(a ** k)}=${Cb(n, k) * a ** k}$.`);
             }),
             mcqS(t`O termo médio de $(x+a)^{10}$ é o:`, t`$T_6=\binom{10}{5}x^5a^5$`, [t`$T_5$`, t`$T_{10}$`, t`$T_6=\binom{10}{6}x^4a^6$`], t`11 termos: o do meio é o 6º, com $k=5$.`),
             gen((rng) => {
@@ -274,7 +274,7 @@ Para achar um termo específico (por exemplo, o **independente de** $x$), escrev
               const n = randInt(rng, 4, 10);
               const p = pick(rng, [0.5, 0.2, 0.3]);
               const k = randInt(rng, 1, n - 1);
-              return num(`Uma moeda/ensaio tem probabilidade ${fmt(p)} de sucesso. Probabilidade de exatamente ${k} sucessos em ${n} ensaios (4 casas)?`, Cb(n, k) * p ** k * (1 - p) ** (n - k), t`É um termo de $(q+p)^{${n}}$: $\binom{${n}}{${k}}p^{${k}}q^{${n - k}}\approx ${fmt(Cb(n, k) * p ** k * (1 - p) ** (n - k), 4)}$.`, { tol: 0.0006 });
+              return num(`Cada ensaio independente tem probabilidade ${fmt(p)} de sucesso. Qual a probabilidade de exatamente ${k} sucessos em ${n} ensaios (4 casas)?`, Cb(n, k) * p ** k * (1 - p) ** (n - k), t`É um termo de $(q+p)^{${n}}$: $\binom{${n}}{${k}}p^{${k}}q^{${n - k}}\approx ${fmt(Cb(n, k) * p ** k * (1 - p) ** (n - k), 4)}$.`, { tol: 0.0006 });
             }),
             tf(t`Em $(x+a)^n$, a soma dos expoentes de $x$ e $a$ em cada termo é sempre $n$.`, true, t`$x^{n-k}a^k$: $(n-k)+k=n$.`),
             mcq(t`Qual a ordem do termo em $x^3$ de $(x+2)^7$?`, ['5º termo', '3º termo', '4º termo', '7º termo'], 0, t`$x^{7-k}=x^3\Rightarrow k=4\Rightarrow T_{k+1}=T_5$.`),

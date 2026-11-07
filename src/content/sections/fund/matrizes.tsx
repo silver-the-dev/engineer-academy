@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcqS, num, tf, fill, match, order, multi, inter, plot, rmcq, near, table } from '../../helpers';
 import { Arrow, PolygonW } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, shuffle } from '../../../lib/random';
 import { matrixLab } from '../../visuals';
 
 const t = String.raw;
@@ -126,10 +126,11 @@ Visualmente, uma matriz $2\times2$ transforma o plano; o produto $AB$ é "aplica
               const A = rnd(rng, 2, 2), B = rnd(rng, 2, 2);
               const P = mul(A, B);
               const i = randInt(rng, 0, 1), j = randInt(rng, 0, 1);
-              return num(t`$A=${tex(A)}$, $B=${tex(B)}$. Quanto vale o elemento $(AB)_{${i + 1}${j + 1}}$?`, P[i][j], t`Linha ${i + 1} de A · coluna ${j + 1} de B: $${A[i][0]}\cdot${B[0][j]}+${A[i][1]}\cdot${B[1][j]}=${P[i][j]}$.`);
+              return num(t`$A=${tex(A)}$, $B=${tex(B)}$. Quanto vale o elemento $(AB)_{${i + 1}${j + 1}}$?`, P[i][j], t`Linha ${i + 1} de A · coluna ${j + 1} de B: $${A[i][0]}\cdot ${par(B[0][j])}+${par(A[i][1])}\cdot ${par(B[1][j])}=${P[i][j]}$.`);
             }),
             gen((rng) => {
-              const m = randInt(rng, 1, 5), n = randInt(rng, 1, 5), p = randInt(rng, 1, 5);
+              // three different sizes, otherwise options like "3 × 3" coincide
+              const [m, n, p] = shuffle(rng, [2, 3, 4, 5, 6]);
               return rmcq(rng, `A é ${m} × ${n} e B é ${n} × ${p}. A ordem de AB é:`, `${m} × ${p}`, [`${n} × ${n}`, `${m} × ${n}`, `${n} × ${p}`, `${p} × ${m}`], 'Fica o número de linhas de A e de colunas de B.');
             }),
             mcqS('A é 2 × 3 e B é 2 × 3. Qual produto existe?', 'A·Bᵀ', ['A·B', 'B·A', 'nenhum'], 'A (2 × 3) · Bᵀ (3 × 2) = 2 × 2. AB não existe: 3 ≠ 2.'),
@@ -189,7 +190,7 @@ Em $3\times3$, **Sarrus**: repita as duas primeiras colunas, some os produtos da
             gen((rng) => {
               const [a, b] = [randInt(rng, 1, 5), randInt(rng, 1, 5)];
               const [c, d] = [randInt(rng, -4, 4), randInt(rng, 1, 5)];
-              return num(t`Área do triângulo de vértices $(0,\,0)$, $(${a},\,${c})$ e $(${b},\,${d})$ (metade do |det|):`, Math.abs(a * d - b * c) / 2, t`$\frac12\left|${a}\cdot${d}-${b}\cdot${c}\right|=${fmt(Math.abs(a * d - b * c) / 2, 1)}$.`);
+              return num(t`Área do triângulo de vértices $(0,\,0)$, $(${a},\,${c})$ e $(${b},\,${d})$ (metade do |det|):`, Math.abs(a * d - b * c) / 2, t`$\frac12\left|${a}\cdot ${par(d)}-${par(b)}\cdot ${par(c)}\right|=${fmt(Math.abs(a * d - b * c) / 2, 1)}$.`);
             }),
           ],
         },

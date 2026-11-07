@@ -117,9 +117,9 @@ Toque nas regiões para explorar:`,
               [t`$\cap$`, 'interseção'],
               [t`$\subset$`, 'está contido'],
               [t`$\in$`, 'pertence'],
-            ]),
+            ], t`$\cup$ junta (união), $\cap$ fica com o comum (interseção); $\subset$ compara **conjuntos** ($A\subset B$) e $\in$ liga um **elemento** a um conjunto ($2\in A$).`),
             mcqS(t`Se $A=\{1, 2, 3\}$ e $B=\{2, 3, 4\}$, quanto vale $A\cup B$?`, t`$\{1, 2, 3, 4\}$`, [t`$\{2, 3\}$`, t`$\{1, 4\}$`, t`$\{1, 2, 3, 2, 3, 4\}$`], t`A união junta tudo, sem repetir: $\{1, 2, 3, 4\}$.`),
-            inter(t`Pinte a região $A\cap B$ (somente ela).`, 'venn', {}, (v: string[]) => vennIs(v, ['AB']), 'só a parte comum aos dois círculos'),
+            inter(t`Pinte a região $A\cap B$ (somente ela).`, 'venn', {}, (v: string[]) => vennIs(v, ['AB']), 'só a parte comum aos dois círculos', t`$A\cap B$ tem só o que está em $A$ **e** em $B$: a lente do meio.`),
             gen((rng) => {
               const [A, B] = pick(rng, SETS);
               const I = A.filter((x) => B.includes(x));
@@ -127,9 +127,9 @@ Toque nas regiões para explorar:`,
               return rmcq(rng, t`Se $A=${setTex(A)}$ e $B=${setTex(B)}$, quanto vale $A\cap B$?`, `$${setTex(I)}$`, [`$${setTex(U)}$`, `$${setTex(A.filter((x) => !B.includes(x)))}$`, `$${setTex(B.filter((x) => !A.includes(x)))}$`], t`Interseção: elementos que estão nos **dois** conjuntos, $${setTex(I)}$.`);
             }),
             mcqS(t`Se $A=\{1, 2, 3, 4\}$ e $B=\{3, 4, 5\}$, quanto vale $A-B$?`, t`$\{1, 2\}$`, [t`$\{5\}$`, t`$\{3, 4\}$`, t`$\{1, 2, 5\}$`], t`Elementos de $A$ que não estão em $B$: $1$ e $2$.`),
-            inter(t`Pinte a região $A - B$.`, 'venn', {}, (v: string[]) => vennIs(v, ['A']), 'a parte de A fora de B'),
-            inter(t`Pinte toda a região $A\cup B$.`, 'venn', {}, (v: string[]) => vennIs(v, ['A', 'AB', 'B']), 'os dois círculos inteiros'),
-            inter(t`Pinte o complementar de $A\cup B$.`, 'venn', {}, (v: string[]) => vennIs(v, ['U']), 'a região fora dos dois círculos'),
+            inter(t`Pinte a região $A - B$.`, 'venn', {}, (v: string[]) => vennIs(v, ['A']), 'a parte de A fora de B', t`$A-B$ é o que está em $A$ mas **não** em $B$: a lua de $A$, sem a lente do meio.`),
+            inter(t`Pinte toda a região $A\cup B$.`, 'venn', {}, (v: string[]) => vennIs(v, ['A', 'AB', 'B']), 'os dois círculos inteiros', t`$A\cup B$ é tudo que está em $A$ **ou** em $B$: as duas luas e a lente do meio.`),
+            inter(t`Pinte o complementar de $A\cup B$.`, 'venn', {}, (v: string[]) => vennIs(v, ['U']), 'a região fora dos dois círculos', t`O complementar de $A\cup B$ é o que não está em nenhum dos dois: só a região de fora dos círculos.`),
             inter(t`Pinte $(A\cup B)-(A\cap B)$: o que está em **exatamente um** dos conjuntos.`, 'venn', {}, (v: string[]) => vennIs(v, ['A', 'B']), 'as duas "luas", sem o meio', t`Tira-se o meio (a interseção) da união. Esse conjunto se chama **diferença simétrica**.`),
           ],
         },
@@ -391,7 +391,7 @@ Ele é um **ponto no plano** (plano de Argand-Gauss). Arraste $z$:`,
               const [a, b, m] = pick(rng, [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10], [1, 1, Math.SQRT2]] as const);
               return num(t`Qual é o módulo de $z=${a}+${b}i$?`, m, t`$|z|=\sqrt{${a}^2+${b}^2}=${fmt(m, 4)}$.`, { tol: 0.01 });
             }),
-            inter(t`Arraste $z$ até o número $-2+3i$.`, 'plot', complexLab().props, (v: any) => v && near(v.pts.z.x, -2, 0.01) && near(v.pts.z.y, 3, 0.01), t`ponto $(-2,\,3)$`),
+            inter(t`Arraste $z$ até o número $-2+3i$.`, 'plot', complexLab().props, (v: any) => v && near(v.pts.z.x, -2, 0.01) && near(v.pts.z.y, 3, 0.01), t`ponto $(-2,\,3)$`, t`No plano complexo, $a+bi$ é o ponto $(a,\,b)$: parte real $-2$ no eixo horizontal e parte imaginária $3$ no vertical.`),
             gen((rng) => {
               const k = randInt(rng, 2, 7);
               return rmcq(rng, t`Resolva $x^2+${k * k}=0$ nos complexos.`, `$x=\\pm ${k}i$`, [`$x=\\pm ${k}$`, `$x=${k}i$`, `$x=\\pm ${k * k}i$`], t`$x^2=-${k * k}\Rightarrow x=\pm\sqrt{-${k * k}}=\pm ${k}i$.`);
@@ -523,7 +523,7 @@ O quadrado grande de lado $a+b$ é formado por $a^2$, $b^2$ e **dois** retângul
               return rmcq(rng, t`Desenvolva $(${p}x+${k})^2$.`, t`$${p * p}x^2+${2 * p * k}x+${k * k}$`, [t`$${p * p}x^2+${k * k}$`, t`$${p}x^2+${2 * p * k}x+${k * k}$`, t`$${p * p}x^2+${p * k}x+${k * k}$`], t`$(${p}x)^2+2\cdot${p}x\cdot${k}+${k}^2=${p * p}x^2+${2 * p * k}x+${k * k}$.`);
             }),
             fill(t`Complete o produto notável:`, t`$(2x+3)^2 = 4x^2 +$ ___ $+$ ___`, ['$12x$', '$9$'], ['$6x$', '$3$', '$6$'], t`$2\cdot(2x)\cdot3=12x$ e $3^2=9$.`),
-            inter(t`Ajuste $a$ e $b$ para que a área total $(a+b)^2$ seja exatamente $25$ com $b=2$.`, 'plot', squareIdentity().props, (v: any) => v && near(v.p.a + v.p.b, 5, 0.051) && near(v.p.b, 2, 0.051), t`$a=3$, $b=2$`),
+            inter(t`Ajuste $a$ e $b$ para que a área total $(a+b)^2$ seja exatamente $25$ com $b=2$.`, 'plot', squareIdentity().props, (v: any) => v && near(v.p.a + v.p.b, 5, 0.051) && near(v.p.b, 2, 0.051), t`$a=3$, $b=2$`, t`$(a+b)^2=25$ pede $a+b=5$; com $b=2$, $a=3$. Confira: $a^2+2ab+b^2=9+12+4=25$.`),
             gen((rng) => {
               const m = pick(rng, [2, 3, 4, 5, 6, 7, 10]);
               const n = 10 * m + 1;
@@ -631,7 +631,8 @@ As raízes são os pontos onde o gráfico **corta o eixo x**:`,
             gen((rng) => {
               const r1 = randNZ(rng, -6, 6);
               let r2 = randNZ(rng, -6, 6);
-              if (r2 === r1) r2 = r1 > 0 ? r1 - 7 : r1 + 7;
+              // r2 = r1 repeats a factor; r2 = -r1 makes the "signs swapped" option the same product
+              while (r2 === r1 || r2 === -r1) r2 = randNZ(rng, -6, 6);
               const f = (r: number) => (r < 0 ? `(x+${-r})` : `(x-${r})`);
               return rmcq(rng, t`Fatore $${polyTex([r1 * r2, -(r1 + r2), 1])}$.`, `$${f(r1)}${f(r2)}$`, [`$${f(-r1)}${f(-r2)}$`, `$${f(r1)}${f(-r2)}$`, `$${f(-r1)}${f(r2)}$`], t`Raízes $${r1}$ e $${r2}$ (soma $${r1 + r2}$, produto $${r1 * r2}$), então os fatores são $${f(r1)}$ e $${f(r2)}$.`);
             }),

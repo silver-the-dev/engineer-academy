@@ -439,14 +439,14 @@ $$a^3 + b^3 = (a+b)(a^2 - ab + b^2)$$`,
               return rmcq(
                 rng,
                 t`Qual é a fatoração de $x^3 - ${k ** 3}$?`,
-                t`$(x-${k})(x^2 + ${k}x + ${k * k})$`,
+                t`$(x-${k})(x^2 + ${k === 1 ? '' : k}x + ${k * k})$`,
                 [
-                  t`$(x-${k})(x^2 - ${k}x + ${k * k})$`,
+                  t`$(x-${k})(x^2 - ${k === 1 ? '' : k}x + ${k * k})$`,
                   t`$(x-${k})^3$`,
                   t`$(x-${k})(x^2 + ${2 * k}x + ${k * k})$`,
-                  t`$(x+${k})(x^2 - ${k}x + ${k * k})$`,
+                  t`$(x+${k})(x^2 - ${k === 1 ? '' : k}x + ${k * k})$`,
                 ],
-                t`Diferença de cubos $a^3-b^3=(a-b)(a^2+ab+b^2)$ com $a=x$ e $b=${k}$ (repare que no trinômio é $+${k}x$, e não $+2ab$).`,
+                t`Diferença de cubos $a^3-b^3=(a-b)(a^2+ab+b^2)$ com $a=x$ e $b=${k}$ (repare que no trinômio é $+${k === 1 ? '' : k}x$, e não $+2ab$).`,
               );
             }),
             gen((rng) => {
@@ -661,7 +661,8 @@ Mexa nas raízes $r_1$ e $r_2$ e veja o polinômio fatorado:`,
             }),
             gen((rng) => {
               const r1 = randInt(rng, 1, 5);
-              const r2 = randInt(rng, 1, 5) + (r1 === 2 ? 2 : 1);
+              let r2 = randInt(rng, 1, 6);
+              if (r2 === r1) r2 = r1 + 1; // r2 = r1 would make b = 0 and a "(x-0)" option
               const b = r2 - r1;
               const c = -r1 * r2;
               return rmcq(
@@ -1035,8 +1036,9 @@ Mexa na raiz $r$ do polinômio cúbico abaixo:`,
             }),
             gen((rng) => {
               const r1 = -1;
-              const r2 = randInt(rng, 1, 4);
-              const r3 = randInt(rng, -4, -2);
+              // r2 = 1 or r3 = -r2 would turn a distractor into the same product in another order
+              const r2 = randInt(rng, 2, 4);
+              const r3 = pick(rng, [-4, -3, -2].filter((r) => r !== -r2));
               const c2 = -(r1 + r2 + r3);
               const c1 = r1 * r2 + r1 * r3 + r2 * r3;
               const c0 = -(r1 * r2 * r3);
@@ -1104,7 +1106,8 @@ Se a incógnita $x$ estiver **no denominador** (equação fracionária):
               const x0 = randInt(rng, -5, 6);
               const a = randInt(rng, 2, 5);
               const b = randNZ(rng, -6, 6);
-              const c = randInt(rng, 1, 4);
+              let c = randInt(rng, 1, 4);
+              if (c === a) c = a - 1; // c = a turns the equation into an identity (0x = 0)
               const d = (a - c) * x0 + a * b;
               return num(
                 t`Resolva a equação $${a}(x ${term(b, '')}) = ${c}x ${term(d, '')}$.`,

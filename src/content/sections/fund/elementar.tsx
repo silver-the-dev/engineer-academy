@@ -295,7 +295,7 @@ $\sqrt{9}=3$ porque $3^2=9$; $\sqrt[3]{-8}=-2$ porque $(-2)^3=-8$. Geometricamen
               [t`$\sqrt[3]{27}$`, '$3$'],
               [t`$\sqrt[4]{16}$`, '$2$'],
               [t`$\sqrt{0{,}25}$`, t`$0{,}5$`],
-            ]),
+            ], t`Procure o número que, elevado ao índice, dá o radicando: $7^2=49$, $3^3=27$, $2^4=16$ e $0{,}5^2=0{,}25$.`),
             inter(t`Ajuste a área $A$ do quadrado para que o **lado** fique igual a $3$.`, 'plot', squarePlot().props, (v) => v && near(v.p.A, 9, 0.01), t`$A=9$`, t`Lado $3$ ⟹ área $3^2=9$.`),
             gen((rng) => {
               let n = randInt(rng, 11, 95);
@@ -528,6 +528,7 @@ Arraste o ponto: a área do retângulo $x\cdot y$ nunca muda!`,
               },
               (v) => v && near(v.pts.P.y, 2, 0.01),
               t`$x=6$, pois $6\cdot2=12$.`,
+              t`Com o produto fixo, $y=\frac{12}{x}$: para $y=2$, $x=\frac{12}{2}=6$. A área do retângulo ($x\cdot y$) nunca muda.`,
             ),
             num(t`$x$ e $y$ são inversamente proporcionais. Se $x$ aumenta $25\%$, $y$ diminui quantos por cento?`, 20, t`$x\cdot y$ fixo: $y_{novo}=\frac{y}{1{,}25}=0{,}8\,y$, ou seja, diminui $20\%$.`, { unit: '%' }),
           ],
@@ -543,7 +544,7 @@ Mais máquinas ⟹ menos tempo (inversa): $\frac{12}{x}=\frac{4}{3}\Rightarrow x
             tip: t`**Regra de três composta** (3 ou mais grandezas): compare cada grandeza com a incógnita separadamente (direta ou inversa) e multiplique todas as razões.`,
           },
           exercises: [
-            order(t`Ordene os passos para resolver uma regra de três:`, ['Organizar as grandezas em uma tabela', 'Identificar se a relação é direta ou inversa', 'Inverter a razão se for inversa', 'Montar a proporção e isolar o $x$']),
+            order(t`Ordene os passos para resolver uma regra de três:`, ['Organizar as grandezas em uma tabela', 'Identificar se a relação é direta ou inversa', 'Inverter a razão se for inversa', 'Montar a proporção e isolar o $x$'], t`Primeiro organize os dados e decida se a relação é direta ou inversa; só depois monte a proporção (invertendo uma das razões se for inversa) e isole $x$.`),
             gen((rng) => {
               const l = pick(rng, [2, 4, 5]);
               const area = l * pick(rng, [4, 5, 6]);
@@ -604,7 +605,7 @@ Mais máquinas ⟹ menos tempo (inversa): $\frac{12}{x}=\frac{4}{3}\Rightarrow x
               [t`$25\%$`, t`$\frac14$`],
               [t`$10\%$`, t`$\frac{1}{10}$`],
               [t`$75\%$`, t`$\frac34$`],
-            ]),
+            ], t`Porcentagem é fração de denominador $100$: $50\%=\frac{50}{100}=\frac12$, $25\%=\frac14$, $10\%=\frac{1}{10}$ e $75\%=\frac34$.`),
             gen((rng) => {
               const d = pick(rng, [0.07, 0.35, 0.8, 1.5, 0.125, 0.04, 2]);
               return rmcq(rng, t`Escreva $${fmt(d)}$ em porcentagem.`, t`$${fmt(d * 100)}\%$`, [t`$${fmt(d * 10)}\%$`, t`$${fmt(d)}\%$`, t`$${fmt(d * 1000)}\%$`], t`Multiplique por $100$: $${fmt(d)}\cdot100=${fmt(d * 100)}\%$.`);
@@ -616,7 +617,7 @@ Mais máquinas ⟹ menos tempo (inversa): $\frac{12}{x}=\frac{4}{3}\Rightarrow x
               const part = (tot * p) / 100;
               return num(t`Numa turma de $${tot}$ alunos, $${part}$ tiraram nota máxima. Que porcentagem da turma é essa?`, p, t`$\frac{${part}}{${tot}}=${fmt(p / 100)}=${p}\%$.`, { unit: '%' });
             }),
-            inter(t`Pinte exatamente $35\%$ do quadrado.`, 'plot', percentGrid(true).props, (v) => v && v.p.p === 35, t`$35$ quadradinhos de $100$.`),
+            inter(t`Pinte exatamente $35\%$ do quadrado.`, 'plot', percentGrid(true).props, (v) => v && v.p.p === 35, t`$35$ quadradinhos de $100$.`, t`$35\%=\frac{35}{100}$: dos $100$ quadradinhos, pinte $35$.`),
             gen((rng) => {
               const p = pick(rng, [20, 25, 30, 40, 60]);
               const V = pick(rng, [50, 80, 120, 150, 200, 250]);

@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, order, inter, plot, rmcq, near } from '../../helpers';
 import { InfLine, Pt, RectW } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, term } from '../../../lib/random';
 
 const t = String.raw;
 
@@ -107,7 +107,7 @@ O gráfico dos termos fica sobre uma **reta**. Mude $a_1$ e $r$:`,
               const n = randInt(rng, 8, 30);
               return num(t`Numa PA com $a_1=${a1}$ e razão $r=${r}$, quanto vale $a_{${n}}$?`, a1 + (n - 1) * r, t`$a_{${n}}=${a1}+(${n}-1)\cdot(${r})=${a1 + (n - 1) * r}$.`);
             }),
-            inter(t`Ajuste $a_1$ e $r$ para formar a PA $3,\ 5,\ 7,\ 9,\ldots$`, 'plot', seqLab(false).props, (v: any) => v && near(v.p.a, 3, 0.01) && near(v.p.r, 2, 0.01), t`$a_1=3$, $r=2$`),
+            inter(t`Ajuste $a_1$ e $r$ para formar a PA $3,\ 5,\ 7,\ 9,\ldots$`, 'plot', seqLab(false).props, (v: any) => v && near(v.p.a, 3, 0.01) && near(v.p.r, 2, 0.01), t`$a_1=3$, $r=2$`, t`O primeiro termo é $3$ e cada termo soma $2$ ao anterior: $a_1=3$ e $r=5-3=2$.`),
             gen((rng) => {
               const a1 = randInt(rng, 1, 9);
               const r = randInt(rng, 2, 6);
@@ -242,7 +242,7 @@ Com $q>1$ o crescimento é **exponencial**; com $0<q<1$ os termos encolhem.`,
               return num(t`Numa PG com $a_1=${a1}$ e $q=${q}$, quanto vale $a_{${n}}$?`, a1 * Math.pow(q, n - 1), t`$a_{${n}}=${a1}\cdot(${q})^{${n - 1}}=${a1 * Math.pow(q, n - 1)}$.`);
             }),
             tf(t`Juros compostos formam uma PG.`, true, t`O montante é multiplicado por $(1+i)$ a cada período: razão $q=1+i$.`),
-            inter(t`Ajuste para formar a PG $2,\ 3,\ 4{,}5,\ 6{,}75,\ldots$`, 'plot', seqLab(true).props, (v: any) => v && near(v.p.a, 2, 0.01) && near(v.p.q, 1.5, 0.01), t`$a_1=2$, $q=1{,}5$`),
+            inter(t`Ajuste para formar a PG $2,\ 3,\ 4{,}5,\ 6{,}75,\ldots$`, 'plot', seqLab(true).props, (v: any) => v && near(v.p.a, 2, 0.01) && near(v.p.q, 1.5, 0.01), t`$a_1=2$, $q=1{,}5$`, t`O primeiro termo é $2$ e cada termo é o anterior vezes $q=\frac{3}{2}=1{,}5$.`),
             gen((rng) => {
               const N = pick(rng, [100, 200, 500]);
               const h = randInt(rng, 3, 8);
@@ -404,7 +404,7 @@ pois $1\cdot5+2\cdot7=19$, $1\cdot6+2\cdot8=22$, e assim por diante.`,
               const A = r4(rng, -3, 4);
               const v = [randInt(rng, -3, 4), randInt(rng, -3, 4)];
               const r = [A[0] * v[0] + A[1] * v[1], A[2] * v[0] + A[3] * v[1]];
-              return rmcq(rng, t`Calcule $${mat([[A[0], A[1]], [A[2], A[3]]])}${mat([[v[0]], [v[1]]])}$.`, `$${mat([[r[0]], [r[1]]])}$`, [`$${mat([[A[0] * v[0] + A[2] * v[1]], [A[1] * v[0] + A[3] * v[1]]])}$`, `$${mat([[A[0] * v[0]], [A[3] * v[1]]])}$`, `$${mat([[r[0] + 1], [r[1]]])}$`], t`Cada linha da matriz "vezes" o vetor: $${A[0]}\cdot${v[0]}+${A[1]}\cdot(${v[1]})=${r[0]}$ e $${A[2]}\cdot${v[0]}+${A[3]}\cdot(${v[1]})=${r[1]}$.`);
+              return rmcq(rng, t`Calcule $${mat([[A[0], A[1]], [A[2], A[3]]])}${mat([[v[0]], [v[1]]])}$.`, `$${mat([[r[0]], [r[1]]])}$`, [`$${mat([[A[0] * v[0] + A[2] * v[1]], [A[1] * v[0] + A[3] * v[1]]])}$`, `$${mat([[A[0] * v[0]], [A[3] * v[1]]])}$`, `$${mat([[r[0] + 1], [r[1]]])}$`], t`Cada linha da matriz "vezes" o vetor: $${A[0]}\cdot ${par(v[0])}+${par(A[1])}\cdot ${par(v[1])}=${r[0]}$ e $${A[2]}\cdot ${par(v[0])}+${par(A[3])}\cdot ${par(v[1])}=${r[1]}$.`);
             }),
             gen((rng) => {
               const A = r4(rng, -2, 4);
@@ -455,7 +455,7 @@ Se $\det A\ne0$, $A$ é **inversível**.`,
             gen((rng) => {
               const [a, b, c] = [randNZ(rng, -4, 5), randNZ(rng, -4, 5), randNZ(rng, -4, 5)];
               const [x, y, z] = r4(rng, -6, 6);
-              return num(t`Calcule $\det${mat([[a, x, y], [0, b, z], [0, 0, c]])}$.`, a * b * c, t`Matriz triangular: o determinante é o produto da diagonal, $${a}\cdot${b}\cdot${c}=${a * b * c}$.`);
+              return num(t`Calcule $\det${mat([[a, x, y], [0, b, z], [0, 0, c]])}$.`, a * b * c, t`Matriz triangular: o determinante é o produto da diagonal, $${a}\cdot ${par(b)}\cdot ${par(c)}=${a * b * c}$.`);
             }),
             tf(t`Trocar duas linhas de uma matriz troca o sinal do seu determinante.`, true, t`Ex.: $\det${mat([[1, 2], [3, 4]])}=-2$ e $\det${mat([[3, 4], [1, 2]])}=2$.`),
             gen((rng) => {
@@ -494,8 +494,8 @@ Se $\det A\ne0$, $A$ é **inversível**.`,
             }),
             mcq(t`O sistema $\begin{cases}x+2y=3\\2x+4y=7\end{cases}$ é:`, ['impossível (SI)', 'possível e determinado', 'possível e indeterminado', 'tem solução $x=1$, $y=1$'], 0, t`A 2ª equação deveria ser o dobro da 1ª ($6$), mas é $7$: retas paralelas.`),
             mcq(t`O sistema $\begin{cases}x+y=2\\2x+2y=4\end{cases}$ é:`, ['possível e indeterminado (SPI)', 'impossível (SI)', 'possível e determinado (SPD)', 'sem equações válidas'], 0, t`A 2ª equação é exatamente o dobro da 1ª: é a mesma reta, infinitas soluções.`),
-            inter(t`Mexa na reta laranja até que o sistema **não tenha solução**.`, 'plot', systemLab().props, (v: any) => v && near(v.p.m, -1, 0.01) && !near(v.p.k, 1, 0.01), t`inclinação $a=-1$ (paralela) e $c\ne1$`),
-            inter(t`Agora faça o sistema ter **infinitas** soluções.`, 'plot', systemLab().props, (v: any) => v && near(v.p.m, -1, 0.01) && near(v.p.k, 1, 0.01), t`$a=-1$ e $c=1$ (a mesma reta)`),
+            inter(t`Mexa na reta laranja até que o sistema **não tenha solução**.`, 'plot', systemLab().props, (v: any) => v && near(v.p.m, -1, 0.01) && !near(v.p.k, 1, 0.01), t`inclinação $a=-1$ (paralela) e $c\ne1$`, t`Sem solução são retas **paralelas e distintas**: a mesma inclinação da outra reta ($-1$) e outro coeficiente linear.`),
+            inter(t`Agora faça o sistema ter **infinitas** soluções.`, 'plot', systemLab().props, (v: any) => v && near(v.p.m, -1, 0.01) && near(v.p.k, 1, 0.01), t`$a=-1$ e $c=1$ (a mesma reta)`, t`Infinitas soluções é a **mesma reta**: inclinação e coeficiente linear iguais aos da outra, e todo ponto dela resolve o sistema.`),
             tf(t`Se o determinante da matriz dos coeficientes é zero, o sistema pode ter infinitas soluções ou nenhuma.`, true, t`$\det=0$ significa retas paralelas ou coincidentes.`),
             gen((rng) => {
               const k = pick(rng, [2, 3, 4]);
@@ -535,9 +535,9 @@ $$\begin{cases}x+y=5\\x-y=1\end{cases}\Rightarrow 2x=6\Rightarrow x=3,\ y=2$$`,
               const y = m * x + c;
               const a = randInt(rng, 1, 3);
               const b = randNZ(rng, -3, 3);
-              return num(t`Resolva por substituição: $\begin{cases}y=${term(m, 'x', true)}${term(c, '')}\\${term(a, 'x', true)}${term(b, 'y')}=${a * x + b * y}\end{cases}$. Quanto vale $x$?`, x, t`Troque $y$ por $${m}x${term(c, '')}$ na 2ª equação e isole $x$: $x=${x}$ (e $y=${y}$).`);
+              return num(t`Resolva por substituição: $\begin{cases}y=${term(m, 'x', true)}${term(c, '')}\\${term(a, 'x', true)}${term(b, 'y')}=${a * x + b * y}\end{cases}$. Quanto vale $x$?`, x, t`Troque $y$ por $${term(m, 'x', true)}${term(c, '')}$ na 2ª equação e isole $x$: $x=${x}$ (e $y=${y}$).`);
             }),
-            order(t`Ordene os passos do método da adição para $\begin{cases}2x+3y=8\\x-y=-1\end{cases}$:`, [t`Multiplicar a 2ª equação por $3$: $3x-3y=-3$`, t`Somar com a 1ª: $5x=5$`, t`Concluir $x=1$`, t`Substituir: $y=x+1=2$`]),
+            order(t`Ordene os passos do método da adição para $\begin{cases}2x+3y=8\\x-y=-1\end{cases}$:`, [t`Multiplicar a 2ª equação por $3$: $3x-3y=-3$`, t`Somar com a 1ª: $5x=5$`, t`Concluir $x=1$`, t`Substituir: $y=x+1=2$`], t`Primeiro prepare uma equação para que $y$ se cancele ($-3y$ contra $+3y$), some, ache $x$ e só então volte para achar $y$.`),
             gen((rng) => {
               const x = randInt(rng, -3, 4);
               const y = randInt(rng, -3, 4);
@@ -565,7 +565,7 @@ Então $x=\frac{D_x}{D}$ e $y=\frac{D_y}{D}$ (só quando $D\neq0$).`,
           exercises: [
             gen((rng) => {
               const [a, b, c, d] = [randNZ(rng, -4, 5), randNZ(rng, -4, 5), randNZ(rng, -4, 5), randNZ(rng, -4, 5)];
-              return num(t`Para $\begin{cases}${term(a, 'x', true)}${term(b, 'y')}=1\\${term(c, 'x', true)}${term(d, 'y')}=2\end{cases}$, calcule $D$ (o determinante dos coeficientes).`, a * d - b * c, t`$D=${a}\cdot${d}-(${b})\cdot(${c})=${a * d - b * c}$.`);
+              return num(t`Para $\begin{cases}${term(a, 'x', true)}${term(b, 'y')}=1\\${term(c, 'x', true)}${term(d, 'y')}=2\end{cases}$, calcule $D$ (o determinante dos coeficientes).`, a * d - b * c, t`$D=${a}\cdot ${par(d)}-${par(b)}\cdot ${par(c)}=${a * d - b * c}$.`);
             }),
             tf(t`A regra de Cramer só dá a solução quando $D\neq0$.`, true, t`As fórmulas dividem por $D$.`),
             gen((rng) => {

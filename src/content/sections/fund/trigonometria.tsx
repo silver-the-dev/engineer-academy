@@ -121,7 +121,7 @@ Mude o ângulo e veja as razões:`,
               [t`$\operatorname{tg}45^\circ$`, '$1$'],
               [t`$\cos30^\circ$`, t`$\frac{\sqrt3}{2}$`],
               [t`$\operatorname{tg}60^\circ$`, t`$\sqrt3$`],
-            ]),
+            ], t`Tabela dos notáveis: $\operatorname{sen}30^\circ=\frac12$, $\cos30^\circ=\frac{\sqrt3}{2}$, $\operatorname{tg}45^\circ=1$ (catetos iguais) e $\operatorname{tg}60^\circ=\frac{\sqrt3/2}{1/2}=\sqrt3$.`),
             gen((rng) => {
               const g = pick(rng, [30, 45, 60]);
               const fn = pick(rng, ['sen', 'cos'] as const);
@@ -193,8 +193,8 @@ Por Pitágoras: $$\operatorname{sen}^2\theta+\cos^2\theta=1$$`,
           exercises: [
             mcq(t`No ciclo trigonométrico, o cosseno de um ângulo é a coordenada…`, ['$x$ do ponto', '$y$ do ponto', 'distância até a origem', 'inclinação do raio'], 0, t`Cosseno no eixo horizontal, seno no vertical.`),
             tf(t`$\operatorname{sen}(\pi)=0$`, true, t`$\pi$ rad $=180^\circ$: o ponto é $(-1,\,0)$, altura zero.`),
-            inter(t`Arraste $P$ até o ângulo de $90^\circ$.`, 'plot', unitCircleLab().props, (v: any) => v && near(v.pts.P.x, 0, 0.05) && v.pts.P.y > 0.99, t`$P=(0,\,1)$`),
-            inter(t`Arraste $P$ para um ponto onde $\cos\theta=-1$.`, 'plot', unitCircleLab().props, (v: any) => v && v.pts.P.x < -0.995, t`$\theta=180^\circ$, $P=(-1,\,0)$`),
+            inter(t`Arraste $P$ até o ângulo de $90^\circ$.`, 'plot', unitCircleLab().props, (v: any) => v && near(v.pts.P.x, 0, 0.05) && v.pts.P.y > 0.99, t`$P=(0,\,1)$`, t`$90^\circ$ é um quarto de volta a partir de $(1,\,0)$: o ponto vai para o topo do círculo, $(\cos90^\circ,\,\operatorname{sen}90^\circ)=(0,\,1)$.`),
+            inter(t`Arraste $P$ para um ponto onde $\cos\theta=-1$.`, 'plot', unitCircleLab().props, (v: any) => v && v.pts.P.x < -0.995, t`$\theta=180^\circ$, $P=(-1,\,0)$`, t`O cosseno é a coordenada $x$; ela vale $-1$ só no ponto mais à esquerda, $(-1,\,0)$, ou seja, $\theta=180^\circ$.`),
             mcq(t`Quais valores $\operatorname{sen}\theta$ pode assumir?`, ['qualquer valor entre $-1$ e $1$', 'qualquer número real', 'só valores positivos', 'só $0$ e $1$'], 0, t`É a altura de um ponto num círculo de raio 1.`),
             num(t`Se $\operatorname{sen}\theta=0{,}6$ e $\theta$ está no 1º quadrante, quanto vale $\cos\theta$?`, 0.8, t`$\cos\theta=\sqrt{1-0{,}36}=0{,}8$.`),
             gen((rng) => {
@@ -352,7 +352,7 @@ Sinais: 1º tudo positivo; 2º só **seno**; 3º só **tangente**; 4º só **cos
               return rmcq(rng, t`Qual o período de $f(x)=\operatorname{sen}(${B}x)$?`, B === 1 ? t`$2\pi$` : B === 2 ? t`$\pi$` : t`$\frac{2\pi}{${B}}$`, [t`$${2 * B}\pi$`, t`$\frac{\pi}{${2 * B}}$`, t`$${B}\pi$`, t`$4\pi$`], t`Período $=\frac{2\pi}{${B}}$.`);
             }),
             tf(t`Aumentar $B$ em $\operatorname{sen}(Bx)$ deixa a onda mais "apertada" (período menor).`, true, t`Período $\frac{2\pi}{B}$ diminui quando $B$ cresce.`),
-            inter(t`Ajuste a onda para ter amplitude 2 e período $\pi$ (sem fase).`, 'plot', fnLab({ f: (x, p) => p.A * Math.sin(p.B * x + p.C), params: [{ key: 'A', label: 'A', min: 0.5, max: 3, step: 0.1, value: 1, color: C.p5 }, { key: 'B', label: 'B', min: 0.5, max: 4, step: 0.1, value: 1, color: C.p2 }, { key: 'C', label: 'C', min: -3.14, max: 3.14, step: 0.05, value: 0, color: C.p3 }], view: { xMin: -1, xMax: 12.6, yMin: -3.5, yMax: 3.5 }, ghost: (x) => 2 * Math.sin(2 * x) }).props, (v: any) => v && near(v.p.A, 2, 0.01) && near(v.p.B, 2, 0.01) && near(v.p.C, 0, 0.01), t`$A=2$, $B=2$, $C=0$`),
+            inter(t`Ajuste a onda para ter amplitude 2 e período $\pi$ (sem fase).`, 'plot', fnLab({ f: (x, p) => p.A * Math.sin(p.B * x + p.C), params: [{ key: 'A', label: 'A', min: 0.5, max: 3, step: 0.1, value: 1, color: C.p5 }, { key: 'B', label: 'B', min: 0.5, max: 4, step: 0.1, value: 1, color: C.p2 }, { key: 'C', label: 'C', min: -3.14, max: 3.14, step: 0.05, value: 0, color: C.p3 }], view: { xMin: -1, xMax: 12.6, yMin: -3.5, yMax: 3.5 }, ghost: (x) => 2 * Math.sin(2 * x) }).props, (v: any) => v && near(v.p.A, 2, 0.01) && near(v.p.B, 2, 0.01) && near(v.p.C, 0, 0.01), t`$A=2$, $B=2$, $C=0$`, t`Amplitude é $A=2$; o período é $\frac{2\pi}{B}=\pi$, logo $B=2$; sem fase, $C=0$.`),
             gen((rng) => {
               const A = randInt(rng, 2, 5);
               const B = pick(rng, [2, 3, 4]);

@@ -439,7 +439,7 @@ Também prova desigualdades (Bernoulli): $(1+x)^n\ge1+nx$ para $x>-1$.`,
               return num(t`Calcule $4^{${n}}-1$ (deve ser múltiplo de 3).`, 4 ** n - 1, t`$4^{${n}}-1=${4 ** n - 1}=3\cdot${(4 ** n - 1) / 3}$.`);
             }),
             tf(t`Pela desigualdade de Bernoulli, $(1{,}01)^{50}\ge 1{,}5$.`, true, t`$(1+0{,}01)^{50}\ge1+50\cdot0{,}01=1{,}5$. (O valor real é ≈ 1,64.)`),
-            mcqS(t`A afirmação $2^n>n^2$ é verdadeira para:`, t`$n\ge5$ (base em 5)`, [t`todo $n\ge1$`, t`só $n\le4$`, t`nenhum $n$`], t`$n=2,3,4$ falham ($4=4$, $8<9$, $16=16$); a partir de 5 vale ($32>25$) e o passo funciona. A base nem sempre é 1!`),
+            mcqS(t`Entre os naturais $n\ge 2$, para quais vale $2^n>n^2$?`, t`$n\ge5$ (base em 5)`, [t`todo $n\ge2$`, t`só $2\le n\le4$`, t`nenhum`], t`$n=2,3,4$ falham ($4=4$, $8<9$, $16=16$); a partir de 5 vale ($32>25$) e o passo funciona. A base nem sempre é 1!`),
             mcqS('Qual é o erro na "prova" de que todos os cavalos têm a mesma cor (o passo de k para k + 1 usa dois grupos de k cavalos que se sobrepõem)?', 'o passo falha de k = 1 para k = 2: os dois grupos não têm cavalo em comum', ['a base n = 1 é falsa', 'indução não vale para cavalos', 'o passo deveria ir de k + 1 para k'], 'Com 2 cavalos, os grupos {1} e {2} não se sobrepõem: o argumento quebra exatamente aí.'),
             gen((rng) => {
               const n = randInt(rng, 2, 8);

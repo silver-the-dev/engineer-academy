@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcqS, num, tf, match, order, inter, plot, near } from '../../helpers';
 import { ArcW, CircleW, InfLine, Label, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt } from '../../../lib/random';
+import { fmt, par, pick, randInt } from '../../../lib/random';
 
 const t = String.raw;
 const PI = Math.PI;
@@ -494,7 +494,7 @@ No polígono **regular**, cada ângulo interno vale $\frac{(n-2)\cdot180^\circ}{
             gen((rng) => {
               const pts: [number, number][] = [[randInt(rng, -5, 5), randInt(rng, -5, 5)], [randInt(rng, -5, 5), randInt(rng, -5, 5)], [randInt(rng, -5, 5), randInt(rng, -5, 5)]];
               const sx = pts[0][0] + pts[1][0] + pts[2][0];
-              return num(t`Triângulo de vértices $(${pts[0][0]},\,${pts[0][1]})$, $(${pts[1][0]},\,${pts[1][1]})$ e $(${pts[2][0]},\,${pts[2][1]})$. Qual a abscissa do baricentro?`, sx / 3, t`$x_G=\frac{x_A+x_B+x_C}{3}=\frac{${sx}}{3}$.`, { tol: 0.01 });
+              return num(t`Triângulo de vértices $(${pts[0][0]},\,${pts[0][1]})$, $(${pts[1][0]},\,${pts[1][1]})$ e $(${pts[2][0]},\,${pts[2][1]})$. Qual a abscissa do baricentro?`, sx / 3, t`$x_G=\frac{x_A+x_B+x_C}{3}=\frac{${pts[0][0]}+${par(pts[1][0])}+${par(pts[2][0])}}{3}=\frac{${sx}}{3}${sx % 3 === 0 ? '=' + sx / 3 : '\\approx ' + fmt(sx / 3, 2)}$.`, { tol: 0.01 });
             }),
             mcqS('O centro da circunferência que passa pelos três vértices é o:', 'circuncentro', ['incentro', 'baricentro', 'ortocentro'], 'Está nas mediatrizes, que equidistam dos extremos de cada lado.'),
             mcqS('Para instalar um poste equidistante de três casas (não alinhadas), devemos usar o:', 'circuncentro do triângulo das casas', ['incentro', 'baricentro', 'ortocentro'], 'Equidistante dos vértices ⇒ circuncentro.'),
@@ -640,7 +640,7 @@ e somando $b^2+c^2=a(m+n)=a^2$: **Pitágoras** sai de graça. Todo triângulo in
             }),
             gen((rng) => {
               const L = randInt(rng, 2, 12);
-              return num(`Diagonal de um quadrado de lado ${L} (arredonde a 2 casas).`, L * Math.SQRT2, `d = L√2 = ${fmt(L * Math.SQRT2, 2)}.`, { tol: 0.01 });
+              return num(`Diagonal de um quadrado de lado ${L} (arredonde a 2 casas).`, L * Math.SQRT2, `d = L√2 = ${L}√2 ≈ ${fmt(L * Math.SQRT2, 2)}.`, { tol: 0.01 });
             }),
           ],
         },
