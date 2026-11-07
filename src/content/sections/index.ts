@@ -17,6 +17,7 @@ import { taxas } from './calc/taxas';
 import { integrais, integralDefinida } from './calc/integrais';
 import { tecnicas } from './calc/tecnicas';
 import { aplIntegral } from './calc/aplintegral';
+import { sequencias, potencias } from './calc/series';
 import { variaveis, duplas } from './calc/variaveis';
 import { vetoresGeo, vetoresAlg } from './gaal/vetores';
 import { escalar, vetorial } from './gaal/produtos';
@@ -51,7 +52,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Cálculo Diferencial e Integral: limites, derivadas e integrais',
     color: '#7C5CFF',
     emoji: '∫',
-    units: [funcoesCalc, limites, derivadas, taxas, aplicacoes, integrais, integralDefinida, tecnicas, aplIntegral, variaveis, duplas],
+    units: [funcoesCalc, limites, derivadas, taxas, aplicacoes, integrais, integralDefinida, tecnicas, aplIntegral, sequencias, potencias, variaveis, duplas],
   },
   {
     id: 'gaal',
