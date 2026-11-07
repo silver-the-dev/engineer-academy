@@ -26,6 +26,7 @@ import { reta, plano, transformacoes } from './gaal/retaplano';
 import { superficies } from './gaal/superficies';
 import { multiplas } from './vet/multiplas';
 import { campos } from './vet/campos';
+import { teoremas } from './vet/teoremas';
 import { edo1 } from './edo/primeira';
 import { edo2 } from './edo/segunda';
 import { laplace } from './edo/laplace';
@@ -74,7 +75,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Integrais múltiplas, campos vetoriais e os teoremas de Green, Stokes e Gauss',
     color: '#B5179E',
     emoji: '🌀',
-    units: [multiplas, campos],
+    units: [multiplas, campos, teoremas],
   },
   {
     id: 'edo',
