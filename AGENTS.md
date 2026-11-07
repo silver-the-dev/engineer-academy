@@ -70,7 +70,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 | `src/content/types.ts` | modelo de conteúdo e `normalizeLesson`/`normalizeSection` |
 | `src/content/helpers.ts` | construtores de exercícios (`mcq`, `mcqS`, `rmcq`, `num`, `tf`, `fill`, `match`, `order`, `multi`, `inter`, `gen`, `plot`, `table`, `near`) |
 | `src/content/visuals.tsx`, `visuals3d.tsx` | laboratórios interativos reutilizáveis (`lineLab`, `parabolaLab`, `tangentLab`, `riemannLab`, `vectorLab`, `matrixLab`…) |
-| `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts`. Seções: `fund` (Fundamentos), `pre` (Pré-Cálculo), `calc` (Cálculo 1–3), `gaal` (GA e Álgebra Linear, inclui superfícies quádricas), `vet` (Cálculo Vetorial: integrais múltiplas, campos, Green/Stokes/Gauss), `edo` (EDOs, Laplace, Fourier), `num`, `est` |
+| `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts`. Seções: `fund` (Fundamentos: inclui lógica, matrizes, matemática financeira, binômio de Newton, geometria plana e espacial), `pre` (Pré-Cálculo: inclui exponenciais/logaritmos, triângulos quaisquer, complexos e equações polinomiais), `calc` (Cálculo 1–3), `gaal` (GA e Álgebra Linear, inclui superfícies quádricas), `vet` (Cálculo Vetorial: integrais múltiplas, campos, Green/Stokes/Gauss), `edo` (EDOs, Laplace, Fourier), `num`, `est` |
 | `src/lib/qa.ts`, `scripts/qa-content.cjs` | QA de conteúdo (o mesmo do `/debug`), também por linha de comando |
 | `src/content/index.ts` | `buildQueue(lesson, part)`, `partsDone`, desbloqueio, treino e revisão |
 | `src/state/store.ts` | estado persistido (chave `engineer-academy-v1`): XP, vidas, dias, `lessons`, `parts`, erros, missões, conquistas |
@@ -99,6 +99,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 - `rmcq` remove distratores iguais à resposta ou repetidos: passe **4 ou 5 candidatos** para sempre sobrarem 3 opções erradas. `mcq(prompt, opções, índiceCorreto, explicação)` não precisa embaralhar (a tela embaralha).
 - `num(…)`: a tolerância padrão é relativa 1e-6. Para respostas arredondadas ("2 casas"), passe `{ tol: … }`. Unidade: `{ unit: 'm' }`.
 - Valor recebido pelo `check` de `inter(…)`: `plot` → `v.p` (sliders) e `v.pts` (pontos arrastáveis); `venn` → lista de regiões (`'A'`, `'AB'`, `'B'`, `'U'`, compare ordenando); `numberline` → número; `bars` → lista de alturas; `simulator` → número de lançamentos; `space3d` → `v.p`.
+- O `RichText` não tem tabelas em markdown: para tabelas use `$$\begin{array}…\end{array}$$` ou o visual `table(...)`. Toda lição precisa de pelo menos 2 partes (o QA avisa "lição sem partes" se tiver uma só).
 - Padrão usado nas lições já convertidas: 2 ou 3 partes por lição, 7 a 9 exercícios por parte, do mais fácil ao mais difícil, misturando tipos e com ao menos um gerador aleatório (`gen`) por parte. Exemplos completos: `sections/fund/elementar.tsx`, `sections/calc/limites.tsx`, `sections/num/numerico1.tsx`.
 
 ## Fluxo de trabalho recomendado

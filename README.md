@@ -2,7 +2,7 @@
 
 App Android para estudar a matemática dos primeiros anos de Engenharia de forma gamificada, no estilo Duolingo/Brilliant.
 
-- **5 seções**: Fundamentos, Cálculo, GA e Álgebra Linear, Cálculo Numérico, Probabilidade e Estatística
+- **8 seções**: Fundamentos, Pré-Cálculo, Cálculo, GA e Álgebra Linear, Cálculo Vetorial, Equações Diferenciais, Cálculo Numérico, Probabilidade e Estatística
 - **Caminho de lições** com sublições: cada lição é dividida em partes (um card de teoria + exercícios do mais fácil ao mais difícil), mostradas como um anel segmentado na bolinha do caminho
 - **Exercícios variados**: múltipla escolha, verdadeiro/falso, resposta numérica, completar, ligar, ordenar e exercícios interativos (gráficos arrastáveis, diagrama de Venn, reta numérica, cenas 3D); muitos são gerados aleatoriamente a cada tentativa
 - **Gamificação**: XP, níveis, ofensiva diária, vidas, gemas, missões diárias e conquistas
