@@ -17,6 +17,9 @@ import { financeira } from './fund/financeira';
 import { classesFuncoes } from './pre/funcoes';
 import { trigAvancada } from './pre/trigonometria';
 import { geoAnalitica } from './pre/geoanalitica';
+import { expLog } from './pre/explog';
+import { trigTransf } from './pre/trigtransf';
+import { complexos, polinomiais } from './pre/complexos';
 import { funcoesCalc, limites } from './calc/limites';
 import { derivadas, aplicacoes } from './calc/derivadas';
 import { taxas } from './calc/taxas';
@@ -46,7 +49,7 @@ const DEFS: SectionDef[] = [
   {
     id: 'fund',
     title: 'Fundamentos',
-    subtitle: 'Competências básicas: álgebra, funções, geometria e trigonometria',
+    subtitle: 'Competências básicas: lógica, álgebra, matrizes, funções, finanças, contagem, geometria e trigonometria',
     color: '#FF9F1C',
     emoji: '🧱',
     units: [aritmetica, elementar, algebra1, logica, fatoracao, equacoes, algebra2, matrizes, funcoes, financeira, combinatoria, binomio, geometria, geoPlana, geoEspacial, trigonometria],
@@ -54,10 +57,10 @@ const DEFS: SectionDef[] = [
   {
     id: 'pre',
     title: 'Pré-Cálculo',
-    subtitle: 'Famílias de funções, trigonometria avançada e geometria analítica',
+    subtitle: 'Funções, exponenciais e logaritmos, trigonometria, complexos, polinômios e geometria analítica',
     color: '#FFD166',
     emoji: '📐',
-    units: [classesFuncoes, trigAvancada, geoAnalitica],
+    units: [classesFuncoes, expLog, trigAvancada, trigTransf, complexos, polinomiais, geoAnalitica],
   },
   {
     id: 'calc',
