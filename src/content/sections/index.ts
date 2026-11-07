@@ -22,6 +22,7 @@ import { variaveis, duplas } from './calc/variaveis';
 import { vetoresGeo, vetoresAlg } from './gaal/vetores';
 import { escalar, vetorial } from './gaal/produtos';
 import { reta, plano, transformacoes } from './gaal/retaplano';
+import { superficies } from './gaal/superficies';
 import { edo1 } from './edo/primeira';
 import { edo2 } from './edo/segunda';
 import { laplace } from './edo/laplace';
@@ -62,7 +63,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Vetores, produtos, retas, planos e transformações',
     color: '#00B4D8',
     emoji: '🧭',
-    units: [vetoresGeo, vetoresAlg, escalar, vetorial, reta, plano, transformacoes],
+    units: [vetoresGeo, vetoresAlg, escalar, vetorial, reta, plano, superficies, transformacoes],
   },
   {
     id: 'edo',
