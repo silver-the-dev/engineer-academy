@@ -371,7 +371,7 @@ const centroidLab = () =>
       const A = 1 / (k + 1);
       const xb = (k + 1) / (k + 2);
       const yb = (k + 1) / (2 * (2 * k + 1));
-      return t`Curva $y=x^{${fmt(k, 1)}}$ em $[0,\,1]$ · área $A=${fmt(A, 3)}$ · centroide $(\bar x,\,\bar y)=(${fmt(xb, 3)},\,${fmt(yb, 3)})$`;
+      return t`Curva $y=x^{${fmt(k, 1)}}$ em $[0,\,1]$ · área $A=${fmt(A, 3)}$ · centroide $(\bar x;\ \bar y)=(${fmt(xb, 3)};\ ${fmt(yb, 3)})$`;
     },
   });
 

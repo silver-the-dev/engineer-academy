@@ -129,7 +129,7 @@ const multLab = () =>
     },
     info: ({ p }: any) => {
       const m = Math.round(p.m);
-      return t`$p(x)=\frac14(x-(${fmt(p.r, 1)}))^{${m}}(x-(${fmt(p.s, 1)}))$ · grau $${m + 1}$ · em $r$ o gráfico ${m % 2 ? 'cruza' : 'tangencia'} o eixo (multiplicidade ${m % 2 ? 'ímpar' : 'par'})`;
+      return t`$p(x)=\frac14(${xm(p.r)})^{${m}}(${xm(p.s)})$ · grau $${m + 1}$ · em $r$ o gráfico ${m % 2 ? 'cruza' : 'tangencia'} o eixo (multiplicidade ${m % 2 ? 'ímpar' : 'par'})`;
     },
   });
 

@@ -31,7 +31,7 @@ const seqLimitLab = () =>
             y={ak}
             r={isCur ? 7.5 : 4.5}
             color={isCur ? C.p2 : inside ? C.success : C.danger}
-            label={isCur ? `a_${k}` : undefined}
+            label={isCur ? `a${String(k).replace(/\d/g, (c) => '₀₁₂₃₄₅₆₇₈₉'[+c])}` : undefined}
             dy={-12}
             dx={-6}
           />,

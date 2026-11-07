@@ -36,7 +36,7 @@ type PlotProps = View2D & {
   xStep?: number;
   yStep?: number;
   tickLabels?: boolean;
-  equalAspect?: boolean; // keep 1:1 by expanding y-range
+  equalAspect?: boolean; // keep 1:1 by expanding the x- or y-range (the whole view stays visible)
   draggables?: Draggable[];
   onDrag?: (id: string, x: number, y: number) => void;
   onDragEnd?: (id: string) => void;
@@ -101,9 +101,15 @@ export function Plot(props: PlotProps) {
   const { width: w, height: h, grid = true, axes = true, tickLabels = true, draggables, onDrag, onDragEnd, onTap, background } = props;
   let { xMin, xMax, yMin, yMax } = props;
   if (props.equalAspect) {
-    const sx = w / (xMax - xMin);
-    const ySpan = h / sx;
+    // 1:1 scale that still shows the whole requested view: on a short, wide plot the x-range grows
+    // (it used to always crop the y-range, cutting the top of polygons and circles)
+    const s = Math.min(w / (xMax - xMin), h / (yMax - yMin));
+    const xSpan = w / s;
+    const ySpan = h / s;
+    const cx = (xMin + xMax) / 2;
     const cy = (yMin + yMax) / 2;
+    xMin = cx - xSpan / 2;
+    xMax = cx + xSpan / 2;
     yMin = cy - ySpan / 2;
     yMax = cy + ySpan / 2;
   }

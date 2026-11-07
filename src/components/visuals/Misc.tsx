@@ -193,10 +193,11 @@ export function Venn({ width, onChange, initial = [], labels = ['A', 'B'], readO
           <Path d={lens} fill={fillFor('AB')} />
           <Circle cx={cx1} cy={cy} r={r} fill="none" stroke={C.p3} strokeWidth={3} />
           <Circle cx={cx2} cy={cy} r={r} fill="none" stroke={C.p5} strokeWidth={3} />
-          <SvgText x={cx1 - r * 0.6} y={cy - r * 0.75} fill={C.p3} fontSize={18} fontFamily={F.black}>
+          {/* labels sit just outside the circles (at ~1.15 r) so they never touch the stroke */}
+          <SvgText x={cx1 - r * 0.8} y={cy - r * 0.8} fill={C.p3} fontSize={18} fontFamily={F.black} textAnchor="end">
             {labels[0]}
           </SvgText>
-          <SvgText x={cx2 + r * 0.45} y={cy - r * 0.75} fill={C.p5} fontSize={18} fontFamily={F.black}>
+          <SvgText x={cx2 + r * 0.8} y={cy - r * 0.8} fill={C.p5} fontSize={18} fontFamily={F.black} textAnchor="start">
             {labels[1]}
           </SvgText>
           <SvgText x={14} y={24} fill={C.textMuted} fontSize={14} fontFamily={F.black}>

@@ -283,7 +283,7 @@ const sciScaleLab = (a0 = 3, n0 = 3) =>
               </React.Fragment>
             ))}
             <Pt x={og} y={0} color={C.p5} r={8} hollow />
-            <Pt x={pos} y={0} color={C.gold} r={6} label={`${fmt(p.a)}×10^(${p.n})`} dx={0} dy={-16} />
+            <Pt x={pos} y={0} color={C.gold} r={6} label={`${fmt(p.a)}×10${String(p.n).replace(/[-\d]/g, (c) => '⁻⁰¹²³⁴⁵⁶⁷⁸⁹'['-0123456789'.indexOf(c)])}`} dx={0} dy={-16} />
           </>
         );
       },

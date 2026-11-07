@@ -88,7 +88,7 @@ export function Slider({ label, value, min, max, step = 0.1, onChange, color = C
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 6, opacity: disabled ? 0.5 : 1 }}>
       {lab ? (
-        <View style={{ width: lab.w, alignItems: 'center', marginRight: lab.w > 34 ? 6 : 0 }}>
+        <View style={{ width: lab.w, alignItems: 'center' }}>
           {lab.tex ? <MathView tex={lab.tex} size={lab.size} color={color} /> : null}
           {lab.text ? (
             <Text style={{ color, fontFamily: F.heavy, fontSize: 13, textAlign: 'center' }} numberOfLines={2}>
@@ -102,7 +102,8 @@ export function Slider({ label, value, min, max, step = 0.1, onChange, color = C
           ) : null}
         </View>
       ) : null}
-      <View style={{ flex: 1, height: 40, justifyContent: 'center' }} onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)} {...pan.panHandlers}>
+      {/* the 28 px thumb hangs 14 px past each end of the track: keep that room so it never covers the label or the value */}
+      <View style={{ flex: 1, height: 40, justifyContent: 'center', marginHorizontal: 15 }} onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)} {...pan.panHandlers}>
         <View style={{ height: 8, borderRadius: 4, backgroundColor: C.surface3 }} />
         <View style={{ position: 'absolute', left: 0, width: Math.max(0, t * w), height: 8, borderRadius: 4, backgroundColor: color }} />
         <View
@@ -123,7 +124,7 @@ export function Slider({ label, value, min, max, step = 0.1, onChange, color = C
           }}
         />
       </View>
-      <View style={{ minWidth: 56, marginLeft: 10, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, backgroundColor: alpha(color, 0.18), alignItems: 'center' }}>
+      <View style={{ minWidth: 56, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, backgroundColor: alpha(color, 0.18), alignItems: 'center' }}>
         <Text style={{ color, fontFamily: F.heavy, fontSize: 15 }}>{shown}</Text>
       </View>
     </View>

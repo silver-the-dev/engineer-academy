@@ -72,9 +72,11 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 | `src/content/visuals.tsx`, `visuals3d.tsx` | laboratórios interativos reutilizáveis (`lineLab`, `parabolaLab`, `tangentLab`, `riemannLab`, `vectorLab`, `matrixLab`…) |
 | `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts`. Seções: `fund` (Fundamentos: inclui lógica, matrizes, matemática financeira, binômio de Newton, geometria plana e espacial), `pre` (Pré-Cálculo: inclui exponenciais/logaritmos, triângulos quaisquer, complexos e equações polinomiais), `calc` (Cálculo 1–3), `gaal` (GA e Álgebra Linear, inclui superfícies quádricas), `vet` (Cálculo Vetorial: integrais múltiplas, campos, Green/Stokes/Gauss), `edo` (EDOs, Laplace, Fourier), `num`, `est` |
 | `src/lib/qa.ts`, `scripts/qa-content.cjs` | QA de conteúdo (o mesmo do `/debug`), também por linha de comando |
+| `src/lib/texEval.ts` | avaliador numérico das opções de múltipla escolha (só QA): acha opções erradas iguais à resposta como expressão |
+| `src/app/audit.tsx` | `/audit?id=<lição>` mostra todos os cards e exercícios de uma lição de uma vez (para conferir layout em 375 px) |
 | `src/content/index.ts` | `buildQueue(lesson, part)`, `partsDone`, desbloqueio, treino e revisão |
 | `src/state/store.ts` | estado persistido (chave `engineer-academy-v1`): XP, vidas, dias, `lessons`, `parts`, erros, missões, conquistas |
-| `src/lib/` | `random.ts` (`fmt`, `term`, `polyTex`, `fracTex`, `randInt`, `randNZ`, `pick`, `shuffle`), `notifications.ts`, `widget.ts`, `feedback.ts` |
+| `src/lib/` | `random.ts` (`fmt`, `term`, `polyTex`, `fracTex`, `par`, `xm`, `randInt`, `randNZ`, `pick`, `shuffle`), `notifications.ts`, `widget.ts`, `feedback.ts` |
 | `modules/streak-widget/` | módulo Expo local em Kotlin: widget de tela inicial com o mapa de dias estudados |
 
 ## Modelo de conteúdo e sublições
@@ -93,7 +95,9 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 
 - Use `const t = String.raw` e escreva TeX entre `$…$` (ou `$$…$$`). Dentro de `t\`…\``, use uma barra só (`\frac`); em strings normais, duas (`'\\frac'`).
 - **Vírgula decimal**: `tex.ts` transforma `dígito,dígito` em vírgula decimal. Por isso pares, intervalos e conjuntos de inteiros devem ter espaço ou `\,` depois da vírgula: `$(2,\,3)$`, `$[0,\,4]$`, `$\{1, 2\}$`. Listas com 2 ou mais vírgulas seguidas de inteiros (`1,2,3`) já são protegidas.
-- Números decimais gerados: sempre `fmt(x)` (vírgula pt-BR). Monômios com sinal: `term(c, 'x')`, `term(c, 'x', true)` para o primeiro termo; polinômios: `polyTex([c0, c1, c2])`.
+- Números decimais gerados: sempre `fmt(x)` (vírgula pt-BR). Monômios com sinal: `term(c, 'x')`, `term(c, 'x', true)` para o primeiro termo; polinômios: `polyTex([c0, c1, c2])`. Negativo como fator: `par(n)` dá `(-3)`; fator `x-a` com o sinal certo: `xm(a)` dá `x+3` para `a=-3`.
+- **Limpeza automática** (`tidyOnes` em `tex.ts`, aplicada a toda fórmula antes do MathJax): esconde coeficiente e expoente 1 (`1x`, `-1e^{t}`, `x^{1}`, `(x+3)^{1}`), dobra sinais (`x+-2` → `x-2`, `x--4` → `x+4`), põe parênteses em negativo depois de `\cdot` (`4\cdot(-3)`), tira `+0` antes de `)`/`}` e, dentro de um par/intervalo que tenha decimal, troca a vírgula separadora por `;` (`(1,5;\ 2)`). Não depende disso para o que é pedagógico: expoente 1 em dígitos (`2^{1}`) e `0+0` ficam como estão.
+- Geradores: evite sorteios degenerados (vetor nulo, `k=1`, denominador zero, `B=-A`); o QA roda 30 sementes e avisa quando sobram menos de 3 opções.
 - Dinheiro em template raw: `R\$`; em string normal: `'R\\$'`.
 - Depois de macros como `\le`, `\ge`, `\to`, deixe espaço antes de letras (`\le x`, `\to a`), senão o TeX lê `\lex`.
 - `rmcq` remove distratores iguais à resposta ou repetidos: passe **4 ou 5 candidatos** para sempre sobrarem 3 opções erradas. `mcq(prompt, opções, índiceCorreto, explicação)` não precisa embaralhar (a tela embaralha).
@@ -107,7 +111,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 1. Preview web: `npx expo start --web` (o QA fica em `/debug`).
 2. Edite um arquivo de conteúdo por vez.
 3. `npx tsc --noEmit -p .` precisa passar.
-4. Rode `node scripts/qa-content.cjs` (ou `--file src/content/sections/<seção>/<arquivo>.tsx` para checar um arquivo ainda não registrado; argumentos extras filtram por id). Sai com código 1 se houver erro. Também dá para abrir `/debug`. O esperado é `erros=1` (a linha "autoteste detector", que é o teste do próprio detector) e `avisos=0`. Avisos comuns: "múltipla escolha com só 2 opções" (faltaram distratores) e "parte com só N exercícios".
+4. Rode `node scripts/qa-content.cjs` (ou `--file src/content/sections/<seção>/<arquivo>.tsx` para checar um arquivo ainda não registrado; argumentos extras filtram por id). Sai com código 1 se houver erro. Também dá para abrir `/debug`. O esperado é `erros=1` (a linha "autoteste detector", que é o teste do próprio detector) e `avisos=0`. Avisos comuns: "múltipla escolha com só 2 opções" (faltaram distratores ou o sorteio é degenerado), "parte com só N exercícios", "sem explicação", "opção errada … é igual à resposta como expressão" (duas respostas certas; perguntas de "fatore/simplifique/escreva na forma" são ignoradas) e "difere da resposta só por uma constante" (duas primitivas válidas).
 5. Teste o fluxo na UI quando mexer em telas: anel na bolinha, popup com as partes, tela de conclusão com "Próxima parte".
 6. Commit por unidade.
 

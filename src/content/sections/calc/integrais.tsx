@@ -22,7 +22,7 @@ const familyLab = () =>
         <Pt x={1} y={0.5 + p.C} color={C.gold} />
       </>
     ),
-    info: (p) => t`$F(x)=\frac{x^2}{2}${p.C < 0 ? '' : '+'}${fmt(p.C, 2)}$ · $F(0)=${fmt(p.C, 2)}$, $F(1)=${fmt(0.5 + p.C, 2)}$ · todas têm $F'(x)=x$`,
+    info: (p) => t`$F(x)=\frac{x^2}{2}${p.C === 0 ? '' : `${p.C < 0 ? '' : '+'}${fmt(p.C, 2)}`}$ · $F(0)=${fmt(p.C, 2)}$, $F(1)=${fmt(0.5 + p.C, 2)}$ · todas têm $F'(x)=x$`,
   });
 
 const motionLab = () =>

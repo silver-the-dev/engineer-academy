@@ -69,11 +69,20 @@ const cache = new Map<string, TexSvg>();
  */
 export function tidyOnes(tex: string): string {
   return tex
+    // "(1,5,\,2)" is ambiguous with the decimal comma: inside a pair/tuple/interval holding a decimal, separate with ";"
+    .replace(/([([])([^()[\]]*)([)\]])/g, (m, o: string, inner: string, c: string) =>
+      /\d,\d/.test(inner) && /,(?:\s*\\,|\s)/.test(inner) ? o + inner.replace(/,\s*\\,\s*|,\s+/g, ';\\ ') + c : m,
+    )
     .replace(/(\\cdot|\\times)\s*[-−]\s*(\d+(?:(?:[.,]|\{,\})\d+)?)(?![\d.,{^])/g, '$1(-$2)')
     .replace(/(^|[(=$]|\\left\()\s*--(?=\s*[\w\\(])/g, '$1')
     .replace(/(?<![\^_])([+\-−])([+\-−])(?=\s*[\w\\(])/g, (_m, a: string, b: string) => ((a === '+') === (b === '+') ? '+' : '-'))
     .replace(/(^|[\s=(+\-−{&$]|\\,|\\cdot|\\left\()1\s*(?=[xytuzv](?![a-zA-Z])|\\operatorname|\\sqrt|\\ln\b|\\cos\b|\\sin\b|e\^)/g, '$1 ')
-    .replace(/((?<![\\a-zA-Z_^])[a-zA-Z]|\))\^\{1\}/g, '$1');
+    .replace(/((?<![\\a-zA-Z_^])[a-zA-Z]|\))\^(?:\{1\}|1(?![\d.,{]))/g, '$1')
+    // "(x+0)", "\frac{x+0}{…}": a zero term right before a closing bracket (never after a digit, so "0+0" stays)
+    .replace(/(?<=[a-zA-Z)}])\s*[+\-−]\s*0(?![\d.,{])(?=\s*[)}])/g, '')
+    // a factor for the root 0 printed as "(x-0)" → "(x)": "(x+3)(x)^2" reads better as "(x+3)x^2"
+    .replace(/\)\(([a-z])\)/g, ')$1')
+    .replace(/(^|[=+\-−\s]|\\cdot)\(([a-z])\)(?=[a-z\\^])/g, '$1$2');
 }
 
 export function texToSvg(tex: string, display = false): TexSvg {

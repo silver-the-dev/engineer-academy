@@ -98,7 +98,7 @@ const expLab = () =>
       return (
         <>
           <FnCurve f={(x) => p.y0 * Math.exp(p.k * x)} from={0} color={C.p1} />
-          <Pt x={0} y={p.y0} color={C.p2} label="y_0" />
+          <Pt x={0} y={p.y0} color={C.p2} label="y₀" />
           {isFinite(half) && half < 6 ? <Pt x={half} y={p.k < 0 ? p.y0 / 2 : 2 * p.y0} color={C.gold} label={p.k < 0 ? 'y₀/2' : '2y₀'} /> : null}
         </>
       );

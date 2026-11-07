@@ -56,7 +56,13 @@ const harmonicLab = (target?: [number, number, number]) =>
         <FnCurve f={(x) => p.b1 * Math.sin(x) + p.b2 * Math.sin(2 * x) + p.b3 * Math.sin(3 * x)} color={C.text} width={3} />
       </>
     ),
-    info: ({ p }: any) => t`Soma (branca): $${fmt(p.b1, 2)}\operatorname{sen}x+${fmt(p.b2, 2)}\operatorname{sen}2x+${fmt(p.b3, 2)}\operatorname{sen}3x$`.replace(/\+-/g, '-'),
+    info: ({ p }: any) => {
+      // only the harmonics that are on: "1 sen x + 0 sen 2x + 0 sen 3x" reads as sen x
+      const terms = [p.b1, p.b2, p.b3]
+        .map((b: number, i: number) => (Math.abs(b) < 1e-9 ? '' : `${Math.abs(b - 1) < 1e-9 ? '' : Math.abs(b + 1) < 1e-9 ? '-' : fmt(b, 2)}\\operatorname{sen}${i ? i + 1 : ''}x`))
+        .filter(Boolean);
+      return t`Soma (branca): $${terms.length ? terms.join('+').replace(/\+-/g, '-') : '0'}$`;
+    },
   });
 
 /** Low-pass filter: keep harmonics up to the cutoff; stem plot of the square-wave spectrum. */

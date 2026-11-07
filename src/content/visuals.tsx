@@ -393,7 +393,8 @@ export const unitCircleLab = (withWave = false): V =>
 export const matrixLab = (m0: [number, number, number, number] = [1, 1, 0, 1], showEig = false): V =>
   plotSpec(
     {
-      view: { xMin: -4, xMax: 4, yMin: -4, yMax: 4 },
+      // ±3 instead of ±4: the image of the unit square (and the Aî/Aĵ labels) get 33% more room on a phone
+      view: { xMin: -3, xMax: 3, yMin: -3, yMax: 3 },
       equalAspect: true,
       grid: false,
       params: [

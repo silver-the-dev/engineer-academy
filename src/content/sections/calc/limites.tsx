@@ -18,7 +18,8 @@ const transformLab = () =>
     ],
     view: { xMin: -6, xMax: 6, yMin: -5, yMax: 7 },
     ghost: (x) => x * x,
-    info: (p) => t`$y=${fmt(p.a)}(x${p.h < 0 ? '+' : '-'}${fmt(Math.abs(p.h))})^2${p.k < 0 ? '-' : '+'}${fmt(Math.abs(p.k))}$ · tracejada: $y=x^2$`,
+    // "y = 1(x−0)²+0" read as y = x²: hide a = ±1, h = 0 and k = 0
+    info: (p) => t`$y=${p.a === 1 ? '' : p.a === -1 ? '-' : fmt(p.a)}${p.h === 0 ? 'x' : `(x${p.h < 0 ? '+' : '-'}${fmt(Math.abs(p.h))})`}^2${p.k === 0 ? '' : `${p.k < 0 ? '-' : '+'}${fmt(Math.abs(p.k))}`}$ · tracejada: $y=x^2$`,
   });
 
 const approachLab = () =>

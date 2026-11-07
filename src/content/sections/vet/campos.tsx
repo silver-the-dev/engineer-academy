@@ -49,7 +49,17 @@ export const divRotLab = (a0 = 1, b0 = 0, withC = false) =>
       ...(withC ? [{ key: 'c', label: 'c', min: -1, max: 1, step: 0.1, value: 0.5, color: C.p2 }] : []),
     ],
     render: ({ p }: any) => <FieldArrows F={mixF} p={p} v={V0} />,
-    info: ({ p }: any) => t`$\vec F=${fmt(p.a, 1)}(x,\,y)+${fmt(p.b, 1)}(-y,\,x)${withC ? `+(${fmt(p.c, 1)},\\,0)` : ''}$ · $\nabla\cdot\vec F=${fmt(2 * p.a, 1)}$ · rotacional $=${fmt(2 * p.b, 1)}$`,
+    info: ({ p }: any) => {
+      // only the nonzero parts: "1(x, y) + 0(−y, x)" reads as F = (x, y)
+      const k = (c: number) => (Math.abs(c - 1) < 1e-9 ? '' : Math.abs(c + 1) < 1e-9 ? '-' : fmt(c, 1));
+      const parts = [
+        Math.abs(p.a) > 1e-9 ? `${k(p.a)}(x,\\,y)` : '',
+        Math.abs(p.b) > 1e-9 ? `${k(p.b)}(-y,\\,x)` : '',
+        withC && Math.abs(p.c) > 1e-9 ? `(${fmt(p.c, 1)},\\,0)` : '',
+      ].filter(Boolean);
+      const F = parts.length ? parts.join('+').replace(/\+-/g, '-') : '\\vec 0';
+      return t`$\vec F=${F}$ · $\nabla\cdot\vec F=${fmt(2 * p.a, 1)}$ · rotacional $=${fmt(2 * p.b, 1)}$`;
+    },
   });
 
 /** Work along a circle of radius R for the rotation field or a gradient field, accumulated up to s. */
