@@ -161,12 +161,12 @@ Aponta para onde $f$ **cresce mais rápido** e é **perpendicular** às curvas d
           },
           exercises: [
             gen((rng) => {
-              const x = randInt(rng, -3, 3);
+              const x = randNZ(rng, -3, 3);
               const y = randInt(rng, -3, 3);
               return rmcq(rng, t`Qual o gradiente de $f(x,y)=x^2+3xy$ no ponto $(${x},\,${y})$?`, t`$(${2 * x + 3 * y},\,${3 * x})$`, [t`$(${2 * x},\,${3 * y})$`, t`$(${3 * x},\,${2 * x + 3 * y})$`, t`$(${2 * x + 3 * y},\,${3 * y})$`, t`$(${2 * x + 3 * y + 1},\,${3 * x})$`], t`$f_x=2x+3y$, $f_y=3x$.`);
             }),
             tf(t`O gradiente é tangente às curvas de nível.`, false, t`Ele é **perpendicular** a elas.`),
-            inter(t`Arraste $P$ até um ponto onde $|\nabla f|=4$ para $f=x^2+y^2$.`, 'plot', levelLab().props, (v: any) => v && near(Math.hypot(2 * v.pts.P.x, 2 * v.pts.P.y), 4, 0.15), t`qualquer ponto da circunferência de raio 2`),
+            inter(t`Arraste $P$ até um ponto onde $|\nabla f|=4$ para $f=x^2+y^2$.`, 'plot', levelLab().props, (v: any) => v && near(Math.hypot(2 * v.pts.P.x, 2 * v.pts.P.y), 4, 0.15), t`qualquer ponto da circunferência de raio 2`, t`$\nabla f=(2x,\,2y)$, então $|\nabla f|=2\sqrt{x^2+y^2}=4\iff x^2+y^2=4$: qualquer ponto da circunferência de raio $2$.`),
             mcq(t`Para subir uma montanha $z=f(x,y)$ o mais rápido possível, ande na direção de…`, ['$\\nabla f$', '$-\\nabla f$', 'uma curva de nível', 'qualquer direção'], 0, t`O gradiente aponta para o maior crescimento.`),
             gen((rng) => {
               const [x, y] = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
@@ -229,7 +229,7 @@ export const duplas: UnitDef = {
           },
           exercises: [
             tf(t`Se $f\ge0$ em $R$, a integral dupla é o volume do sólido sob a superfície.`, true, t`Soma de colunas finíssimas.`),
-            inter(t`Aumente a malha para $n\ge6$ e observe a soma convergir.`, 'space3d', DLAB().props!, (v: any) => v && v.p.n >= 6, '$n\\ge6$'),
+            inter(t`Aumente a malha para $n\ge6$ e observe a soma convergir.`, 'space3d', DLAB().props!, (v: any) => v && v.p.n >= 6, '$n\\ge6$', t`Cada prisma tem volume $f(x_i,y_j)\,\Delta A$; refinando a malha, a soma dupla de Riemann se aproxima da integral dupla (o volume exato).`),
             mcq(t`Numa soma de Riemann dupla, cada parcela $f(x_i,y_j)\,\Delta A$ é…`, ['o volume de uma coluna', 'a área de um quadradinho', 'a altura da superfície', 'um comprimento'], 0, t`Altura vezes área da base.`),
             gen((rng) => {
               const n = randInt(rng, 2, 6);
@@ -281,7 +281,7 @@ Integre **de dentro para fora**, tratando a outra variável como constante.`,
             example: t`$\int_0^2\!\int_0^1xy\,dy\,dx=\int_0^2\left[\frac{xy^2}{2}\right]_0^1dx=\int_0^2\frac x2dx=1$.`,
           },
           exercises: [
-            order(t`Ordene o cálculo de $\int_0^1\int_0^3 2xy\,dy\,dx$:`, [t`Integrar em $y$: $\left[xy^2\right]_0^3=9x$`, t`Integrar em $x$: $\int_0^1 9x\,dx$`, t`Resultado: $\frac92$`]),
+            order(t`Ordene o cálculo de $\int_0^1\int_0^3 2xy\,dy\,dx$:`, [t`Integrar em $y$: $\left[xy^2\right]_0^3=9x$`, t`Integrar em $x$: $\int_0^1 9x\,dx$`, t`Resultado: $\frac92$`], t`Primeiro a integral de dentro (em $y$, com $x$ fixo): $\int_0^3 2xy\,dy=9x$. Depois a de fora: $\int_0^1 9x\,dx=\frac92$.`),
             mcq(t`Em $\int_0^2\!\int_0^1 f\,dy\,dx$, qual integral se faz **primeiro**?`, ['a de dentro, em $y$', 'a de fora, em $x$', 'tanto faz a ordem dos limites', 'as duas ao mesmo tempo'], 0, t`De dentro para fora.`),
             gen((rng) => {
               const b = randInt(rng, 1, 3);

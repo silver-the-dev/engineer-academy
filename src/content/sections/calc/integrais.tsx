@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near } from '../../helpers';
 import { AreaUnder, FnCurve, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, randInt, randNZ, polyTex, term } from '../../../lib/random';
+import { fmt, randInt, randNZ, polyTex, term, par } from '../../../lib/random';
 import { areaLab, betweenLab, fnLab, riemannLab } from '../../visuals';
 
 const t = String.raw;
@@ -164,9 +164,9 @@ O $+C$ existe porque somar uma constante só desloca o gráfico na vertical, sem
               const a = (n + 1) * k;
               const x0 = randInt(rng, 1, 3);
               return num(
-                t`Seja $F(x)$ a primitiva de $f(x)=${a}x^{${n}}$ com constante $C=0$. Quanto vale $F(${x0})$?`,
+                t`Seja $F(x)$ a primitiva de $f(x)=${a}x${n === 1 ? "" : `^{${n}}`}$ com constante $C=0$. Quanto vale $F(${x0})$?`,
                 k * x0 ** (n + 1),
-                t`$F(x)=${k === 1 ? '' : k}x^{${n + 1}}\implies F(${x0})=${k}\cdot ${x0}^{${n + 1}}=${k * x0 ** (n + 1)}$.`,
+                t`$F(x)=${k === 1 ? '' : k}x^{${n + 1}}\implies F(${x0})=${k === 1 ? "" : `${k}\\cdot `}${x0}^{${n + 1}}=${k * x0 ** (n + 1)}$.`,
               );
             }),
             mcq(
@@ -875,7 +875,7 @@ export const integralDefinida: UnitDef = {
               return num(
                 t`Aproxime $\int_0^2 (${m === 1 ? '' : m}x+${c})\,dx$ com $n=2$ retângulos pela **esquerda** (alturas em $x=0$ e $x=1$).`,
                 m + 2 * c,
-                t`$\Delta x=1$: $f(0)\cdot 1 + f(1)\cdot 1 = ${c} + (${m + c}) = ${m + 2 * c}$.`,
+                t`$\Delta x=1$: $f(0)\cdot 1 + f(1)\cdot 1 = ${c} + ${m + c} = ${m + 2 * c}$.`,
               );
             }),
             mcq(
@@ -929,7 +929,7 @@ Mova $b$ em $f(x)=x-1$ e veja como a área positiva compensa a negativa:`,
             ),
             mcq(
               t`Por que $\int_{-5}^{5} x^3\cos x\,dx = 0$ sem precisar achar a primitiva?`,
-              ['porque o integrando é ímpar e o intervalo $[-5,\,5]$ é simétrico', 'porque $\\cos x$ é zero', 'porque $x^3$ é par', 'porque os limites são iguais'],
+              [t`porque o integrando é ímpar e o intervalo $[-5,\,5]$ é simétrico`, 'porque $\\cos x$ é zero', 'porque $x^3$ é par', 'porque os limites são iguais'],
               0,
               t`Ímpar $\times$ par $=$ ímpar; em $[-a,\,a]$ as metades esquerda e direita se cancelam.`,
             ),
@@ -968,7 +968,7 @@ $$\int_a^c f(x)\,dx+\int_c^b f(x)\,dx=\int_a^b f(x)\,dx$$`,
               return num(
                 t`Se $\int_0^3 f(x)\,dx = ${A}$ e $\int_3^7 f(x)\,dx = ${B}$, quanto vale $\int_0^7 f(x)\,dx$?`,
                 A + B,
-                t`Pela aditividade: $\int_0^3 f + \int_3^7 f = ${A}+(${B})=${A + B}$.`,
+                t`Pela aditividade: $\int_0^3 f + \int_3^7 f = ${A}+${par(B)}=${A + B}$.`,
               );
             }),
             gen((rng) => {
@@ -978,7 +978,7 @@ $$\int_a^c f(x)\,dx+\int_c^b f(x)\,dx=\int_a^b f(x)\,dx$$`,
               return num(
                 t`Se $\int_1^4 f(x)\,dx=${A}$ e $\int_1^4 g(x)\,dx=${B}$, calcule $\int_1^4\big(${k}f(x)-g(x)\big)\,dx$.`,
                 k * A - B,
-                t`$${k}\int_1^4 f - \int_1^4 g = ${k}\cdot ${A}-(${B})=${k * A - B}$.`,
+                t`$${k}\int_1^4 f - \int_1^4 g = ${k}\cdot ${par(A)}-${par(B)}=${k * A - B}$.`,
               );
             }),
             num(
@@ -1358,7 +1358,7 @@ O mesmo vale para vazão $\to$ volume, força $\to$ trabalho ($W=\int_a^b F(x)\,
             gen((rng) => {
               const t0 = randInt(rng, 1, 4);
               return num(
-                t`Para a mesma velocidade $v(t)=2t-${2 * t0}$ m/s, qual é a **distância total percorrida** entre $t=0$ e $t=${2 * t0}$ s?`,
+                t`Para a velocidade $v(t)=2t-${2 * t0}$ m/s, qual é a **distância total percorrida** entre $t=0$ e $t=${2 * t0}$ s?`,
                 2 * t0 * t0,
                 t`De $0$ a $${t0}$ recua $${t0 * t0}$ m e de $${t0}$ a $${2 * t0}$ avança $${t0 * t0}$ m; distância total $=${2 * t0 * t0}$ m.`,
                 { unit: 'm' },

@@ -232,7 +232,7 @@ $$\operatorname{sen}^2 x+\cos^2 x=1$$
                   t`$\frac{\cos^{${n + 1}}x}{${n + 1}}-\frac{\cos^{${n + 3}}x}{${n + 3}}+C$`,
                   t`$\frac{\operatorname{sen}^{4}x\cos^{${n + 1}}x}{${4 * (n + 1)}}+C$`,
                   t`$-\frac{\cos^{${n + 1}}x}{${n + 1}}-\frac{\cos^{${n + 3}}x}{${n + 3}}+C$`,
-                  t`$\frac{\operatorname{sen}^{${n + 1}}x}{${n + 1}}-\frac{\operatorname{sen}^{${n + 3}}x}{${n + 3}}+C$`,
+                  t`$\frac{\operatorname{sen}^{${n + 1}}x}{${n + 1}}+\frac{\operatorname{sen}^{${n + 3}}x}{${n + 3}}+C$`,
                 ],
                 t`Com $u=\cos x$ ($du=-\operatorname{sen}x\,dx$): $\int(1-u^2)u^{${n}}(-du)=-\frac{u^{${n + 1}}}{${n + 1}}+\frac{u^{${n + 3}}}{${n + 3}}+C$.`,
               );
@@ -358,9 +358,9 @@ Veja que $\operatorname{sen}^2 x$ oscila entre $0$ e $1$ em torno da reta média
               const k = randInt(rng, 1, 5);
               const a = (m + 1) * k;
               return num(
-                t`Calcule a integral definida $\int_0^{\pi/4} ${a}\operatorname{tg}^{${m}}x\sec^2 x\,dx$.`,
+                t`Calcule a integral definida $\int_0^{\pi/4} ${a}\operatorname{tg}${m === 1 ? "" : `^{${m}}`}x\sec^2 x\,dx$.`,
                 k,
-                t`Com $u=\operatorname{tg}x$, $u(0)=0$ e $u(\frac{\pi}{4})=1$: $\int_0^1 ${a}u^{${m}}\,du = \left[${k === 1 ? '' : k}u^{${m + 1}}\right]_0^1 = ${k}$.`,
+                t`Com $u=\operatorname{tg}x$, $u(0)=0$ e $u(\frac{\pi}{4})=1$: $\int_0^1 ${a}u${m === 1 ? "" : `^{${m}}`}\,du = \left[${k === 1 ? '' : k}u^{${m + 1}}\right]_0^1 = ${k}$.`,
               );
             }),
             mcqS(

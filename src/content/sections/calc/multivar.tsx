@@ -314,7 +314,7 @@ Isso descreve não só a forma da curva, mas **como** ela é percorrida (sentido
             }),
             mcqS(t`Eliminando o parâmetro em $x=t$, $y=t^2$, obtemos:`, t`$y=x^2$`, [t`$x=y^2$`, t`$y=2x$`, t`$x^2+y^2=1$`, t`$y=\sqrt x$`], t`$t=x$ ⟹ $y=x^2$.`),
             tf(t`$(\cos t,\,\operatorname{sen}t)$ e $(\cos 2t,\,\operatorname{sen}2t)$, para $0\le t\le\pi$, descrevem a mesma trajetória percorrida no mesmo tempo.`, false, t`A segunda dá a volta completa em $[0,\,\pi]$ (duas vezes mais rápido); a primeira só meia volta.`),
-            inter(t`No lab, escolha a **cicloide** (curva nº 4) e leve a partícula ao ponto mais alto ($t=\pi$).`, 'plot', particleLab().props, (v: any) => v && Math.round(v.p.c) === 3 && near(v.p.s, Math.PI, 0.06), t`Na cicloide $y=1-\cos t$ é máximo em $t=\pi$.`),
+            inter(t`No lab, escolha a **cicloide** (curva nº 4) e leve a partícula ao ponto mais alto ($t=\pi$).`, 'plot', particleLab().props, (v: any) => v && Math.round(v.p.c) === 3 && near(v.p.s, Math.PI, 0.06), t`Na cicloide $y=1-\cos t$ é máximo em $t=\pi$.`, t`Na cicloide $(t-\operatorname{sen}t,\ 1-\cos t)$, a altura $y=1-\cos t$ é máxima quando $\cos t=-1$, ou seja, em $t=\pi$ (altura $2$).`),
             mcqS(t`A elipse $\frac{x^2}{9}+\frac{y^2}{4}=1$ pode ser parametrizada por:`, t`$(3\cos t,\,2\operatorname{sen}t)$`, [t`$(9\cos t,\,4\operatorname{sen}t)$`, t`$(2\cos t,\,3\operatorname{sen}t)$`, t`$(3t,\,2t)$`, t`$(\cos 3t,\,\operatorname{sen}2t)$`], t`$\frac{9\cos^2t}{9}+\frac{4\operatorname{sen}^2t}{4}=1$.`),
             gen((rng) => {
               const A = [randInt(rng, -3, 3), randInt(rng, -3, 3)];
@@ -341,7 +341,7 @@ Ela gira em torno do eixo $z$ enquanto sobe — como uma mola ou a rosca de um p
               const c = randInt(rng, 1, 5);
               return num(t`Quanto a hélice $(\cos t,\,\operatorname{sen}t,\,${c}t)$ sobe a cada volta completa? (2 casas)`, 2 * Math.PI * c, t`Uma volta: $\Delta t=2\pi$, $\Delta z=${c}\cdot2\pi\approx${fmt(2 * Math.PI * c, 2)}$.`, { tol: 0.02 });
             }),
-            inter(t`Ajuste a hélice do lab para subir aproximadamente $3{,}14$ por volta.`, 'space3d', helixLab().props, (v: any) => v && near(2 * Math.PI * v.p.c, Math.PI, 0.2), t`$2\pi c=\pi\Rightarrow c=0{,}5$.`),
+            inter(t`Ajuste a hélice do lab para subir aproximadamente $3{,}14$ por volta.`, 'space3d', helixLab().props, (v: any) => v && near(2 * Math.PI * v.p.c, Math.PI, 0.2), t`$2\pi c=\pi\Rightarrow c=0{,}5$.`, t`Numa volta $t$ cresce $2\pi$, e $z=ct$ sobe $2\pi c$. Para subir $\pi\approx3{,}14$: $2\pi c=\pi\Rightarrow c=0{,}5$.`),
             mcqS(t`Qual curva está **sobre** o cilindro $x^2+y^2=4$?`, t`$(2\cos t,\,2\operatorname{sen}t,\,t^2)$`, [t`$(2\cos t,\,\operatorname{sen}t,\,t)$`, t`$(t,\,2,\,t)$`, t`$(4\cos t,\,4\operatorname{sen}t,\,1)$`, t`$(\cos t,\,\operatorname{sen}t,\,2)$`], t`$x^2+y^2=4(\cos^2t+\operatorname{sen}^2t)=4$ para todo $t$.`),
             gen((rng) => {
               const P = [randInt(rng, -2, 2), randInt(rng, -2, 2), randInt(rng, -2, 2)];
@@ -382,7 +382,7 @@ $\vec v$ é **tangente** à trajetória e aponta no sentido do movimento; seu m�
               return num(t`Qual a velocidade escalar de $\vec r(t)=(${R}\cos ${w}t,\,${R}\operatorname{sen}${w}t)$?`, R * w, t`$|\vec r\,'|=\sqrt{(${R * w})^2(\operatorname{sen}^2+\cos^2)}=${R * w}$ (constante).`);
             }),
             tf(t`No movimento circular uniforme, a aceleração é nula porque a rapidez é constante.`, false, t`A **direção** de $\vec v$ muda: há aceleração centrípeta $\vec a=-\omega^2\vec r$.`),
-            inter(t`No lab (circunferência), leve a partícula a $t=\frac{\pi}{2}$ e observe: velocidade horizontal para a esquerda.`, 'plot', particleLab({ acc: true }).props, (v: any) => v && Math.round(v.p.c) === 0 && near(v.p.s, Math.PI / 2, 0.05), t`$\vec r\,'(\frac\pi2)=(-2,\,0)$.`),
+            inter(t`No lab (circunferência), leve a partícula a $t=\frac{\pi}{2}$ e observe: velocidade horizontal para a esquerda.`, 'plot', particleLab({ acc: true }).props, (v: any) => v && Math.round(v.p.c) === 0 && near(v.p.s, Math.PI / 2, 0.05), t`$\vec r\,'(\frac\pi2)=(-2,\,0)$.`, t`Com $\vec r=(2\cos t,\ 2\operatorname{sen}t)$, $\vec r\,'=(-2\operatorname{sen}t,\ 2\cos t)$; em $t=\frac{\pi}{2}$ dá $(-2,\,0)$: velocidade tangente, apontando para a esquerda.`),
             mcqS(t`A reta tangente a $\vec r(t)=(t^2,\,t^3)$ em $t=1$ tem direção:`, t`$(2,\,3)$`, [t`$(1,\,1)$`, t`$(2,\,1)$`, t`$(1,\,3)$`, t`$(0,\,6)$`], t`$\vec r\,'(t)=(2t,\,3t^2)$.`),
             num(t`Para $\vec r(t)=(t,\,t^2,\,t^3)$, quanto vale a 3ª coordenada de $\vec a(2)$?`, 12, t`$z''=6t=12$.`),
             gen((rng) => {
@@ -471,7 +471,7 @@ Reta: $\kappa=0$. Circunferência de raio $R$: $\kappa=\frac1R$. O **círculo os
             }),
             tf(t`Uma reta tem curvatura zero.`, true, t`A direção nunca muda.`),
             num(t`Curvatura de $y=x^2$ na origem:`, 2, t`$f'(0)=0$, $f''=2$: $\kappa=\frac{2}{1}=2$.`),
-            inter(t`No lab ($y=\operatorname{sen}x$), leve o ponto para onde a curvatura é **zero** (um ponto de inflexão).`, 'plot', curvatureLab().props, (v: any) => v && Math.round(v.p.f) === 1 && near(v.p.x, 0, 0.06), t`Em $x=0$, $y''=-\operatorname{sen}0=0$.`),
+            inter(t`No lab ($y=\operatorname{sen}x$), leve o ponto para onde a curvatura é **zero** (um ponto de inflexão).`, 'plot', curvatureLab().props, (v: any) => v && Math.round(v.p.f) === 1 && near(v.p.x, 0, 0.06), t`Em $x=0$, $y''=-\operatorname{sen}0=0$.`, t`$\kappa=\frac{|y''|}{(1+y'^2)^{3/2}}$ zera onde $y''=-\operatorname{sen}x=0$: em $x=0$ (ou $x=\pm\pi$), os pontos de inflexão.`),
             mcq(t`Na parábola $y=\frac{x^2}{2}$, onde a curvatura é máxima?`, ['no vértice', 'longe do vértice', 'é constante', 'em x = 1'], 0, t`$\kappa=\frac{1}{(1+x^2)^{3/2}}$, máximo em $x=0$.`),
             num(t`Raio do círculo osculador de $y=\frac{x^2}{2}$ no vértice:`, 1, t`$\kappa=1\Rightarrow R=1$.`),
             mcqS(t`Em engenharia de estradas, curvatura alta significa:`, 'curva fechada (exige velocidade menor)', ['reta longa', 'subida íngreme', 'pista mais larga', 'nada em especial'], t`Aceleração centrípeta $=\kappa v^2$: com $\kappa$ grande, $v$ precisa ser menor.`),
@@ -508,7 +508,7 @@ Teste clássico: aproximar de $(0,\,0)$ pelas retas $y=mx$. Para $f=\frac{xy}{x^
             num(t`Para $f=\dfrac{xy}{x^2+y^2}$, qual o valor ao longo da reta $y=x$ (perto da origem)?`, 0.5, t`$\frac{x^2}{2x^2}=\frac12$.`),
             num(t`E ao longo do eixo $x$ ($y=0$)?`, 0, t`$\frac{0}{x^2}=0$.`),
             tf(t`Como os dois caminhos acima dão valores diferentes, $\lim_{(x,y)\to(0,0)}\frac{xy}{x^2+y^2}$ não existe.`, true, t`$\frac12\ne0$.`),
-            inter(t`No lab, ache uma reta pela origem onde $f$ vale $-\frac12$.`, 'plot', pathLimitLab().props, (v: any) => v && near(v.p.m / (1 + v.p.m * v.p.m), -0.5, 0.01), t`$\frac{m}{1+m^2}=-\frac12\Rightarrow m=-1$.`),
+            inter(t`No lab, ache uma reta pela origem onde $f$ vale $-\frac12$.`, 'plot', pathLimitLab().props, (v: any) => v && near(v.p.m / (1 + v.p.m * v.p.m), -0.5, 0.01), t`$\frac{m}{1+m^2}=-\frac12\Rightarrow m=-1$.`, t`Sobre $y=mx$, $f=\frac{x\cdot mx}{x^2+m^2x^2}=\frac{m}{1+m^2}$; igualando a $-\frac12$: $m^2+2m+1=0\Rightarrow m=-1$. Como o valor muda com $m$, o limite na origem não existe.`),
             gen((rng) => {
               const a = randInt(rng, -3, 3);
               const b = randInt(rng, -3, 3);
@@ -566,7 +566,7 @@ Essa é a **aproximação linear** $L(x,y)\approx f(x,y)$. Mova o ponto de tang�
             }),
             num(t`Use a linearização de $f=x^2+y^2$ em $(1,\,2)$ para estimar $f(1{,}1;\ 1{,}9)$ (2 casas).`, 4.8, t`$5+2(0{,}1)+4(-0{,}1)=4{,}8$.`, { tol: 0.01 }),
             tf(t`Num ponto de máximo local de uma função diferenciável, o plano tangente é horizontal.`, true, t`$f_x=f_y=0$ ali.`),
-            inter(t`No lab, leve o ponto de tangência ao **topo** da superfície (plano horizontal).`, 'space3d', tangentPlaneLab().props, (v: any) => v && near(v.p.x, 0, 0.01) && near(v.p.y, 0, 0.01), t`$(x_0,\,y_0)=(0,\,0)$.`),
+            inter(t`No lab, leve o ponto de tangência ao **topo** da superfície (plano horizontal).`, 'space3d', tangentPlaneLab().props, (v: any) => v && near(v.p.x, 0, 0.01) && near(v.p.y, 0, 0.01), t`$(x_0,\,y_0)=(0,\,0)$.`, t`O plano tangente é horizontal onde $f_x=f_y=0$; no topo do morro isso acontece em $(0,\,0)$.`),
             gen((rng) => {
               const a = randInt(rng, 1, 4);
               const b = randInt(rng, 1, 4);
@@ -605,7 +605,7 @@ Arraste $P$ e gire $\vec u$ (azul):`,
               return num(t`Se $\nabla f(P)=(${a},\,${b})$, qual a **maior** taxa de crescimento de $f$ em $P$?`, c, t`$|\nabla f|=\sqrt{${a * a}+${b * b}}=${c}$.`);
             }),
             tf(t`Para usar $D_{\vec u}f=\nabla f\cdot\vec u$, o vetor $\vec u$ precisa ser unitário.`, true, t`Senão a "taxa" fica multiplicada por $|\vec u|$. Normalize: $\vec u=\frac{\vec v}{|\vec v|}$.`),
-            inter(t`No lab, gire $\vec u$ até a derivada direcional ser (quase) **zero** em $P$.`, 'plot', directionalLab().props, (v: any) => { if (!v) return false; const a = (v.p.th * Math.PI) / 180; const g = Math.hypot(2 * v.pts.P.x, 4 * v.pts.P.y); return g > 0.3 && Math.abs(2 * v.pts.P.x * Math.cos(a) + 4 * v.pts.P.y * Math.sin(a)) < 0.15 * g; }, t`$\vec u$ perpendicular ao gradiente: tangente à elipse de nível.`),
+            inter(t`No lab, gire $\vec u$ até a derivada direcional ser (quase) **zero** em $P$.`, 'plot', directionalLab().props, (v: any) => { if (!v) return false; const a = (v.p.th * Math.PI) / 180; const g = Math.hypot(2 * v.pts.P.x, 4 * v.pts.P.y); return g > 0.3 && Math.abs(2 * v.pts.P.x * Math.cos(a) + 4 * v.pts.P.y * Math.sin(a)) < 0.15 * g; }, t`$\vec u$ perpendicular ao gradiente: tangente à elipse de nível.`, t`$D_{\vec u}f=\nabla f\cdot\vec u=|\nabla f|\cos\theta$ zera quando $\theta=90^\circ$: $\vec u$ perpendicular ao gradiente, ou seja, tangente à curva de nível.`),
             mcqS(t`Para $f=x^2y$ em $(1,\,2)$, na direção de $\vec v=(3,\,4)$, $D_{\vec u}f=$`, t`$3{,}2$`, [t`$16$`, t`$5$`, t`$4$`, t`$2{,}8$`], t`$\nabla f=(2xy,\,x^2)=(4,\,1)$ e $\vec u=\frac{\vec v}{5}=(0{,}6;\ 0{,}8)$: $4\cdot0{,}6+1\cdot0{,}8=3{,}2$. (Sem normalizar daria $16$.)`),
             mcq(t`Uma formiga sobre $f(x,y)$ quer andar sem subir nem descer. Ela deve seguir…`, ['a curva de nível', 'o gradiente', 'o oposto do gradiente', 'qualquer reta'], 0, t`Ao longo da curva de nível $D_{\vec u}f=0$.`),
             num(t`Qual a taxa de **decrescimento** mais rápido de $f$ em $P$ se $\nabla f(P)=(1,\,1)$? Dê o valor (negativo, 3 casas).`, -Math.SQRT2, t`$-|\nabla f|=-\sqrt2\approx-1{,}414$.`, { tol: 0.002 }),
@@ -635,7 +635,7 @@ Esses são os **pontos críticos**. Mas nem todo ponto crítico é extremo: pode
               return rmcq(rng, t`Ponto crítico de $f=x^2${term(-2 * a, 'x')}+y^2${term(-2 * b, 'y')}$:`, `$(${a},\\,${b})$`, [`$(${-a},\\,${-b})$`, `$(${2 * a},\\,${2 * b})$`, `$(${b},\\,${a})$`, '$(0,\\,0)$'], t`$f_x=2x-${2 * a}=0$, $f_y=2y-${2 * b}=0$.`);
             }),
             tf(t`Todo ponto crítico é um máximo ou um mínimo local.`, false, t`Pode ser uma sela, como em $x^2-y^2$ na origem.`),
-            inter(t`No lab, mostre a superfície em que a origem é **sela**.`, 'space3d', extremaLab(0).props, (v: any) => v && Math.round(v.p.k) === 2, t`$f=x^2-y^2$.`),
+            inter(t`No lab, mostre a superfície em que a origem é **sela**.`, 'space3d', extremaLab(0).props, (v: any) => v && Math.round(v.p.k) === 2, t`$f=x^2-y^2$.`, t`Em $f=x^2-y^2$, a origem é mínimo ao longo do eixo $x$ e máximo ao longo do eixo $y$: $D=f_{xx}f_{yy}-f_{xy}^2=-4<0$, sela.`),
             num(t`Quantos pontos críticos tem $f=x^3-3x+y^2$?`, 2, t`$f_x=3x^2-3=0\Rightarrow x=\pm1$; $f_y=2y=0$. Pontos $(\pm1,\,0)$.`),
             mcqS(t`Os pontos críticos de $f=xy$ são:`, t`só $(0,\,0)$`, [t`os eixos`, t`$(1,\,1)$ e $(-1,\,-1)$`, t`nenhum`, t`a reta $y=x$`], t`$f_x=y=0$ e $f_y=x=0$.`),
             mcq(t`Na origem, $f=xy$ tem…`, ['uma sela', 'um mínimo', 'um máximo', 'nada'], 0, t`$f>0$ no 1º e 3º quadrantes, $<0$ no 2º e 4º.`),
@@ -672,7 +672,7 @@ $$H=\begin{pmatrix}f_{xx}&f_{xy}\\f_{xy}&f_{yy}\end{pmatrix},\qquad D=f_{xx}f_{y
             num(t`Para $f=x^3-3x+y^2$ no ponto $(1,\,0)$, quanto vale $D$?`, 12, t`$f_{xx}=6x=6$, $f_{yy}=2$, $f_{xy}=0$: $D=12>0$, mínimo.`),
             mcqS(t`E no ponto $(-1,\,0)$ da mesma função?`, 'sela', ['mínimo local', 'máximo local', 'inconclusivo'], t`$f_{xx}=-6$, $D=-12<0$.`),
             tf(t`Para $f=x^4+y^4$, o teste da 2ª derivada é inconclusivo na origem, embora ela seja mínimo.`, true, t`Todas as segundas derivadas zeram ($D=0$), mas $f\ge0=f(0,0)$.`),
-            inter(t`No lab, escolha o caso **degenerado** ($D=0$) e observe que ainda é um mínimo.`, 'space3d', extremaLab(0).props, (v: any) => v && Math.round(v.p.k) === 3, t`$x^4+y^4$: bem "achatado" no fundo.`),
+            inter(t`No lab, escolha o caso **degenerado** ($D=0$) e observe que ainda é um mínimo.`, 'space3d', extremaLab(0).props, (v: any) => v && Math.round(v.p.k) === 3, t`$x^4+y^4$: bem "achatado" no fundo.`, t`Em $x^4+y^4$ todas as derivadas segundas zeram na origem ($D=0$, teste inconclusivo), mas $f\ge0=f(0,0)$: ainda é mínimo.`),
             gen((rng) => {
               const a = randInt(rng, 1, 4);
               const b = randInt(rng, 1, 4);
@@ -724,7 +724,7 @@ Arraste $P$ sobre a reta $x+y=4$ procurando o maior $xy$ — repare nos gradient
             example: t`$f=xy$, $x+y=4$: $(y,\,x)=\lambda(1,\,1)$ ⟹ $x=y=2$, $f=4$.`,
           },
           exercises: [
-            inter(t`No lab, ache o ponto da reta $x+y=4$ que maximiza $xy$.`, 'plot', lagrangeLab().props, (v: any) => v && near(v.pts.P.x, 2, 0.08), t`$(2,\,2)$, onde $xy=4$.`),
+            inter(t`No lab, ache o ponto da reta $x+y=4$ que maximiza $xy$.`, 'plot', lagrangeLab().props, (v: any) => v && near(v.pts.P.x, 2, 0.08), t`$(2,\,2)$, onde $xy=4$.`, t`Lagrange: $\nabla(xy)=\lambda\nabla(x+y)\Rightarrow y=\lambda=x$; com $x+y=4$, $x=y=2$ e $xy=4$ (a curva de nível $xy=4$ tangencia a reta).`),
             mcqS(t`O sistema de Lagrange para $f=xy$ com $x+y=10$ dá:`, t`$x=y=5$`, [t`$x=10,\ y=0$`, t`$x=2,\ y=8$`, t`$x=y=10$`, t`não tem solução`], t`$y=\lambda$, $x=\lambda$ ⟹ $x=y$; com $x+y=10$.`),
             gen((rng) => {
               const s = 2 * randInt(rng, 2, 8);

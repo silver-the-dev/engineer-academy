@@ -2217,7 +2217,7 @@ Atenção: **não** é a regra do quociente! Derive o numerador e o denominador 
               const a = randInt(rng, 2, 7);
               const b = randInt(rng, 1, 5);
               return num(
-                t`Usando L'Hôpital, calcule $\lim_{x\to0}\dfrac{e^{${a}x}-1}{${b}x}$.`,
+                t`Usando L'Hôpital, calcule $\lim_{x\to0}\dfrac{e^{${a}x}-1}{${b === 1 ? "" : b}x}$.`,
                 a / b,
                 t`$\frac00\implies \lim_{x\to0}\frac{${a}e^{${a}x}}{${b}}=\frac{${a}}{${b}}=${fmt(a / b)}$.`,
                 { tol: 0.005 },
@@ -2227,7 +2227,7 @@ Atenção: **não** é a regra do quociente! Derive o numerador e o denominador 
               const a = randInt(rng, 2, 8);
               const b = randInt(rng, 1, 4);
               return num(
-                t`Calcule $\lim_{x\to0}\dfrac{\operatorname{sen}(${a}x)}{${b}x}$.`,
+                t`Calcule $\lim_{x\to0}\dfrac{\operatorname{sen}(${a}x)}{${b === 1 ? "" : b}x}$.`,
                 a / b,
                 t`$\frac00\implies \lim_{x\to0}\frac{${a}\cos(${a}x)}{${b}}=\frac{${a}}{${b}}=${fmt(a / b)}$.`,
                 { tol: 0.005 },
@@ -2361,7 +2361,7 @@ No infinito ($x\to\infty$), L'Hôpital confirma a hierarquia de crescimento:
               return num(
                 t`Calcule $\lim_{x\to\infty}x\operatorname{sen}\left(\dfrac{${k}}{x}\right)$ (forma $\infty\cdot0$, trocando $u=1/x$).`,
                 k,
-                t`Escrevendo $\frac{\operatorname{sen}(${k}/x)}{1/x}$ (ou $u=1/x\to0^+$): $\lim_{u\to0^+}\frac{\operatorname{sen}(${k}u)}{u}=${k}$.`,
+                t`Escrevendo $\frac{\operatorname{sen}(${k}/x)}{1/x}$ (ou $u=1/x\to0^+$): $\lim_{u\to0^+}\frac{\operatorname{sen}(${k === 1 ? "" : k}u)}{u}=${k}$.`,
               );
             }),
             mcqS(

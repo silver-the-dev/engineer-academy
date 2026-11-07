@@ -1196,7 +1196,7 @@ Varie o expoente $k$ de $y=x^k$ em $[0,\,1]$ e acompanhe o centroide $C$:`,
               [
                 'porque o centroide de cada tira vertical de altura $f(x)$ está na altura média $f(x)/2$',
                 'porque a derivada de $x^2$ é $2x$',
-                'porque dividimos o intervalo $[a,\,b]$ ao meio',
+                t`porque dividimos o intervalo $[a,\,b]$ ao meio`,
                 'porque a área da tira é $\\frac12 f(x)\\,dx$',
               ],
               0,
