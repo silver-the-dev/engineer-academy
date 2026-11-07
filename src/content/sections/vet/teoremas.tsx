@@ -265,7 +265,7 @@ Só conta a componente **normal** do campo: um disco paralelo ao escoamento não
               const A = randInt(rng, 1, 6);
               return num(t`Campo uniforme $\vec F=(0,\,0,\,${k})$ através de uma placa horizontal de área $${A}$ (normal para cima):`, k * A, t`$\vec F\cdot\vec n=${k}$; vezes a área: $${k * A}$.`);
             }),
-            num(t`Mesmo campo $(0,\,0,\,1)$, placa de área $2$ inclinada $60^\circ$:`, 1, t`$2\cos60^\circ=1$.`),
+            num(t`Campo uniforme $(0,\,0,\,1)$ e uma placa de área $2$ cuja normal faz $60^\circ$ com o eixo $z$. Qual o fluxo?`, 1, t`$\vec F\cdot\vec n=|\vec F|\cos60^\circ=\frac12$; vezes a área: $2\cdot\frac12=1$.`),
             tf(t`Invertendo a orientação da normal, o fluxo troca de sinal.`, true, t`$\vec n\to-\vec n$.`),
             mcqS(t`Fluxo de $\vec F=(x,\,y,\,z)$ pela esfera de raio $R$ (normal para fora), direto pela definição: em cada ponto $\vec F\cdot\vec n=$`, t`$R$`, [t`$1$`, t`$R^2$`, t`$0$`, t`$3$`], t`$\vec n=\frac{\vec r}{R}$, $\vec F\cdot\vec n=\frac{|\vec r|^2}{R}=R$. Fluxo $=R\cdot4\pi R^2$.`),
             gen((rng) => {
@@ -310,7 +310,7 @@ Consequência surpreendente: o lado direito dá **o mesmo valor para qualquer su
             gen((rng) => {
               const a = randInt(rng, 1, 3);
               const b = randInt(rng, 1, 3);
-              return num(t`Use Stokes: circulação de $\vec F=(0,\,x,\,0)$ na elipse $\frac{x^2}{${a * a}}+\frac{y^2}{${b * b}}=1$ (plano $xy$, anti-horário), 2 casas:`, PI * a * b, t`$(\nabla\times\vec F)\cdot\vec k=1$: dá a área $${a * b}\pi\approx${fmt(PI * a * b, 2)}$.`, { tol: 0.03 });
+              return num(t`Use Stokes: circulação de $\vec F=(0,\,x,\,0)$ na ${a === b ? 'circunferência' : 'elipse'} $\frac{x^2}{${a * a}}+\frac{y^2}{${b * b}}=1$ (plano $xy$, anti-horário), 2 casas:`, PI * a * b, t`$(\nabla\times\vec F)\cdot\vec k=1$, então a circulação é a área $\pi ab=${a * b === 1 ? '' : a * b}\pi\approx${fmt(PI * a * b, 2)}$.`, { tol: 0.03 });
             }),
             mcqS(t`Uma rede de borboleta (superfície) com o mesmo aro (curva) que um disco: o fluxo do rotacional nos dois é:`, 'igual', ['maior na rede', 'maior no disco', 'sempre zero', 'não dá para comparar'], t`Ambos são iguais à circulação no aro.`),
           ],

@@ -429,7 +429,7 @@ $\frac ba$ é o **equilíbrio** (solução particular constante) e $Ce^{-ax}$ é
             gen((rng) => {
               const a = randNZ(rng, -3, 4);
               const b = randNZ(rng, -6, 6);
-              return rmcq(rng, t`Solução geral de $y'${term(a, 'y')}=${b}$:`, `$y=${fmt(b / a)}+Ce^{${-a}x}$`.replace('+-', '-').replace('{1x', '{x').replace('{-1x', '{-x'), [`$y=${fmt(a / b)}+Ce^{${-a}x}$`.replace('+-', '-').replace('{1x', '{x').replace('{-1x', '{-x'), `$y=${fmt(b / a)}+Ce^{${a}x}$`.replace('+-', '-').replace('{1x', '{x').replace('{-1x', '{-x'), `$y=${b}x+C$`, `$y=Ce^{${b}x}$`], t`Equilíbrio $\frac{${b}}{${a}}$ mais $Ce^{${-a}x}$.`);
+              return rmcq(rng, t`Solução geral de $y'${term(a, 'y')}=${b}$:`, `$y=${fmt(b / a)}+Ce^{${-a}x}$`.replace('+-', '-').replace('{1x', '{x').replace('{-1x', '{-x'), [`$y=${fmt(a / b)}+Ce^{${-a}x}$`.replace('+-', '-').replace('{1x', '{x').replace('{-1x', '{-x'), `$y=${fmt(b / a)}+Ce^{${a}x}$`.replace('+-', '-').replace('{1x', '{x').replace('{-1x', '{-x'), `$y=${b}x+C$`, `$y=Ce^{${b}x}$`], t`O equilíbrio é $y=\frac{${b}}{${a}}=${fmt(b / a)}$ (onde $y'=0$), e a homogênea $y'${term(a, 'y')}=0$ dá $Ce^{${-a}x}$.`);
             }),
             gen((rng) => {
               const a = randInt(rng, 1, 4);
@@ -448,7 +448,7 @@ $\frac ba$ é o **equilíbrio** (solução particular constante) e $Ce^{-ax}$ é
               const y0 = 0;
               const x1 = 1;
               const ans = (b / a) * (1 - Math.exp(-a * x1));
-              return num(t`Resolva $y'+${a}y=${b}$, $y(0)=${y0}$ e calcule $y(1)$ (3 casas).`, ans, t`$y=\frac{${b}}{${a}}(1-e^{-${a}x})$; $y(1)\approx${fmt(ans, 3)}$.`, { tol: 0.002 });
+              return num(t`Resolva $y'+${a}y=${b}$, $y(0)=${y0}$ e calcule $y(1)$ (3 casas).`, ans, t`$y=${a === 1 ? b : `\\frac{${b}}{${a}}`}(1-e^{-${a}x})$; $y(1)\approx${fmt(ans, 3)}$.`, { tol: 0.002 });
             }),
           ],
         },

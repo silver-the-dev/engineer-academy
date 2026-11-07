@@ -251,7 +251,7 @@ Com $f=1$ dá o **volume** de $E$; com $f=\rho$ (densidade), a **massa**. Calcul
             }),
             gen((rng) => {
               const c = randInt(rng, 1, 4);
-              return num(t`Volume do tetraedro $x+y+z\le${c}$ no 1º octante (3 casas):`, c ** 3 / 6, t`$\frac{c^3}{6}=${fmt(c ** 3 / 6, 3)}$.`, { tol: 0.002 });
+              return num(t`Volume do tetraedro $x+y+z\le${c}$ no 1º octante (3 casas):`, c ** 3 / 6, t`É o tetraedro de arestas $${c}$ nos eixos: $V=\frac{${c}^3}{6}=${fmt(c ** 3 / 6, 3)}$.`, { tol: 0.002 });
             }),
             inter(t`No lab, monte o tetraedro com volume $1$: $a=1$, $b=2$, $c=3$.`, 'space3d', tetraLab().props, (v: any) => v && near(v.p.a, 1, 0.01) && near(v.p.b, 2, 0.01) && near(v.p.c, 3, 0.01), t`$\frac{1\cdot2\cdot3}{6}=1$.`, t`O tetraedro com vértices na origem e em $(a,0,0)$, $(0,b,0)$, $(0,0,c)$ tem volume $\frac{abc}{6}$: $\frac{1\cdot2\cdot3}{6}=1$.`),
             num(t`$\iiint_{[0,1]^3}(x+y+z)\,dV$:`, 1.5, t`Cada termo dá $\frac12$: total $\frac32$.`),
