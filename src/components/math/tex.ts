@@ -14,6 +14,7 @@ import 'mathjax-full/js/input/tex/noundefined/NoUndefinedConfiguration.js';
 import 'mathjax-full/js/input/tex/boldsymbol/BoldsymbolConfiguration.js';
 import 'mathjax-full/js/input/tex/cancel/CancelConfiguration.js';
 import 'mathjax-full/js/input/tex/color/ColorConfiguration.js';
+import 'mathjax-full/js/input/tex/configmacros/ConfigMacrosConfiguration.js';
 
 export type TexSvg = {
   xml: string;
@@ -34,7 +35,7 @@ function init() {
   RegisterHTMLHandler(adaptor);
   doc = mathjax.document('', {
     InputJax: new TeX({
-      packages: ['base', 'ams', 'newcommand', 'noundefined', 'boldsymbol', 'cancel', 'color'],
+      packages: ['base', 'ams', 'newcommand', 'configmacros', 'noundefined', 'boldsymbol', 'cancel', 'color'],
       macros: {
         R: '\\mathbb{R}',
         N: '\\mathbb{N}',
