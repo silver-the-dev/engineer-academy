@@ -307,7 +307,7 @@ Perto de $x_0$, a reta tangente é a melhor **aproximação linear** da curva: $
                   t`$y=${lin(2 * a, a * a)}$`,
                   t`$y=${lin(-2 * a, b0)}$`,
                 ],
-                t`$f'(${a})=${2 * a}$ e ponto $(${a},\,${a * a})$: $y-${a * a}=${2 * a}(x-${a})\Rightarrow y=${lin(2 * a, b0)}$.`,
+                t`$f'(${a})=${2 * a}$ e ponto $(${a},\,${a * a})$: $y-${a * a}=${2 * a}(${a < 0 ? `x+${-a}` : `x-${a}`})\Rightarrow y=${lin(2 * a, b0)}$.`,
               );
             }),
             gen((rng) => {
@@ -733,7 +733,7 @@ $$(f\cdot g)'=f'\,g+f\,g'$$
               return num(
                 t`Se $f(x)=(x+${a})(x^2+${b})$, calcule $f'(${x})$ pela regra do produto.`,
                 val,
-                t`$f'(x)=1\cdot(x^2+${b})+(x+${a})\cdot2x$ ⟹ $f'(${x})=${x * x + b}+${(x + a) * 2 * x}=${val}$.`,
+                t`$f'(x)=1\cdot(x^2+${b})+(x+${a})\cdot2x$ ⟹ $f'(${x})=${x * x + b}${(x + a) * 2 * x < 0 ? '' : '+'}${(x + a) * 2 * x}=${val}$.`,
               );
             }),
             gen((rng) => {
@@ -1080,17 +1080,18 @@ Na notação de Leibniz, com $u=g(x)$, as taxas se multiplicam como engrenagens:
             ),
             gen((rng) => {
               const a = randNZ(rng, -5, 6);
+              const c = a === 1 ? '' : a === -1 ? '-' : `${a}`; // "x^2", not "1x^2"
               return rmcq(
                 rng,
-                t`Qual é a derivada de $f(x)=e^{${a}x^2}$?`,
-                t`$${2 * a}x\,e^{${a}x^2}$`,
+                t`Qual é a derivada de $f(x)=e^{${c}x^2}$?`,
+                t`$${2 * a}x\,e^{${c}x^2}$`,
                 [
-                  t`$e^{${a}x^2}$`,
-                  t`$${a}x\,e^{${a}x^2}$`,
+                  t`$e^{${c}x^2}$`,
+                  t`$${c}x\,e^{${c}x^2}$`,
                   t`$${2 * a}x\,e^{${2 * a}x}$`,
-                  t`$${a}x^2e^{${a}x^2-1}$`,
+                  t`$${c}x^2e^{${c}x^2-1}$`,
                 ],
-                t`$(e^u)'=e^u\cdot u'$ com $u=${a}x^2$ e $u'=${2 * a}x$.`,
+                t`$(e^u)'=e^u\cdot u'$ com $u=${c}x^2$ e $u'=${2 * a}x$.`,
               );
             }),
             gen((rng) => {
@@ -2307,7 +2308,7 @@ No infinito ($x\to\infty$), L'Hôpital confirma a hierarquia de crescimento:
             ),
             mcqS(
               t`Quantas vezes precisamos aplicar L'Hôpital para eliminar a potência do numerador em $\lim_{x\to\infty}\dfrac{x^3}{e^x}$?`,
-              '$3$ vezes (até $x^3\to 3x^2\to 6x\to 6$)',
+              t`$3$ vezes (até $x^3\to 3x^2\to 6x\to 6$)`,
               ['$1$ vez', '$2$ vezes', 'Infinitas vezes'],
               t`Cada derivada reduz o grau de $x^3$ em $1$, enquanto $e^x$ permanece $e^x$: $\lim\frac{6}{e^x}=0$.`,
             ),

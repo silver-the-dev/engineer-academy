@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { CircleW, FnCurve, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
+import { fmt, par, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
 import { fnLab } from '../../visuals';
 
 const t = String.raw;
@@ -270,7 +270,8 @@ Se $f(x)=x^2$ e $g(x)=x+1$:
               return rmcq(rng, t`Sendo $f(x)=${lin(a, b)}$ e $g(x)=${lin(c, d)}$, quanto é $f(g(x))$?`, `$${lin(a * c, a * d + b)}$`, [`$${lin(a * c, c * b + d)}$`, `$${lin(a + c, b + d)}$`, `$${lin(a * c, b * d)}$`, `$${lin(a * c, a * d + b + 1)}$`], t`$f(g(x))=${a}(${lin(c, d)})${term(b, '')}=${lin(a * c, a * d + b)}$.`);
             }),
             gen((rng) => {
-              const [a, b] = [randNZ(rng, -3, 4), randInt(rng, -4, 4)];
+              // b ≠ 0: with b = 0 three distractors collapse into the answer a²x
+              const [a, b] = [randNZ(rng, -3, 4), randNZ(rng, -4, 4)];
               return rmcq(rng, t`Sendo $f(x)=${lin(a, b)}$, quanto é $f(f(x))$?`, `$${lin(a * a, a * b + b)}$`, [`$${lin(2 * a, 2 * b)}$`, `$${lin(a * a, b * b)}$`, `$${lin(a * a, b)}$`, `$${lin(a * a, a * b)}$`], t`$${a}(${lin(a, b)})${term(b, '')}=${lin(a * a, a * b + b)}$.`);
             }),
             num(t`Sendo $f(x)=2x+1$ e $f(g(x))=6x+7$, quanto vale $g(1)$?`, 6, t`$2g(x)+1=6x+7\Rightarrow g(x)=3x+3$, então $g(1)=6$.`),
@@ -300,7 +301,7 @@ $h(x)=(3x+1)^5$: dentro $g(x)=3x+1$, fora $f(u)=u^5$.`,
               [t`$\cos(5x)$`, t`$5x$`],
               [t`$e^{-x}$`, t`$-x$`],
               [t`$\ln(x^2+1)$`, t`$x^2+1$`],
-            ]),
+            ], t`A parte de dentro é o que se calcula primeiro, o "argumento" da última operação: a base da potência, o ângulo do cosseno, o expoente da exponencial, o que está dentro do $\ln$.`),
             mcq(t`Como decompor $h(x)=\dfrac{1}{(x+3)^2}$?`, ['$f(u)=\\frac{1}{u^2}$ e $g(x)=x+3$', '$f(u)=u+3$ e $g(x)=\\frac{1}{x^2}$', '$f(u)=\\frac1u$ e $g(x)=x^2+3$', '$f(u)=u^2$ e $g(x)=\\frac{1}{x+3}$'], 0, t`Dentro: $x+3$. Fora: $\frac{1}{u^2}$.`),
             mcq(t`$h(x)=\operatorname{sen}^2(3x)=[\operatorname{sen}(3x)]^2$ é uma composição tripla. Qual é a ordem de cálculo?`, ['$3x$, depois seno, depois elevar ao quadrado', 'seno, depois $3x$, depois quadrado', 'quadrado, depois seno, depois $3x$', '$3x$, depois quadrado, depois seno'], 0, t`De dentro para fora: $u=3x$, $v=\operatorname{sen}u$, $h=v^2$.`),
           ],
@@ -322,7 +323,7 @@ O gráfico de $f^{-1}$ é o reflexo do de $f$ na reta $y=x$. Só existe inversa 
               [t`$x+5$`, t`$x-5$`],
               [t`$x^3$`, t`$\sqrt[3]{x}$`],
               [t`$10^x$`, t`$\log x$`],
-            ]),
+            ], t`A inversa desfaz a operação: dividir desfaz multiplicar, subtrair desfaz somar, a raiz cúbica desfaz o cubo e o $\log$ desfaz a potência de $10$.`),
             mcq(t`O gráfico de $f^{-1}$ é o de $f$ refletido…`, ['na reta $y=x$', 'no eixo $x$', 'no eixo $y$', 'na origem'], 0, t`Trocar $x$ com $y$ é refletir na diagonal $y=x$.`),
             gen((rng) => {
               const a = randNZ(rng, -4, 4);
@@ -359,16 +360,17 @@ Mexa em $h$ e $k$ partindo de $y=x^2$:`,
             mcq(t`O gráfico de $y=(x-3)^2$ é o de $y=x^2$ deslocado…`, ['3 unidades para a direita', '3 unidades para a esquerda', '3 para cima', '3 para baixo'], 0, t`$x-3=0$ em $x=3$: o vértice vai para a direita.`),
             mcqS(t`Qual transformação leva $y=\operatorname{sen}x$ em $y=\operatorname{sen}x+2$?`, '2 unidades para cima', ['2 para a direita', 'amplitude 2', 'período 2'], t`Somar fora da função desloca na vertical.`),
             mcq(t`O gráfico de $y=f(x+4)$ é o de $y=f(x)$ deslocado…`, ['4 para a esquerda', '4 para a direita', '4 para cima', '4 para baixo'], 0, t`$x+4=x-(-4)$: $h=-4$, para a esquerda.`),
-            inter(t`Posicione a parábola com vértice em $(2,\,-1)$, mantendo a abertura de $y=x^2$.`, 'plot', transformLab().props, (v: any) => v && near(v.p.a, 1, 0.01) && near(v.p.h, 2, 0.01) && near(v.p.k, -1, 0.01), t`$a=1$, $h=2$, $k=-1$`),
+            inter(t`Posicione a parábola com vértice em $(2,\,-1)$, mantendo a abertura de $y=x^2$.`, 'plot', transformLab().props, (v: any) => v && near(v.p.a, 1, 0.01) && near(v.p.h, 2, 0.01) && near(v.p.k, -1, 0.01), t`$a=1$, $h=2$, $k=-1$`, t`Em $y=a(x-h)^2+k$ o vértice é $(h,\,k)$: $h=2$, $k=-1$, e a mesma abertura de $x^2$ pede $a=1$.`),
             gen((rng) => {
               const h = randNZ(rng, -4, 4);
-              const k = randNZ(rng, -4, 4);
+              let k = randNZ(rng, -4, 4);
+              if (k === h) k = -h; // (k, h) would repeat the answer
               return rmcq(rng, t`Qual o vértice de $y=(${xm(h)})^2${term(k, '')}$?`, `$(${h},\\,${k})$`, [`$(${-h},\\,${k})$`, `$(${h},\\,${-k})$`, `$(${k},\\,${h})$`], t`$(x-h)^2+k$ tem vértice $(h,\,k)=(${h},\,${k})$.`);
             }),
             gen((rng) => {
               const h = randNZ(rng, -4, 4);
               const k = randNZ(rng, -4, 4);
-              return rmcq(rng, t`Deslocando $y=x^2$ ${Math.abs(h)} unidade(s) para a ${h > 0 ? 'direita' : 'esquerda'} e ${Math.abs(k)} para ${k > 0 ? 'cima' : 'baixo'}, obtemos:`, `$y=(${xm(h)})^2${term(k, '')}$`, [`$y=(${xm(-h)})^2${term(k, '')}$`, `$y=(${xm(h)})^2${term(-k, '')}$`, `$y=x^2${term(k - h, '')}$`], t`Direita/esquerda mexe **dentro** ($x-h$), cima/baixo mexe **fora** ($+k$).`);
+              return rmcq(rng, t`Deslocando $y=x^2$ ${Math.abs(h)} ${Math.abs(h) === 1 ? 'unidade' : 'unidades'} para a ${h > 0 ? 'direita' : 'esquerda'} e ${Math.abs(k)} para ${k > 0 ? 'cima' : 'baixo'}, obtemos:`, `$y=(${xm(h)})^2${term(k, '')}$`, [`$y=(${xm(-h)})^2${term(k, '')}$`, `$y=(${xm(h)})^2${term(-k, '')}$`, `$y=x^2${term(k - h, '')}$`], t`Direita/esquerda mexe **dentro** ($x-h$), cima/baixo mexe **fora** ($+k$).`);
             }),
             tf(t`O gráfico de $y=\sqrt{x-2}$ começa no ponto $(2,\,0)$.`, true, t`É $\sqrt x$ deslocada 2 para a direita.`),
             mcq(t`Qual é o "bico" (vértice) do gráfico de $y=|x+1|-3$?`, ['$(-1,\\,-3)$', '$(1,\\,-3)$', '$(-1,\\,3)$', '$(1,\\,3)$'], 0, t`$|x|$ deslocado 1 para a esquerda e 3 para baixo.`),
@@ -386,7 +388,7 @@ Mexa em $h$ e $k$ partindo de $y=x^2$:`,
             tf(t`O gráfico de $y=-f(x)$ é o reflexo de $y=f(x)$ no eixo $x$.`, true, t`Cada altura troca de sinal.`),
             mcq(t`Comparado com $y=x^2$, o gráfico de $y=3x^2$ fica…`, ['mais fechado (esticado na vertical)', 'mais aberto', 'deslocado 3 para cima', 'refletido'], 0, t`Cada altura fica 3 vezes maior.`),
             mcq(t`O gráfico de $y=f(-x)$ é o de $y=f(x)$…`, ['refletido no eixo $y$', 'refletido no eixo $x$', 'deslocado para a esquerda', 'igual'], 0, t`O valor que estava em $x$ passa a estar em $-x$.`),
-            inter(t`Faça a parábola ficar "triste" (boca para baixo) com vértice em $(-1,\,3)$ e $|a|=1$.`, 'plot', transformLab().props, (v: any) => v && near(v.p.a, -1, 0.01) && near(v.p.h, -1, 0.01) && near(v.p.k, 3, 0.01), t`$a=-1$, $h=-1$, $k=3$`),
+            inter(t`Faça a parábola ficar "triste" (boca para baixo) com vértice em $(-1,\,3)$ e $|a|=1$.`, 'plot', transformLab().props, (v: any) => v && near(v.p.a, -1, 0.01) && near(v.p.h, -1, 0.01) && near(v.p.k, 3, 0.01), t`$a=-1$, $h=-1$, $k=3$`, t`Boca para baixo pede $a<0$ (com $|a|=1$, $a=-1$); o vértice $(h,\,k)=(-1,\,3)$ dá $y=-(x+1)^2+3$.`),
             mcq(t`Qual a amplitude de $y=0{,}5\operatorname{sen}x$?`, ['$0{,}5$', '$1$', '$2$', '$\\pi$'], 0, t`O fator $0{,}5$ achata a onda pela metade.`),
             gen((rng) => {
               const a = randInt(rng, 2, 4);
@@ -421,7 +423,7 @@ A maioria das funções não é nem par nem ímpar.`,
             }),
             multi(t`Quais funções são **pares**?`, ['$\\cos x$', '$x^4+1$', '$x^3$', '$|x|$', '$e^x$'], [0, 1, 3], t`$x^3$ é ímpar; $e^x$ não é nem par nem ímpar.`),
             mcq(t`O produto de duas funções **ímpares** é…`, ['par', 'ímpar', 'nem par nem ímpar', 'sempre zero'], 0, t`$f(-x)g(-x)=(-f(x))(-g(x))=f(x)g(x)$.`),
-            num(t`$f$ é ímpar e está definida em $x=0$. Quanto vale $f(0)$?`, 0, t`$f(-0)=-f(0)\Rightarrow f(0)=-f(0)\Rightarrow f(0)=0$.`),
+            num(t`$f$ é ímpar e está definida em $x=0$. Quanto vale $f(0)$?`, 0, t`Ímpar significa $f(-x)=-f(x)$. Com $x=0$ (e $-0=0$): $f(0)=-f(0)\Rightarrow 2f(0)=0\Rightarrow f(0)=0$.`),
           ],
         },
       ],
@@ -480,7 +482,7 @@ O limite existe se, e somente se, os laterais existem e são **iguais**. Ajuste 
             visual: jumpLab(),
           },
           exercises: [
-            inter(t`Ajuste $c$ para que $\lim_{x\to1}f(x)$ exista.`, 'plot', jumpLab().props, (v: any) => v && near(v.p.L, 1, 0.01), t`$c=1$`),
+            inter(t`Ajuste $c$ para que $\lim_{x\to1}f(x)$ exista.`, 'plot', jumpLab().props, (v: any) => v && near(v.p.L, 1, 0.01), t`$c=1$`, t`O limite existe quando os dois laterais coincidem: o pedaço da direita precisa chegar à mesma altura que o da esquerda, o que acontece com $c=1$.`),
             mcq(t`Se $\lim_{x\to2^-}f(x)=5$ e $\lim_{x\to2^+}f(x)=3$, então $\lim_{x\to2}f(x)$…`, ['não existe', 'vale 4', 'vale 5', 'vale 3'], 0, t`Laterais diferentes: o limite não existe.`),
             tf(t`Se os dois limites laterais em $a$ valem $L$, então $\lim_{x\to a}f(x)=L$.`, true, t`É exatamente a condição de existência.`),
             gen((rng) => {
@@ -527,7 +529,7 @@ $\lim_{x\to2^-}f=3$ e $\lim_{x\to2^+}f=3$: o limite existe e vale $3$.`,
             gen((rng) => {
               const a = randInt(rng, -2, 5);
               const val = a + 1;
-              return num(t`Para qual $a$ o limite de $f(x)=\begin{cases}ax+1,&x<1\\ x^2+${val - 1},&x\ge1\end{cases}$ existe em $x=1$?`, a, t`Esquerda: $a+1$. Direita: $1+${val - 1}=${val}$. Então $a=${a}$.`);
+              return num(t`Para qual $a$ o limite de $f(x)=\begin{cases}ax+1,&x<1\\ x^2${term(val - 1, '')},&x\ge1\end{cases}$ existe em $x=1$?`, a, t`Esquerda: $a+1$. Direita: $1${term(val - 1, '')}=${val}$. Então $a+1=${val}$, ou seja, $a=${a}$.`);
             }),
             mcq(t`Para $f(x)=\begin{cases}x^2,&x<1\\ 2x-1,&x\ge1\end{cases}$, o limite em $x=1$…`, ['existe e vale $1$', 'não existe', 'vale $2$', 'vale $0$'], 0, t`Esquerda: $1^2=1$. Direita: $2-1=1$. Iguais.`),
           ],
@@ -586,7 +588,7 @@ Para polinômios e funções contínuas: **substitua direto**. Só quando aparec
 $$\frac{x^2-9}{x-3}=\frac{(x-3)(x+3)}{x-3}=x+3\ \to\ 6$$`,
           },
           exercises: [
-            order(t`Ordene a estratégia para um limite que dá $\frac00$:`, ['Substituir e detectar a indeterminação 0/0', 'Fatorar ou racionalizar', 'Cancelar o fator comum', 'Substituir de novo']),
+            order(t`Ordene a estratégia para um limite que dá $\frac00$:`, ['Substituir e detectar a indeterminação 0/0', 'Fatorar ou racionalizar', 'Cancelar o fator comum', 'Substituir de novo'], t`Primeiro confirme que é $\frac00$; depois transforme a expressão (fatorar ou racionalizar) para revelar o fator que zera, cancele-o e só então substitua.`),
             gen((rng) => {
               const a = randNZ(rng, -6, 6);
               return num(t`Calcule $${lim(a)}\dfrac{x^2-${a * a}}{${xm(a)}}$.`, 2 * a, t`Fatore: $\frac{(${xm(a)})(${xm(-a)})}{${xm(a)}}=${xm(-a)}$ ⟹ $${a}+(${a})=${2 * a}$.`);
@@ -733,7 +735,7 @@ Numa fração, quem cresce mais rápido **domina**: $\frac{x^{10}}{e^x}\to0$ e $
               const p = randInt(rng, 2, 6);
               return mcq(t`Quanto vale $\lim_{x\to\infty}\dfrac{${a}x^{${p}}+1}{e^x}$?`, ['$0$', '$+\\infty$', `$${a}$`, '$1$'], 0, t`A exponencial no denominador domina.`);
             }),
-            order(t`Ordene do que cresce **mais devagar** ao **mais rápido** (para $x\to\infty$):`, [t`$\ln x$`, t`$\sqrt{x}$`, t`$x^2$`, t`$2^x$`]),
+            order(t`Ordene do que cresce **mais devagar** ao **mais rápido** (para $x\to\infty$):`, [t`$\ln x$`, t`$\sqrt{x}$`, t`$x^2$`, t`$2^x$`], t`Hierarquia no infinito: logaritmo $\ll$ potências (quanto maior o expoente, mais rápido) $\ll$ exponenciais.`),
             mcq(t`Quanto vale $\lim_{x\to\infty}\left(1+\frac1x\right)^x$?`, ['$e\\approx2{,}718$', '$1$', '$+\\infty$', '$0$'], 0, t`"$1^\infty$" é indeterminação; este limite define o $e$.`),
             num(t`Calcule $\lim_{x\to\infty}\left(1+\frac{2}{x}\right)^x$. (3 casas)`, Math.E ** 2, t`Com $u=\frac x2$: $\left[\left(1+\frac1u\right)^u\right]^2\to e^2\approx7{,}389$.`, { tol: 0.01 }),
           ],
@@ -878,8 +880,8 @@ Veja em $f(x)=2x+1$ perto de $a=1$ ($L=3$):`,
             ),
             mcqS(
               t`A condição $|f(x)-5|<0{,}1$ equivale a qual intervalo para $f(x)$?`,
-              t`$(4{,}9,\,5{,}1)$`,
-              [t`$(-0{,}1,\,0{,}1)$`, t`$[5,\,5{,}1]$`, t`$(4{,}5,\,5{,}5)$`, t`$(0{,}1,\,5)$`],
+              t`$(4{,}9;\,5{,}1)$`,
+              [t`$(-0{,}1;\,0{,}1)$`, t`$[5;\,5{,}1]$`, t`$(4{,}5;\,5{,}5)$`, t`$(0{,}1;\,5)$`],
               t`$|f(x)-L|<\varepsilon\iff L-\varepsilon<f(x)<L+\varepsilon$, logo $5-0{,}1<f(x)<5+0{,}1$.`,
             ),
             gen((rng) => {
@@ -891,9 +893,9 @@ Veja em $f(x)=2x+1$ perto de $a=1$ ($L=3$):`,
               return rmcq(
                 rng,
                 t`A condição $0<|x-${a}|<${dStr}$ representa qual conjunto de valores de $x$?`,
-                t`$(${lo},\,${hi})-\{${a}\}$`,
-                [t`$(${lo},\,${hi})$`, t`$[${lo},\,${hi}]-\{${a}\}$`, t`$(0,\,${dStr})$`, t`$(-${dStr},\,${dStr})-\{0\}$`],
-                t`$|x-${a}|<${dStr}$ define o intervalo aberto $(${lo},\,${hi})$, e $0<|x-${a}|$ retira o centro $x=${a}$.`,
+                t`$(${lo};\,${hi})-\{${a}\}$`,
+                [t`$(${lo};\,${hi})$`, t`$[${lo};\,${hi}]-\{${a}\}$`, t`$(0;\,${dStr})$`, t`$(-${dStr};\,${dStr})-\{0\}$`],
+                t`$|x-${a}|<${dStr}$ define o intervalo aberto $(${lo};\,${hi})$, e $0<|x-${a}|$ retira o centro $x=${a}$.`,
               );
             }),
             tf(
@@ -918,9 +920,9 @@ Veja em $f(x)=2x+1$ perto de $a=1$ ($L=3$):`,
               const xMin = a - d1;
               const xMax = a + d2;
               return num(
-                t`Para garantir $|f(x)-L|<\varepsilon$ perto de $a=${a}$, descobrimos que basta $x\in(${fmt(xMin)},\,${fmt(xMax)})$, com $x\ne ${a}$. Qual é o maior $\delta>0$ simétrico ($0<|x-${a}|<\delta$) que podemos escolher?`,
+                t`Para garantir $|f(x)-L|<\varepsilon$ perto de $a=${a}$, descobrimos que basta $x\in(${fmt(xMin)};\,${fmt(xMax)})$, com $x\ne ${a}$. Qual é o maior $\delta>0$ simétrico ($0<|x-${a}|<\delta$) que podemos escolher?`,
                 d1,
-                t`As distâncias até as bordas são $${fmt(d1)}$ à esquerda e $${fmt(d2)}$ à direita; para caber dos dois lados, tomamos $\delta=\min(${fmt(d1)},\,${fmt(d2)})=${fmt(d1)}$.`,
+                t`As distâncias até as bordas são $${fmt(d1)}$ à esquerda e $${fmt(d2)}$ à direita; para caber dos dois lados, tomamos $\delta=\min(${fmt(d1)};\,${fmt(d2)})=${fmt(d1)}$.`,
               );
             }),
           ],
@@ -959,9 +961,9 @@ Perto de $0$, $\frac{1}{x}$ passa por infinitos múltiplos de $\frac{\pi}{2}$. E
               const k = randInt(rng, 1, 4);
               const eps = (Math.abs(m) * k) / 100;
               return num(
-                t`Na definição de $\lim_{x\to ${a}}(${lin(m, b)})=${L}$, qual é o maior $\delta$ que garante $|f(x)-(${L})|<${fmt(eps)}$?`,
+                t`Na definição de $\lim_{x\to ${a}}(${lin(m, b)})=${L}$, qual é o maior $\delta$ que garante $|f(x)${L === 0 ? '' : '-' + par(L)}|<${fmt(eps)}$?`,
                 k / 100,
-                t`$|(${lin(m, b)})-(${L})|=${Math.abs(m)}|${xm(a)}|<${fmt(eps)}\iff |${xm(a)}|<\frac{${fmt(eps)}}{${Math.abs(m)}}=${fmt(k / 100)}$.`,
+                t`$|(${lin(m, b)})${L === 0 ? '' : '-' + par(L)}|=${Math.abs(m)}|${xm(a)}|<${fmt(eps)}\iff |${xm(a)}|<\frac{${fmt(eps)}}{${Math.abs(m)}}=${fmt(k / 100)}$.`,
               );
             }),
             order(

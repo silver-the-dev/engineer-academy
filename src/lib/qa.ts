@@ -82,7 +82,10 @@ function drawIssues(e: Exercise): string[] {
     if (pa) e.options.forEach((o, i) => i !== e.answer && prod(o) === pa && out.push(`opção errada "${o}" é o mesmo produto da resposta em outra ordem`));
   }
   for (const str of exStrings(e)) {
+    // "\to", "\frac", "\beta" in a normal '…' string turn into tab/form-feed/backspace; "\in", "\mathbb" lose the backslash
+    if (/[\t\f\v\b]/.test(str)) out.push(`caractere de controle no texto (TeX com barra simples em string normal?): ${JSON.stringify(str.slice(0, 60))}`);
     for (const tex of extractMath(str)) {
+      if (/(^|[^\\a-zA-Z])(infty|mathbb|operatorname|dfrac|sqrt|cdot)(?![a-zA-Z])/.test(tex)) out.push(`macro TeX sem barra em $${tex}$`);
       if (tex.startsWith('__UNBALANCED__')) continue;
       // "−0" written as a value (after "=", "(", "," or at the start), not "a−0"
       if (/(^|[=(,]|\\cdot|\\left\()\s*[-−]\s*0(?![\d.,{])/.test(tex)) out.push(`"−0" em $${tex}$`);
@@ -100,6 +103,7 @@ export function runContentQA(sections: Section[]): QAReport {
   let nEx = 0;
   let nLessons = 0;
   const checkStr = (where: string, s: string) => {
+    if (/[\t\f\v\b]/.test(s)) warnings.push(`${where}: caractere de controle no texto (TeX com barra simples em string normal?): ${JSON.stringify(s.slice(0, 60))}`);
     for (const tex of extractMath(s)) {
       if (tex.startsWith('__UNBALANCED__')) {
         errors.push(`${where}: $ desbalanceado: ${tex.slice(14)}`);

@@ -359,7 +359,7 @@ Teste no laboratório a trajetória $s(t)=t^3-6t^2+9t$:`,
               const a = randInt(rng, 1, 4);
               const b = randInt(rng, -4, 4);
               return num(
-                t`Calcule $f'''(x)$ para $f(x)=${a}x^3${term(b, 'x^2')}+7x-5$.`,
+                t`Calcule $f'''(x)$ para $f(x)=${term(a, 'x^3', true)}${term(b, 'x^2')}+7x-5$.`,
                 6 * a,
                 t`$f'(x)=${3 * a}x^2${term(2 * b, 'x')}+7 \Rightarrow f''(x)=${6 * a}x${term(2 * b, '')} \Rightarrow f'''(x)=${6 * a}$.`,
               );
@@ -462,8 +462,8 @@ Teste no laboratório a trajetória $s(t)=t^3-6t^2+9t$:`,
               t`Ligue cada função ao motivo pelo qual $f'(0)$ **não existe**:`,
               [
                 [t`$f(x)=|x|$`, 'Bico: derivadas laterais $-1$ e $+1$'],
-                [t`$f(x)=\sqrt[3]{x}=x^{1/3}$`, 'Tangente vertical: $f\'(x)\to +\infty$'],
-                [t`$f(x)=x^{2/3}$`, 'Cúspide: $f\'_-\to -\infty$ e $f\'_+\to +\infty$'],
+                [t`$f(x)=\sqrt[3]{x}=x^{1/3}$`, t`Tangente vertical: $f'(x)\to +\infty$`],
+                [t`$f(x)=x^{2/3}$`, t`Cúspide: $f'_-\to -\infty$ e $f'_+\to +\infty$`],
                 [t`$f(x)=\dfrac{1}{x}$`, 'Descontínua em $x=0$'],
               ],
               t`Bico tem laterais finitas distintas; $\sqrt[3]{x}$ tem tangente vertical; $x^{2/3}$ tem cúspide; $1/x$ nem existe em $0$.`,
@@ -495,7 +495,7 @@ Teste no laboratório a trajetória $s(t)=t^3-6t^2+9t$:`,
                 'Se $f$ é diferenciável em $a$, então $f$ é contínua em $a$',
                 'Se $f$ é descontínua em $a$, então $f$ não é diferenciável em $a$',
                 'Se $f$ é contínua em $a$, então $f$ é diferenciável em $a$',
-                'Se $f\'_-(a)=f\'_+(a)\in\mathbb R$, então $f\'(a)$ existe',
+                t`Se $f'_-(a)=f'_+(a)\in\mathbb R$, então $f'(a)$ existe`,
               ],
               [0, 1, 3],
               t`Diferenciável $\Rightarrow$ contínua (e descontínua $\Rightarrow$ não diferenciável). Só "contínua $\Rightarrow$ diferenciável" é falsa.`,
