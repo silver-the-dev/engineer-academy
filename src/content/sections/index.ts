@@ -25,6 +25,7 @@ import { reta, plano, transformacoes } from './gaal/retaplano';
 import { edo1 } from './edo/primeira';
 import { edo2 } from './edo/segunda';
 import { laplace } from './edo/laplace';
+import { fourier } from './edo/fourier';
 import { erros, zeros, sistemasNum } from './num/numerico1';
 import { interpolacao, ajuste, integracaoNum, edos } from './num/numerico2';
 import { conceitos, tabelas, posicao, dispersao } from './est/estatistica1';
@@ -69,7 +70,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'EDOs de 1ª e 2ª ordem, Laplace e Fourier',
     color: '#E76F51',
     emoji: '🌊',
-    units: [edo1, edo2, laplace],
+    units: [edo1, edo2, laplace, fourier],
   },
   {
     id: 'num',
