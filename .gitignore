@@ -47,3 +47,6 @@ modules/*/android/.gradle/
 # personal / local files (never commit)
 scripts/env.local.sh
 .claude/
+
+# local APK output (published as GitLab Releases, not versioned)
+releases/

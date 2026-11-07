@@ -11,7 +11,7 @@ App Android para estudar a matemática dos primeiros anos de Engenharia de forma
 
 ## Baixar
 
-Os APKs prontos para instalar (Android 7.0 ou mais novo, arm64) ficam na pasta [`releases/`](releases/), um por versão. A lista com datas e checksums está em [`releases/README.md`](releases/README.md).
+Os APKs prontos para instalar (Android 7.0 ou mais novo, arm64) ficam na página de [Releases](https://gitlab.com/silveriodev/engineer-academy/-/releases) do GitLab, um por versão. Todas as versões têm a mesma assinatura, então uma versão nova instala por cima da anterior e mantém o progresso.
 
 ## Stack
 
@@ -125,7 +125,7 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64
 
 **Assinatura**: o build de release usa a keystore de debug gerada pelo template do Expo, suficiente para instalar e testar. Para publicar em loja, configure a sua própria assinatura.
 
-**Publicar uma versão**: suba `version` e `android.versionCode` no `app.json`, gere o APK com `APK_OUT_DIR=releases` e acrescente a linha da versão (versionCode, data e SHA-256) na tabela de [`releases/README.md`](releases/README.md).
+**Publicar uma versão**: suba `version` e `android.versionCode` no `app.json`, gere o APK e crie uma Release no GitLab com a tag da versão, anexando o APK (com o SHA-256 na descrição). A pasta local `releases/` (se usada como `APK_OUT_DIR`) é ignorada pelo git.
 
 ## Estrutura
 
@@ -144,7 +144,6 @@ src/
 ├── lib/                    aleatoriedade/formatação, notificações, widget, feedback
 └── state/store.ts          estado persistido (XP, progresso, vidas, missões…)
 modules/streak-widget/      widget de tela inicial (Kotlin)
-releases/                   APKs publicados, um por versão
 scripts/                    build do APK e geração de assets
 ```
 
