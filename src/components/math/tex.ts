@@ -59,6 +59,21 @@ function init() {
 
 const cache = new Map<string, TexSvg>();
 
+/**
+ * Random generators often produce "x+-2", "x--4", "1x", "-1e^{t}", "\operatorname{sen}(1x)" or
+ * "x^{1}", "(x+3)^{1}". Fold doubled signs ("+-" → "-", "--" → "+"; never right after ^ or _,
+ * so "0^+" or "x_-" stay), then hide the ones: a coefficient 1 right before a variable/function
+ * and a braced exponent 1 on a single-letter variable or a parenthesis (never on digits, so
+ * "2^{1}" or "\int_0^{1}" stay).
+ */
+export function tidyOnes(tex: string): string {
+  return tex
+    .replace(/(^|[(=$]|\\left\()\s*--(?=\s*[\w\\(])/g, '$1')
+    .replace(/(?<![\^_])([+\-−])([+\-−])(?=\s*[\w\\(])/g, (_m, a: string, b: string) => ((a === '+') === (b === '+') ? '+' : '-'))
+    .replace(/(^|[\s=(+\-−{&$]|\\,|\\cdot|\\left\()1\s*(?=[xytuzv](?![a-zA-Z])|\\operatorname|\\sqrt|\\ln\b|\\cos\b|\\sin\b|e\^)/g, '$1 ')
+    .replace(/((?<![\\a-zA-Z_^])[a-zA-Z]|\))\^\{1\}/g, '$1');
+}
+
 export function texToSvg(tex: string, display = false): TexSvg {
   const key = (display ? 'D|' : 'I|') + tex;
   const hit = cache.get(key);
@@ -69,7 +84,7 @@ export function texToSvg(tex: string, display = false): TexSvg {
     // pt-BR decimal comma: "0,5" must not get the punctuation space TeX adds after commas.
     // (Coordinates/lists are written with ", " so they are not affected.)
     // Integer runs with 2+ commas (lists/tuples like -1,0,1 or (1,0,2)) are never decimals.
-    const src = tex
+    const src = tidyOnes(tex)
       .replace(/-?\d+(?:,-?\d+){2,}/g, (run) => run.replace(/,/g, '\u0001'))
       .replace(/(\d),(?=\d)/g, '$1{,}')
       .replace(/\u0001/g, ',');

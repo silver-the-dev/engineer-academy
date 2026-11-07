@@ -4,7 +4,7 @@
  */
 import { isGenerator, type Exercise, type Section } from '../content/types';
 import { makeRng } from './random';
-import { texToSvg } from '../components/math/tex';
+import { texToSvg, tidyOnes } from '../components/math/tex';
 
 function extractMath(s: string): string[] {
   const out: string[] = [];
@@ -33,6 +33,8 @@ function structural(e: Exercise): string | null {
   if (e.kind === 'mcq' && new Set(e.options).size !== e.options.length) return 'mcq duplicate options';
   if (e.kind === 'multi' && (!e.answers.length || e.answers.some((a) => a < 0 || a >= e.options.length))) return 'multi answer index';
   if (e.kind === 'multi' && new Set(e.options).size !== e.options.length) return 'multi duplicate options';
+  // the renderer hides coefficient/exponent 1 (tidyOnes): "1x" and "x" would show as the same option
+  if ((e.kind === 'mcq' || e.kind === 'multi') && new Set(e.options.map(tidyOnes)).size !== e.options.length) return 'opções iguais depois de esconder o 1 (1x = x)';
   if (e.kind === 'numeric' && !isFinite(e.answer)) return 'numeric answer not finite';
   if (e.kind === 'fill') {
     const slots = e.template.split('___').length - 1;
@@ -84,7 +86,8 @@ function drawIssues(e: Exercise): string[] {
   for (const str of exStrings(e)) {
     // "\to", "\frac", "\beta" in a normal '…' string turn into tab/form-feed/backspace; "\in", "\mathbb" lose the backslash
     if (/[\t\f\v\b]/.test(str)) out.push(`caractere de controle no texto (TeX com barra simples em string normal?): ${JSON.stringify(str.slice(0, 60))}`);
-    for (const tex of extractMath(str)) {
+    for (const raw of extractMath(str)) {
+      const tex = tidyOnes(raw); // what the screen shows
       if (/(^|[^\\a-zA-Z])(infty|mathbb|operatorname|dfrac|sqrt|cdot)(?![a-zA-Z])/.test(tex)) out.push(`macro TeX sem barra em $${tex}$`);
       if (tex.startsWith('__UNBALANCED__')) continue;
       // "−0" written as a value (after "=", "(", "," or at the start), not "a−0"
