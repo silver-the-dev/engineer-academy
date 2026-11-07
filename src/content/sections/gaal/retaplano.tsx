@@ -1,7 +1,7 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { Arrow, InfLine, Pt, Seg } from '../../../components/plot/Plot';
+import { ArcW, Arrow, InfLine, Pt, Seg } from '../../../components/plot/Plot';
 import { Arrow3, Axes3, Line3, Point3, Poly3, type V3 as V3T } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
@@ -59,6 +59,51 @@ const line3D = () => ({
     info: ({ p }: any) => t`$r:\ (x,y,z)=(1,\,-1,\,0{,}5)+t\,(1,\,2,\,1{,}5)$ · $t=${fmt(p.t, 2)}$`,
   },
 });
+
+/** Acute angle (degrees) between the lines spanned by u and v. */
+const lineAngle = (u: { x: number; y: number }, v: { x: number; y: number }) => {
+  const nu = Math.hypot(u.x, u.y);
+  const nv = Math.hypot(v.x, v.y);
+  if (nu < 1e-9 || nv < 1e-9) return NaN;
+  return (Math.acos(Math.min(1, Math.abs(u.x * v.x + u.y * v.y) / (nu * nv))) * 180) / Math.PI;
+};
+
+const lineAngleLab = (u0: [number, number] = [3, 1], v0: [number, number] = [-1, 2]) =>
+  plot({
+    view: { xMin: -4, xMax: 4, yMin: -3, yMax: 3.5 },
+    equalAspect: true,
+    snap: 0.5,
+    points: [
+      { id: 'U', x: u0[0], y: u0[1], color: C.p2, label: 'u' },
+      { id: 'V', x: v0[0], y: v0[1], color: C.p3, label: 'v' },
+    ],
+    render: ({ pts }: any) => {
+      const { U, V } = pts;
+      if (Math.hypot(U.x, U.y) < 1e-9 || Math.hypot(V.x, V.y) < 1e-9) return null;
+      const au = Math.atan2(U.y, U.x);
+      let av = Math.atan2(V.y, V.x);
+      if (U.x * V.x + U.y * V.y < 0) av += Math.PI; // use -v: same line, acute angle
+      let d = av - au;
+      while (d > Math.PI) d -= 2 * Math.PI;
+      while (d <= -Math.PI) d += 2 * Math.PI;
+      return (
+        <>
+          <InfLine x1={0} y1={0} x2={U.x} y2={U.y} color={C.p2} width={1.5} dash="6 5" />
+          <InfLine x1={0} y1={0} x2={V.x} y2={V.y} color={C.p3} width={1.5} dash="6 5" />
+          <ArcW cx={0} cy={0} r={0.8} a0={au} a1={au + d} color={C.gold} fillOpacity={0.25} />
+          <Arrow x1={0} y1={0} x2={U.x} y2={U.y} color={C.p2} />
+          <Arrow x1={0} y1={0} x2={V.x} y2={V.y} color={C.p3} />
+        </>
+      );
+    },
+    info: ({ pts }: any) => {
+      const { U, V } = pts;
+      const vv = (Math.acos(Math.max(-1, Math.min(1, (U.x * V.x + U.y * V.y) / (Math.hypot(U.x, U.y) * Math.hypot(V.x, V.y) || 1)))) * 180) / Math.PI;
+      const ll = lineAngle(U, V);
+      if (!isFinite(ll)) return 'Afaste os pontos da origem';
+      return t`$\vec u\cdot\vec v=${fmt(U.x * V.x + U.y * V.y, 2)}$ · entre vetores: $${fmt(vv, 1)}^\circ$ · entre **retas**: $${fmt(ll, 1)}^\circ$`;
+    },
+  });
 
 const r3 = (rng: () => number, lo: number, hi: number) => [randInt(rng, lo, hi), randInt(rng, lo, hi), randInt(rng, lo, hi)];
 const nz3 = (rng: () => number, lo: number, hi: number) => [randNZ(rng, lo, hi), randNZ(rng, lo, hi), randNZ(rng, lo, hi)];
@@ -212,24 +257,83 @@ Gire a cena e percorra a reta com $t$:`,
     {
       id: 'g-reta-ang',
       title: 'Ângulo entre retas e ortogonalidade',
-      cards: [
+      parts: [
         {
-          title: 'Ângulo entre diretores',
-          body: t`$$\cos\theta=\frac{|\vec v_1\cdot\vec v_2|}{|\vec v_1|\,|\vec v_2|}\quad(0^\circ\le\theta\le90^\circ)$$
-Usamos o módulo porque o ângulo entre retas é sempre o menor.
+          card: {
+            title: 'Ângulo entre diretores',
+            body: t`O ângulo entre duas retas é o ângulo entre seus diretores — mas sempre o **menor** deles, entre $0^\circ$ e $90^\circ$. Por isso entra um módulo no produto escalar:
 
-**Retas ortogonais** ⟺ $\vec v_1\cdot\vec v_2=0$.`,
+$$\cos\theta=\frac{|\vec v_1\cdot\vec v_2|}{|\vec v_1|\,|\vec v_2|}$$
+
+Arraste as pontas dos diretores: quando o ângulo entre os **vetores** passa de $90^\circ$, o ângulo entre as **retas** continua sendo o agudo.`,
+            visual: lineAngleLab(),
+          },
+          exercises: [
+            tf(t`O ângulo entre duas retas está sempre entre $0^\circ$ e $90^\circ$.`, true, t`Duas retas formam dois ângulos suplementares; convenciona-se o menor.`),
+            num(t`Calcule o ângulo (graus) entre as retas de diretores $(1,\,0,\,0)$ e $(1,\,1,\,0)$.`, 45, t`$\cos\theta=\frac{1}{1\cdot\sqrt2}$ ⟹ $45^\circ$.`, { unit: '°' }),
+            num(t`Calcule o ângulo (graus) entre as retas de diretores $(1,\,1,\,0)$ e $(-1,\,0,\,0)$.`, 45, t`$\cos\theta=\frac{|-1|}{\sqrt2\cdot1}$ ⟹ $45^\circ$ (o ângulo entre **retas** é o menor).`, { unit: '°' }),
+            mcqS(t`Por que a fórmula do ângulo entre retas usa $|\vec v_1\cdot\vec v_2|$?`, 'para obter sempre o ângulo agudo', ['para o cosseno nunca passar de 1', 'porque o produto escalar é sempre negativo', 'para o ângulo dar em radianos', 'porque as retas são reversas'], t`Trocar $\vec v_2$ por $-\vec v_2$ descreve a mesma reta e muda o sinal do produto escalar; o módulo elimina essa ambiguidade.`),
+            inter(t`Arraste os diretores para que as **retas** formem $45^\circ$.`, 'plot', lineAngleLab().props, (v: any) => v && near(lineAngle(v.pts.U, v.pts.V), 45, 1.5), t`Por exemplo $\vec u=(2,\,0)$ e $\vec v=(2,\,2)$.`),
+            num(t`Qual o ângulo (graus) entre $r:\ (1,\,2,\,3)+t\,(1,\,1,\,0)$ e $s:\ (0,\,0,\,1)+t\,(0,\,1,\,1)$?`, 60, t`$\vec v_1\cdot\vec v_2=1$, $|\vec v_1|=|\vec v_2|=\sqrt2$: $\cos\theta=\frac12$ ⟹ $60^\circ$.`, { unit: '°' }),
+            gen((rng) => {
+              const [u, v] = pick(rng, [
+                [[1, 0, 0], [1, 0, 1], 45],
+                [[0, 1, 0], [0, -1, -1], 45],
+                [[1, 1, 0], [0, 1, 1], 60],
+                [[1, 0, 1], [-1, -1, 0], 60],
+                [[1, 2, 2], [2, 1, -2], 90],
+                [[0, 0, 2], [1, 1, 0], 90],
+                [[1, 1, 1], [-1, -1, -1], 0],
+              ] as const);
+              const d = dot3([...u], [...v]);
+              const ang = (Math.acos(Math.min(1, Math.abs(d) / Math.hypot(...u) / Math.hypot(...v))) * 180) / Math.PI;
+              return num(t`Calcule o ângulo (graus) entre as retas de diretores $${V3([...u])}$ e $${V3([...v])}$.`, Math.round(ang), t`$|\vec v_1\cdot\vec v_2|=${Math.abs(d)}$, então $\cos\theta=${fmt(Math.cos((ang * Math.PI) / 180), 3)}$ ⟹ $\theta=${Math.round(ang)}^\circ$.`, { unit: '°', tol: 0.5 });
+            }),
+            gen((rng) => {
+              const u = nz3(rng, -3, 3);
+              const v = nz3(rng, -3, 3);
+              const c = Math.abs(dot3(u, v)) / Math.hypot(u[0], u[1], u[2]) / Math.hypot(v[0], v[1], v[2]);
+              return num(t`Calcule $\cos\theta$ entre as retas de diretores $${V3(u)}$ e $${V3(v)}$ (2 casas).`, Math.round(c * 100) / 100, t`$\cos\theta=\frac{|${dot3(u, v)}|}{\sqrt{${dot3(u, u)}}\cdot\sqrt{${dot3(v, v)}}}\approx${fmt(c, 2)}$.`, { tol: 0.011 });
+            }),
+          ],
         },
-      ],
-      exercises: [
-        gen((rng) => {
-          const a = randNZ(rng, -3, 3);
-          const b = randNZ(rng, -3, 3);
-          return num(t`Para que as retas de diretores $(${a},\,${b},\,1)$ e $(1,\,1,\,m)$ sejam ortogonais, $m=$?`, -(a + b), t`$${a}+${b}+m=0\Rightarrow m=${-(a + b)}$.`);
-        }),
-        num(t`Calcule o ângulo (graus) entre as retas de diretores $(1,\,0,\,0)$ e $(1,\,1,\,0)$.`, 45, undefined, { unit: '°' }),
-        num(t`Calcule o ângulo (graus) entre as retas de diretores $(1,\,1,\,0)$ e $(-1,\,0,\,0)$.`, 45, t`$\cos\theta=\frac{|-1|}{\sqrt2\cdot1}$ ⟹ $45^\circ$ (o ângulo entre **retas** é o menor).`, { unit: '°' }),
-        tf(t`Retas ortogonais no espaço precisam se cruzar.`, false, t`Ortogonalidade é sobre as **direções**; retas reversas também podem ser ortogonais.`),
+        {
+          card: {
+            title: 'Ortogonalidade e distância',
+            body: t`**Retas ortogonais** ⟺ $\vec v_1\cdot\vec v_2=0$. Se, além disso, elas se cruzam, são **perpendiculares**.
+
+**Distância de um ponto $P$ a uma reta** (ponto $A$, diretor $\vec v$): é o comprimento do segmento perpendicular. Com o produto vetorial:
+
+$$d(P,r)=\frac{|\vec{AP}\times\vec v|}{|\vec v|}$$`,
+            example: t`$P(3,\,4,\,0)$ e $r$ = eixo $x$ ($A=O$, $\vec v=\vec i$): $\vec{AP}\times\vec i=(0,\,0,\,-4)$, então $d=4$. O pé da perpendicular é $(3,\,0,\,0)$.`,
+            tip: t`Retas **reversas** também podem ser ortogonais: ortogonalidade fala só das direções.`,
+          },
+          exercises: [
+            tf(t`Retas ortogonais no espaço precisam se cruzar.`, false, t`Ortogonalidade é sobre as **direções**; retas reversas também podem ser ortogonais.`),
+            mcqS(t`Qual destes vetores é diretor de uma reta ortogonal à de diretor $(1,\,2,\,3)$?`, t`$(3,\,0,\,-1)$`, [t`$(2,\,1,\,0)$`, t`$(3,\,0,\,1)$`, t`$(-1,\,2,\,0)$`, t`$(1,\,2,\,3)$`], t`$(1,\,2,\,3)\cdot(3,\,0,\,-1)=3+0-3=0$.`),
+            gen((rng) => {
+              const a = randNZ(rng, -3, 3);
+              const b = randNZ(rng, -3, 3);
+              return num(t`Para que as retas de diretores $(${a},\,${b},\,1)$ e $(1,\,1,\,m)$ sejam ortogonais, $m=$?`, -(a + b), t`$${a}+${b}+m=0\Rightarrow m=${-(a + b)}$.`);
+            }),
+            gen((rng) => {
+              const u = nz3(rng, -3, 3);
+              const orth = rng() < 0.5;
+              const w = orth ? cross3(u, [1, 0, 0]).every((x) => x === 0) ? cross3(u, [0, 1, 0]) : cross3(u, [1, 0, 0]) : [u[0] + 1, u[1], u[2]];
+              const ok = dot3(u, w) === 0;
+              return tf(t`As retas de diretores $${V3(u)}$ e $${V3(w)}$ são ortogonais.`, ok, t`$${V3(u)}\cdot${V3(w)}=${dot3(u, w)}$${ok ? ' ⟹ ortogonais.' : ' ≠ 0 ⟹ não são ortogonais.'}`);
+            }),
+            inter(t`Com $\vec u=(2,\,1)$, arraste $\vec v$ para que as retas fiquem **ortogonais**.`, 'plot', lineAngleLab([2, 1], [1, 2]).props, (v: any) => v && near(v.pts.U.x, 2, 0.01) && near(v.pts.U.y, 1, 0.01) && Math.hypot(v.pts.V.x, v.pts.V.y) > 0.1 && near(v.pts.U.x * v.pts.V.x + v.pts.U.y * v.pts.V.y, 0, 0.01), t`$\vec v=(-1,\,2)$ ou $(1,\,-2)$, por exemplo: $2\cdot(-1)+1\cdot2=0$.`),
+            multi(t`Quais pares de diretores dão retas **ortogonais**?`, [t`$(1,\,0,\,0)$ e $(0,\,5,\,-2)$`, t`$(1,\,1,\,1)$ e $(1,\,-2,\,1)$`, t`$(2,\,1,\,0)$ e $(1,\,2,\,0)$`, t`$(1,\,2,\,3)$ e $(-2,\,-4,\,-6)$`], [0, 1], t`Produto escalar zero: $0$ e $1-2+1=0$. Os outros dão $4$ e $-28$.`),
+            num(t`Qual a distância do ponto $P(3,\,4,\,0)$ ao eixo $x$?`, 4, t`O pé da perpendicular é $(3,\,0,\,0)$; a distância é $|(0,\,4,\,0)|=4$.`),
+            gen((rng) => {
+              const [a, b, h] = pick(rng, [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10], [12, 5, 13]] as const);
+              const z = randInt(rng, -4, 4);
+              return num(t`Qual a distância do ponto $P(${a},\,${b},\,${z})$ ao eixo $z$?`, h, t`A reta é $(0,\,0,\,0)+t\,(0,\,0,\,1)$: só $x$ e $y$ contam. $d=\sqrt{${a}^2+${b}^2}=${h}$.`);
+            }),
+            num(t`Qual a distância de $P(1,\,1,\,1)$ à reta $r:\ (0,\,0,\,0)+t\,(1,\,1,\,0)$? (2 casas)`, 1, t`$\vec{AP}\times\vec v=(1,\,1,\,1)\times(1,\,1,\,0)=(-1,\,1,\,0)$, módulo $\sqrt2$; dividido por $|\vec v|=\sqrt2$: $d=1$.`, { tol: 0.01 }),
+          ],
+        },
       ],
     },
   ],
