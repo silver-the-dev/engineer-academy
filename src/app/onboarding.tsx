@@ -33,7 +33,7 @@ export default function Onboarding() {
             <Text style={{ fontSize: 90, color: C.primary, fontFamily: F.black }}>∫</Text>
             <Text style={{ color: C.text, fontFamily: F.black, fontSize: 32, textAlign: 'center' }}>Engineer Academy</Text>
             <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 17, textAlign: 'center', marginTop: 10 }}>
-              Matemática de Engenharia em lições curtas, visuais e interativas. Cálculo, Álgebra Linear, Numérico e Estatística — um pouquinho todo dia.
+              Matemática de Engenharia em lições curtas, visuais e interativas. Do pré-cálculo ao Cálculo 4: funções, cálculo, álgebra linear, cálculo vetorial, EDOs, numérico e estatística — um pouquinho todo dia.
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 26, gap: 8 }}>
               {['📈 gráficos interativos', '🔥 ofensiva diária', '🟩 widget de dias', '🏆 conquistas', '🔔 lembretes'].map((t) => (

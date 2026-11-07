@@ -56,7 +56,7 @@ const DEFS: SectionDef[] = [
   {
     id: 'calc',
     title: 'Cálculo',
-    subtitle: 'Cálculo Diferencial e Integral: limites, derivadas e integrais',
+    subtitle: 'Cálculo 1 a 3: limites, derivadas, integrais, séries e várias variáveis',
     color: '#7C5CFF',
     emoji: '∫',
     units: [funcoesCalc, limites, derivadas, taxas, aplicacoes, integrais, integralDefinida, tecnicas, aplIntegral, sequencias, potencias, curvas, variaveis, otimMulti, duplas],

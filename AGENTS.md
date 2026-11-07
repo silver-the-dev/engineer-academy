@@ -70,7 +70,8 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 | `src/content/types.ts` | modelo de conteúdo e `normalizeLesson`/`normalizeSection` |
 | `src/content/helpers.ts` | construtores de exercícios (`mcq`, `mcqS`, `rmcq`, `num`, `tf`, `fill`, `match`, `order`, `multi`, `inter`, `gen`, `plot`, `table`, `near`) |
 | `src/content/visuals.tsx`, `visuals3d.tsx` | laboratórios interativos reutilizáveis (`lineLab`, `parabolaLab`, `tangentLab`, `riemannLab`, `vectorLab`, `matrixLab`…) |
-| `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts` |
+| `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts`. Seções: `fund` (Fundamentos), `pre` (Pré-Cálculo), `calc` (Cálculo 1–3), `gaal` (GA e Álgebra Linear, inclui superfícies quádricas), `vet` (Cálculo Vetorial: integrais múltiplas, campos, Green/Stokes/Gauss), `edo` (EDOs, Laplace, Fourier), `num`, `est` |
+| `src/lib/qa.ts`, `scripts/qa-content.cjs` | QA de conteúdo (o mesmo do `/debug`), também por linha de comando |
 | `src/content/index.ts` | `buildQueue(lesson, part)`, `partsDone`, desbloqueio, treino e revisão |
 | `src/state/store.ts` | estado persistido (chave `engineer-academy-v1`): XP, vidas, dias, `lessons`, `parts`, erros, missões, conquistas |
 | `src/lib/` | `random.ts` (`fmt`, `term`, `polyTex`, `fracTex`, `randInt`, `randNZ`, `pick`, `shuffle`), `notifications.ts`, `widget.ts`, `feedback.ts` |
@@ -86,6 +87,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 - Os exercícios de cada parte são apresentados **na ordem escrita** (do mais fácil ao mais difícil). Só as opções de múltipla escolha são embaralhadas.
 - Progresso: `lessons[id].done > 0` = lição concluída (desbloqueia a próxima); `parts[id]` = quantas partes já foram feitas numa lição ainda não concluída. Concluir a última parte marca a lição.
 - **Nunca mude o `id` de uma lição existente**: ele é a chave do progresso salvo no celular do usuário.
+- Dá para inserir unidades novas no meio de uma seção: `isLessonUnlocked` mantém aberta qualquer lição já feita e tudo antes de uma lição já concluída mais adiante.
 
 ## Convenções para escrever conteúdo
 
@@ -104,7 +106,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 1. Preview web: `npx expo start --web` (o QA fica em `/debug`).
 2. Edite um arquivo de conteúdo por vez.
 3. `npx tsc --noEmit -p .` precisa passar.
-4. Abra `/debug`. O esperado é `erros=1` (a linha "autoteste detector", que é o teste do próprio detector) e nenhum aviso novo. Avisos comuns: "múltipla escolha com só 2 opções" (faltaram distratores) e "parte com só N exercícios".
+4. Rode `node scripts/qa-content.cjs` (ou `--file src/content/sections/<seção>/<arquivo>.tsx` para checar um arquivo ainda não registrado; argumentos extras filtram por id). Sai com código 1 se houver erro. Também dá para abrir `/debug`. O esperado é `erros=1` (a linha "autoteste detector", que é o teste do próprio detector) e `avisos=0`. Avisos comuns: "múltipla escolha com só 2 opções" (faltaram distratores) e "parte com só N exercícios".
 5. Teste o fluxo na UI quando mexer em telas: anel na bolinha, popup com as partes, tela de conclusão com "Próxima parte".
 6. Commit por unidade.
 
