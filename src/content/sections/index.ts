@@ -1,4 +1,5 @@
 import { normalizeSection, type Section, type SectionDef } from '../types';
+import { aritmetica } from './fund/aritmetica';
 import { elementar } from './fund/elementar';
 import { algebra1 } from './fund/algebra1';
 import { algebra2 } from './fund/algebra2';
@@ -8,6 +9,7 @@ import { geometria } from './fund/geometria';
 import { trigonometria } from './fund/trigonometria';
 import { funcoesCalc, limites } from './calc/limites';
 import { derivadas, aplicacoes } from './calc/derivadas';
+import { taxas } from './calc/taxas';
 import { integrais, integralDefinida } from './calc/integrais';
 import { variaveis, duplas } from './calc/variaveis';
 import { vetoresGeo, vetoresAlg } from './gaal/vetores';
@@ -25,7 +27,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Competências básicas: álgebra, funções, geometria e trigonometria',
     color: '#FF9F1C',
     emoji: '🧱',
-    units: [elementar, algebra1, algebra2, funcoes, combinatoria, geometria, trigonometria],
+    units: [aritmetica, elementar, algebra1, algebra2, funcoes, combinatoria, geometria, trigonometria],
   },
   {
     id: 'calc',
@@ -33,7 +35,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Cálculo Diferencial e Integral: limites, derivadas e integrais',
     color: '#7C5CFF',
     emoji: '∫',
-    units: [funcoesCalc, limites, derivadas, aplicacoes, integrais, integralDefinida, variaveis, duplas],
+    units: [funcoesCalc, limites, derivadas, taxas, aplicacoes, integrais, integralDefinida, variaveis, duplas],
   },
   {
     id: 'gaal',

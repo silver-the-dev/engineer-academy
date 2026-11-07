@@ -58,10 +58,28 @@ for (const ext of ['.ts', '.tsx']) {
   };
 }
 
-const { SECTIONS } = require(path.join(ROOT, 'src/content/sections/index.ts'));
 const { runContentQA } = require(path.join(ROOT, 'src/lib/qa.ts'));
+const { normalizeSection } = require(path.join(ROOT, 'src/content/types.ts'));
 
-const filters = process.argv.slice(2);
+// --file path/to/content.tsx: check every UnitDef exported by that file (even if not registered yet)
+let args = process.argv.slice(2);
+let SECTIONS;
+const fi = args.indexOf('--file');
+if (fi >= 0) {
+  const file = path.resolve(process.cwd(), args[fi + 1]);
+  args = args.filter((_, i) => i !== fi && i !== fi + 1);
+  const mod = require(file);
+  const units = Object.values(mod).filter((u) => u && typeof u === 'object' && typeof u.id === 'string' && Array.isArray(u.lessons));
+  if (!units.length) {
+    console.log('✗ nenhum UnitDef exportado em ' + file);
+    process.exit(1);
+  }
+  SECTIONS = [normalizeSection({ id: path.basename(file), title: '', subtitle: '', color: '', emoji: '', units })];
+} else {
+  SECTIONS = require(path.join(ROOT, 'src/content/sections/index.ts')).SECTIONS;
+}
+
+const filters = args;
 const keep = (s) => !filters.length || filters.some((f) => s.includes(f));
 const r = runContentQA(SECTIONS);
 console.log(`lições=${r.nLessons} partes=${r.nParts} exercícios=${r.nItems} (testados=${r.nEx}) fórmulas=${r.nTex} erros=${r.errors.length} avisos=${r.warnings.length}`);
