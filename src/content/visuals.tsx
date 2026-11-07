@@ -72,7 +72,7 @@ export const parabolaLab = (opts: { a?: number; b?: number; c?: number; ghost?: 
 /** generic f(x; params) plotter */
 export const fnLab = (opts: {
   f: (x: number, p: Record<string, number>) => number;
-  params: { key: string; label?: string; min: number; max: number; step?: number; value: number; color?: string }[];
+  params: { key: string; label?: string; min: number; max: number; step?: number; value: number; color?: string; format?: (v: number) => string }[];
   view: { xMin: number; xMax: number; yMin: number; yMax: number };
   info?: (p: Record<string, number>) => string;
   extra?: (p: Record<string, number>) => React.ReactNode;
