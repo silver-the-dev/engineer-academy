@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { ArcW, CircleW, FnCurve, Label, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt } from '../../../lib/random';
+import { fmt, gcd, pick, randInt, term } from '../../../lib/random';
 
 const t = String.raw;
 
@@ -318,7 +318,7 @@ $$y = A\operatorname{sen}(Bx + C) + D$$
               const B = pick(rng, [2, 3, 4]);
               const D = randInt(rng, -3, 4);
               return num(
-                t`Na onda $y = ${A}\cos(${B}x) ${D < 0 ? `- ${Math.abs(D)}` : `+ ${D}`}$, qual é a distância vertical entre o valor máximo e o valor mínimo (variação pico a pico)?`,
+                t`Na onda $y = ${A}\cos(${B}x) ${term(D, '')}$, qual é a distância vertical entre o valor máximo e o valor mínimo (variação pico a pico)?`,
                 2 * A,
                 t`O máximo é $D + A = ${D + A}$ e o mínimo é $D - A = ${D - A}$. A distância pico a pico é sempre $2|A| = ${2 * A}$.`,
               );
@@ -326,13 +326,15 @@ $$y = A\operatorname{sen}(Bx + C) + D$$
             gen((rng) => {
               const B = pick(rng, [2, 3, 4]);
               const k = pick(rng, [1, 3]);
-              const ans = `\\frac{${k === 1 ? '' : k}\\pi}{${2 * B}}`;
-              const wrong = [
-                `\\frac{${k === 1 ? '' : k}\\pi}{2}`,
-                `\\frac{${k === 1 ? '' : k}\\pi}{${B}}`,
-                `-\\frac{${k === 1 ? '' : k}\\pi}{${2 * B}}`,
-                `${B}\\pi`,
-              ];
+              // k·π/d in lowest terms ("3π/6" → "π/2", "3π/3" → "π")
+              const piFrac = (n: number, d: number) => {
+                const g = gcd(n, d);
+                const [a, b] = [n / g, d / g];
+                const top = `${a === 1 ? '' : a}\\pi`;
+                return b === 1 ? top : `\\frac{${top}}{${b}}`;
+              };
+              const ans = piFrac(k, 2 * B);
+              const wrong = [piFrac(k, 2), piFrac(k, B), `-${piFrac(k, 2 * B)}`, `${B}\\pi`];
               return rmcq(
                 rng,
                 t`Qual é a defasagem horizontal $-\dfrac{C}{B}$ da função $y = 2\operatorname{sen}\left(${B}x - \dfrac{${k === 1 ? '' : k}\pi}{2}\right)$?`,
@@ -439,7 +441,7 @@ $$y = A\operatorname{sen}(Bx + C) + D$$
               return num(
                 t`A primeira assíntota vertical positiva ($x > 0$) de $f(x) = \operatorname{tg}(${B === 1 ? '' : B}x)$ ocorre em $x = \dfrac{\pi}{n}$. Quanto vale $n$?`,
                 2 * B,
-                t`A primeira assíntota positiva ocorre quando $${B}x = \frac{\pi}{2} \Rightarrow x = \frac{\pi}{${2 * B}}$, logo $n = ${2 * B}$.`,
+                t`A primeira assíntota positiva ocorre quando $${B === 1 ? '' : B}x = \frac{\pi}{2} \Rightarrow x = \frac{\pi}{${2 * B}}$, logo $n = ${2 * B}$.`,
               );
             }),
             match(
@@ -467,9 +469,9 @@ $$y = A\operatorname{sen}(Bx + C) + D$$
               const A = randInt(rng, 2, 6);
               const D = randInt(rng, -4, 5);
               return num(
-                t`Dada $f(x) = ${A}\operatorname{tg}(3x) ${D < 0 ? `- ${Math.abs(D)}` : `+ ${D}`}$, calcule $f\left(\dfrac{\pi}{12}\right)$.`,
+                t`Dada $f(x) = ${A}\operatorname{tg}(3x) ${term(D, '')}$, calcule $f\left(\dfrac{\pi}{12}\right)$.`,
                 A + D,
-                t`$3 \cdot \frac{\pi}{12} = \frac{\pi}{4}$ e $\operatorname{tg}\left(\frac{\pi}{4}\right) = 1$, logo $f\left(\frac{\pi}{12}\right) = ${A}\cdot 1 ${D < 0 ? `- ${Math.abs(D)}` : `+ ${D}`} = ${A + D}$.`,
+                t`$3 \cdot \frac{\pi}{12} = \frac{\pi}{4}$ e $\operatorname{tg}\left(\frac{\pi}{4}\right) = 1$, logo $f\left(\frac{\pi}{12}\right) = ${A}\cdot 1 ${term(D, '')} = ${A + D}$.`,
               );
             }),
           ],

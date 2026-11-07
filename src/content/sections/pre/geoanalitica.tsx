@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { CircleW, FnCurve, InfLine, Label, ParamCurve, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, fracTex, pick, polyTex, randInt, randNZ, term } from '../../../lib/random';
+import { fmt, par, pick, polyTex, randInt, randNZ, term } from '../../../lib/random';
 
 const t = String.raw;
 
@@ -286,7 +286,7 @@ $$P = A + t(B-A) = \left(\frac{x_A+k\,x_B}{1+k},\,\frac{y_A+k\,y_B}{1+k}\right)$
                   `$${pt(px + 1, py - 1)}$`,
                   `$${pt(ax - kx, ay - ky)}$`,
                 ],
-                t`$P = A + \frac13(B-A) = \left(${ax}+${kx},\,${ay}+${ky}\right)=${pt(px, py)}$.`,
+                t`$P = A + \frac13(B-A) = \left(${ax}+${par(kx)},\,${ay}+${par(ky)}\right)=${pt(px, py)}$.`,
               );
             }),
             tf(
@@ -654,7 +654,8 @@ Para obter a inclinação perpendicular, **inverta a fração e troque o sinal**
               const x0 = mPerp * k;
               const y0 = randInt(rng, -4, 4);
               const n = y0 - mPerp * x0;
-              const rEq = Math.abs(mPerp) === 1 ? `${mPerp > 0 ? '-' : ''}x+5` : `-${fracTex(1, mPerp)}x+1`;
+              // the given line has slope -1/mPerp (a single sign, never "--1/3")
+              const rEq = Math.abs(mPerp) === 1 ? `${mPerp > 0 ? '-' : ''}x+5` : `${mPerp > 0 ? '-' : ''}\\frac{1}{${Math.abs(mPerp)}}x+1`;
               return rmcq(
                 rng,
                 t`Qual é a equação reduzida da reta que passa por $${pt(x0, y0)}$ e é **perpendicular** a $y=${rEq}$?`,

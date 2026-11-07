@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcqS, num, tf, match, order, multi, inter, plot, rmcq, near } from '../../helpers';
 import { ArcW, CircleW, FnCurve, InfLine, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt } from '../../../lib/random';
+import { fmt, par, pick, randInt } from '../../../lib/random';
 
 const t = String.raw;
 const PI = Math.PI;
@@ -80,7 +80,7 @@ const ambiguousLab = () =>
     info: ({ p }: any) => {
       const h = 3 * Math.sin(rad(p.A));
       const nSol = p.a < h - 1e-9 ? 0 : Math.abs(p.a - h) < 0.03 || p.a >= 3 ? 1 : 2;
-      return t`$b=3$, altura $h=b\operatorname{sen}A=${fmt(h, 2)}$ · $a=${fmt(p.a, 2)}$ ⇒ **${nSol}** triângulo(s)`;
+      return t`$b=3$, altura $h=b\operatorname{sen}A=${fmt(h, 2)}$ · $a=${fmt(p.a, 2)}$ ⇒ **${nSol === 1 ? '1 triângulo' : nSol === 0 ? 'nenhum triângulo' : `${nSol} triângulos`}**`;
     },
   });
 
@@ -202,7 +202,7 @@ Use quando conhecer **dois ângulos e um lado** (ALA, LAAo) ou **dois lados e o 
               const h = b / 2;
               const kind = pick(rng, ['0', '1', '2']);
               const a = kind === '0' ? h - 1 : kind === '1' ? h : h + 0.5 * (b - h);
-              return num(t`$\hat A=${A}^\circ$, $b=${b}$ e $a=${fmt(a)}$. Quantos triângulos existem?`, Number(kind), t`$h=b\operatorname{sen}30^\circ=${h}$. $a${a < h ? '<' : a === h ? '=' : '>'}h$${a > h ? t` e $a<b$` : ''}: ${kind} triângulo(s).`);
+              return num(t`$\hat A=${A}^\circ$, $b=${b}$ e $a=${fmt(a)}$. Quantos triângulos existem?`, Number(kind), t`$h=b\operatorname{sen}30^\circ=${h}$. $a${a < h ? '<' : a === h ? '=' : '>'}h$${a > h ? t` e $a<b$` : ''}: ${Number(kind) === 1 ? '1 triângulo' : Number(kind) === 0 ? 'nenhum triângulo' : `${kind} triângulos`}.`);
             }),
             tf(t`Se $\hat A$ é obtuso e $a>b$, existe exatamente um triângulo com esses dados.`, true, 'Com A obtuso, só há solução se a > b, e ela é única.'),
             gen((rng) => {
@@ -318,7 +318,7 @@ O sinal da raiz depende do quadrante de $\frac x2$.`,
             }),
             gen((rng) => {
               const c = pick(rng, [0.28, 0.5, 0.6, -0.5, 0.8]);
-              return num(t`$0<x<\pi$ e $\cos x=${fmt(c)}$. Quanto vale $\cos\frac x2$ (3 casas)?`, Math.sqrt((1 + c) / 2), t`$\frac x2$ está no 1º quadrante: $\sqrt{\frac{1+${fmt(c)}}{2}}\approx${fmt(Math.sqrt((1 + c) / 2), 3)}$.`, { tol: 0.002 });
+              return num(t`$0<x<\pi$ e $\cos x=${fmt(c)}$. Quanto vale $\cos\frac x2$ (3 casas)?`, Math.sqrt((1 + c) / 2), t`$\frac x2$ está no 1º quadrante: $\sqrt{\frac{1+${par(c)}}{2}}\approx${fmt(Math.sqrt((1 + c) / 2), 3)}$.`, { tol: 0.002 });
             }),
             mcqS(t`$\cos15^\circ$ por arco metade:`, t`$\sqrt{\frac{2+\sqrt3}{4}}=\frac{\sqrt{2+\sqrt3}}{2}$`, [t`$\frac{\sqrt3}{4}$`, t`$\frac12\cos30^\circ$`, t`$\sqrt{\frac{1-\sqrt3/2}{2}}$`], t`$\cos^215^\circ=\frac{1+\cos30^\circ}{2}=\frac{2+\sqrt3}{4}$.`),
             tf(t`$\operatorname{sen}3x=3\operatorname{sen}x$ para todo $x$.`, false, t`Falta $-4\operatorname{sen}^3x$. Ex.: $x=90^\circ$: $\operatorname{sen}270^\circ=-1\ne3$.`),
@@ -373,7 +373,7 @@ Daí: o **máximo** é $R$, o mínimo $-R$, e a equação $a\operatorname{sen}x+
           exercises: [
             gen((rng) => {
               const [a, b] = pick(rng, [[3, 4], [5, 12], [1, 1], [6, 8], [8, 15]]);
-              return num(t`Valor máximo de $${a}\operatorname{sen}x+${b}\cos x$ (2 casas).`, Math.hypot(a, b), t`$R=\sqrt{${a * a}+${b * b}}=${fmt(Math.hypot(a, b), 2)}$.`, { tol: 0.01 });
+              return num(t`Valor máximo de $${a === 1 ? '' : a}\operatorname{sen}x+${b === 1 ? '' : b}\cos x$ (2 casas).`, Math.hypot(a, b), t`$R=\sqrt{${a * a}+${b * b}}=${fmt(Math.hypot(a, b), 2)}$.`, { tol: 0.01 });
             }),
             gen((rng) => {
               const [a, b] = pick(rng, [[3, 4], [5, 12], [6, 8]]);

@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcqS, num, tf, match, order, multi, inter, plot, rmcq, near } from '../../helpers';
 import { Arrow, ArcW, CircleW, FnCurve, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, polyTex, randInt, randNZ } from '../../../lib/random';
+import { fmt, par, pick, polyTex, randInt, randNZ, term, xm } from '../../../lib/random';
 
 const t = String.raw;
 const PI = Math.PI;
@@ -358,7 +358,7 @@ Para $z^2=w$ com $w$ complexo, use a forma polar, ou escreva $z=x+yi$ e resolva 
             }),
             gen((rng) => {
               const x = randInt(rng, 1, 4), y = randNZ(rng, -4, 4);
-              return rmcq(rng, t`Uma raiz quadrada de $${cx(x * x - y * y, 2 * x * y)}$ é:`, t`$${cx(x, y)}$`, [t`$${cx(y, x)}$`, t`$${cx(x, -y)}$`, t`$${cx(x * x, y * y)}$`, t`$${cx(x + 1, y)}$`], t`$(${cx(x, y)})^2=${x * x}-${y * y}+${2 * x * y}i$.`);
+              return rmcq(rng, t`Uma raiz quadrada de $${cx(x * x - y * y, 2 * x * y)}$ é:`, t`$${cx(x, y)}$`, [t`$${cx(y, x)}$`, t`$${cx(x, -y)}$`, t`$${cx(x * x, y * y)}$`, t`$${cx(x + 1, y)}$`], t`$(${cx(x, y)})^2=${x * x}-${y * y}${2 * x * y < 0 ? '-' : '+'}${Math.abs(2 * x * y)}i=${cx(x * x - y * y, 2 * x * y)}$.`);
             }),
             tf('Uma equação do 2º grau com coeficientes reais e Δ < 0 tem raízes complexas conjugadas.', true, 'b² − 4ac < 0 ⇒ z = (−b ± i√|Δ|)/2a.'),
             mcqS(t`Resolva $z^4=16$ em $\mathbb C$.`, t`$2,\ 2i,\ -2,\ -2i$`, [t`$2$ e $-2$`, t`$4$ e $-4$`, t`$2,\ -2,\ 4i,\ -4i$`], t`Módulo $2$, argumentos $0^\circ, 90^\circ, 180^\circ, 270^\circ$.`),
@@ -400,8 +400,10 @@ Se $(x-r)^m$ aparece na fatoração, $r$ tem **multiplicidade** $m$. No gráfico
               return num(`Quantas raízes complexas (contando multiplicidade) tem um polinômio de grau ${n}?`, n, 'Teorema Fundamental da Álgebra.');
             }),
             gen((rng) => {
-              const a = randNZ(rng, -4, 4), m = randInt(rng, 2, 4), b = randNZ(rng, -4, 4), k = randInt(rng, 1, 3);
-              return num(t`Grau de $P(x)=(x${a < 0 ? '+' : '-'}${Math.abs(a)})^{${m}}(x${b < 0 ? '+' : '-'}${Math.abs(b)})^{${k}}$:`, m + k, `${m} + ${k}.`);
+              const a = randNZ(rng, -4, 4), m = randInt(rng, 2, 4), k = randInt(rng, 1, 3);
+              let b = randNZ(rng, -4, 4);
+              if (b === a) b = -a; // two different roots, otherwise "(x+3)^4(x+3)^1"
+              return num(t`Grau de $P(x)=(${xm(a)})^{${m}}(${xm(b)})${k === 1 ? '' : `^{${k}}`}$:`, m + k, `Somam-se as multiplicidades: ${m} + ${k} = ${m + k}.`);
             }),
             inter('Ajuste a multiplicidade de r para que o gráfico apenas TOQUE o eixo em r.', 'plot', multLab().props, (v) => Math.round(v.p.m) === 2 && Math.abs(v.p.r - v.p.s) > 0.1, 'multiplicidade 2 (e r ≠ s)', 'Multiplicidade par: o sinal não muda, o gráfico tangencia.'),
             mcqS(t`Um polinômio de coeficientes reais tem raízes $2$ e $1+3i$. O menor grau possível é:`, '3', ['2', '4', '1'], t`$1-3i$ também é raiz (conjugada): no mínimo 3 raízes.`),
@@ -434,15 +436,15 @@ $$(x-(a+bi))(x-(a-bi))=x^2-2ax+(a^2+b^2)$$`,
             }),
             gen((rng) => {
               const a = randNZ(rng, -4, 4), b = randInt(rng, 1, 4);
-              return num(t`Mesmo par $${cx(a, b)}$ e $${cx(a, -b)}$: quanto vale $p$ em $x^2+px+q$?`, -2 * a, t`$p=-(\text{soma})=-2\cdot${a}=${-2 * a}$.`);
+              return num(t`Mesmo par $${cx(a, b)}$ e $${cx(a, -b)}$: quanto vale $p$ em $x^2+px+q$?`, -2 * a, t`$p=-(\text{soma})=-2\cdot ${par(a)}=${-2 * a}$.`);
             }),
             gen((rng) => {
               const r = randNZ(rng, -4, 4), a = randInt(rng, -3, 3), b = randInt(rng, 1, 3);
-              return num(t`Polinômio mônico de grau 3 com raízes $${r}$ e $${cx(a, b)}$ (coeficientes reais). Quanto vale o termo independente?`, -r * (a * a + b * b), t`$P(x)=(x-${r})(x^2-${2 * a}x+${a * a + b * b})$; termo independente $=-${r}\cdot${a * a + b * b}=${-r * (a * a + b * b)}$.`);
+              return num(t`Polinômio mônico de grau 3 com raízes $${r}$ e $${cx(a, b)}$ (coeficientes reais). Quanto vale o termo independente?`, -r * (a * a + b * b), t`$P(x)=(${xm(r)})(x^2${term(-2 * a, 'x')}+${a * a + b * b})$; termo independente $=${par(-r)}\cdot ${a * a + b * b}=${-r * (a * a + b * b)}$.`);
             }),
             gen((rng) => {
               const r1 = randNZ(rng, -4, 4), r2 = randNZ(rng, -4, 4), k = randNZ(rng, -3, 3);
-              return num(t`$P$ tem grau 2, raízes $${r1}$ e $${r2}$ e $P(0)=${k * r1 * r2}$. Qual o coeficiente líder?`, k, t`$P(x)=a(x-${r1})(x-${r2})$, $P(0)=a\cdot${r1 * r2}=${k * r1 * r2}\Rightarrow a=${k}$.`);
+              return num(t`$P$ tem grau 2, raízes $${r1}$ e $${r2}$ e $P(0)=${k * r1 * r2}$. Qual o coeficiente líder?`, k, t`$P(x)=a(${xm(r1)})(${xm(r2)})$, $P(0)=a\cdot ${par(r1 * r2)}=${k * r1 * r2}\Rightarrow a=${k}$.`);
             }),
             tf(t`O polinômio $P(x)=x-i$ tem raiz $i$ mas não tem raiz $-i$.`, true, 'A regra dos conjugados só vale para coeficientes reais; aqui o coeficiente −i não é real.'),
             gen((rng) => {
@@ -484,12 +486,12 @@ Truques: $r_1^2+r_2^2+r_3^2=(\Sigma r)^2-2\Sigma r_ir_j$ e $\frac1{r_1}+\frac1{r
               const r = [randNZ(rng, -4, 4), randNZ(rng, -4, 4), randNZ(rng, -4, 4)];
               const c = fromRoots(r);
               const s1 = -c[1], s2 = c[2];
-              return num(t`Para $${polyStr(c)}=0$, calcule $r_1^2+r_2^2+r_3^2$.`, s1 * s1 - 2 * s2, t`$(\Sigma r)^2-2\Sigma r_ir_j=${s1}^2-2\cdot${s2}=${s1 * s1 - 2 * s2}$.`);
+              return num(t`Para $${polyStr(c)}=0$, calcule $r_1^2+r_2^2+r_3^2$.`, s1 * s1 - 2 * s2, t`$(\Sigma r)^2-2\Sigma r_ir_j=${par(s1)}^2-2\cdot ${par(s2)}=${s1 * s1 - 2 * s2}$.`);
             }),
             gen((rng) => {
               const r = [randNZ(rng, -4, 4), randNZ(rng, -4, 4), randNZ(rng, -4, 4)];
               const c = fromRoots(r);
-              return num(t`Para $${polyStr(c)}=0$, calcule $\frac1{r_1}+\frac1{r_2}+\frac1{r_3}$ (3 casas).`, c[2] / -c[3], t`$\frac{\Sigma r_ir_j}{r_1r_2r_3}=\frac{${c[2]}}{${-c[3]}}$.`, { tol: 0.002 });
+              return num(t`Para $${polyStr(c)}=0$, calcule $\frac1{r_1}+\frac1{r_2}+\frac1{r_3}$ (3 casas).`, c[2] / -c[3], t`$\frac{\Sigma r_ir_j}{r_1r_2r_3}=\frac{${c[2]}}{${-c[3]}}\approx ${fmt(c[2] / -c[3], 3)}$.`, { tol: 0.002 });
             }),
             gen((rng) => {
               const m = randNZ(rng, -3, 3), d = randInt(rng, 1, 3);
@@ -529,7 +531,7 @@ Para criar uma equação cujas raízes são **transformadas** (dobro, inverso, $
             }),
             gen((rng) => {
               const S = randInt(rng, -6, 6), P = randInt(rng, -8, 8);
-              return num(t`Raízes de $${polyStr([1, -S, P])}=0$: quanto vale $r_1^2+r_2^2$?`, S * S - 2 * P, t`$S^2-2P=${S * S}-${2 * P}=${S * S - 2 * P}$.`);
+              return num(t`Raízes de $${polyStr([1, -S, P])}=0$: quanto vale $r_1^2+r_2^2$?`, S * S - 2 * P, t`$S^2-2P=${S * S}-${par(2 * P)}=${S * S - 2 * P}$.`);
             }),
             gen((rng) => {
               const b = randNZ(rng, -5, 5), c = randNZ(rng, -6, 6);
@@ -625,7 +627,7 @@ Roteiro:
             gen((rng) => {
               const y = pick(rng, [2, 3, 4]);
               const xs = (y + Math.sqrt(y * y - 4)) / 2;
-              return num(t`Se $x+\frac1x=${y}$, qual a maior solução $x$ (3 casas)?`, xs, t`$x^2-${y}x+1=0\Rightarrow x=\frac{${y}+\sqrt{${y * y - 4}}}{2}\approx${fmt(xs, 3)}$.`, { tol: 0.002 });
+              return num(t`Se $x+\frac1x=${y}$, qual a maior solução $x$ (3 casas)?`, xs, y === 2 ? t`$x^2-2x+1=(x-1)^2=0$: raiz dupla $x=1$.` : t`$x^2-${y}x+1=0\Rightarrow x=\frac{${y}+\sqrt{${y * y - 4}}}{2}\approx${fmt(xs, 3)}$.`, { tol: 0.002 });
             }),
             inter('Faça r = s e escolha a multiplicidade de r para que a raiz resultante tenha multiplicidade PAR (o gráfico só toca o eixo).', 'plot', multLab().props, (v) => near(v.p.r, v.p.s, 0.01) && (Math.round(v.p.m) + 1) % 2 === 0, 'r = s e multiplicidade de r igual a 1 ou 3', '(x − r)^(m+1) com m + 1 par: raiz de multiplicidade par, o gráfico só tangencia.'),
             gen((rng) => {
