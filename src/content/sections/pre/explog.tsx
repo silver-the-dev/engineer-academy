@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcqS, num, tf, match, order, multi, inter, plot, rmcq } from '../../helpers';
 import { FnCurve, InfLine, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt } from '../../../lib/random';
+import { fmt, fracTex, pick, randInt, randNZ } from '../../../lib/random';
 
 const t = String.raw;
 const lg = Math.log10;
@@ -120,9 +120,9 @@ export const expLog: UnitDef = {
             gen((rng) => {
               const h = randInt(rng, 1, 5);
               const k = randInt(rng, -3, 3);
-              return num(t`O gráfico de $y=\log_2(x-${h})${k < 0 ? '' : '+'}${k}$ corta a reta $y=${k}$ em que $x$?`, h + 1, t`$\log_2(x-${h})=0\Rightarrow x-${h}=1\Rightarrow x=${h + 1}$ (o ponto $(1,\,0)$ deslocado).`);
+              return num(t`O gráfico de $y=\log_2(x-${h})${k === 0 ? '' : k < 0 ? k : '+' + k}$ corta a reta $y=${k}$ em que $x$?`, h + 1, t`$\log_2(x-${h})=0\Rightarrow x-${h}=1\Rightarrow x=${h + 1}$ (o ponto $(1,\,0)$ deslocado).`);
             }),
-            match('Associe cada característica ao gráfico.', [['domínio ℝ e imagem (0, ∞)', 'exponencial aˣ'], ['domínio (0, ∞) e imagem ℝ', 'logarítmica logₐ x'], ['passa por (0, 1)', 'curva de aˣ'], ['passa por (1, 0)', 'curva de logₐ x']], 'Domínio e imagem trocam de papel na inversa, e os pontos notáveis também.'),
+            match('Associe cada característica ao gráfico.', [['crescente, passa por (0, 1)', t`$y=2^x$`], ['decrescente, passa por (0, 1)', t`$y=\left(\frac12\right)^x$`], ['crescente, passa por (1, 0)', t`$y=\log_2x$`], ['decrescente, passa por (1, 0)', t`$y=\log_{1/2}x$`]], 'Exponenciais passam por (0, 1) e logaritmos por (1, 0); base > 1 cresce, base entre 0 e 1 decresce.'),
             tf(t`$f(x)=\left(\frac12\right)^x$ é crescente.`, false, 'Base entre 0 e 1: decrescente.'),
           ],
         },
@@ -133,7 +133,7 @@ export const expLog: UnitDef = {
 Calculadoras só têm $\log$ (base 10) e $\ln$ (base $e$): use qualquer uma delas como $c$. Consequências: $\log_a b\cdot\log_b a=1$ e $\log_{a^k}b=\frac1k\log_a b$.
 
 **Número de algarismos**: se $\log N=3{,}7$, então $10^3\le N<10^4$: $N$ tem 4 algarismos. Em geral, $N$ tem $\lfloor\log N\rfloor+1$ dígitos.`,
-            example: t`Quantos dígitos tem $2^{100}$? $\log2^{100}=100\cdot0{,}30103=30{,}1$: são $31$ dígitos.`,
+            example: t`Quantos dígitos tem $2^{100}$? $\log2^{100}=100\cdot0{,}30103\approx30{,}1$: são $31$ dígitos.`,
           },
           exercises: [
             gen((rng) => {
@@ -145,20 +145,24 @@ Calculadoras só têm $\log$ (base 10) e $\ln$ (base $e$): use qualquer uma dela
               const a = pick(rng, [2, 3, 5]);
               const k = randInt(rng, 2, 4);
               const m = randInt(rng, 1, 6);
-              return num(t`Simplifique $\log_{${a ** k}}${a ** m}$.`, m / k, t`$\log_{${a}^{${k}}}${a}^{${m}}=\frac{${m}}{${k}}$.`, { tol: 0.001 });
+              const s = fracTex(m, k);
+              return num(t`Simplifique $\log_{${a ** k}}${a ** m}$.`, m / k, t`$\log_{${a}^{${k}}}${a}^{${m}}=\frac{${m}}{${k}}${s === `\\frac{${m}}{${k}}` ? '' : '=' + s}$.`, { tol: 0.001 });
             }),
             tf(t`$\log_2 5\cdot\log_5 2=1$.`, true, t`$\frac{\log5}{\log2}\cdot\frac{\log2}{\log5}=1$.`),
             gen((rng) => {
               const b = pick(rng, [2, 3, 7]);
-              const n = randInt(rng, 20, 200);
+              // evita n·log b perto de um inteiro (a aproximação de 5 casas poderia mudar a contagem)
+              let n = randInt(rng, 20, 200);
+              while (Math.abs(n * lg(b) - Math.round(n * lg(b))) < 0.01) n = randInt(rng, 20, 200);
               const d = Math.floor(n * lg(b)) + 1;
               return num(t`Quantos algarismos tem $${b}^{${n}}$? ($\log${b}\approx${fmt(lg(b), 5)}$)`, d, t`$${n}\cdot${fmt(lg(b), 5)}\approx${fmt(n * lg(b), 3)}$ ⇒ $${d}$ algarismos.`);
             }),
             gen((rng) => {
-              const x = randInt(rng, 2, 9);
-              return num(t`Se $\log 2\approx0{,}301$ e $\log 3\approx0{,}477$, quanto vale $\log ${[6, 12, 18, 24, 36, 54, 72, 8, 9][x - 1]}$ (3 casas)?`, lg([6, 12, 18, 24, 36, 54, 72, 8, 9][x - 1]), 'Fatore em 2 e 3 e use log(ab) = log a + log b e log aᵏ = k log a.', { tol: 0.003 });
+              const [N, p, q] = pick(rng, [[12, 2, 1], [18, 1, 2], [24, 3, 1], [36, 2, 2], [54, 1, 3], [72, 3, 2], [8, 3, 0], [9, 0, 2]] as [number, number, number][]);
+              const sum = [p ? `${p === 1 ? '' : p}\\log2` : '', q ? `${q === 1 ? '' : q}\\log3` : ''].filter(Boolean).join('+');
+              return num(t`Se $\log 2\approx0{,}301$ e $\log 3\approx0{,}477$, quanto vale $\log ${N}$ (3 casas)?`, lg(N), t`$\log${N}=${sum}\approx${fmt(p * 0.301 + q * 0.477, 3)}$ (use $\log(ab)=\log a+\log b$ e $\log a^k=k\log a$).`, { tol: 0.003 });
             }),
-            mcqS(t`$\log_8 32$ vale:`, t`$\frac53$`, [t`$4$`, t`$\frac35$`, t`$\frac{32}{8}$`], t`$8=2^3$, $32=2^5$: $\frac53$.`),
+            mcqS(t`$\log_8 32$ vale:`, t`$\frac53$`, [t`$4$`, t`$\frac35$`, t`$\frac52$`], t`$8=2^3$, $32=2^5$: $\frac53$.`),
             order(t`Ordene do menor para o maior: $\log_2 10$, $\log_3 10$, $\log_{10}10$, $\log_{0{,}5}10$.`, [t`$\log_{0{,}5}10$`, t`$\log_{10}10$`, t`$\log_3 10$`, t`$\log_2 10$`], t`Base < 1 dá negativo; entre bases > 1, quanto menor a base, maior o log: $\approx-3{,}32$, $1$, $2{,}10$, $3{,}32$.`),
             gen((rng) => {
               const x = randInt(rng, 2, 5);
@@ -183,7 +187,7 @@ Estratégia: escreva os dois lados na **mesma base** e compare os expoentes (inv
           exercises: [
             gen((rng) => {
               const k = randInt(rng, 2, 6);
-              const c = randInt(rng, -2, 3);
+              const c = randNZ(rng, -2, 3);
               return rmcq(rng, t`Resolva $2^{x${c < 0 ? '' : '+'}${c}}>${2 ** k}$.`, t`$x>${k - c}$`, [t`$x<${k - c}$`, t`$x>${k}$`, t`$x>${k + c}$`, t`$x\ge${k - c}$`], t`$2^{x${c < 0 ? '' : '+'}${c}}>2^{${k}}\Rightarrow x${c < 0 ? '' : '+'}${c}>${k}$ (base > 1 mantém).`);
             }),
             gen((rng) => {
@@ -202,7 +206,7 @@ Estratégia: escreva os dois lados na **mesma base** e compare os expoentes (inv
             }),
             gen((rng) => {
               const k = randInt(rng, 2, 9);
-              return num(t`Menor inteiro $n$ com $1{,}1^n>${k}$ (use logaritmos).`, Math.ceil(Math.log(k) / Math.log(1.1)), t`$n>\frac{\log${k}}{\log1{,}1}\approx${fmt(Math.log(k) / Math.log(1.1), 2)}$.`);
+              return num(t`Menor inteiro $n$ com $1{,}1^n>${k}$ (use logaritmos).`, Math.ceil(Math.log(k) / Math.log(1.1)), t`$n>\frac{\log${k}}{\log1{,}1}\approx${fmt(Math.log(k) / Math.log(1.1), 2)}\Rightarrow n=${Math.ceil(Math.log(k) / Math.log(1.1))}$.`);
             }),
             match('Associe a inequação ao conjunto solução.', [[t`$2^x>1$`, t`$x>0$`], [t`$\left(\frac12\right)^x>1$`, t`$x<0$`], [t`$2^x>0$`, t`$\mathbb R$`], [t`$2^x<0$`, t`$\varnothing$`]], 'aˣ é sempre positivo e vale 1 em x = 0.'),
           ],
@@ -269,7 +273,7 @@ Passos: (1) condições de existência; (2) resolva com a regra da base; (3) **i
             }),
             gen((rng) => {
               const n = pick(rng, [2, 4, 8]);
-              return num(`Quantos dB aumenta o nível sonoro quando ${n} fontes iguais tocam juntas (2 casas)?`, 10 * lg(n), `10·log ${n} ≈ ${fmt(10 * lg(n), 2)} dB.`, { tol: 0.01 });
+              return num(`Quantos dB aumenta o nível sonoro quando ${n} fontes iguais tocam juntas, em relação a uma só (2 casas)?`, 10 * lg(n), `10·log ${n} ≈ ${fmt(10 * lg(n), 2)} dB.`, { tol: 0.01 });
             }),
             tf('Um terremoto de magnitude 7 tem amplitude 2 vezes maior que um de magnitude 5.', false, '2 pontos = 10² = 100 vezes a amplitude.'),
             mcqS('Por que gráficos de resposta em frequência usam eixo logarítmico?', 'para ver de 10 Hz a 100 kHz com a mesma resolução relativa', ['porque o log é sempre positivo', 'para os valores ficarem inteiros', 'porque a frequência não pode ser zero'], 'Escala log dá o mesmo espaço para cada década (fator 10).'),
@@ -291,7 +295,7 @@ Passos: (1) condições de existência; (2) resolva com a regra da base; (3) **i
             visual: eLab(),
           },
           exercises: [
-            inter(t`Aumente $n$ até $\left(1+\frac1n\right)^n$ passar de $2{,}69$.`, 'plot', eLab().props, (v) => (1 + 1 / Math.round(v.p.n)) ** Math.round(v.p.n) > 2.69, 'n ≥ 37', 'A convergência para e é lenta: precisa de n ≈ 37.'),
+            inter(t`Aumente $n$ até $\left(1+\frac1n\right)^n$ passar de $2{,}69$.`, 'plot', eLab().props, (v) => (1 + 1 / Math.round(v.p.n)) ** Math.round(v.p.n) > 2.69, 'n ≥ 48', 'A convergência para e é lenta: só em n = 48 o valor passa de 2,69 (≈ 2,6905).'),
             gen((rng) => {
               const T = pick(rng, [5, 8, 10, 30]), k = randInt(rng, 2, 5), N0 = 100 * randInt(rng, 2, 10);
               return num(`Meia-vida de ${T} anos, ${N0} g iniciais. Quanto resta após ${k * T} anos?`, N0 / 2 ** k, `${k} meias-vidas: ${N0}/2^${k} = ${fmt(N0 / 2 ** k, 3)} g.`, { tol: 0.01, unit: 'g' });
@@ -300,7 +304,7 @@ Passos: (1) condições de existência; (2) resolva com a regra da base; (3) **i
               const T = 5730;
               const f = pick(rng, [0.5, 0.25, 0.1, 0.7, 0.8]);
               const tt = (T * Math.log(f)) / Math.log(0.5);
-              return num(`Um fóssil tem ${fmt(f * 100)}% do carbono-14 original (meia-vida 5730 anos). Idade aproximada (anos)?`, tt, t`$t=5730\cdot\frac{\ln ${fmt(f)}}{\ln 0{,}5}\approx${fmt(tt, 0)}$ anos.`, { tol: 2 });
+              return num(`Um fóssil tem ${fmt(f * 100)}% do carbono-14 original (meia-vida 5730 anos). Idade aproximada (anos)?`, tt, t`$t=5730\cdot\frac{\ln ${fmt(f)}}{\ln 0{,}5}\approx${fmt(tt, 0)}$ anos.`, { tol: Math.max(2, tt * 0.001) });
             }),
             gen((rng) => {
               const Ta = randInt(rng, 18, 25), T0 = randInt(rng, 80, 95), k = pick(rng, [0.05, 0.1, 0.08]), tt = randInt(rng, 5, 20);
@@ -309,7 +313,7 @@ Passos: (1) condições de existência; (2) resolva com a regra da base; (3) **i
             }),
             gen((rng) => {
               const k = pick(rng, [0.02, 0.05, 0.07, 0.1]);
-              return num(`Uma população cresce como P₀e^(${fmt(k)}t). Em quanto tempo dobra (2 casas)?`, Math.log(2) / k, t`$e^{${fmt(k)}t}=2\Rightarrow t=\frac{\ln2}{${fmt(k)}}\approx${fmt(Math.log(2) / k, 2)}$.`, { tol: 0.01 });
+              return num(`Uma população cresce como P₀e^(${fmt(k)}t). Em quanto tempo dobra (na unidade de t, 2 casas)?`, Math.log(2) / k, t`$e^{${fmt(k)}t}=2\Rightarrow t=\frac{\ln2}{${fmt(k)}}\approx${fmt(Math.log(2) / k, 2)}$.`, { tol: 0.01 });
             }),
             tf(t`Se $y=3e^{0{,}5x}$, o gráfico de $\ln y$ contra $x$ é uma reta de inclinação $0{,}5$.`, true, t`$\ln y=\ln3+0{,}5x$.`),
             mcqS('Dados (x, y) cujo gráfico de log y contra log x é uma reta indicam um modelo:', 'potência y = C·xᵏ', ['exponencial y = C·eᵏˣ', 'linear y = ax + b', 'logarítmico y = a ln x'], 'log y = log C + k log x: reta no papel di-log ⇔ lei de potência.'),

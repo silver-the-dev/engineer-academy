@@ -797,7 +797,7 @@ Na circunferência $x^2+y^2=r^2$: $2x+2y\,\frac{dy}{dx}=0 \implies \dfrac{dy}{dx
             ),
             fill(
               t`Complete a demonstração da derivada de $y=\operatorname{arctg}x$:`,
-              t`Como $\operatorname{tg}y=x$, derivando temos $(\sec^2 y)\,y'=1$, logo $y'=\dfrac{1}{\sec^2 y}=\dfrac{1}{\text{___}}=\dfrac{1}{\text{___}}$.`,
+              t`Como $\operatorname{tg}y=x$, derivando temos $(\sec^2 y)\,y'=1$, logo $y'=\dfrac{1}{\sec^2 y}$, em que $\sec^2 y=$ ___ $=$ ___.`,
               [t`$1+\operatorname{tg}^2 y$`, t`$1+x^2$`],
               [t`$1-\operatorname{sen}^2 y$`, t`$1-x^2$`, t`$\sqrt{1-x^2}$`],
               t`Usamos a identidade pitagórica $\sec^2 y=1+\operatorname{tg}^2 y=1+x^2$.`,

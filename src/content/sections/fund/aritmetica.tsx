@@ -179,7 +179,7 @@ const negExpLab = (a0 = 2, n0 = 2) =>
 const radicalSquareLab = (k0 = 2, m0 = 3) =>
   plot(
     {
-      view: { xMin: -0.8, xMax: 9.8, yMin: -1.2, yMax: 9.5 },
+      view: { xMin: -0.8, xMax: 9.8, yMin: -1.4, yMax: 6.6 },
       equalAspect: true,
       grid: false,
       tickLabels: false,
@@ -188,8 +188,10 @@ const radicalSquareLab = (k0 = 2, m0 = 3) =>
         { key: 'm', label: 'm (radicando)', min: 2, max: 5, step: 1, value: m0, color: C.gold, format: (v: number) => String(v) },
       ],
       render: ({ p }: any) => {
-        const s = Math.sqrt(p.m);
         const K = p.k;
+        // the k×k grid always fills the widget; each small square stands for area m (side √m)
+        const s = 6.2 / K;
+        const x0 = 1.6; // centres the 6.2-wide grid
         const cells: React.ReactNode[] = [];
         for (let r = 0; r < K; r++) {
           for (let c = 0; c < K; c++) {
@@ -197,7 +199,7 @@ const radicalSquareLab = (k0 = 2, m0 = 3) =>
             cells.push(
               <RectW
                 key={`${r}-${c}`}
-                x={c * s}
+                x={x0 + c * s}
                 y={r * s}
                 w={s}
                 h={s}
@@ -211,8 +213,8 @@ const radicalSquareLab = (k0 = 2, m0 = 3) =>
         return (
           <>
             {cells}
-            <Label x={s / 2} y={s / 2} text={`área ${p.m}`} anchor="middle" color={C.gold} size={11} />
-            <Label x={tot / 2} y={-0.65} text={`lado total = ${K}·√${p.m} ≈ ${fmt(tot, 2)}`} anchor="middle" color={C.p2} size={12} />
+            <Label x={x0 + s / 2} y={s / 2} dy={4} text={`área ${p.m}`} anchor="middle" color={C.gold} size={K > 3 ? 11 : 13} />
+            <Label x={x0 + tot / 2} y={-0.7} text={`lado total = ${K}·√${p.m} ≈ ${fmt(K * Math.sqrt(p.m), 2)}`} anchor="middle" color={C.p2} size={13} />
           </>
         );
       },
@@ -378,7 +380,7 @@ Multiplicar ou dividir $p$ e $q$ pelo **mesmo número** não altera o valor — 
             ),
             fill(
               t`Complete as igualdades sobre equivalência e simplificação:`,
-              t`O $\operatorname{mdc}(18,\,24)$ é ___, logo a forma irredutível de $\dfrac{18}{24}$ é $\dfrac{3}{\text{___}}$.`,
+              t`O $\operatorname{mdc}(18,\,24)$ é ___, logo a forma irredutível de $\dfrac{18}{24}$ tem numerador $3$ e denominador ___.`,
               ['6', '4'],
               ['3', '8', '12'],
               t`Dividindo $18$ e $24$ por $\operatorname{mdc}(18,\,24)=6$, obtemos $\frac{3}{4}$.`,
@@ -1021,7 +1023,7 @@ Isso permite quebrar frações com raízes em somas de potências fáceis de der
               t`Como $50=25\cdot 2$ e $8=4\cdot 2$, temos $\sqrt{50}-\sqrt{8}=$ ___$\sqrt{2}-2\sqrt{2}=$ ___$\sqrt{2}$.`,
               ['5', '3'],
               ['25', '7', '2'],
-              t`$\sqrt{50}=5\sqrt{2}$ e $\sqrt{8}=2\sqrt{2}$; subtraindo os coeficientes, $5-2=3\sqrt{2}$.`,
+              t`$\sqrt{50}=5\sqrt{2}$ e $\sqrt{8}=2\sqrt{2}$; subtraindo os coeficientes, $5\sqrt{2}-2\sqrt{2}=3\sqrt{2}$.`,
             ),
             gen((rng) => {
               const a = pick(rng, [2, 3, 5, 6]);
@@ -1248,7 +1250,7 @@ Se após uma conta a mantissa $a$ sair do intervalo $[1,\,10)$, **normalizamos**
             }),
             fill(
               t`Complete a normalização:`,
-              t`Em $0{,}06\times 10^{-4}$, a vírgula anda $2$ casas para a direita (virando $6$) e ___ $2$ no expoente, resultando em $6\times 10^{\text{___}}$.`,
+              t`Em $0{,}06\times 10^{-4}$, a vírgula anda $2$ casas para a direita (virando $6$) e ___ $2$ no expoente, resultando em $6\times 10^{n}$ com $n=$ ___.`,
               ['subtraímos', '-6'],
               ['somamos', '-2', '-8'],
               t`Como aumentamos a mantissa em $10^2$ ($0{,}06\to 6$), compensamos dividindo a potência por $10^2$: $-4-2=-6$.`,
