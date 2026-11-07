@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef, VisualSpec } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
+import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, near } from '../../helpers';
 import { ArcW, PolygonW, PolylineW, Pt, Seg } from '../../../components/plot/Plot';
 import { Axes3, Line3, Point3, Poly3, type V3 } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';

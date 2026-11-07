@@ -378,7 +378,6 @@ $K$ é a **capacidade de suporte**. Os equilíbrios são $P=0$ (**instável**: s
             num(t`Logística $P'=0{,}5P(1-P/100)$, $P_0=20$. Quanto vale $P'(0)$, a taxa inicial?`, 8, t`$0{,}5\cdot20\cdot(1-0{,}2)=8$.`),
             gen((rng) => {
               const r = pick(rng, [0.5, 1, 2]);
-              const K = 100;
               const A = pick(rng, [1, 3, 9]);
               const tt = Math.log(A) / r;
               return num(t`Para $P(t)=\dfrac{100}{1+${A}e^{-${fmt(r)}t}}$, em que instante a população atinge $50$? (2 casas)`, tt, t`$1+${A}e^{-${fmt(r)}t}=2\Rightarrow e^{-${fmt(r)}t}=\frac1{${A}}\Rightarrow t=\frac{\ln ${A}}{${fmt(r)}}\approx${fmt(tt, 2)}$.`, { tol: 0.02 });

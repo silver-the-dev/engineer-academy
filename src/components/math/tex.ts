@@ -92,7 +92,7 @@ export function texToSvg(tex: string, display = false): TexSvg {
       .replace(/\saria-[a-z-]+="[^"]*"/g, '')
       .replace(/<title>[\s\S]*?<\/title>/g, '');
     out = { xml: svg, wEx: w, hEx: h, vaEx: va, error: hasError };
-  } catch (e) {
+  } catch {
     out = { xml: '', wEx: 0, hEx: 0, vaEx: 0, error: true };
   }
   cache.set(key, out);

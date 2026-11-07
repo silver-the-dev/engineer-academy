@@ -8,6 +8,9 @@ import { Arrow, AreaUnder, ArcW, CircleW, FnCurve, InfLine, Label, PolygonW, Pol
 import { Arrow3, Axes3, Grid3, Line3, Point3, Poly3, type V3 } from '../components/visuals/Space3D';
 import { C } from '../theme';
 import { fmt } from '../lib/random';
+import { Bars } from '../components/visuals/Misc';
+import { Slider } from '../components/ui/Slider';
+import { RichText } from '../components/math/RichText';
 
 const t = String.raw;
 type V = VisualSpec & { props: Record<string, any> };
@@ -124,7 +127,6 @@ export const tangentLab = (f: (x: number) => number, df: (x: number) => number, 
     render: ({ p }: any) => {
       const a = p.x;
       const b = p.x + p.h;
-      const m = (f(b) - f(a)) / (b - a);
       return (
         <>
           <FnCurve f={f} color={C.p1} />
@@ -755,9 +757,6 @@ export const binomialLab = (): V => ({
 });
 
 function BinomialView({ width }: { width: number }) {
-  const { Bars } = require('../components/visuals/Misc');
-  const { Slider } = require('../components/ui/Slider');
-  const { RichText } = require('../components/math/RichText');
   const [n, setN] = React.useState(10);
   const [p, setP] = React.useState(0.5);
   const comb = (a: number, b: number) => {

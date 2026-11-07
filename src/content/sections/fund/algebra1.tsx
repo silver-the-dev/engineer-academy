@@ -1,7 +1,7 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { Arrow, CircleW, FnCurve, Pt, Seg } from '../../../components/plot/Plot';
+import { gen, mcq, mcqS, num, tf, fill, match, inter, plot, rmcq, near, multi } from '../../helpers';
+import { Arrow, CircleW, FnCurve, Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
 
@@ -45,7 +45,6 @@ const squareIdentity = () =>
         { key: 'b', label: 'b', min: 0.5, max: 2.5, step: 0.1, value: 1.8, color: C.p5 },
       ],
       render: ({ p }: any) => {
-        const { RectW, Label } = require('../../../components/plot/Plot');
         return (
           <>
             <RectW x={0} y={0} w={p.a} h={p.a} color={C.p3} opacity={0.45} />

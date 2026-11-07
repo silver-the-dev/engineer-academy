@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { FnCurve, InfLine, Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, pick, randInt, randNZ, polyTex, term, fracTex } from '../../../lib/random';
+import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
 import { derivativeSignLab, fnLab, tangentLab } from '../../visuals';
 
 const t = String.raw;
@@ -123,7 +123,6 @@ const concavityLab = () =>
     render: ({ p }: any) => {
       const f = (x: number) => (x ** 3) / 3 - x;
       const df = (x: number) => x * x - 1;
-      const d2f = (x: number) => 2 * x;
       const x0 = p.x0;
       const y0 = f(x0);
       const m = df(x0);

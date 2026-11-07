@@ -1,8 +1,8 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { ArcW, Arrow, InfLine, Pt, Seg } from '../../../components/plot/Plot';
-import { Arrow3, Axes3, Line3, Point3, Poly3, type V3 as V3T } from '../../../components/visuals/Space3D';
+import { gen, mcq, mcqS, num, tf, order, inter, plot, rmcq, near, multi } from '../../helpers';
+import { ArcW, Arrow, InfLine, Pt } from '../../../components/plot/Plot';
+import { Arrow3, Axes3, Line3, Point3, type V3 as V3T } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 import { matrixLab, plane3DLab } from '../../visuals';
@@ -528,7 +528,6 @@ Com $h,t\in[0,\,1]$, $P$ percorre o **paralelogramo** de lados $\vec u$ e $\vec 
             gen((rng) => {
               const tt = randInt(rng, -2, 3);
               const A = r3(rng, -2, 2);
-              const v = [1, 1, 1];
               const k = A[0] + A[1] + A[2] + 3 * tt;
               return num(t`Para qual $t$ a reta $${V3(A)}+t\,(1,\,1,\,1)$ fura o plano $x+y+z=${k}$?`, tt, t`$${A[0] + A[1] + A[2]}+3t=${k}\Rightarrow t=${tt}$.`);
             }),

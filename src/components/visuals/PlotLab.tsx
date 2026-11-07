@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { C, F } from '../../theme';
 import { Plot, View2D } from '../plot/Plot';

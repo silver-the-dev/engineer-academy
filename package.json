@@ -36,6 +36,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~58.0.4",
+    "globals": "^16.5.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -46,7 +49,8 @@
     "typecheck": "tsc --noEmit",
     "assets": "python3 scripts/generate-assets.py",
     "prebuild": "expo prebuild --platform android --no-install",
-    "apk": "bash scripts/build-apk.sh"
+    "apk": "bash scripts/build-apk.sh",
+    "lint": "expo lint"
   },
   "private": true
 }

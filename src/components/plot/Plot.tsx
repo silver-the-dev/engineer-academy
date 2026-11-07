@@ -64,7 +64,6 @@ export function Plot(props: PlotProps) {
     yMin = cy - ySpan / 2;
     yMax = cy + ySpan / 2;
   }
-  const v = { xMin, xMax, yMin, yMax };
   const ctx = useMemo<Ctx>(() => {
     const sx = (x: number) => ((x - xMin) / (xMax - xMin)) * w;
     const sy = (y: number) => h - ((y - yMin) / (yMax - yMin)) * h;

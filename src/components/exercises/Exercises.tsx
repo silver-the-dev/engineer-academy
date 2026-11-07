@@ -4,10 +4,9 @@ import { C, F, alpha } from '../../theme';
 import type { Fill, Interactive, MCQ, Match, MultiSelect, Numeric, Order, TrueFalse } from '../../content/types';
 import { RichText } from '../math/RichText';
 import { Choice, ChoiceState, ExProps, Token, parseNumber } from './common';
-import { makeRng, shuffle } from '../../lib/random';
+import { fmt, makeRng, shuffle } from '../../lib/random';
 import { tapFeedback, wrongFeedback, correctFeedback } from '../../lib/feedback';
 import { renderWidget } from '../visuals/registry';
-import { fmt } from '../../lib/random';
 
 /* ---------------- Multiple choice ---------------- */
 export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {

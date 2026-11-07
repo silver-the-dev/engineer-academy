@@ -1,17 +1,12 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi, table } from '../../helpers';
+import { gen, mcq, mcqS, num, tf, order, inter, plot, near, table } from '../../helpers';
 import { Label, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 import { binomialLab, normalLab, regressionLab } from '../../visuals';
 
 const t = String.raw;
-const comb = (n: number, k: number) => {
-  let r = 1;
-  for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
-  return r;
-};
 
 const treeLab = () =>
   plot(
@@ -453,7 +448,6 @@ $\binom nk$ conta de quantas maneiras os $k$ sucessos podem aparecer.`,
             gen((rng) => {
               const n = randInt(rng, 3, 5);
               const p = pick(rng, [0.2, 0.3, 0.5]);
-              const k = 1;
               const v = n * p * (1 - p) ** (n - 1);
               return num(t`Binomial com $n=${n}$ e $p=${fmt(p)}$: calcule $P(X=1)$. (4 casas)`, v, t`$${n}\cdot${fmt(p)}\cdot${fmt(1 - p)}^{${n - 1}}\approx${fmt(v, 4)}$.`, { tol: 0.0005 });
             }),

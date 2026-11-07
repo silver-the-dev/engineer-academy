@@ -1,7 +1,7 @@
 import React from 'react';
 import type { UnitDef, VisualSpec } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { Arrow, CircleW, FnCurve, InfLine, Label, ParamCurve, Pt, Seg } from '../../../components/plot/Plot';
+import { gen, mcq, mcqS, num, tf, fill, order, inter, plot, rmcq, near, multi } from '../../helpers';
+import { Arrow, CircleW, FnCurve, InfLine, ParamCurve, Pt } from '../../../components/plot/Plot';
 import { Axes3, Line3, Point3, Poly3, type V3 } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
+import { gen, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { Arrow, CircleW, FnCurve, InfLine, Label, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, polyTex, randInt, randNZ, term } from '../../../lib/random';

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { Arrow, CircleW, Pt } from '../../../components/plot/Plot';
+import { gen, mcq, mcqS, num, tf, order, inter, plot, rmcq, near } from '../../helpers';
+import { Arrow, CircleW } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 import { doubleIntegralLab, surfaceLab } from '../../visuals3d';

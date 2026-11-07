@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi, table } from '../../helpers';
+import { gen, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, table } from '../../helpers';
 import { AreaUnder, FnCurve, InfLine, Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
@@ -12,7 +12,6 @@ const t = String.raw;
 const iv = (a: number | string, b: number | string, oa: boolean, ob: boolean) => `${oa ? '(' : '['}${a},\\,${b}${ob ? ')' : ']'}`;
 /** Factor (x - r) in TeX. */
 const xm = (r: number) => (r === 0 ? 'x' : r < 0 ? `x+${-r}` : `x-${r}`);
-const xmParen = (r: number) => (r === 0 ? 'x' : `(${xm(r)})`);
 
 /* ---------------- Local Interactive Visuals ---------------- */
 
@@ -999,7 +998,6 @@ Mexa na raiz $r$ do polinômio cúbico abaixo:`,
               t`Como o produto das raízes (a menos de sinal) é o termo independente $-6$, qualquer raiz inteira divide $6$.`,
             ),
             gen((rng) => {
-              const r1 = 1;
               const r2 = randInt(rng, 2, 4);
               const r3 = r2 + randInt(rng, 1, 3);
               // (x-1)(x-r2)(x-r3) = (x-1)(x^2 - (r2+r3)x + r2*r3)
@@ -1756,10 +1754,6 @@ $$|A(x)| = c \iff A(x) = c \quad\text{ou}\quad A(x) = -c$$`,
             }),
             gen((rng) => {
               const a = pick(rng, [2, 3]);
-              const x1 = randInt(rng, 1, 5);
-              const x2 = randInt(rng, -5, 0);
-              // We want |a x + b| = c with integer roots: pick b, c
-              const b = randNZ(rng, -6, 6);
               const c = randInt(rng, 2, 10);
               // Solutions: x = (c - b)/a and (-c - b)/a => sum of solutions = -2b/a
               const bEven = a * randNZ(rng, -4, 4);
@@ -1767,7 +1761,7 @@ $$|A(x)| = c \iff A(x) = c \quad\text{ou}\quad A(x) = -c$$`,
               return num(
                 t`Quanto vale a **soma** das duas soluções reais da equação $|${a}x ${term(bEven, '')}| = ${c}$?`,
                 sumSol,
-                t`As soluções vêm de $${a}x ${term(bEven, '')} = ${c}$ e $${a}x ${term(bEven, '')} = -${c}$. Somando as duas equações: $2(${a}x ${term(bEven, '')}) = 0 \Rightarrow x_1 + x_2 = 2\left(-\frac{${bEven}}{${a}}\right) = ${sumSol}$.`,
+                t`As soluções vêm de $${a}x ${term(bEven, '')} = ${c}$ e $${a}x ${term(bEven, '')} = -${c}$. Somando as duas equações: $${a}(x_1+x_2) ${term(2 * bEven, '')} = 0 \Rightarrow x_1 + x_2 = -\frac{${2 * bEven}}{${a}} = ${sumSol}$.`,
               );
             }),
             mcqS(

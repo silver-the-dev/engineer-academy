@@ -511,7 +511,7 @@ Como $|\cos x| \le 1$ e $|\operatorname{sen} x| \le 1$, seus inversos $\sec x$ e
               t`Como $0 < |\cos x| \le 1$, ao inverter obtemos $|\sec x| \ge 1$, incluindo $-1$ e $1$.`,
             ),
             gen((rng) => {
-              const [a, b, c] = pick(rng, TRI);
+              const [, b, c] = pick(rng, TRI);
               return num(
                 t`Se $\cos\theta = ${fr(b, c)}$, quanto vale $\sec\theta$? (fração ou decimal)`,
                 c / b,

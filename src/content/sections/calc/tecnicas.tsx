@@ -3,7 +3,7 @@ import type { UnitDef } from '../../types';
 import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
 import { ArcW, AreaUnder, FnCurve, Label, PolygonW, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
-import { fmt, randInt, randNZ, polyTex, term } from '../../../lib/random';
+import { fmt, randInt, polyTex, term } from '../../../lib/random';
 
 const t = String.raw;
 

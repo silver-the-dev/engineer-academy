@@ -99,7 +99,7 @@ export async function rescheduleReminders() {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // ignore
   } finally {
     scheduling = false;

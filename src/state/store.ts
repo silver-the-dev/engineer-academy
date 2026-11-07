@@ -329,6 +329,8 @@ export const useApp = create<State & Actions>()(
         const newXp = s.xp + xp;
         set({ xp: newXp, gems: s.gems + gems, days, lessons, parts, stats, quests });
         // achievements
+        // lazy require: achievements.ts imports this store (import cycle)
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { checkAchievements } = require('../content/achievements');
         const unlocked: string[] = checkAchievements(get());
         if (unlocked.length) {

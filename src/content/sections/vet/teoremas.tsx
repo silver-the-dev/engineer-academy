@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef, VisualSpec } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
+import { gen, mcq, mcqS, num, tf, match, order, inter, plot, near } from '../../helpers';
 import { ArcW, PolygonW } from '../../../components/plot/Plot';
 import { Arrow3, Axes3, Line3, Point3, Poly3, type V3 } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
@@ -175,7 +175,6 @@ Intuição: divida $D$ em quadradinhos, cada um com sua pequena circulação ("r
             mcqS(t`$\oint_C x\,dy$ (anti-horário) é igual a:`, 'a área da região', ['zero', 'o perímetro', 'o dobro da área', 'a área com sinal trocado'], t`$P=0$, $Q=x$: $Q_x-P_y=1$.`),
             gen((rng) => {
               const a = randInt(rng, 1, 5);
-              const b = randInt(rng, 1, 5);
               return num(t`Use Green para calcular $\oint_C x^2y\,dx+(x^3+${a}x)\,dy$ na borda do quadrado $[0,\,1]^2$, sentido anti-horário (3 casas).`, 2 / 3 + a, t`$Q_x-P_y=(3x^2+${a})-x^2=2x^2+${a}$; $\iint_{[0,1]^2}(2x^2+${a})\,dA=\frac23+${a}\approx${fmt(2 / 3 + a, 3)}$.`, { tol: 0.002 });
             }),
             num(t`Área da elipse $x=3\cos t$, $y=2\operatorname{sen}t$ via $\frac12\oint x\,dy-y\,dx$ (2 casas):`, 6 * PI, t`$\frac12\int_0^{2\pi}6(\cos^2t+\operatorname{sen}^2t)\,dt=6\pi\approx18{,}85$.`, { tol: 0.03 }),

@@ -61,7 +61,6 @@ export function Slider({ label, value, min, max, step = 0.1, onChange, color = C
         onPanResponderRelease: () => lock(false),
         onPanResponderTerminate: () => lock(false),
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lock],
   );
 

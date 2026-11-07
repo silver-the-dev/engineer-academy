@@ -1,7 +1,8 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near } from '../../helpers';
-import { CircleW, FnCurve, InfLine, Label, PolygonW, Pt, RectW, Seg } from '../../../components/plot/Plot';
+import { gen, mcq, mcqS, num, tf, match, inter, plot, rmcq, near } from '../../helpers';
+import { cylinder } from '../../visuals3d';
+import { CircleW, PolygonW, Pt, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 
@@ -234,7 +235,7 @@ A hipotenusa ao quadrado é a soma dos quadrados dos catetos. Triângulos famoso
 • **Cilindro**: $\pi r^2h$
 
 $1\ \text{m}^3=1000$ L e $1\ \text{dm}^3=1$ L.`,
-            visual: { name: 'space3d', props: { params: [{ key: 'h', label: 'h', min: 0.5, max: 3.5, step: 0.1, value: 2, color: C.p2 }], render: ({ p }: any) => require('../../visuals3d').cylinder(p.h), info: ({ p }: any) => t`Cilindro $r=1{,}5$: $V=\pi\cdot1{,}5^2\cdot${fmt(p.h)}=${fmt(Math.PI * 2.25 * p.h, 2)}$` } },
+            visual: { name: 'space3d', props: { params: [{ key: 'h', label: 'h', min: 0.5, max: 3.5, step: 0.1, value: 2, color: C.p2 }], render: ({ p }: any) => cylinder(p.h), info: ({ p }: any) => t`Cilindro $r=1{,}5$: $V=\pi\cdot1{,}5^2\cdot${fmt(p.h)}=${fmt(Math.PI * 2.25 * p.h, 2)}$` } },
           },
           exercises: [
             tf(t`O volume de qualquer prisma é a área da base vezes a altura.`, true, t`Vale para prismas e cilindros: a seção é a mesma em toda a altura.`),

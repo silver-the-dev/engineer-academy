@@ -1,6 +1,6 @@
 import { NativeModule, requireOptionalNativeModule } from 'expo';
 
-declare class StreakWidgetModule extends NativeModule<{}> {
+declare class StreakWidgetModule extends NativeModule<Record<never, never>> {
   updateAsync(json: string): Promise<boolean>;
   countAsync(): Promise<number>;
   requestPinAsync(): Promise<boolean>;

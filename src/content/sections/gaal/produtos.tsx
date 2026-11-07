@@ -1,7 +1,5 @@
-import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near, multi } from '../../helpers';
-import { C } from '../../../theme';
+import { gen, mcq, mcqS, num, tf, inter, rmcq, near } from '../../helpers';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
 import { cross3DLab, vectorLab } from '../../visuals';
 

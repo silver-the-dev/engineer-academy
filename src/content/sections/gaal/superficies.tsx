@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef, VisualSpec } from '../../types';
-import { gen, mcq, mcqS, num, tf, fill, match, order, inter, rmcq, near, multi } from '../../helpers';
+import { gen, mcq, mcqS, num, tf, match, order, inter, rmcq, near, multi } from '../../helpers';
 import { Axes3, Line3, Point3, Poly3, type V3 } from '../../../components/visuals/Space3D';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, term } from '../../../lib/random';
