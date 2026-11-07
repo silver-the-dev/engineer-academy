@@ -11,6 +11,9 @@ import { trigonometria } from './fund/trigonometria';
 import { logica } from './fund/logica';
 import { geoPlana } from './fund/geoplana';
 import { geoEspacial } from './fund/geoespacial';
+import { binomio } from './fund/binomio';
+import { matrizes } from './fund/matrizes';
+import { financeira } from './fund/financeira';
 import { classesFuncoes } from './pre/funcoes';
 import { trigAvancada } from './pre/trigonometria';
 import { geoAnalitica } from './pre/geoanalitica';
@@ -46,7 +49,7 @@ const DEFS: SectionDef[] = [
     subtitle: 'Competências básicas: álgebra, funções, geometria e trigonometria',
     color: '#FF9F1C',
     emoji: '🧱',
-    units: [aritmetica, elementar, algebra1, logica, fatoracao, equacoes, algebra2, funcoes, combinatoria, geometria, geoPlana, geoEspacial, trigonometria],
+    units: [aritmetica, elementar, algebra1, logica, fatoracao, equacoes, algebra2, matrizes, funcoes, financeira, combinatoria, binomio, geometria, geoPlana, geoEspacial, trigonometria],
   },
   {
     id: 'pre',
