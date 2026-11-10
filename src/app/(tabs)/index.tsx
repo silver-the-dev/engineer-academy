@@ -17,6 +17,9 @@ const RING = 112;
 
 const courses = availableCourses();
 
+/** Sections that show the shortcut to the free circuit lab. */
+const LAB_SECTIONS = ['ele', 'eln', 'dig'];
+
 /** Ring split in one arc per sub-lesson (gap at the top), finished arcs in the section colour. */
 function PartRing({ total, done, color }: { total: number; done: number; color: string }) {
   const c = RING / 2;
@@ -150,6 +153,23 @@ export default function PathScreen() {
           <Text style={{ color: C.bg, fontFamily: F.bold, fontSize: 14, opacity: 0.85, marginBottom: 10 }}>{section.subtitle}</Text>
           <ProgressBar value={prog.total ? prog.done / prog.total : 0} color={C.bg} track={shade(section.color, -0.25)} height={12} />
         </View>
+
+        {LAB_SECTIONS.includes(section.id) ? (
+          <Pressable
+            onPress={() => {
+              tapFeedback();
+              router.push('/lab');
+            }}
+            style={{ marginHorizontal: 16, marginBottom: 16, padding: 14, borderRadius: 18, backgroundColor: C.surface, borderWidth: 2, borderColor: alpha(C.cyan, 0.5), flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 28, marginRight: 12 }}>🔬</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: C.cyan, fontFamily: F.black, fontSize: 16 }}>Laboratório de circuitos</Text>
+              <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 13 }}>Monte, meça e veja a corrente circular</Text>
+            </View>
+            <Text style={{ color: C.cyan, fontFamily: F.black, fontSize: 20 }}>›</Text>
+          </Pressable>
+        ) : null}
 
         {section.units.map((unit, ui) => {
           const unitDone = unit.lessons.every((l) => lessons[l.id]);
