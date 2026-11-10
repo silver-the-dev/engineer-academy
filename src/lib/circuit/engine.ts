@@ -33,7 +33,7 @@ function topology(comps: Comp[]): Topology {
   const nodeAt = (p: Pt) => points.get(key(p)) ?? -1;
   let size = nodes - 1;
   const parts = comps.map((c): Part => {
-    const n = c.type === 'dff' ? 2 : sources.has(c.type) || c.type === 'input' || c.type === 'opamp' || gates.has(c.type) || c.type === 'capacitor' || c.type === 'inductor' ? 1 : 0;
+    const n = c.type === 'dff' ? 2 : sources.has(c.type) || c.type === 'input' || c.type === 'opamp' || gates.has(c.type) || c.type === 'capacitor' || c.type === 'inductor' || c.type === 'wire' || c.type === 'ammeter' ? 1 : 0;
     return { c, ns: c.pts.map(nodeAt), bs: Array.from({ length: n }, () => size++) };
   });
   // Common-mode gmin is stamped through an extra unknown. Unlike adding 1e-12
@@ -166,7 +166,10 @@ function run(top: Topology, mode: Mode, t: number, dt: number, mem: Memory, prev
       for (const { c, ns, bs } of parts) {
         const [p, q = 0] = ns, [b] = bs, vs = ns.map(voltage), v = vs[0] - (vs[1] ?? 0);
         switch (c.type) {
-          case 'wire': case 'ammeter': conduct(p, q, 1 / WIRE); break;
+          // A 100 kS nodal stamp cancels the pS common-mode reference on
+          // floating AC leads. Keep the same 10 µΩ using a branch-current
+          // unknown instead, so Newton retains the off-state diode reference.
+          case 'wire': case 'ammeter': branch(p, q, b, 0, WIRE); break;
           case 'switch': if (c.on) conduct(p, q, 1 / WIRE); break;
           case 'resistor': case 'lamp': conduct(p, q, 1 / Math.max(WIRE, value(c))); break;
           case 'isrc': current(p, q, -value(c)); break;
@@ -273,7 +276,7 @@ function run(top: Topology, mode: Mode, t: number, dt: number, mem: Memory, prev
     let on: boolean | undefined, burnt: boolean | undefined;
     let supplied = false;
     switch (c.type) {
-      case 'wire': case 'ammeter': i = v / WIRE; break;
+      case 'wire': case 'ammeter': i = x[bs[0]]; break;
       case 'resistor': case 'lamp': i = v / Math.max(WIRE, value(c)); break;
       case 'switch': on = !!c.on; i = on ? v / WIRE : 0; break;
       case 'vsrc': case 'acsrc': case 'clock': i = -x[bs[0]]; supplied = true; break;

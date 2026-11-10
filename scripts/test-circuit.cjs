@@ -269,5 +269,50 @@ group(15, 'Equivalent resistance, immutable edits, defaults, QA and performance'
   const start=performance.now();let s;for(let k=0;k<100;k++)s=solveDC(sixty);const ms=(performance.now()-start)/100;
   healthy(s);near('60-part current',s.comp.v.i,12/5900,1e-8);yes(`linear DC ${ms.toFixed(3)} ms < 5 ms`,ms<5);
 });
+group(16, 'Full-wave bridges with extended leads, references, filter and center tap', () => {
+  const left = [2, 4], right = [6, 4], pos = [4, 2], neg = [4, 6];
+  for (const [name, grounded, filtered] of [['grounded bridge', true, false], ['bridge without ground', false, false], ['filtered bridge', true, true]]) {
+    const cs = circuit(
+      VAC('ac', [1, 10], [7, 10], 10, 60),
+      wires([1, 10], [1, 4], left), wires([7, 10], [7, 4], right),
+      D('d1', left, pos), D('d2', right, pos), D('d3', neg, left), D('d4', neg, right),
+      wires(pos, [8, 2]), R('load', [8, 2], [8, 8], 1000), wires([8, 8], [4, 8], neg),
+      ...(grounded ? [GND(neg)] : []), ...(filtered ? [C('filter', pos, neg, .001)] : []),
+    );
+    const sim = new Sim(cs); healthy(sim.solution);
+    let valid = true, inRange = true, peak = 0, min = Infinity, max = -Infinity;
+    const halves = [0, 0];
+    for (let k = 0; k < 1440; k++) {
+      const s = sim.step(1 / 7200), v = s.comp.load.v;
+      valid &&= s.ok; inRange &&= Number.isFinite(v) && v >= -1e-8 && v <= 10 - 2 * .7 + .01;
+      peak = Math.max(peak, v);
+      if (k >= 1320) { min = Math.min(min, v); max = Math.max(max, v); halves[k % 120 < 60 ? 0 : 1] = Math.max(halves[k % 120 < 60 ? 0 : 1], v); }
+    }
+    yes(`${name}: every step converges`, valid); yes(`${name}: load stays between 0 and peak minus two drops`, inRange);
+    // Charging pulses increase the exponential diodes' drop above 0.7 V.
+    near(`${name}: peak`, peak, filtered ? 8.55 : 8.6, .02);
+    yes(`${name}: both half cycles rectify`, halves.every(v => v > 8.5));
+    if (filtered) yes(`${name}: ripple < 0.1 V (${max - min})`, max - min < .1);
+    else near(`${name}: zero crossing`, min, 0, 1e-6);
+  }
+  // Equal series windings: the center tap is 0 V, the ends have opposite phases.
+  const ct = [4, 10], end1 = [1, 10], end2 = [7, 10];
+  const cs = circuit(VAC('upper', end1, ct, 10, 60), VAC('lower', ct, end2, 10, 60),
+    wires(end1, [1, 4], left), wires(end2, [7, 4], right),
+    D('d1', left, pos), D('d2', right, pos), wires(pos, [8, 2]),
+    R('load', [8, 2], [8, 8], 1000), wires([8, 8], [4, 8], ct), GND(ct));
+  const sim = new Sim(cs); healthy(sim.solution);
+  let valid = true, inRange = true, peak = 0;
+  const halves = [0, 0];
+  for (let k = 0; k < 480; k++) {
+    const s = sim.step(1 / 7200), v = s.comp.load.v;
+    valid &&= s.ok; inRange &&= Number.isFinite(v) && v >= -1e-8 && v <= 10 - .7 + .01;
+    peak = Math.max(peak, v); halves[k % 120 < 60 ? 0 : 1] = Math.max(halves[k % 120 < 60 ? 0 : 1], v);
+    if (k === 29) near('series winding end-to-end peak', s.comp.upper.v + s.comp.lower.v, 20, 1e-8);
+  }
+  yes('center tap: every step converges', valid); yes('center tap: load range', inRange);
+  near('center tap: peak with one diode drop', peak, 9.3, .01);
+  yes('center tap: both half cycles rectify', halves.every(v => v > 9.2));
+});
 console.log(`\n${assertions} checks; ${failed ? `${failed} FALHOU` : 'all ok'}`);
 process.exit(failed ? 1 : 0);

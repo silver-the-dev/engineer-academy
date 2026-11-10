@@ -27,20 +27,39 @@ export function partValue(c: Comp): string {
   if (c.hidden) return '?';
   if (units[c.type]) return engineering(c.value ?? defaults(c.type).value ?? 0, units[c.type]);
   if (c.type === 'npn' || c.type === 'pnp') return `β ${c.beta ?? 100}`;
-  if (c.type === 'switch' || c.type === 'input') return c.on ? 'Ligado' : 'Desligado';
+  if (c.type === 'input') return c.on ? '1' : '0';
+  if (c.type === 'switch') return c.on ? 'Ligado' : 'Desligado';
   return '';
 }
+/** IDs share a namespace, including existing authored parts and other types. */
+export function nextId(type: CompType, comps: Comp[]): string {
+  const prefixes: Record<CompType, string> = {
+    wire: 'W', ground: 'GND', resistor: 'R', lamp: 'LP', inductor: 'L', capacitor: 'C',
+    diode: 'D', led: 'LED', zener: 'Z', vsrc: 'V', acsrc: 'V', clock: 'V', isrc: 'I',
+    switch: 'CH', npn: 'Q', pnp: 'Q', nmos: 'M', opamp: 'U', and: 'U', or: 'U',
+    not: 'U', nand: 'U', nor: 'U', xor: 'U', xnor: 'U', dff: 'U', voltmeter: 'VM', ammeter: 'AM', input: '', output: 'S',
+  };
+  const used = new Set(comps.map(c => c.id));
+  const letters = (n: number): string => n > 26 ? letters(Math.floor((n - 1) / 26)) + letters((n - 1) % 26 + 1) : String.fromCharCode(64 + n);
+  for (let n = 1; ; n++) {
+    const id = type === 'input' ? letters(n) : `${prefixes[type]}${n}`;
+    if (!used.has(id)) return id;
+  }
+}
+export const measurable = (c: Comp) => c.type !== 'wire' && c.type !== 'ground';
 export function limits(c: Comp): [number, number] {
-  const range: [number, number] = c.type === 'capacitor' ? [1e-12, 1] : c.type === 'inductor' ? [1e-6, 100]
-    : c.type === 'isrc' ? [1e-6, 10] : c.type === 'resistor' || c.type === 'lamp' ? [1, 1e7] : [0.1, 1000];
-  return [c.min ?? c.values?.reduce((a, b) => Math.min(a, b), Infinity) ?? Math.min(range[0], c.value ?? range[0]),
-    c.max ?? c.values?.reduce((a, b) => Math.max(a, b), -Infinity) ?? Math.max(range[1], c.value ?? range[1])];
+  const range: [number, number] = c.type === 'capacitor' ? [1e-9, 1e-2] : c.type === 'inductor' ? [1e-6, 10]
+    : c.type === 'isrc' ? [1e-3, 2] : c.type === 'resistor' || c.type === 'lamp' ? [1, 1e6]
+      : c.type === 'vsrc' ? [0, 24] : c.type === 'acsrc' || c.type === 'clock' ? [1, 50] : [0.1, 1000];
+  const values = c.values?.filter(Number.isFinite);
+  return [c.min ?? (values?.length ? Math.min(...values) : range[0]),
+    c.max ?? (values?.length ? Math.max(...values) : range[1])];
 }
 export function offeredValues(c: Comp): number[] {
   const [min, max] = limits(c);
   if (c.values) return [...new Set(c.values)].filter(v => Number.isFinite(v) && v >= min && v <= max).sort((a, b) => a - b);
   const list = [min, max];
-  for (let p = -12; p <= 9; p++) for (const e of [1, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2]) {
+  for (let p = -12; p <= 9; p++) for (const e of [1, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2, 2.2, 2.4, 2.7, 3, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]) {
     const v = Number((e * 10 ** p).toPrecision(8));
     if (v >= min && v <= max) list.push(v);
     if (-v >= min && -v <= max) list.push(-v);
@@ -48,23 +67,36 @@ export function offeredValues(c: Comp): number[] {
   if (min <= 0 && max >= 0) list.push(0);
   return [...new Set(list)].sort((a, b) => a - b);
 }
-export function stepValue(c: Comp, direction: number): number {
-  const list = offeredValues(c), current = c.value ?? defaults(c.type).value ?? 0;
-  return direction > 0 ? list.find(v => v > current + Math.abs(current) * 1e-8) ?? list[list.length - 1]
-    : [...list].reverse().find(v => v < current - Math.abs(current) * 1e-8) ?? list[0];
+function stepIn(list: number[], current: number, direction: number): number {
+  return direction > 0 ? list.find(v => v > current + Math.abs(current) * 1e-8) ?? list[list.length - 1] ?? current
+    : [...list].reverse().find(v => v < current - Math.abs(current) * 1e-8) ?? list[0] ?? current;
 }
-// Positive ranges are logarithmic; a signed logarithm also supports sources spanning zero.
+export function stepValue(c: Comp, direction: number): number {
+  return stepIn(offeredValues(c), c.value ?? defaults(c.type).value ?? 0, direction);
+}
+export function sliderValue(c: Comp, value: number): number {
+  const [min, max] = limits(c), clamp = (v: number) => Math.max(min, Math.min(max, v));
+  const v = clamp(value), values = c.values && offeredValues(c);
+  if (values?.length) return values.reduce((best, n) => Math.abs(n - v) < Math.abs(best - v) ? n : best);
+  return clamp(c.type === 'vsrc' ? Math.round(v * 2) / 2 : Number(v.toPrecision(2)));
+}
+// DC voltage is linear; positive ranges are logarithmic, signed ranges use log1p.
 export function sliderMap(c: Comp) {
   const [a, b] = limits(c), base = Math.max(1e-12, Math.min(Math.abs(a) || 1, Math.abs(b) || 1));
-  const f = (v: number) => a > 0 ? Math.log(v) : Math.sign(v) * Math.log1p(Math.abs(v) / base);
-  const inv = (v: number) => a > 0 ? Math.exp(v) : Math.sign(v) * Math.expm1(Math.abs(v)) * base;
+  const f = (v: number) => c.type === 'vsrc' ? v : a > 0 ? Math.log(v) : Math.sign(v) * Math.log1p(Math.abs(v) / base);
+  const inv = (v: number) => c.type === 'vsrc' ? v : a > 0 ? Math.exp(v) : Math.sign(v) * Math.expm1(Math.abs(v)) * base;
   return {
     position: (v: number) => Math.max(0, Math.min(1, (f(Math.max(a, Math.min(b, v))) - f(a)) / (f(b) - f(a) || 1))),
-    value: (t: number) => {
-      const v = Math.max(a, Math.min(b, inv(f(a) + t * (f(b) - f(a)))));
-      return c.values ? offeredValues(c).reduce((best, n) => Math.abs(f(n) - f(v)) < Math.abs(f(best) - f(v)) ? n : best, c.values[0]) : Number(v.toPrecision(5));
-    },
+    value: (t: number) => sliderValue(c, inv(f(a) + Math.max(0, Math.min(1, t)) * (f(b) - f(a)))),
   };
+}
+export const frequencyValue = (c: Comp) => c.freq ?? defaults(c.type).freq ?? 60;
+const frequencyPart: Comp = { id: '', type: 'acsrc', pts: [], min: 1, max: 1e5 };
+export const frequencyMap = () => sliderMap(frequencyPart);
+export function stepFrequency(c: Comp, direction: number): number {
+  const values: number[] = [];
+  for (let p = 0; p <= 5; p++) for (const m of [1, 2, 5]) if (m * 10 ** p <= 1e5) values.push(m * 10 ** p);
+  return stepIn(values, frequencyValue(c), direction);
 }
 export type Grid = { cols: number; rows: number; cell: number; x: number; y: number };
 export function gridFor(spec: CircuitSpec, width: number): Grid {

@@ -4,7 +4,7 @@ import { C, F, R } from '../../theme';
 import type { Comp, CompType, PaletteItem, Solution } from '../../lib/circuit';
 import { defaults } from '../../lib/circuit';
 import { Slider } from '../ui/Slider';
-import { engineering, limits, names, paletteItem, partValue, sliderMap, stepValue, units } from './model';
+import { engineering, frequencyMap, frequencyValue, limits, names, paletteItem, partValue, sliderMap, stepFrequency, stepValue, units } from './model';
 
 export function Action({ title, onPress, disabled = false, active = false, danger = false, label }: {
   title: string; onPress: () => void; disabled?: boolean; active?: boolean; danger?: boolean; label?: string;
@@ -31,12 +31,13 @@ export function Palette({ items, comps, tool, setTool }: { items: (PaletteItem |
     </ScrollView>
   </View>;
 }
-export function Meter({ part, solution, mode, edit, remove, close, toggle }: {
-  part: Comp; solution: Solution; mode: string; edit: (value: number) => void; remove: () => void; close: () => void; toggle: () => void;
+export function Meter({ part, solution, mode, edit, editFrequency, remove, close, toggle }: {
+  part: Comp; solution: Solution; mode: string; edit: (value: number) => void; editFrequency: (freq: number) => void; remove: () => void; close: () => void; toggle: () => void;
 }) {
   const state = solution.comp[part.id];
   const canEdit = mode !== 'view' && !part.fixed && !!units[part.type];
   const map = sliderMap(part), [min, max] = limits(part);
+  const freq = frequencyValue(part), freqMap = frequencyMap();
   const value = part.value ?? defaults(part.type).value ?? 0;
   return <View style={styles.meter}>
     <View style={styles.row}>
@@ -50,13 +51,22 @@ export function Meter({ part, solution, mode, edit, remove, close, toggle }: {
         <Text adjustsFontSizeToFit numberOfLines={1} style={styles.reading}>{engineering(state?.[k] ?? 0, { v: 'V', i: 'A', p: 'W' }[k])}</Text>
       </View>)}
     </View>
-    {(part.type === 'acsrc' || part.type === 'clock') && <Text style={styles.small}>{engineering(part.freq ?? 60, 'Hz')}{part.type === 'acsrc' ? ' · amplitude de pico' : ''}</Text>}
+    {(part.type === 'acsrc' || part.type === 'clock') && <Text style={styles.small}>{engineering(freq, 'Hz')}{part.type === 'acsrc' ? ' · amplitude de pico' : ''}</Text>}
     {canEdit && <>
       <View style={styles.row}><Action title="−" label={`Diminuir ${part.id}`} disabled={stepValue(part, -1) >= value} onPress={() => edit(stepValue(part, -1))} />
-        <Text style={[styles.value, { flex: 1, textAlign: 'center' }]}>{part.values ? 'Valores disponíveis' : 'Série E12'}</Text>
+        <Text style={[styles.value, { flex: 1, textAlign: 'center' }]}>{part.values ? 'Valores disponíveis' : 'Série E24'}</Text>
         <Action title="+" label={`Aumentar ${part.id}`} disabled={stepValue(part, 1) <= value} onPress={() => edit(stepValue(part, 1))} /></View>
       <Slider value={map.position(value)} min={0} max={1} step={0.001} disabled={min >= max} onChange={n => edit(map.value(n))} format={() => part.hidden ? '?' : engineering(value, units[part.type])} />
-      <Text style={styles.small}>Escala logarítmica · {engineering(min, units[part.type])} a {engineering(max, units[part.type])}</Text>
+      <Text style={styles.small}>Escala {part.type === 'vsrc' ? 'linear · passo de 0,5 V' : 'logarítmica'} · {engineering(min, units[part.type])} a {engineering(max, units[part.type])}</Text>
+    </>}
+    {canEdit && (part.type === 'acsrc' || part.type === 'clock') && <>
+      <View style={styles.row}>
+        <Action title="−" label={`Diminuir frequência de ${part.id}`} disabled={stepFrequency(part, -1) >= freq} onPress={() => editFrequency(stepFrequency(part, -1))} />
+        <Text style={[styles.value, { flex: 1, textAlign: 'center' }]}>Frequência · passos 1–2–5</Text>
+        <Action title="+" label={`Aumentar frequência de ${part.id}`} disabled={stepFrequency(part, 1) <= freq} onPress={() => editFrequency(stepFrequency(part, 1))} />
+      </View>
+      <Slider value={freqMap.position(freq)} min={0} max={1} step={0.001} onChange={n => editFrequency(freqMap.value(n))} format={() => engineering(freq, 'Hz')} />
+      <Text style={styles.small}>Escala logarítmica · 1 Hz a 100 kHz</Text>
     </>}
     {(part.type === 'switch' || part.type === 'input') && <Action title={part.fixed ? 'Estado fixo' : part.on ? 'Desligar' : 'Ligar'} disabled={part.fixed} onPress={toggle} />}
     {mode === 'build' && <View style={{ marginTop: 10 }}><Action title={part.locked ? 'Peça protegida' : 'Apagar peça'} danger disabled={part.locked} onPress={remove} /></View>}

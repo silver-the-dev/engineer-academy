@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Circle, G, Line, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
-import { C } from '../../theme';
+import { C, F } from '../../theme';
 import type { Comp, CompState, Pt, Solution } from '../../lib/circuit';
 import { Grid, pixel } from './model';
 
@@ -26,7 +26,7 @@ export const Symbol = memo(function Symbol({ c, grid, state, solution, max, sele
   if (c.type === 'ground' || c.type === 'input' || c.type === 'output') return <G stroke={selected ? C.cyan : color} strokeWidth={2} fill={C.surface}>
     {c.type === 'ground' ? <Path d={`M${a[0]},${a[1]} v10 m-10,0 h20 m-16,5 h12 m-9,5 h6`} /> : <>
       <Rect x={a[0] - 13} y={a[1] - 13} width={26} height={26} rx={c.type === 'output' ? 13 : 4} fill={state?.on ? C.successBg : C.surface2} />
-      <SvgText x={a[0]} y={a[1] + 5} textAnchor="middle" stroke="none" fill={state?.on ? C.success : C.textMuted} fontSize={16} fontWeight="bold">{state?.on ? '1' : '0'}</SvgText>
+      <SvgText fontFamily={F.bold} x={a[0]} y={a[1] + 5} textAnchor="middle" stroke="none" fill={state?.on ? C.success : C.textMuted} fontSize={16} fontWeight="bold">{state?.on ? '1' : '0'}</SvgText>
     </>}{pins}</G>;
   if (ps.length > 2 || c.type === 'not') return <MultiSymbol c={c} grid={grid} state={state} selected={selected} solution={solution} max={max} />;
   const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -40,12 +40,12 @@ export const Symbol = memo(function Symbol({ c, grid, state, solution, max, sele
     case 'resistor': body = <Path d="M-15,0 l3,-7 5,14 5,-14 5,14 5,-14 4,7" />; break;
     case 'capacitor': body = <Path d="M-15,0 H-4 M-4,-13 V13 M4,-13 V13 M4,0 H15" />; break;
     case 'inductor': body = <Path d="M-15,0 c0,-14 7,-14 7,0 c0,-14 7,-14 7,0 c0,-14 7,-14 7,0 c0,-14 7,-14 7,0 H15" />; break;
-    case 'vsrc': body = <><Path d="M-15,0 H-4 M-4,-14 V14 M4,-8 V8 M4,0 H15" /><SvgText x={-10} y={-18} fill={C.textMuted} stroke="none" fontSize={10}>+</SvgText></>; break;
+    case 'vsrc': body = <><Path d="M-15,0 H-4 M-4,-14 V14 M4,-8 V8 M4,0 H15" /><SvgText fontFamily={F.bold} x={-10} y={-18} fill={C.textMuted} stroke="none" fontSize={10}>+</SvgText></>; break;
     case 'acsrc': case 'clock': case 'isrc': case 'voltmeter': case 'ammeter':
       body = <><Circle r={15} />{c.type === 'acsrc' ? <Path d="M-10,0 Q-5,-13 0,0 T10,0" />
         : c.type === 'clock' ? <Path d="M-10,6 v-12 h10 v12 h10 v-12" />
         : c.type === 'isrc' ? <><Path d="M9,0 H-9" />{arrow(-9, 0, true)}</>
-        : <SvgText x={0} y={6} stroke="none" fill={color} fontSize={17} textAnchor="middle">{c.type === 'voltmeter' ? 'V' : 'A'}</SvgText>}</>; break;
+        : <SvgText fontFamily={F.bold} x={0} y={6} stroke="none" fill={color} fontSize={17} textAnchor="middle">{c.type === 'voltmeter' ? 'V' : 'A'}</SvgText>}</>; break;
     case 'switch': body = <><Path d={`M-15,0 H-10 M10,0 H15 M-10,0 L10,${c.on ? 0 : -13}`} /><Circle cx={-10} r={2} /><Circle cx={10} r={2} /></>; break;
     case 'lamp': body = <><Circle r={15} fill={state?.on ? glow : C.surface} fillOpacity={state?.on ? 0.15 + 0.6 * brightness : 1} /><Path d="M-10,-10 L10,10 M-10,10 L10,-10" /></>; break;
     case 'diode': case 'led': case 'zener': body = <>
@@ -65,7 +65,7 @@ export const Symbol = memo(function Symbol({ c, grid, state, solution, max, sele
         {body}
       </G>
     </G>{pins}
-    {state?.burnt && <SvgText x={(a[0] + b[0]) / 2 + 9} y={(a[1] + b[1]) / 2 - 14} fontSize={15}>💥</SvgText>}
+    {state?.burnt && <SvgText fontFamily={F.bold} x={(a[0] + b[0]) / 2 + 9} y={(a[1] + b[1]) / 2 - 14} fontSize={15}>💥</SvgText>}
   </G>;
 });
 
@@ -104,9 +104,9 @@ function MultiSymbol({ c, grid, state, selected, solution, max }: {
           {(c.type === 'xor' || c.type === 'xnor') && <Path d={`M${s * 0.3},${top} Q${s},${s} ${s * 0.3},${bottom}`} fill="none" />}</>}
       {['nand', 'nor', 'not', 'xnor'].includes(c.type) && <Circle cx={right + 3} cy={isNot ? 0 : s} r={3.5} />}
       {(c.type === 'opamp' || c.type === 'dff') && <G stroke="none" fill={C.text} fontSize={Math.min(14, s * 0.4)}>
-        <SvgText x={s * 0.76} y={4}>{c.type === 'opamp' ? '−' : 'D'}</SvgText>
-        <SvgText x={s * 0.76} y={2 * s + 4}>{c.type === 'opamp' ? '+' : '▷'}</SvgText>
-        {c.type === 'dff' && <><SvgText x={s * 1.9} y={4}>Q</SvgText><SvgText x={s * 1.9} y={2 * s + 4}>Q̅</SvgText></>}
+        <SvgText fontFamily={F.bold} x={s * 0.76} y={4}>{c.type === 'opamp' ? '−' : 'D'}</SvgText>
+        <SvgText fontFamily={F.bold} x={s * 0.76} y={2 * s + 4}>{c.type === 'opamp' ? '+' : '▷'}</SvgText>
+        {c.type === 'dff' && <><SvgText fontFamily={F.bold} x={s * 1.9} y={4}>Q</SvgText><SvgText fontFamily={F.bold} x={s * 1.9} y={2 * s + 4}>Q̅</SvgText></>}
       </G>}
     </G>;
   }

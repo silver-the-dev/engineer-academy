@@ -20,9 +20,14 @@ import { magnetismo } from './emg/magnetismo';
 import { inducao } from './emg/inducao';
 import { diodos } from './eln/diodo';
 import { ledZener } from './eln/led';
+import { bjt } from './eln/bjt';
+import { osciladores } from './eln/osciladores';
 import { numeracao } from './dig/numeracao';
 import { aritBinaria } from './dig/aritmetica';
 import { portas } from './dig/portas';
+import { booleana } from './dig/booleana';
+import { karnaugh } from './dig/karnaugh';
+import { conversores } from './dig/conversores';
 
 /** Sections of the Física e Eletricidade course, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
@@ -60,7 +65,7 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Diodos, fontes, transistores, amplificadores operacionais e filtros',
     color: '#80ED99',
     emoji: '🔌',
-    units: [diodos, ledZener],
+    units: [diodos, ledZener, bjt, osciladores],
   },
   {
     id: 'dig',
@@ -69,6 +74,6 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Numeração, portas lógicas, álgebra booleana, circuitos combinacionais e sequenciais',
     color: '#C77DFF',
     emoji: '💡',
-    units: [numeracao, aritBinaria, portas],
+    units: [numeracao, aritBinaria, portas, booleana, karnaugh, conversores],
   },
 ];
