@@ -3,7 +3,7 @@
     "name": "Engineer Academy",
     "slug": "engineer-academy",
     "scheme": "engineeracademy",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.silverio.engineeracademy",
-      "versionCode": 6,
+      "versionCode": 7,
       "adaptiveIcon": {
         "backgroundColor": "#0B1020",
         "foregroundImage": "./assets/android-icon-foreground.png",
