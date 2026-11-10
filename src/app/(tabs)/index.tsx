@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { C, F, alpha, shade } from '../../theme';
 import { SECTIONS, isLessonUnlocked, partsDone, sectionProgress } from '../../content';
+import { availableCourses, courseOf, sectionsOf } from '../../content/courses';
 import { useApp } from '../../state/store';
 import { TopBar } from '../../components/ui/TopBar';
 import { Button, ProgressBar } from '../../components/ui/Button';
@@ -99,6 +100,8 @@ export default function PathScreen() {
   const updateSettings = useApp((s) => s.updateSettings);
   const section = SECTIONS.find((s) => s.id === settings.section) ?? SECTIONS[0];
   const [picker, setPicker] = useState(false);
+  const courses = useMemo(availableCourses, []);
+  const [courseTab, setCourseTab] = useState(courseOf(section));
   const [popup, setPopup] = useState<null | { lesson?: Lesson; unit: Unit; review?: boolean; locked: boolean }>(null);
   const [pick, setPick] = useState(0);
   const scrollRef = useRef<any>(null);
@@ -124,7 +127,10 @@ export default function PathScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <TopBar
-        onLeftPress={() => setPicker(true)}
+        onLeftPress={() => {
+          setCourseTab(courseOf(section));
+          setPicker(true);
+        }}
         left={
           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: alpha(section.color, 0.15), paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, borderWidth: 2, borderColor: alpha(section.color, 0.5) }}>
             <Text style={{ fontSize: 18, color: section.color, fontFamily: F.black }}>{section.emoji}</Text>
@@ -224,9 +230,32 @@ export default function PathScreen() {
       {/* Section picker */}
       <Modal visible={picker} transparent animationType="fade" onRequestClose={() => setPicker(false)}>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'center', padding: 20 }} onPress={() => setPicker(false)}>
-          <View style={{ backgroundColor: C.surface, borderRadius: 24, padding: 16 }}>
-            <Text style={{ color: C.text, fontFamily: F.black, fontSize: 20, marginBottom: 12 }}>Escolha a matéria</Text>
-            {SECTIONS.map((s) => {
+          <Pressable style={{ backgroundColor: C.surface, borderRadius: 24, padding: 16, maxHeight: '88%' }}>
+            {courses.length > 1 ? (
+              <View style={{ flexDirection: 'row', marginBottom: 14, backgroundColor: C.surface2, borderRadius: 16, padding: 4 }}>
+                {courses.map((c) => {
+                  const active = c.id === courseTab;
+                  return (
+                    <Pressable
+                      key={c.id}
+                      onPress={() => {
+                        tapFeedback();
+                        setCourseTab(c.id);
+                      }}
+                      style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, backgroundColor: active ? alpha(c.color, 0.18) : 'transparent', borderWidth: 2, borderColor: active ? c.color : 'transparent' }}
+                    >
+                      <Text style={{ fontSize: 18, marginRight: 6 }}>{c.emoji}</Text>
+                      <Text style={{ color: active ? c.color : C.textMuted, fontFamily: F.black, fontSize: 14 }} numberOfLines={1}>
+                        {c.short}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : null}
+            <Text style={{ color: C.text, fontFamily: F.black, fontSize: 20, marginBottom: 12 }}>{courses.find((c) => c.id === courseTab)?.title ?? 'Escolha a matéria'}</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+            {sectionsOf(courseTab).map((s) => {
               const p = sectionProgress(s, lessons);
               return (
                 <Pressable
@@ -249,7 +278,8 @@ export default function PathScreen() {
                 </Pressable>
               );
             })}
-          </View>
+            </ScrollView>
+          </Pressable>
         </Pressable>
       </Modal>
 
