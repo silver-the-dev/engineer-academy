@@ -44,6 +44,7 @@ import { erros, zeros, sistemasNum } from './num/numerico1';
 import { interpolacao, ajuste, integracaoNum, edos } from './num/numerico2';
 import { conceitos, tabelas, posicao, dispersao } from './est/estatistica1';
 import { probabilidade, pesquisa, distribuicoes, regressao } from './est/estatistica2';
+import { FIS_SECTIONS } from './fis';
 
 const DEFS: SectionDef[] = [
   {
@@ -112,4 +113,4 @@ const DEFS: SectionDef[] = [
   },
 ];
 
-export const SECTIONS: Section[] = DEFS.map(normalizeSection);
+export const SECTIONS: Section[] = [...DEFS, ...FIS_SECTIONS].map(normalizeSection);
