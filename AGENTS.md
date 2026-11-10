@@ -72,7 +72,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 | `src/content/visuals.tsx`, `visuals3d.tsx` | laboratórios interativos reutilizáveis (`lineLab`, `parabolaLab`, `tangentLab`, `riemannLab`, `vectorLab`, `matrixLab`…) |
 | `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts`. Seções: `fund` (Fundamentos: inclui lógica, matrizes, matemática financeira, binômio de Newton, geometria plana e espacial), `pre` (Pré-Cálculo: inclui exponenciais/logaritmos, triângulos quaisquer, complexos e equações polinomiais), `calc` (Cálculo 1–3), `gaal` (GA e Álgebra Linear, inclui superfícies quádricas), `vet` (Cálculo Vetorial: integrais múltiplas, campos, Green/Stokes/Gauss), `edo` (EDOs, Laplace, Fourier), `num`, `est` |
 | `src/lib/qa.ts`, `scripts/qa-content.cjs` | QA de conteúdo (o mesmo do `/debug`), também por linha de comando |
-| `src/content/courses.ts`, `src/content/sections/fis.ts` | cursos (Matemática e Física e Eletricidade) e as seções do curso de física: `mec`, `ele`, `emg`, `eln`, `dig`, `emb` |
+| `src/content/courses.ts`, `src/content/sections/fis.ts` | cursos (Matemática, Física e Eletricidade, Sistemas Embarcados) e as seções dos dois cursos novos: física `mec`, `ele`, `emg`, `eln`, `dig`, `ofi`; embarcados `lc`, `mcu` |
 | `src/lib/circuit/` | motor do simulador de circuitos (TypeScript puro: MNA, Newton, transitórios, lógica) e `makeValue` para os `check` dos exercícios; testes em `scripts/test-circuit.cjs` |
 | `src/content/circuits.ts` | construtores de circuitos (`circuit`, `wires`, `R`, `V`, `LED`, `NPN`, `GATE`…), `circuitVisual` e `circuitEx` |
 | `src/components/visuals/CircuitSim.tsx`, `src/components/circuit/` | widget `circuit`: desenho, corrente animada, multímetro, edição, montagem, osciloscópio; `src/app/lab.tsx` é o laboratório livre e `src/app/circuit-demo.tsx` a galeria com todas as peças |
@@ -112,7 +112,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 
 ## Cursos e simulador de circuitos
 
-- Uma seção pertence a um curso (`course: 'mat' | 'fis'`, padrão `mat`). O seletor de seção mostra um curso por vez. Prefixos de id do curso de física: `m-`, `el-`, `em-`, `ea-`, `dg-`, `se-`.
+- Uma seção pertence a um curso (`course: 'mat' | 'fis' | 'emb'`, padrão `mat`). O seletor de seção mostra um curso por vez. Prefixos de id: física `m-`, `el-`, `em-`, `ea-`, `dg-`, `of-`; embarcados `lc-`, `mc-`.
 - Código-fonte (C, Arduino) vai no visual `code(src, linhasDestacadas?, título?)` de `helpers.ts` (widget `code`, `src/components/visuals/Code.tsx`): monoespaçado, numerado, com rolagem lateral.
 - Exercício prático de circuito: `circuitEx(prompt, spec, check, answerText, explain, solution)`. O `check` recebe um `CircuitValue` (`v.v(id)`, `v.i(id)`, `v.p(id)`, `v.val(id)`, `v.on(id)`, `v.burnt(id)`, `v.count(tipo)`, `v.req(a, b)`, `v.wave(id)`, `v.at(id, t)`, `v.truth(entradas, saída)`) e deve conferir o efeito elétrico com tolerância. `solution` (`{ set, on, add, remove }`) é obrigatória: o QA aplica e exige que o `check` passe, e avisa se o circuito já começa resolvido.
 - Circuito num card ou como visual de um exercício comum: `visual: circuitVisual({ comps, mode })`. Modos: `view`, `adjust` (padrão) e `build` (com `palette`).

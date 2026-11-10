@@ -18,7 +18,7 @@ const RING = 112;
 const courses = availableCourses();
 
 /** Sections that show the shortcut to the free circuit lab. */
-const LAB_SECTIONS = ['ele', 'eln', 'dig', 'emb'];
+const LAB_SECTIONS = ['ele', 'eln', 'dig', 'mcu'];
 
 /** Ring split in one arc per sub-lesson (gap at the top), finished arcs in the section colour. */
 function PartRing({ total, done, color }: { total: number; done: number; color: string }) {
@@ -265,8 +265,8 @@ export default function PathScreen() {
                       }}
                       style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, backgroundColor: active ? alpha(c.color, 0.18) : 'transparent', borderWidth: 2, borderColor: active ? c.color : 'transparent' }}
                     >
-                      <Text style={{ fontSize: 18, marginRight: 6 }}>{c.emoji}</Text>
-                      <Text style={{ color: active ? c.color : C.textMuted, fontFamily: F.black, fontSize: 14 }} numberOfLines={1}>
+                      <Text style={{ fontSize: courses.length > 2 ? 14 : 18, marginRight: 4 }}>{c.emoji}</Text>
+                      <Text style={{ color: active ? c.color : C.textMuted, fontFamily: F.black, fontSize: courses.length > 2 ? 12 : 14 }} numberOfLines={1}>
                         {c.short}
                       </Text>
                     </Pressable>

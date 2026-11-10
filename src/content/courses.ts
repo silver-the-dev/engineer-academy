@@ -7,6 +7,7 @@ export type Course = { id: CourseId; title: string; short: string; emoji: string
 export const COURSES: Course[] = [
   { id: 'mat', title: 'Matemática', short: 'Matemática', emoji: '📐', color: '#7C5CFF' },
   { id: 'fis', title: 'Física e Eletricidade', short: 'Física', emoji: '⚡', color: '#FFE14D' },
+  { id: 'emb', title: 'Sistemas Embarcados', short: 'Embarcados', emoji: '🤖', color: '#F4A261' },
 ];
 
 export const courseOf = (s: Section): CourseId => s.course ?? 'mat';

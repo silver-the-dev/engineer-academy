@@ -29,7 +29,7 @@ import { booleana } from './dig/booleana';
 import { karnaugh } from './dig/karnaugh';
 import { conversores } from './dig/conversores';
 
-/** Sections of the Física e Eletricidade course, in curriculum order. */
+/** Sections of the Física e Eletricidade and Sistemas Embarcados courses, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
   {
     id: 'mec',
