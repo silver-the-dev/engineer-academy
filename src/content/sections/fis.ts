@@ -35,7 +35,15 @@ import { aritBinaria } from './dig/aritmetica';
 import { portas } from './dig/portas';
 import { booleana } from './dig/booleana';
 import { karnaugh } from './dig/karnaugh';
+import { combinacionais } from './dig/combinacionais';
+import { sequenciais } from './dig/sequenciais';
 import { conversores } from './dig/conversores';
+import { bancada } from './ofi/bancada';
+import { soldagem } from './ofi/soldagem';
+import { projetoPCB } from './ofi/pcb';
+import { cFundamentos } from './lc/fundamentos';
+import { cFluxo } from './lc/fluxo';
+import { cFuncoes } from './lc/funcoes';
 
 /** Sections of the Física e Eletricidade and Sistemas Embarcados courses, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
@@ -82,6 +90,24 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Numeração, portas lógicas, álgebra booleana, circuitos combinacionais e sequenciais',
     color: '#C77DFF',
     emoji: '💡',
-    units: [numeracao, aritBinaria, portas, booleana, karnaugh, conversores],
+    units: [numeracao, aritBinaria, portas, booleana, karnaugh, combinacionais, sequenciais, conversores],
+  },
+  {
+    id: 'ofi',
+    course: 'fis',
+    title: 'Bancada, Soldagem e PCB',
+    subtitle: 'Segurança e instrumentos, soldagem, prototipagem e projeto de placas',
+    color: '#F9844A',
+    emoji: '🛠️',
+    units: [bancada, soldagem, projetoPCB],
+  },
+  {
+    id: 'lc',
+    course: 'emb',
+    title: 'Linguagem C',
+    subtitle: 'C do zero até o código que conversa com o hardware',
+    color: '#90BE6D',
+    emoji: '💻',
+    units: [cFundamentos, cFluxo, cFuncoes],
   },
 ];
