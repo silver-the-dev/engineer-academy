@@ -15,6 +15,8 @@ const OFFSETS = [0, 0.55, 0.85, 0.55, 0, -0.55, -0.85, -0.55];
 
 const RING = 112;
 
+const courses = availableCourses();
+
 /** Ring split in one arc per sub-lesson (gap at the top), finished arcs in the section colour. */
 function PartRing({ total, done, color }: { total: number; done: number; color: string }) {
   const c = RING / 2;
@@ -100,7 +102,6 @@ export default function PathScreen() {
   const updateSettings = useApp((s) => s.updateSettings);
   const section = SECTIONS.find((s) => s.id === settings.section) ?? SECTIONS[0];
   const [picker, setPicker] = useState(false);
-  const courses = useMemo(availableCourses, []);
   const [courseTab, setCourseTab] = useState(courseOf(section));
   const [popup, setPopup] = useState<null | { lesson?: Lesson; unit: Unit; review?: boolean; locked: boolean }>(null);
   const [pick, setPick] = useState(0);
