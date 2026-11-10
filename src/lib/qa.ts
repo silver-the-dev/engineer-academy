@@ -6,6 +6,7 @@ import { isGenerator, type Exercise, type Section } from '../content/types';
 import { makeRng } from './random';
 import { compareOptions } from './texEval';
 import { texToSvg, tidyOnes } from '../components/math/tex';
+import { applyEdit, makeValue, solveDC, type CircuitSpec, type Edit } from './circuit';
 
 function extractMath(s: string): string[] {
   const out: string[] = [];
@@ -113,6 +114,45 @@ function drawIssues(e: Exercise): string[] {
 
 export type QAReport = { errors: string[]; warnings: string[]; bySection: string[]; nTex: number; nEx: number; nLessons: number; nItems: number; nParts: number };
 
+/** Circuit-specific QA, also callable by headless engine tests. */
+export function checkCircuitExercise(e: Exercise): Pick<QAReport, 'errors' | 'warnings'> {
+  const errors: string[] = [], warnings: string[] = [];
+  if (e.visual?.name === 'circuit') checkCircuitVisual(e.visual.props as CircuitSpec, errors, warnings);
+  if (e.kind !== 'interactive' || e.widget !== 'circuit') return { errors, warnings };
+  try {
+    const { comps } = e.props as CircuitSpec;
+    duplicateCircuitIds(comps, errors);
+    if (e.solution == null) errors.push('circuit: sem solution');
+    else {
+      const solved = makeValue(applyEdit(comps, e.solution as Edit));
+      if (solved.error) warnings.push(`circuit solution: ${solved.error}`);
+      try {
+        if (!e.check(solved)) errors.push('circuit: solution não satisfaz check');
+      } catch (err) { errors.push(`circuit: check da solution lançou exceção: ${String(err)}`); }
+    }
+    try {
+      if (e.check(makeValue(comps))) warnings.push('circuit: já começa resolvido');
+    } catch (err) { errors.push(`circuit: check inicial lançou exceção: ${String(err)}`); }
+  } catch (err) { errors.push(`circuit: falha no QA: ${String(err)}`); }
+  return { errors, warnings };
+}
+
+function duplicateCircuitIds(comps: CircuitSpec['comps'], errors: string[]): void {
+  const ids = new Set<string>();
+  for (const c of comps) {
+    if (ids.has(c.id)) errors.push(`circuit: id repetido: ${c.id}`);
+    ids.add(c.id);
+  }
+}
+
+function checkCircuitVisual(spec: CircuitSpec, errors: string[], warnings: string[]): void {
+  try {
+    duplicateCircuitIds(spec.comps, errors);
+    const s = solveDC(spec.comps);
+    if (s.error) warnings.push(`circuit visual: ${s.error}`);
+  } catch (err) { errors.push(`circuit visual: falha no QA: ${String(err)}`); }
+}
+
 export function runContentQA(sections: Section[]): QAReport {
   const errors: string[] = [];
   let nTex = 0;
@@ -158,6 +198,12 @@ export function runContentQA(sections: Section[]): QAReport {
         if (u.guide) checkStr(`${u.id} guide`, u.guide);
         l.cards.forEach((c, i) => {
           checkStr(`${l.id} card${i}`, c.body);
+          if (c.visual?.name === 'circuit') {
+            const ce: string[] = [], cw: string[] = [];
+            checkCircuitVisual(c.visual.props as CircuitSpec, ce, cw);
+            errors.push(...ce.map((m) => `${l.id} card${i}: ${m}`));
+            warnings.push(...cw.map((m) => `${l.id} card${i}: ${m}`));
+          }
           if (c.formula) {
             nTex++;
             if (texToSvg(c.formula, true).error) errors.push(`${l.id} card${i} formula: ${c.formula}`);
@@ -177,6 +223,15 @@ export function runContentQA(sections: Section[]): QAReport {
               continue;
             }
             nEx++;
+            const cq = checkCircuitExercise(e);
+            for (const m of cq.errors) {
+              const msg = `${l.id}#${idx}: ${m}`;
+              if (!errors.includes(msg)) errors.push(msg);
+            }
+            for (const m of cq.warnings) {
+              const msg = `${l.id}#${idx}: ${m}`;
+              if (!warnings.includes(msg)) warnings.push(msg);
+            }
             const st = structural(e);
             if (st) errors.push(`${l.id}#${idx}: ${st}`);
             if (e.kind === 'mcq' && e.options.length < 3 && !e.options.includes('Direta')) warnings.push(`${l.id}#${idx} (seed ${sd}): múltipla escolha com só ${e.options.length} opções`);
