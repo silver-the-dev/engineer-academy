@@ -39,6 +39,8 @@ export type Interactive = Base & {
   props: Record<string, any>;
   check: (value: any) => boolean;
   answerText?: string; // shown when wrong
+  /** One way of solving it, in the widget's own format (circuit: an `Edit`). QA applies it and expects `check` to pass. */
+  solution?: unknown;
 };
 
 export type Exercise = MCQ | MultiSelect | Numeric | TrueFalse | Match | Order | Fill | Interactive;
@@ -76,8 +78,13 @@ export type Unit = {
 
 export type UnitDef = Omit<Unit, 'lessons'> & { lessons: LessonDef[] };
 
+/** Course ("idioma" in Duolingo terms): each one has its own list of sections. */
+export type CourseId = 'mat' | 'fis';
+
 export type Section = {
   id: string;
+  /** Course the section belongs to (default 'mat'). */
+  course?: CourseId;
   title: string;
   subtitle: string;
   color: string;
