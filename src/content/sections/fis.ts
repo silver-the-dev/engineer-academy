@@ -6,6 +6,11 @@ import { vetoresFis } from './mec/vetores';
 import { movimento2d } from './mec/mov2d';
 import { leisNewton } from './mec/newton';
 import { energia } from './mec/energia';
+import { grandezas } from './ele/base';
+import { leiOhm } from './ele/ohm';
+import { associacao } from './ele/associacao';
+import { kirchhoff } from './ele/kirchhoff';
+import { capacitores } from './ele/capacitores';
 import { potenciaCA } from './ele/potenciaca';
 import { transformadores } from './ele/transformadores';
 import { eficiencia } from './ele/eficiencia';
@@ -13,8 +18,11 @@ import { campoEletrico } from './emg/campo';
 import { potencialEletrico } from './emg/potencial';
 import { magnetismo } from './emg/magnetismo';
 import { inducao } from './emg/inducao';
+import { diodos } from './eln/diodo';
+import { ledZener } from './eln/led';
 import { numeracao } from './dig/numeracao';
 import { aritBinaria } from './dig/aritmetica';
+import { portas } from './dig/portas';
 
 /** Sections of the Física e Eletricidade course, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
@@ -34,7 +42,7 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Circuitos elétricos: Ohm, Kirchhoff, capacitores, indutores, corrente alternada e energia',
     color: '#FFE14D',
     emoji: '⚡',
-    units: [potenciaCA, transformadores, eficiencia],
+    units: [grandezas, leiOhm, associacao, kirchhoff, capacitores, potenciaCA, transformadores, eficiencia],
   },
   {
     id: 'emg',
@@ -46,12 +54,21 @@ export const FIS_SECTIONS: SectionDef[] = [
     units: [campoEletrico, potencialEletrico, magnetismo, inducao],
   },
   {
+    id: 'eln',
+    course: 'fis',
+    title: 'Eletrônica Analógica',
+    subtitle: 'Diodos, fontes, transistores, amplificadores operacionais e filtros',
+    color: '#80ED99',
+    emoji: '🔌',
+    units: [diodos, ledZener],
+  },
+  {
     id: 'dig',
     course: 'fis',
     title: 'Eletrônica Digital',
     subtitle: 'Numeração, portas lógicas, álgebra booleana, circuitos combinacionais e sequenciais',
     color: '#C77DFF',
     emoji: '💡',
-    units: [numeracao, aritBinaria],
+    units: [numeracao, aritBinaria, portas],
   },
 ];

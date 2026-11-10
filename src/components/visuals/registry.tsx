@@ -2,11 +2,13 @@ import React from 'react';
 import { Text } from 'react-native';
 import { C } from '../../theme';
 import { PlotLab } from './PlotLab';
+import { CircuitSim } from './CircuitSim';
 import { Space3D } from './Space3D';
 import { Bars, NumberLine, Simulator, Stepper, TableView, Venn } from './Misc';
 import type { VisualSpec } from '../../content/types';
 
 const REGISTRY: Record<string, React.ComponentType<any>> = {
+  circuit: CircuitSim,
   plot: PlotLab,
   space3d: Space3D,
   stepper: Stepper,
