@@ -10,7 +10,10 @@ import { grandezas } from './ele/base';
 import { leiOhm } from './ele/ohm';
 import { associacao } from './ele/associacao';
 import { kirchhoff } from './ele/kirchhoff';
+import { teoremasCirc } from './ele/teoremas';
 import { capacitores } from './ele/capacitores';
+import { indutores } from './ele/indutores';
+import { alternada } from './ele/alternada';
 import { potenciaCA } from './ele/potenciaca';
 import { transformadores } from './ele/transformadores';
 import { eficiencia } from './ele/eficiencia';
@@ -20,7 +23,12 @@ import { magnetismo } from './emg/magnetismo';
 import { inducao } from './emg/inducao';
 import { diodos } from './eln/diodo';
 import { ledZener } from './eln/led';
+import { retificadores } from './eln/retificadores';
 import { bjt } from './eln/bjt';
+import { amplificadores } from './eln/amplificadores';
+import { mosfet } from './eln/mosfet';
+import { ampOp } from './eln/opamp';
+import { filtros } from './eln/filtros';
 import { osciladores } from './eln/osciladores';
 import { numeracao } from './dig/numeracao';
 import { aritBinaria } from './dig/aritmetica';
@@ -47,7 +55,7 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Circuitos elétricos: Ohm, Kirchhoff, capacitores, indutores, corrente alternada e energia',
     color: '#FFE14D',
     emoji: '⚡',
-    units: [grandezas, leiOhm, associacao, kirchhoff, capacitores, potenciaCA, transformadores, eficiencia],
+    units: [grandezas, leiOhm, associacao, kirchhoff, teoremasCirc, capacitores, indutores, alternada, potenciaCA, transformadores, eficiencia],
   },
   {
     id: 'emg',
@@ -65,7 +73,7 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Diodos, fontes, transistores, amplificadores operacionais e filtros',
     color: '#80ED99',
     emoji: '🔌',
-    units: [diodos, ledZener, bjt, osciladores],
+    units: [diodos, ledZener, retificadores, bjt, amplificadores, mosfet, ampOp, filtros, osciladores],
   },
   {
     id: 'dig',
