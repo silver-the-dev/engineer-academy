@@ -21,7 +21,8 @@ export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
   const seed = useRef(Math.floor(Math.random() * 1e9)).current;
   const orderIdx = useMemo(() => shuffle(makeRng(seed), ex.options.map((_, i) => i)), [ex, seed]);
   return (
-    <View style={{ flexDirection: many ? 'row' : 'column', flexWrap: 'wrap', justifyContent: many ? 'space-between' : undefined }}>
+    // Wrapping a column makes Android size each choice to its content; formulas can collapse after layout.
+    <View style={{ flexDirection: many ? 'row' : 'column', flexWrap: many ? 'wrap' : 'nowrap', justifyContent: many ? 'space-between' : undefined }}>
       {orderIdx.map((i) => {
         const o = ex.options[i];
         let st: ChoiceState = sel === i ? 'selected' : 'idle';
