@@ -7,6 +7,7 @@ import { useApp } from '../state/store';
 import { Button } from '../components/ui/Button';
 import { ensurePermission, rescheduleReminders } from '../lib/notifications';
 import { SECTIONS } from '../content';
+import { availableCourses, sectionsOf } from '../content/courses';
 import { syncWidget } from '../lib/widget';
 
 export default function Onboarding() {
@@ -68,7 +69,12 @@ export default function Onboarding() {
           <View>
             <Text style={{ color: C.text, fontFamily: F.black, fontSize: 26, marginBottom: 6 }}>Por onde começar?</Text>
             <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 15, marginBottom: 14 }}>Você pode trocar de matéria a qualquer momento.</Text>
-            {SECTIONS.map((sec) => (
+            {availableCourses().map((course) => (
+              <View key={course.id}>
+                <Text style={{ color: C.textMuted, fontFamily: F.black, fontSize: 12, letterSpacing: 1.2, marginTop: 8, marginBottom: 8 }}>
+                  {course.emoji} {course.title.toUpperCase()}
+                </Text>
+                {sectionsOf(course.id).map((sec) => (
               <Pressable key={sec.id} onPress={() => setSection(sec.id)} style={{ flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 16, marginBottom: 8, borderWidth: 2, borderColor: section === sec.id ? sec.color : C.border, backgroundColor: section === sec.id ? alpha(sec.color, 0.14) : C.surface }}>
                 <Text style={{ fontSize: 30, marginRight: 12, width: 44, textAlign: 'center', color: sec.color, fontFamily: F.black }}>{sec.emoji}</Text>
                 <View style={{ flex: 1 }}>
@@ -76,6 +82,8 @@ export default function Onboarding() {
                   <Text style={{ color: C.textMuted, fontFamily: F.semibold, fontSize: 13 }}>{sec.subtitle}</Text>
                 </View>
               </Pressable>
+                ))}
+              </View>
             ))}
           </View>
         )}

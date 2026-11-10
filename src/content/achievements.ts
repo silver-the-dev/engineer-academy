@@ -30,6 +30,11 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'gaal', title: 'Vetorizado', desc: '10 lições de GA e Álgebra Linear', icon: '🧭', test: (s) => sectionDone(s, 'g-', 10) },
   { id: 'num', title: 'Numericamente estável', desc: '10 lições de Cálculo Numérico', icon: '💻', test: (s) => sectionDone(s, 'n-', 10) },
   { id: 'est', title: 'Estatisticamente significativo', desc: '10 lições de Estatística', icon: '📊', test: (s) => sectionDone(s, 'e-', 10) },
+  { id: 'mec', title: 'Corpo em movimento', desc: '10 lições de Mecânica', icon: '🚀', test: (s) => sectionDone(s, 'm-', 10) },
+  { id: 'ele', title: 'Alta tensão', desc: '10 lições de Eletricidade', icon: '⚡', test: (s) => sectionDone(s, 'el-', 10) },
+  { id: 'emg', title: 'Força de campo', desc: '8 lições de Eletromagnetismo', icon: '🧲', test: (s) => sectionDone(s, 'em-', 8) },
+  { id: 'eln', title: 'Bem polarizado', desc: '10 lições de Eletrônica Analógica', icon: '🔌', test: (s) => sectionDone(s, 'ea-', 10) },
+  { id: 'dig', title: 'Nível lógico alto', desc: '10 lições de Eletrônica Digital', icon: '💡', test: (s) => sectionDone(s, 'dg-', 10) },
 ];
 
 export function checkAchievements(state: any): string[] {
