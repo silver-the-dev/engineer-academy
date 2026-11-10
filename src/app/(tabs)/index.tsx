@@ -18,7 +18,7 @@ const RING = 112;
 const courses = availableCourses();
 
 /** Sections that show the shortcut to the free circuit lab. */
-const LAB_SECTIONS = ['ele', 'eln', 'dig'];
+const LAB_SECTIONS = ['ele', 'eln', 'dig', 'emb'];
 
 /** Ring split in one arc per sub-lesson (gap at the top), finished arcs in the section colour. */
 function PartRing({ total, done, color }: { total: number; done: number; color: string }) {

@@ -35,6 +35,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'emg', title: 'Força de campo', desc: '8 lições de Eletromagnetismo', icon: '🧲', test: (s) => sectionDone(s, 'em-', 8) },
   { id: 'eln', title: 'Bem polarizado', desc: '10 lições de Eletrônica Analógica', icon: '🔌', test: (s) => sectionDone(s, 'ea-', 10) },
   { id: 'dig', title: 'Nível lógico alto', desc: '10 lições de Eletrônica Digital', icon: '💡', test: (s) => sectionDone(s, 'dg-', 10) },
+  { id: 'emb', title: 'Firmware no ar', desc: '10 lições de Sistemas Embarcados e PCB', icon: '🤖', test: (s) => sectionDone(s, 'se-', 10) },
 ];
 
 export function checkAchievements(state: any): string[] {

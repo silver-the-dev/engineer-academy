@@ -32,4 +32,7 @@ export function rmcq(rng: Rng, prompt: string, correct: string, wrong: string[],
 export const plot = (props: Record<string, any>, height?: number): VisualSpec & { props: Record<string, any> } => ({ name: 'plot', props, height });
 export const table = (head: string[] | undefined, rows: (string | number)[][], highlight?: number[]): VisualSpec => ({ name: 'table', props: { head, rows, highlight } });
 
+/** Source code listing (monospaced, numbered); `highlight` are 1-based line numbers. Works in cards and as the visual of any exercise. */
+export const code = (src: string, highlight?: number[], title?: string): VisualSpec => ({ name: 'code', props: { code: src, highlight, title } });
+
 export const near = (a: number, b: number, tol: number) => Math.abs(a - b) <= tol;
