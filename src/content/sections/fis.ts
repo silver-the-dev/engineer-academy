@@ -44,6 +44,12 @@ import { projetoPCB } from './ofi/pcb';
 import { cFundamentos } from './lc/fundamentos';
 import { cFluxo } from './lc/fluxo';
 import { cFuncoes } from './lc/funcoes';
+import { cDados } from './lc/dados';
+import { cHardware } from './lc/hardware';
+import { arduino } from './mcu/arduino';
+import { sensoresAtuadores } from './mcu/sensores';
+import { comunicacao } from './mcu/comunicacao';
+import { iot } from './mcu/iot';
 
 /** Sections of the Física e Eletricidade and Sistemas Embarcados courses, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
@@ -108,6 +114,15 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'C do zero até o código que conversa com o hardware',
     color: '#90BE6D',
     emoji: '💻',
-    units: [cFundamentos, cFluxo, cFuncoes],
+    units: [cFundamentos, cFluxo, cFuncoes, cDados, cHardware],
+  },
+  {
+    id: 'mcu',
+    course: 'emb',
+    title: 'Microcontroladores',
+    subtitle: 'Arduino, sensores e atuadores, comunicação serial, ESP32 e IoT',
+    color: '#F4A261',
+    emoji: '🤖',
+    units: [arduino, sensoresAtuadores, comunicacao, iot],
   },
 ];
