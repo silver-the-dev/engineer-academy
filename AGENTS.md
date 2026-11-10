@@ -72,6 +72,10 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 | `src/content/visuals.tsx`, `visuals3d.tsx` | laboratórios interativos reutilizáveis (`lineLab`, `parabolaLab`, `tangentLab`, `riemannLab`, `vectorLab`, `matrixLab`…) |
 | `src/content/sections/<seção>/*.tsx` | o conteúdo; registrado em `src/content/sections/index.ts`. Seções: `fund` (Fundamentos: inclui lógica, matrizes, matemática financeira, binômio de Newton, geometria plana e espacial), `pre` (Pré-Cálculo: inclui exponenciais/logaritmos, triângulos quaisquer, complexos e equações polinomiais), `calc` (Cálculo 1–3), `gaal` (GA e Álgebra Linear, inclui superfícies quádricas), `vet` (Cálculo Vetorial: integrais múltiplas, campos, Green/Stokes/Gauss), `edo` (EDOs, Laplace, Fourier), `num`, `est` |
 | `src/lib/qa.ts`, `scripts/qa-content.cjs` | QA de conteúdo (o mesmo do `/debug`), também por linha de comando |
+| `src/content/courses.ts`, `src/content/sections/fis.ts` | cursos (Matemática e Física e Eletricidade) e as seções do curso de física: `mec`, `ele`, `emg`, `eln`, `dig` |
+| `src/lib/circuit/` | motor do simulador de circuitos (TypeScript puro: MNA, Newton, transitórios, lógica) e `makeValue` para os `check` dos exercícios; testes em `scripts/test-circuit.cjs` |
+| `src/content/circuits.ts` | construtores de circuitos (`circuit`, `wires`, `R`, `V`, `LED`, `NPN`, `GATE`…), `circuitVisual` e `circuitEx` |
+| `src/components/visuals/CircuitSim.tsx`, `src/components/circuit/` | widget `circuit`: desenho, corrente animada, multímetro, edição, montagem, osciloscópio; `src/app/lab.tsx` é o laboratório livre e `src/app/circuit-demo.tsx` a galeria com todas as peças |
 | `src/lib/texEval.ts` | avaliador numérico das opções de múltipla escolha (só QA): acha opções erradas iguais à resposta como expressão |
 | `src/app/audit.tsx` | `/audit?id=<lição>` mostra todos os cards e exercícios de uma lição de uma vez (para conferir layout em 375 px) |
 | `src/content/index.ts` | `buildQueue(lesson, part)`, `partsDone`, desbloqueio, treino e revisão |
@@ -105,6 +109,14 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 - Valor recebido pelo `check` de `inter(…)`: `plot` → `v.p` (sliders) e `v.pts` (pontos arrastáveis); `venn` → lista de regiões (`'A'`, `'AB'`, `'B'`, `'U'`, compare ordenando); `numberline` → número; `bars` → lista de alturas; `simulator` → número de lançamentos; `space3d` → `v.p`.
 - O `RichText` não tem tabelas em markdown: para tabelas use `$$\begin{array}…\end{array}$$` ou o visual `table(...)`. Toda lição precisa de pelo menos 2 partes (o QA avisa "lição sem partes" se tiver uma só).
 - Padrão usado nas lições já convertidas: 2 ou 3 partes por lição, 7 a 9 exercícios por parte, do mais fácil ao mais difícil, misturando tipos e com ao menos um gerador aleatório (`gen`) por parte. Exemplos completos: `sections/fund/elementar.tsx`, `sections/calc/limites.tsx`, `sections/num/numerico1.tsx`.
+
+## Cursos e simulador de circuitos
+
+- Uma seção pertence a um curso (`course: 'mat' | 'fis'`, padrão `mat`). O seletor de seção mostra um curso por vez. Prefixos de id do curso de física: `m-`, `el-`, `em-`, `ea-`, `dg-`.
+- Exercício prático de circuito: `circuitEx(prompt, spec, check, answerText, explain, solution)`. O `check` recebe um `CircuitValue` (`v.v(id)`, `v.i(id)`, `v.p(id)`, `v.val(id)`, `v.on(id)`, `v.burnt(id)`, `v.count(tipo)`, `v.req(a, b)`, `v.wave(id)`, `v.at(id, t)`, `v.truth(entradas, saída)`) e deve conferir o efeito elétrico com tolerância. `solution` (`{ set, on, add, remove }`) é obrigatória: o QA aplica e exige que o `check` passe, e avisa se o circuito já começa resolvido.
+- Circuito num card ou como visual de um exercício comum: `visual: circuitVisual({ comps, mode })`. Modos: `view`, `adjust` (padrão) e `build` (com `palette`).
+- Grade de até 9 × 7 células; fios ligam pelas pontas; primeiro ponto da fonte é o +, do diodo é o anodo. Valores do modelo: diodo 0,7 V, LED 1,8 a 3,0 V conforme a cor, `Vce(sat)` ≈ 0,2 V.
+- Ao mexer no motor: `node scripts/test-circuit.cjs` e `node scripts/test-circuit-ui.cjs` precisam passar.
 
 ## Fluxo de trabalho recomendado
 
