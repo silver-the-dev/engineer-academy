@@ -5,6 +5,14 @@ import { quedaLivre } from './mec/queda';
 import { vetoresFis } from './mec/vetores';
 import { movimento2d } from './mec/mov2d';
 import { leisNewton } from './mec/newton';
+import { energia } from './mec/energia';
+import { potenciaCA } from './ele/potenciaca';
+import { transformadores } from './ele/transformadores';
+import { eficiencia } from './ele/eficiencia';
+import { campoEletrico } from './emg/campo';
+import { potencialEletrico } from './emg/potencial';
+import { magnetismo } from './emg/magnetismo';
+import { inducao } from './emg/inducao';
 import { numeracao } from './dig/numeracao';
 import { aritBinaria } from './dig/aritmetica';
 
@@ -17,7 +25,25 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Medidas, movimento, vetores, leis de Newton e energia',
     color: '#FF6B6B',
     emoji: '🚀',
-    units: [medidas, cinematica, quedaLivre, vetoresFis, movimento2d, leisNewton],
+    units: [medidas, cinematica, quedaLivre, vetoresFis, movimento2d, leisNewton, energia],
+  },
+  {
+    id: 'ele',
+    course: 'fis',
+    title: 'Eletricidade',
+    subtitle: 'Circuitos elétricos: Ohm, Kirchhoff, capacitores, indutores, corrente alternada e energia',
+    color: '#FFE14D',
+    emoji: '⚡',
+    units: [potenciaCA, transformadores, eficiencia],
+  },
+  {
+    id: 'emg',
+    course: 'fis',
+    title: 'Eletromagnetismo',
+    subtitle: 'Campo elétrico, potencial, campo magnético e indução',
+    color: '#4CC9F0',
+    emoji: '🧲',
+    units: [campoEletrico, potencialEletrico, magnetismo, inducao],
   },
   {
     id: 'dig',
