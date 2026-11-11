@@ -223,7 +223,7 @@ const invTrigLab = () =>
   plot({
     view: { xMin: -2.2, xMax: 2.2, yMin: -1.8, yMax: 1.8 },
     equalAspect: true,
-    params: [{ key: 'x', label: 'x', min: -1, max: 1, step: 0.05, value: 0.5, color: C.p5 }],
+    params: [{ key: 'x', label: 'x', min: -1, max: 1, step: 0.05, value: 0, color: C.p5 }],
     render: ({ p }: any) => {
       const y = Math.asin(p.x);
       return (

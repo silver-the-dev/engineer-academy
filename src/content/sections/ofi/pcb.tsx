@@ -21,7 +21,7 @@ const layout = () => plot({
   info: ({ p }: any) => `Distância ilustrada entre CI e C: ${p.x - 3} unidades.`,
 });
 
-const aproxima = () => inter('Mova C até a posição 3, junto ao CI, para reduzir o caminho de desacoplamento.', 'plot', layout().props,
+const aproxima = () => inter('Posicione o capacitor C junto aos pinos de alimentação do CI para encurtar a conexão de desacoplamento.', 'plot', layout().props,
   (v) => v.p.x === 3, 'Posição 3', 'Na posição 3, a distância ilustrada é zero; na placa real mantenha curtas as conexões aos pinos de alimentação e terra.');
 
 // O controle desloca a peça à direita para examinar uma medida ou um alinhamento.
@@ -52,14 +52,14 @@ export const projetoPCB: UnitDef = {
   guide: t`O esquemático define as redes; o layout transforma essas conexões em cobre. Confira footprints e pinagem com o datasheet, posicione componentes, roteie e rode ERC e DRC. Trilhas e vias são dimensionadas para corrente, temperatura, cobre e fabricação; o retorno precisa de um caminho próximo. Coloque o desacoplamento junto aos pinos de alimentação do CI. Confira Gerbers, furação, BOM e posição antes de fabricar. Para orçamento: custo por placa = custo total do lote dividido pelo número de placas úteis.`,
   lessons: [
     { id: 'of-pcb-fluxo', title: 'Do esquemático ao layout', parts: [
-      { card: { title: 'Da ideia às redes', body: 'No KiCad, desenhe o esquemático com símbolos, valores e conexões. Uma rede reúne pinos eletricamente ligados; rótulos iguais podem ligar pontos distantes. O ERC aponta inconsistências elétricas, mas não prova que o circuito funciona. Associe footprints e atualize a placa a partir do esquemático.', visual: layout() }, exercises: [
+      { card: { title: 'Da ideia às redes', body: 'No KiCad, desenhe o esquemático com símbolos, valores e conexões. Uma rede reúne pinos eletricamente ligados; rótulos iguais podem ligar pontos distantes. O ERC aponta inconsistências elétricas, mas não prova que o circuito funciona. Associe footprints e atualize a placa a partir do esquemático.' }, exercises: [
         mcq('O que o esquemático descreve?', ['Componentes e conexões elétricas', 'Somente a cor da máscara', 'A embalagem de envio', 'Somente o contorno da placa'], 0, 'Símbolos e redes descrevem os componentes e suas conexões.'),
         tf('Pontos com o mesmo rótulo de rede podem estar conectados mesmo sem fio desenhado entre eles.', true, 'Rótulos de rede iguais representam a mesma conexão, conforme o escopo definido no projeto.'),
         mcq('Qual verificação procura inconsistências elétricas no esquemático?', ['ERC', 'DRC de fabricação', 'Visualizador de Gerber', 'Lista de materiais'], 0, 'O ERC verifica regras elétricas do esquemático.'),
         match('Associe cada representação à função.', [['Símbolo', 'Representa o componente no esquemático'], ['Rede', 'Identifica pinos conectados'], ['Footprint', 'Define a geometria na placa']], 'Símbolo e footprint têm papéis distintos; a rede conserva as ligações.'),
         gen((rng) => { const n = randInt(rng, 3, 9); return num(`Uma rede liga ${n} pinos e recebe mais 2 pinos. Quantos pinos ela reúne?`, n + 2, `${n} + 2 = ${n + 2} pinos.`); }),
         order('Ordene o início do projeto.', ['Desenhar o esquemático', 'Verificar o ERC', 'Associar footprints', 'Atualizar a placa'], 'Primeiro defina e confira as conexões, associe os encapsulamentos e transfira ao editor de placa.'),
-        aproxima(),
+        order('Ordene a preparação da placa a partir do esquemático.', ['Conferir redes e executar ERC', 'Associar os footprints aos símbolos', 'Atualizar a placa com os footprints e as redes'], 'O esquemático e as associações determinam o que a ferramenta importa para o layout.'),
       ] },
       { card: { title: 'Posicionar antes de rotear', body: 'No editor de PCB, defina o contorno fechado e coloque conectores conforme a caixa e o acesso. Agrupe componentes relacionados, respeite a polaridade e deixe espaço para montagem. As linhas de conexão indicam redes ainda não roteadas; não são cobre.', tip: 'Um DRC limpo não substitui conferir a função elétrica, a mecânica e o datasheet.' }, exercises: [
         mcq('O contorno da placa deve ser...', ['Fechado e compatível com a caixa', 'Uma linha aberta sem dimensão', 'Uma rede elétrica de alimentação', 'Um texto na serigrafia'], 0, 'Um contorno fechado define a geometria de fabricação.'),

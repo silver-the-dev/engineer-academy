@@ -1,23 +1,6 @@
 import type { UnitDef } from '../../types';
-import { code, fill, gen, inter, match, mcq, num, order, tf } from '../../helpers';
-import { fnLab } from '../../visuals';
+import { code, fill, gen, match, mcq, num, order, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
-
-// O controle representa um valor inteiro; o gráfico mostra sua transformação.
-const lab = (factor: number, offset = 0) => fnLab({
-  f: (x) => factor * x + offset,
-  params: [{ key: 'n', label: 'valor', min: 0, max: 10, step: 1, value: 1 }],
-  view: { xMin: 0, xMax: 10, yMin: 0, yMax: 12 },
-  info: (p) => `Valor escolhido: ${p.n} · resultado: ${factor * p.n + offset}`,
-  extra: () => null,
-});
-// O parâmetro é a entrada; a informação do gráfico calcula o resultado.
-const ajuste = (prompt: string, factor: number, offset: number, target: number) => {
-  const v = lab(factor, offset);
-  return inter(prompt, 'plot', v.props, (v) => factor * v.p.n + offset === target,
-    `Escolha ${ (target - offset) / factor }.`,
-    `O resultado é ${factor} vezes o valor escolhido mais ${offset}; para obter ${target}, escolha ${(target - offset) / factor}.`);
-};
 
 export const cFundamentos: UnitDef = {
   id: 'lc-base', title: 'Fundamentos de C', icon: '🔤',
@@ -30,7 +13,6 @@ export const cFundamentos: UnitDef = {
         {
           card: [
             { title: 'Uma primeira execução', body: 'O programa começa pela função principal. A biblioteca declarada no início fornece a declaração da função de saída. A instrução de retorno informa sucesso ao ambiente.', visual: code('#include <stdio.h>\n\nint main(void) {\n  printf("Ola!\\n");\n  return 0;\n}', [3, 4], 'primeiro.c') },
-            { title: 'Experimente um valor', body: 'Mova o controle para representar quantas vezes uma mensagem seria exibida. A leitura mostra esse mesmo número; o gráfico é um modelo da contagem, não um compilador.', visual: lab(1) },
           ],
           exercises: [
             mcq('Qual função é o ponto de entrada do programa mostrado?', ['main', 'printf', 'stdio', 'return'], 0, 'A execução de um programa C hospedado começa em main.'),
@@ -39,7 +21,7 @@ export const cFundamentos: UnitDef = {
             fill('Complete a ideia:', 'A função ___ inicia o programa.', ['main'], ['printf', 'arquivo', 'compilador'], 'A função main é o ponto de entrada no ambiente hospedado.'),
             order('Ordene o ciclo de trabalho:', ['Escrever o arquivo fonte', 'Compilar e ligar o programa', 'Executar o programa', 'Observar a saída'], 'Primeiro escrevemos, depois traduzimos e ligamos, executamos e observamos o resultado.'),
             gen((rng) => { const n = randInt(rng, 2, 8); return num('Quantas linhas iguais aparecem nesta listagem de saída?', n, `Há ${n} chamadas, cada uma com uma quebra de linha, portanto aparecem ${n} linhas.`, { visual: code(Array(n).fill('printf("Oi\\n");').join('\n'), [], 'Trecho de main') }); }),
-            ajuste('Ajuste o controle para representar 4 mensagens.', 1, 0, 4),
+            fill('Complete a linha que imprime uma mensagem e muda de linha:', '___', ['printf("OK\\n");'], ['return 0;', 'printf("OK");'], 'A sequência barra invertida + n muda de linha. return encerra a função.'),
           ],
         },
         {
@@ -61,7 +43,6 @@ export const cFundamentos: UnitDef = {
         {
           card: [
             { title: 'Guardar valores', body: 'Uma variável tem nome e tipo. Um inteiro guarda valores inteiros; tipos de ponto flutuante representam aproximações de números reais; um caractere pode guardar um símbolo. Inicializar dá um valor antes da leitura.', visual: code("int pulsos = 3;\nfloat tensao = 2.5f;\nchar letra = 'A';", [], 'Declarações') },
-            { title: 'Contagem', body: 'Explore uma contagem de pulsos pelo controle. O gráfico representa a identidade entre o valor escolhido e o número exibido.', visual: lab(1) },
           ],
           exercises: [
             mcq('Qual tipo da listagem representa um inteiro?', ['int', 'float', 'char', 'main'], 0, 'O tipo int representa valores inteiros.', { visual: code('int pulsos = 3;\nfloat tensao = 2.5f;\nchar letra = \'A\';', [], 'Tipos') }),
@@ -70,7 +51,7 @@ export const cFundamentos: UnitDef = {
             fill('Complete:', 'Dar o primeiro valor a uma variável é ___ a variável.', ['inicializar'], ['compilar', 'imprimir', 'ligar'], 'Inicialização associa um valor inicial à variável em sua definição.'),
             match('Associe tipo e uso típico:', [['int', 'contagem inteira'], ['float', 'medida aproximada'], ['char', 'um caractere']], 'Inteiros servem a contagens; ponto flutuante aproxima medidas; char pode representar um caractere.'),
             gen((rng) => { const a = randInt(rng, 1, 6); const b = randInt(rng, 1, 4); return num('Qual é o valor final da variável?', a + b, `Ela começa em ${a} e aumenta ${b}, chegando a ${a + b}.`, { visual: code(`int x = ${a};\nx = x + ${b};`, [], 'Atualização') }); }),
-            ajuste('Ajuste a contagem para 6 pulsos.', 1, 0, 6),
+            num('O contador começa em 6 e três pulsos chegam. Que valor ele guarda após somar os pulsos?', 9, 'O contador deve guardar o total acumulado: 6 + 3 = 9.'),
           ],
         },
         {
@@ -92,7 +73,6 @@ export const cFundamentos: UnitDef = {
         {
           card: [
             { title: 'Prioridade das operações', body: 'Parênteses agrupam primeiro. Multiplicação, divisão e resto têm prioridade sobre soma e subtração; operadores do mesmo nível associam da esquerda para a direita.', visual: code('int a = 2 + 3 * 4;\nint b = (2 + 3) * 4;', [], 'Precedência') },
-            { title: 'Entrada e resultado', body: 'O controle escolhe uma entrada; o modelo dobra a entrada e soma um. Experimente diferentes valores e acompanhe o resultado.', visual: lab(2, 1) },
           ],
           exercises: [
             num('Qual o valor de a?', 14, 'Primeiro 3 vezes 4 é 12; depois 2 + 12 = 14.', { visual: code('int a = 2 + 3 * 4;', [], 'Precedência') }),
@@ -101,7 +81,7 @@ export const cFundamentos: UnitDef = {
             fill('Complete:', 'Multiplicação tem prioridade ___ que adição.', ['maior'], ['menor', 'igual', 'desconhecida'], 'Multiplicação é feita antes da soma quando não há parênteses que alterem o agrupamento.'),
             num('Qual o valor final?', 5, 'As divisões associam à esquerda: 20 dividido por 2 dá 10, depois 10 dividido por 2 dá 5.', { visual: code('int x = 20 / 2 / 2;', [], 'Associação') }),
             gen((rng) => { const a = randInt(rng, 1, 4); const b = randInt(rng, 2, 4); return num('Qual o valor de x?', a + 2 * b, `Primeiro 2 vezes ${b} é ${2 * b}; somando ${a}, obtemos ${a + 2 * b}.`, { visual: code(`int x = ${a} + 2 * ${b};`, [], 'Expressão') }); }),
-            ajuste('Ajuste a entrada para obter resultado 9 no modelo.', 2, 1, 9),
+            num('Um sensor devolveu 4. O código calcula duas vezes a leitura mais 1. Qual é o valor processado?', 9, 'Multiplique primeiro: 2 × 4 + 1 = 9.'),
           ],
         },
         {
@@ -123,7 +103,6 @@ export const cFundamentos: UnitDef = {
         {
           card: [
             { title: 'Texto e valores', body: 'A função de saída usa uma cadeia de formato. Cada especificador indica como apresentar um argumento; a ordem e os tipos precisam corresponder. Uma sequência de escape encerra a linha.', visual: code('#include <stdio.h>\nint main(void) {\n  int n = 7;\n  printf("Pulsos: %d\\n", n);\n  return 0;\n}', [4], 'Saída formatada') },
-            { title: 'Número exibido', body: 'Escolha um inteiro no controle. O modelo exibe o mesmo número, como uma saída decimal de uma contagem.', visual: lab(1) },
           ],
           exercises: [
             mcq('Qual texto aparece antes da quebra de linha?', ['Pulsos: 7', 'Pulsos: n', 'Pulsos: %d', '7: Pulsos'], 0, 'O especificador decimal é substituído pelo valor inteiro 7.', { visual: code('int n = 7;\nprintf("Pulsos: %d\\n", n);', [], 'Saída') }),
@@ -132,7 +111,7 @@ export const cFundamentos: UnitDef = {
             fill('Complete:', 'A sequência de escape de nova linha termina a linha e começa outra; seu nome é ___.', ['barra n'], ['barra t', 'porcento d', 'aspas'], 'A sequência formada por barra invertida seguida de n produz uma quebra de linha.'),
             num('Qual número aparece na saída?', 9, 'A variável recebe 4 + 5 = 9 e o especificador decimal imprime esse valor.', { visual: code('int n = 4 + 5;\nprintf("%d", n);', [], 'Saída') }),
             gen((rng) => { const n = randInt(rng, 2, 9); return num('Qual número aparece na saída?', n * 2, `A variável é ${n}; seu dobro é ${n * 2}, valor mostrado em decimal.`, { visual: code(`int n = ${n};\nprintf("%d", 2 * n);`, [], 'Saída') }); }),
-            ajuste('Ajuste o valor para exibir a contagem 8.', 1, 0, 8),
+            fill('Complete o formato para mostrar um contador do tipo int em decimal:', 'printf("___", contador);', ['%d'], ['%x', '%c', '%%'], '%d mostra o inteiro em decimal; %x usa hexadecimal e %% escreve um sinal de porcentagem.'),
           ],
         },
         {

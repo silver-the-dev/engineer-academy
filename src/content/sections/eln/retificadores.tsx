@@ -64,7 +64,7 @@ const aleatorio = (fator: number, contexto: string) => gen((rng) => {
 });
 const laboratorio = () => fnLab({
   f: (x, p) => 1000*p.c / (120*x),
-  params: [{ key: 'c', label: 'I (mA)', min: 10, max: 100, step: 10, value: 60 }],
+  params: [{ key: 'c', label: 'I (mA)', min: 10, max: 100, step: 10, value: 30 }],
   view: { xMin: 100, xMax: 1000, yMin: 0, yMax: 9 },
   info: () => t`Estimativa $\Delta V=I/(120C)$: eixo horizontal em µF e vertical em V.`,
 });
@@ -149,20 +149,20 @@ export const retificadores: UnitDef = {
       ] },
     ] },
     { id: 'ea-ret-reg', title: 'Reguladores e projeto de fonte', parts: [
-      { card: { title: 'Regulação linear 78xx', body: t`Um regulador 78xx fornece tensão positiva nominal: por exemplo, o 7805 fornece cerca de $5\,\text{V}$. Ele precisa de tensão de entrada suficientemente acima da saída, inclusive no vale da ondulação. A diferença mínima depende do componente, corrente e temperatura: consulte a folha de dados. O gráfico ilustra a filtragem que antecede o regulador.`, visual: laboratorio() }, exercises: [
+      { card: { title: 'Regulação linear 78xx', body: t`Um regulador 78xx fornece tensão positiva nominal: por exemplo, o 7805 fornece cerca de $5\,\text{V}$. Ele precisa de tensão de entrada suficientemente acima da saída, inclusive no vale da ondulação. A diferença mínima depende do componente, corrente e temperatura: consulte a folha de dados.` }, exercises: [
         tf('Um 7805 é um regulador de tensão positiva nominal de 5 V.', true, 'Na família 78xx, o sufixo 05 indica tensão nominal de saída de 5 V.'),
         mcq('Qual condição verifica a margem de entrada de um regulador?', ['Comparar o vale da entrada com a tensão mínima exigida', 'Comparar só o pico com a saída', 'Igualar corrente e tensão', 'Ignorar a ondulação'], 0, 'O regulador precisa de margem também no instante de menor tensão de entrada.'),
         num(t`A entrada varia de $9$ a $10\,\text{V}$. Qual seu valor mínimo em V? Dê inteiro.`, 9, t`O vale é $9\,\text{V}$.`, { unit: 'V', tol: 0.5 }),
-        interFiltro(),
+        num('Um regulador de 5 V precisa de pelo menos 2 V de margem na entrada. Qual é a menor tensão aceitável no vale da ondulação?', 7, 'A entrada precisa ficar pelo menos 2 V acima dos 5 V de saída, inclusive no ponto mais baixo.', { unit: 'V' }),
         num(t`Um regulador de $5\,\text{V}$ exige entrada mínima de $7\,\text{V}$. Se o vale é $8\,\text{V}$, qual a margem em V? Dê inteiro.`, 1, t`$8-7=1\,\text{V}$ acima do mínimo especificado.`, { unit: 'V', tol: 0.5 }),
         tf('Um regulador linear elimina a necessidade de verificar dissipação térmica.', false, 'A diferença entre entrada e saída vezes a corrente gera calor no regulador.'),
         gen((rng) => { const n = randInt(rng, 8, 15); return num(t`A entrada de um regulador vale $${n}\,\text{V}$ e a saída $5\,\text{V}$. Qual a diferença em V? Dê inteiro.`, n-5, t`$${n}-5=${n-5}\,\text{V}$.`, { unit: 'V', tol: 0.5 }); }),
       ] },
-      { card: { title: 'Projeto e potência', body: t`Escolha secundário, ponte e filtro para que o vale da entrada supere o mínimo do regulador nas piores condições. Estime $V_{vale}\approx V_{pico}-2V_D-\Delta V_{pp}$ para ponte. A dissipação linear é aproximadamente $P=(V_{in}-V_{out})I$, desprezando corrente própria; confira dissipador, corrente, tensão nominal e polaridade do capacitor.`, visual: laboratorio() }, exercises: [
+      { card: { title: 'Projeto e potência', body: t`Escolha secundário, ponte e filtro para que o vale da entrada supere o mínimo do regulador nas piores condições. Estime $V_{vale}\approx V_{pico}-2V_D-\Delta V_{pp}$ para ponte. A dissipação linear é aproximadamente $P=(V_{in}-V_{out})I$, desprezando corrente própria; confira dissipador, corrente, tensão nominal e polaridade do capacitor.` }, exercises: [
         tf('O capacitor eletrolítico exige atenção à polaridade e à tensão nominal.', true, 'Uma ligação invertida ou tensão acima da nominal pode danificar o componente.'),
         mcq('Qual ordem descreve uma fonte linear típica?', ['Secundário CA → retificação → filtro → regulador', 'Filtro → rede CA → carga → ponte', 'Regulador → ponte → rede CA', 'Carga → filtro → rede CA'], 0, 'A tensão secundária é retificada, filtrada e então regulada.'),
         num(t`Com $V_{in}=10\,\text{V}$, $V_{out}=5\,\text{V}$ e $I=200\,\text{mA}$, estime a dissipação em W como inteiro.`, 1, t`$P=(10-5)\cdot0,2=1\,\text{W}$.`, { unit: 'W', tol: 0.5 }),
-        interFiltro(),
+        num('Um regulador recebe 9 V e entrega 5 V a 100 mA. Desprezando a corrente própria, quanta potência ele dissipa em W?', 0.4, 'A queda de 4 V no regulador multiplica a corrente de 0,1 A: 0,4 W.', { unit: 'W' }),
         num(t`Uma ponte recebe pico de $15\,\text{V}$. Com duas quedas de $0,7\,\text{V}$ e ondulação de $1,6\,\text{V}$, estime o vale em V como inteiro.`, 12, t`$15-1,4-1,6=12\,\text{V}$.`, { unit: 'V', tol: 0.5 }),
         tf('O valor de pico de uma senoide é igual ao seu valor eficaz.', false, 'Para senoide, o pico é √2 vezes o valor eficaz.'),
         gen((rng) => { const n = randInt(rng, 6, 12); return num(t`Um regulador recebe $${n+5}\,\text{V}$ e entrega $5\,\text{V}$ a $1\,\text{A}$. Despreze a corrente própria e calcule a dissipação em W como inteiro.`, n, t`$P=(${n+5}-5)\cdot1=${n}\,\text{W}$.`, { unit: 'W', tol: 0.5 }); }),

@@ -1,3 +1,6 @@
+import React from 'react';
+import { Pt } from '../../../components/plot/Plot';
+import { C as colors } from '../../../theme';
 import type { UnitDef } from '../../types';
 import { gen, inter, mcq, near, num, tf } from '../../helpers';
 import { fnLab } from '../../visuals';
@@ -5,11 +8,16 @@ import { circuit, circuitEx, circuitVisual, C, R, VAC, wires } from '../../circu
 import { fmt, randInt } from '../../../lib/random';
 
 const t = String.raw;
-const bode = (high = false, gain = 1) => fnLab({
-  f: (x) => 20 * Math.log10(gain * (high ? 10 ** x / Math.sqrt(1 + 10 ** (2 * x)) : 1 / Math.sqrt(1 + 10 ** (2 * x)))),
-  params: [{ key: 'x', label: 'log₁₀(f/fc)', min: -2, max: 2, step: 0.1, value: 0 }],
+const bodeDb = (x: number, high: boolean, gain: number) => {
+  const ratio = 10 ** x;
+  return 20 * Math.log10(gain * (high ? ratio : 1) / Math.sqrt(1 + ratio ** 2));
+};
+const bode = (high = false, gain = 1, initial = 0) => fnLab({
+  f: (x) => bodeDb(x, high, gain),
+  params: [{ key: 'x', label: 'log₁₀(f/fc)', min: -2, max: 2, step: 0.05, value: initial }],
   view: { xMin: -2, xMax: 2, yMin: -45, yMax: 15 },
-  info: (p) => t`Eixo horizontal: $\log_{10}(f/f_c)$. Em $f/f_c=${fmt(10 ** p.x, 2)}$, ganho $=${fmt(20 * Math.log10(gain * (high ? 10 ** p.x / Math.sqrt(1 + 10 ** (2 * p.x)) : 1 / Math.sqrt(1 + 10 ** (2 * p.x)))), 1)}\,\text{dB}$.`,
+  extra: (p) => <Pt x={p.x} y={bodeDb(p.x, high, gain)} color={colors.gold} />,
+  info: (p) => 'Frequência relativa ao corte: ' + fmt(10 ** p.x, 2) + ' · ganho: ' + fmt(bodeDb(p.x, high, gain), 1) + ' dB.',
 });
 const bandLab = () => fnLab({
   f: (x, p) => x <= 0 ? 0 : 1 / Math.sqrt(1 + (p.q * (x - 1 / x)) ** 2),
@@ -18,8 +26,6 @@ const bandLab = () => fnLab({
   info: (p) => t`RLC série, saída em R: eixo horizontal $f/f_0$, vertical $|H|$. Para $Q=${p.q}$, $BW=f_0/${p.q}$.`,
 });
 const bandQuestion = () => inter(t`Ajuste o fator de qualidade para que $BW=f_0/4$.`, 'plot', bandLab().props, (v) => near(v.p.q, 4, 0.01), t`$Q=4$`, t`Como $Q=f_0/BW$, para $BW=f_0/4$ temos $Q=4$.`);
-const plotQuestion = (high = false) => inter(t`Ajuste o controle para $f=f_c$ no gráfico de Bode.`, 'plot', bode(high).props, (v) => near(v.p.x, 0, 0.01), t`$\log_{10}(f/f_c)=0$`, t`Como $f/f_c=1$, seu logaritmo decimal é zero e o ganho é aproximadamente $-3,0\,\text{dB}$.`);
-
 const rc = (high: boolean, r: number) => circuit(
   VAC('fonte', [0, 0], [0, 3], 1, 100, { locked: true }),
   wires([0, 0], [1, 0]),
@@ -76,10 +82,10 @@ export const filtros: UnitDef = {
       ] },
     ] },
     { id: 'ea-filt-bode', title: 'Decibéis e diagrama de Bode', parts: [
-      { card: { title: 'Razão em decibéis', body: t`Para amplitudes de tensão, $G_{dB}=20\log_{10}|V_o/V_i|$. Para razões de potência, use $10\log_{10}(P_o/P_i)$. Ganhos de etapas em cascata somam em dB, desde que os ganhos usados incluam o carregamento entre elas.`, visual: bode() }, exercises: [
+      { card: { title: 'Razão em decibéis', body: t`Para amplitudes de tensão, $G_{dB}=20\log_{10}|V_o/V_i|$. Para razões de potência, use $10\log_{10}(P_o/P_i)$. Ganhos de etapas em cascata somam em dB, desde que os ganhos usados incluam o carregamento entre elas.` }, exercises: [
         tf(t`Ganho de tensão unitário equivale a $0\,\text{dB}$.`, true, t`$20\log_{10}1=0\,\text{dB}$.`),
         num(t`Uma razão de tensão igual a 10 corresponde a quantos dB? Dê um inteiro.`, 20, t`$20\log_{10}10=20\,\text{dB}$.`, { unit: 'dB', tol: 0.5 }),
-        plotQuestion(),
+        num('Um filtro entrega metade da amplitude de entrada. Qual é o ganho aproximado em dB, com uma casa decimal?', -6.0, '20 log₁₀(0,5) ≈ −6,0 dB.', { unit: 'dB', tol: 0.05 }),
         num(t`Duas etapas têm ganhos carregados de $6\,\text{dB}$ e $-3\,\text{dB}$. Qual o ganho total em dB? Dê um inteiro.`, 3, t`Somam-se os ganhos: $6-3=3\,\text{dB}$.`, { unit: 'dB', tol: 0.5 }),
         gen((rng) => { const k = randInt(rng, 1, 3); return num(t`Uma razão de tensão é $10^{${k}}$. Qual o ganho em dB? Dê um inteiro.`, 20*k, t`$20\log_{10}(10^{${k}})=20\cdot${k}=${20*k}\,\text{dB}$.`, { unit: 'dB', tol: 0.5 }); }),
         mcq(t`Uma razão de potência igual a 100 corresponde a…`, ['$20\\,\\text{dB}$', '$40\\,\\text{dB}$', '$100\\,\\text{dB}$', '$10\\,\\text{dB}$'], 0, t`Para potência, $10\log_{10}100=20\,\text{dB}$.`),
@@ -87,7 +93,7 @@ export const filtros: UnitDef = {
       ] },
       { card: { title: 'Lendo Bode', body: t`O eixo horizontal usa frequência logarítmica: uma década é fator 10. O gráfico mostra ganho em dB e, separadamente, fase. No gráfico abaixo, $x=\log_{10}(f/f_c)$; o ponto de corte tem $x=0$ e ganho aproximadamente $-3,01\,\text{dB}$ para ganho passante unitário.`, visual: bode() }, exercises: [
         tf(t`De $100\,\text{Hz}$ a $1\,\text{kHz}$ há uma década.`, true, t`A razão é $1000/100=10$.`),
-        plotQuestion(),
+        inter('Deslize o ponto sobre a curva passa-baixas até achar um ganho de aproximadamente −20 dB. Veja quantas vezes a frequência de corte isso representa.', 'plot', bode(false, 1, -1).props, (v) => near(bodeDb(v.p.x, false, 1), -20, 0.4), 'Cerca de dez vezes a frequência de corte.', 'Uma década acima do corte, um polo de primeira ordem já atenua cerca de 20 dB.'),
         num(t`No corte de um RC de ganho passante unitário, qual o ganho em dB com uma casa decimal?`, -3.0103, t`$20\log_{10}(1/\sqrt2)\approx-3,0\,\text{dB}$.`, { unit: 'dB', tol: 0.05 }),
         gen((rng) => { const f = randInt(rng, 1, 9)*100; return num(t`Uma década acima de $${f}\,\text{Hz}$ está qual frequência em Hz? Dê um inteiro.`, f*10, t`Uma década multiplica por 10: $${f}\cdot10=${f*10}\,\text{Hz}$.`, { unit: 'Hz', tol: 0.5 }); }),
         mcq(t`Qual a inclinação assintótica de um passa-baixas RC bem acima do corte?`, ['$-20\\,\\text{dB/década}$', '$+20\\,\\text{dB/década}$', '$0\\,\\text{dB/década}$', '$-40\\,\\text{dB/década}$'], 0, t`Um polo de primeira ordem contribui com $-20\,\text{dB}$ por década.`),
@@ -119,15 +125,15 @@ export const filtros: UnitDef = {
       { card: { title: 'Ganho e isolamento', body: t`Filtros ativos combinam componentes reativos e amplificadores alimentados. Um seguidor de tensão após um RC pode isolar uma carga de alta impedância de entrada; um amplificador pode fornecer ganho. Um passa-baixas RC ideal seguido de estágio ideal de ganho $K$ tem $|H|=K/\sqrt{1+(f/f_c)^2}$.`, visual: bode(false, 2) }, exercises: [
         tf(t`Um filtro ativo pode fornecer ganho de tensão.`, true, t`A energia adicional vem da alimentação do amplificador.`),
         mcq(t`Qual a função de um seguidor ideal depois de um RC?`, ['Isolar a carga do RC', 'Eliminar a alimentação do amplificador', 'Transformar sempre o filtro em passa-altas', 'Gerar uma fonte independente'], 0, t`O seguidor ideal tem entrada de alta impedância e saída de baixa impedância.`),
-        plotQuestion(),
+        inter('O filtro ativo passa-baixas tem ganho passante 2. Encontre a frequência em que a amplitude de saída se iguala à de entrada (0 dB).', 'plot', bode(false, 2, -1).props, (v) => near(bodeDb(v.p.x, false, 2), 0, 0.4), 'Aproximadamente 1,73 vezes a frequência de corte.', 'Iguale 2 dividido pela raiz de 1 + (f/fc)² a 1: a frequência relativa é raiz de 3.'),
         num(t`Um estágio ideal de ganho 2 recebe $0,5\,\text{V}$ de pico dentro de sua faixa linear. Qual a saída de pico em V com uma casa decimal?`, 1, t`$V_o=2\cdot0,5=1,0\,\text{V}$.`, { unit: 'V', tol: 0.05 }),
         gen((rng) => { const k = randInt(rng, 2, 6); return num(t`Um estágio ideal linear tem ganho ${k} e entrada de pico $1\,\text{V}$. Qual a saída de pico em V com uma casa decimal?`, k, t`$V_o=${k}\cdot1=${k},0\,\text{V}$.`, { unit: 'V', tol: 0.05 }); }),
         num(t`Um passa-baixas ideal tem ganho passante 2. No corte, qual o módulo do ganho com duas casas decimais?`, Math.SQRT2, t`$2/\sqrt2\approx1,41$.`, { tol: 0.005 }),
         tf(t`Em um filtro com ganho passante 2, o corte corresponde a aproximadamente $-3\,\text{dB}$ em relação ao ganho passante.`, true, t`No corte a amplitude é dividida por $\sqrt2$, diferença de $20\log_{10}(1/\sqrt2)\approx-3,01\,\text{dB}$.`),
       ] },
-      { card: { title: 'Limites reais', body: t`Amplificadores operacionais reais exigem alimentação e têm faixa limitada de saída, largura de banda e slew rate. Fora da região linear, a saída pode saturar ou distorcer. A ordem do filtro depende de seus polos: cada polo de primeira ordem contribui assintoticamente com $-20\,\text{dB/década}$ acima dele.`, visual: bode(false, 2) }, exercises: [
+      { card: { title: 'Limites reais', body: t`Amplificadores operacionais reais exigem alimentação e têm faixa limitada de saída, largura de banda e slew rate. Fora da região linear, a saída pode saturar ou distorcer. A ordem do filtro depende de seus polos: cada polo de primeira ordem contribui assintoticamente com $-20\,\text{dB/década}$ acima dele.` }, exercises: [
         tf(t`A saída real de um amplificador não pode crescer sem limite mantendo alimentação fixa.`, true, t`A faixa de saída é limitada pelas tensões de alimentação e pelo circuito.`),
-        plotQuestion(),
+        num('A saída linear de um amplificador pode atingir no máximo 3 V de pico. O ganho é 2. Qual é a maior entrada de pico antes de recortar?', 1.5, 'O pico de saída é duas vezes o de entrada até o limite. Divida 3 por 2.', { unit: 'V' }),
         mcq(t`Ao exigir uma saída além da faixa disponível do amplificador, pode ocorrer…`, ['saturação e distorção', 'ganho infinito', 'ausência de alimentação', 'frequência negativa'], 0, t`A saída atinge seu limite e a senoide pode ser recortada.`),
         num(t`Dois polos de primeira ordem contribuem com qual inclinação assintótica total em dB por década, bem acima de ambos? Dê um inteiro.`, -40, t`Cada polo contribui com $-20\,\text{dB/década}$; a soma é $-40\,\text{dB/década}$.`, { unit: 'dB/década', tol: 0.5 }),
         gen((rng) => { const n = randInt(rng, 1, 4); return num(t`Quantos dB por década contribuem ${n} polos de primeira ordem, bem acima de todos? Dê um inteiro.`, -20*n, t`A contribuição é $${n}\cdot(-20)=${-20*n}\,\text{dB/década}$.`, { unit: 'dB/década', tol: 0.5 }); }),

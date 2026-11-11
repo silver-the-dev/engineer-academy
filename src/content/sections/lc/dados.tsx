@@ -1,21 +1,6 @@
 import type { UnitDef } from '../../types';
-import { code, fill, gen, inter, mcq, num, order, table, tf } from '../../helpers';
-import { fnLab } from '../../visuals';
+import { code, fill, gen, mcq, num, order, table, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
-
-// Modelo de posições ou valores; não executa código C.
-const lab = (label: string, offset: number) => fnLab({
-  view: { xMin: 0, xMax: 5, yMin: 0, yMax: 10 },
-  params: [{ key: 'n', label, min: 0, max: 5, step: 1, value: 0 }],
-  f: (x) => x + offset,
-  info: (p) => `${label}: ${p.n}; resultado do modelo: ${p.n + offset}.`,
-});
-const desafio = (label: string, offset: number, alvo: number) => {
-  const v = lab(label, offset);
-  return inter(`Ajuste ${label} para obter resultado ${alvo}.`, 'plot', v.props,
-    (v) => v.p.n + offset === alvo, `Ajuste para ${alvo - offset}.`,
-    `O modelo soma ${offset}; ${alvo} menos ${offset} é ${alvo - offset}.`);
-};
 
 export const cDados: UnitDef = {
   id: 'lc-dados', title: 'Vetores, ponteiros e structs', icon: '📦',
@@ -29,13 +14,12 @@ export const cDados: UnitDef = {
           card: [
             { title: 'Posições começam em zero', body: 'Um vetor reúne elementos do mesmo tipo em posições consecutivas. Neste exemplo há três leituras: os índices válidos são 0, 1 e 2.', visual: code('int leituras[3] = {4, 7, 9};\nint valor = leituras[1];', [2], 'Leitura de um vetor') },
             { title: 'Mapa da memória', body: 'Cada coluna representa um elemento; a posição 1 contém 7. A tabela mostra valores, não endereços numéricos.', visual: table(['Índice', '0', '1', '2'], [['Valor', 4, 7, 9]]) },
-            { title: 'Explore o índice', body: 'Neste modelo, o valor é o índice mais 4. Mova o controle para observar a correspondência; o gráfico não executa C.', visual: lab('índice', 4) },
           ],
           exercises: [
             num('Qual é o primeiro índice de um vetor C?', 0, 'A contagem dos índices começa em zero.'),
             num('Qual valor é armazenado em resultado?', 7, 'A posição 1 é a segunda e contém 7.', { visual: code('int v[3] = {4, 7, 9};\nint resultado = v[1];') }),
             tf('Um vetor de 3 elementos tem índice válido 3.', false, 'Os três índices válidos são 0, 1 e 2; 3 fica fora do vetor.'),
-            desafio('índice', 4, 7),
+            num('Uma tabela contém os valores 4, 5, 6 e 7. Qual índice dá acesso ao valor 7?', 3, 'O primeiro índice é 0; o quarto valor fica em v[3].'),
             gen((rng) => { const n = randInt(rng, 3, 9); return num('Qual é o último índice válido?', n - 1, `Com ${n} elementos, os índices vão de 0 a ${n - 1}.`, { visual: code(`int amostras[${n}];`) }); }),
             mcq('Qual é o valor de resultado?', ['13', '8', '5', '10'], 0, 'A posição 0 vale 5 e a posição 2 vale 8; a soma é 13.', { visual: code('int v[3] = {5, 2, 8};\nint resultado = v[0] + v[2];') }),
             mcq('Qual é o problema da última linha?', ['Acesso fora dos limites.', 'O vetor tem elementos demais.', 'O índice começa em 1.', 'A declaração exige quatro tipos.'], 0, 'Um vetor de quatro elementos termina no índice 3; acessar o índice 4 tem comportamento indefinido.', { visual: code('int v[4] = {1, 2, 3, 4};\nint x = v[4];', [2]) }),
@@ -61,13 +45,12 @@ export const cDados: UnitDef = {
           card: [
             { title: 'Texto como vetor', body: 'Uma string C é uma sequência de caracteres encerrada pelo caractere nulo. Um literal usado para inicializar o vetor inclui esse terminador.', visual: code('char nome[4] = "Luz";', [], 'Texto e terminador') },
             { title: 'Memória da string', body: 'As letras ocupam três posições; o terminador nulo ocupa a quarta. Ele não é o caractere dígito zero.', visual: table(['Índice', '0', '1', '2', '3'], [['Conteúdo', 'L', 'u', 'z', 'nulo']]) },
-            { title: 'Espaço necessário', body: 'O controle representa a quantidade de caracteres visíveis; o resultado inclui uma posição para o terminador. É um modelo de capacidade, não um compilador.', visual: lab('caracteres', 1) },
           ],
           exercises: [
             mcq('O que marca o fim de uma string C?', ['O caractere nulo.', 'Um espaço obrigatório.', 'O caractere de nova linha.', 'O último índice de qualquer vetor.'], 0, 'As operações usuais de string procuram o caractere nulo para encontrar o fim.'),
             num('Quantas posições são necessárias para três caracteres e seu terminador?', 4, 'Três caracteres mais um terminador ocupam quatro posições.'),
             tf('O caractere nulo e o caractere que representa o dígito zero são o mesmo valor.', false, 'O terminador tem valor zero; o caractere do dígito zero é outro caractere.'),
-            desafio('caracteres', 1, 5),
+            num('Qual é a capacidade mínima de um vetor char para guardar a palavra TEST, incluindo o terminador?', 5, 'São quatro letras e mais uma posição para o byte nulo.'),
             gen((rng) => { const n = randInt(rng, 1, 5); return num(`Uma string tem ${n} caracteres de um byte cada. Quantos elementos char são necessários incluindo o terminador?`, n + 1, `${n} caracteres mais o terminador exigem ${n + 1} elementos.`); }),
             num('Qual é o índice do terminador?', 2, 'As letras ocupam os índices 0 e 1; o terminador está no índice 2.', { visual: code('char texto[3] = "Oi";') }),
             mcq('Qual é o risco de usar como string o vetor da listagem?', ['Não há terminador nulo no vetor.', 'Ele contém caracteres demais para dois elementos.', 'Toda string deve começar com nulo.', 'Os índices de caracteres começam em 1.'], 0, 'Os dois elementos foram preenchidos com letras e não há nulo; uma função de string pode ler além do vetor.', { visual: code("char texto[2] = {'O', 'i'};") }),
@@ -93,13 +76,12 @@ export const cDados: UnitDef = {
           card: [
             { title: 'Endereço e acesso indireto', body: 'Um ponteiro para inteiro guarda o endereço de um inteiro. O operador de endereço obtém esse endereço; o acesso indireto lê ou altera o objeto apontado.', visual: code('int x = 4;\nint *p = &x;\n*p = 7;', [2, 3], 'Alteração indireta') },
             { title: 'Relação na memória', body: 'O endereço é simbólico: p aponta para x. Após a última linha, o objeto x contém 7.', visual: table(['Objeto', 'Conteúdo'], [['x', '7'], ['p', 'endereço de x']]) },
-            { title: 'Altere o valor', body: 'O controle modela o valor de x e o resultado mostra esse valor acrescido de 1; não executa código.', visual: lab('valor de x', 1) },
           ],
           exercises: [
             mcq('O que guarda um ponteiro válido para uma variável?', ['O endereço da variável.', 'Uma cópia obrigatória do conteúdo.', 'O nome da variável como texto.', 'O tamanho de toda a memória.'], 0, 'O valor do ponteiro identifica o objeto apontado por seu endereço.'),
             num('Quanto vale x ao final?', 7, 'O ponteiro guarda o endereço de x; a atribuição indireta escreve 7 no próprio x.', { visual: code('int x = 4;\nint *p = &x;\n*p = 7;') }),
             tf('Ler através de um ponteiro nulo é uma forma válida de obter zero.', false, 'Um ponteiro nulo não aponta para objeto acessível; desreferenciá-lo tem comportamento indefinido.'),
-            desafio('valor de x', 1, 5),
+            num('x começa em 4 e p guarda &x. Depois de executar (*p)++, quanto vale x?', 5, '*p acessa o próprio objeto x, que é incrementado.'),
             gen((rng) => { const n = randInt(rng, 2, 8); return num('Quanto vale x ao final?', n + 2, `O ponteiro aponta para x; a atualização soma 2 a ${n}, resultando em ${n + 2}.`, { visual: code(`int x = ${n};\nint *p = &x;\n*p += 2;`) }); }),
             fill('Complete: o operador usado para obter o endereço de um objeto é ___.', '___', ['&'], ['*', '+', '='], 'O operador de endereço obtém o endereço do objeto, que pode ser guardado num ponteiro compatível.'),
             mcq('Qual é o erro na última linha?', ['O ponteiro não foi inicializado com endereço válido.', 'Um inteiro não pode ter endereço.', 'Todo ponteiro aponta automaticamente para zero.', 'A escrita indireta é sempre proibida.'], 0, 'O valor do ponteiro local não foi inicializado; usá-lo para acessar memória tem comportamento indefinido.', { visual: code('int *p;\n*p = 3;', [2]) }),
@@ -125,13 +107,12 @@ export const cDados: UnitDef = {
           card: [
             { title: 'Um registro para o sensor', body: 'Uma estrutura agrupa campos que podem ter tipos diferentes. Cada instância guarda seus próprios campos; use o operador ponto para acessar um campo da instância.', visual: code('struct Sensor {\n  int id;\n  int valor;\n};\nstruct Sensor s = {2, 25};', [], 'Registro de sensor') },
             { title: 'Campos do registro', body: 'A tabela representa os valores dos campos, sem supor tamanhos ou alinhamento físico.', visual: table(['Campo', 'Valor'], [['id', 2], ['valor', 25]]) },
-            { title: 'Ajuste a leitura', body: 'O controle representa uma leitura; o resultado inclui uma correção de duas unidades. O gráfico é apenas um modelo dos valores.', visual: lab('leitura', 2) },
           ],
           exercises: [
             mcq('Para que serve uma estrutura?', ['Agrupar campos relacionados, inclusive de tipos diferentes.', 'Garantir que todos os campos sejam do mesmo tipo.', 'Executar funções automaticamente.', 'Eliminar a necessidade de declarar variáveis.'], 0, 'Uma estrutura reúne campos nomeados em um único tipo de registro.'),
             num('Qual é o valor do campo leitura?', 25, 'O segundo inicializador corresponde ao segundo campo e vale 25.', { visual: code('struct Sensor {\n  int id;\n  int leitura;\n};\nstruct Sensor s = {2, 25};') }),
             tf('Duas instâncias de uma estrutura obrigatoriamente compartilham o mesmo valor para cada campo.', false, 'Cada instância tem seus próprios campos e pode conter valores distintos.'),
-            desafio('leitura', 2, 6),
+            fill('Um ponteiro p aponta para uma struct com campo leitura. Complete o acesso a esse campo:', 'int n = ___;', ['p->leitura'], ['p.leitura', '&p', 'p[0]'], 'O operador -> acessa o campo do objeto apontado por p.'),
             gen((rng) => { const n = randInt(rng, 2, 8); return num('Qual é o valor de resultado?', n + 1, `O campo começa em ${n} e recebe mais 1: ${n + 1}.`, { visual: code(`struct Sensor { int valor; };\nstruct Sensor s = {${n}};\ns.valor += 1;\nint resultado = s.valor;`) }); }),
             fill('Complete: o operador para acessar um campo diretamente em uma instância é ___.', '___', ['.'], ['&', '*', '+'], 'O operador ponto seleciona um campo de uma instância de estrutura.'),
             mcq('Qual valor fica em resultado?', ['12', '10', '2', '22'], 0, 'A leitura começa em 10 e a correção soma 2; o campo passa a 12.', { visual: code('struct Sensor { int valor; };\nstruct Sensor s = {10};\ns.valor += 2;\nint resultado = s.valor;') }),

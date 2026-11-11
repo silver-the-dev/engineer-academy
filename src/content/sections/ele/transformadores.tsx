@@ -23,12 +23,12 @@ export const transformadores: UnitDef = {
   guide: t`Um fluxo magnético variável acopla os enrolamentos. No modelo ideal, com tensões e correntes eficazes: $\frac{V_1}{V_2}=\frac{N_1}{N_2}=\frac{I_2}{I_1}$. A frequência não muda. Potências aparentes ideais são iguais; para potência ativa, $\eta=P_{\text{saída}}/P_{\text{entrada}}$ e $P_{\text{perdas}}=P_{\text{entrada}}-P_{\text{saída}}$.`,
   lessons: [
     { id: 'el-trafo-princ', title: 'Princípio de funcionamento', parts: [
-      { card: { title: 'Indução mútua', body: t`Uma tensão alternada no primário produz fluxo magnético variável no núcleo. Esse fluxo atravessa o secundário e induz tensão nele: é a **indução mútua**. O núcleo facilita o acoplamento; os enrolamentos de um transformador isolador são eletricamente separados.`, visual: lab(), tip: 'Mova a razão de espiras e observe as duas ondas idealizadas; a frequência permanece igual.' }, exercises: [
+      { card: { title: 'Indução mútua', body: t`Uma tensão alternada no primário produz fluxo magnético variável no núcleo. Esse fluxo atravessa o secundário e induz tensão nele: é a **indução mútua**. O núcleo facilita o acoplamento; os enrolamentos de um transformador isolador são eletricamente separados.` }, exercises: [
         mcq('Qual fenômeno produz tensão no secundário?', ['Indução eletromagnética', 'Atrito entre fios', 'Reação química', 'Luz emitida pelo núcleo'], 0, 'O fluxo magnético variável induz tensão nas espiras do secundário.'),
         tf('O núcleo magnético ajuda a acoplar os enrolamentos.', true, 'O núcleo oferece um caminho para o fluxo que atravessa os dois enrolamentos.'),
         match('Associe cada elemento à sua função.', [['Primário', 'Recebe energia da fonte'], ['Secundário', 'Fornece energia à carga'], ['Núcleo', 'Conduz o fluxo magnético']], 'O primário recebe energia, o núcleo acopla o fluxo e o secundário alimenta a carga.'),
         tf('Em um transformador isolador ideal, os enrolamentos precisam estar ligados por um fio.', false, 'O acoplamento é magnético; os enrolamentos são eletricamente separados.'),
-        ajuste(2, 'No gráfico ideal, ajuste a razão para que a amplitude secundária seja o dobro da primária.'),
+        mcq('O núcleo de um transformador se abre e o acoplamento magnético enfraquece. O que tende a ocorrer no secundário?', ['Menos fluxo do primário atravessa o secundário', 'As bobinas se conectam eletricamente', 'O fluxo deixa de depender do primário', 'A frequência da rede dobra'], 0, 'Uma parte menor do fluxo gerado pelo primário passa pelas espiras do secundário.'),
         num(t`Um fluxo varia de $0$ a $0{,}02\,\text{Wb}$ em $0{,}1\,\text{s}$ linearmente. Qual é o módulo da variação média em Wb/s, com uma casa decimal?`, 0.2, t`$|\Delta\Phi/\Delta t|=0{,}02/0{,}1=0{,}2\,\text{Wb/s}$.`, { unit: 'Wb/s', tol: 0.05 }),
         gen((rng) => { const n = randInt(rng, 2, 9) * 10; return num(t`Com $${n}$ espiras e fluxo variando linearmente a $0{,}1\,\text{Wb/s}$, qual o módulo da tensão induzida média em V, sem casas decimais?`, n / 10, t`Pela lei de Faraday, $|e|=N|\Delta\Phi/\Delta t|=${n}\cdot0{,}1=${n / 10}\,\text{V}$.`, { unit: 'V', tol: 0.5 }); }),
       ] },
@@ -63,10 +63,10 @@ export const transformadores: UnitDef = {
       ] },
     ] },
     { id: 'el-trafo-pot', title: 'Potência, perdas e rendimento', parts: [
-      { card: { title: 'Potência e rendimento', body: t`Para grandezas eficazes senoidais, $S=VI$ em VA e $P=VI\cos\varphi$ em W. No ideal, $S_1=S_2$ e $P_1=P_2$. Num transformador real, $\eta=P_2/P_1$ e $P_{\text{perdas}}=P_1-P_2$, usando potências ativas.`, visual: lab() }, exercises: [
+      { card: { title: 'Potência e rendimento', body: t`Para grandezas eficazes senoidais, $S=VI$ em VA e $P=VI\cos\varphi$ em W. No ideal, $S_1=S_2$ e $P_1=P_2$. Num transformador real, $\eta=P_2/P_1$ e $P_{\text{perdas}}=P_1-P_2$, usando potências ativas.` }, exercises: [
         mcq('Qual unidade mede potência aparente?', ['VA', 'Wb', 'Hz', 'Ω'], 0, 'Potência aparente é o produto das grandezas eficazes V e I, em VA.'),
         tf('A potência ativa é sempre igual a VI para qualquer fator de potência.', false, t`Em regime senoidal, $P=VI\cos\varphi$; só são iguais quando o fator de potência é 1.`),
-        ajuste(3, 'No modelo ideal, ajuste a razão para triplicar a amplitude da tensão secundária.'),
+        num('Um transformador consome 80 W com fator de potência 0,8. Qual potência aparente deve ser usada para dimensionar a alimentação?', 100, 'S = P / FP = 80 / 0,8 = 100 VA.', { unit: 'VA' }),
         num(t`A saída fornece $20\,\text{V}$ e $3\,\text{A}$ eficazes. Calcule a potência aparente em VA, sem casas decimais.`, 60, t`$S=VI=20\cdot3=60\,\text{VA}$.`, { unit: 'VA', tol: 0.5 }),
         gen((rng) => { const p = randInt(rng, 2, 9) * 100; return num(t`A entrada ativa é $${p}\,\text{W}$ e a saída ativa é $${p * 0.9}\,\text{W}$. Qual o rendimento em %, sem casas decimais?`, 90, t`$\eta=100\cdot${p * 0.9}/${p}=90\%$.`, { unit: '%', tol: 0.5 }); }),
         num(t`Um transformador recebe $500\,\text{W}$ e entrega $460\,\text{W}$ de potência ativa. Qual a perda em W, sem casas decimais?`, 40, t`$P_{\text{perdas}}=500-460=40\,\text{W}$.`, { unit: 'W', tol: 0.5 }),
@@ -83,10 +83,10 @@ export const transformadores: UnitDef = {
       ] },
     ] },
     { id: 'el-trafo-apl', title: 'Aplicações', parts: [
-      { card: { title: 'Fontes e derivação central', body: t`Uma fonte pode usar transformador abaixador para obter uma CA menor, seguida de retificação e filtragem. Um secundário com derivação central simétrica fornece, entre a derivação e cada ponta, metade da tensão eficaz entre as pontas. Essas tensões são medidas em relação à derivação.`, visual: lab(), tip: 'O transformador sozinho não retifica: sua saída continua alternada.' }, exercises: [
+      { card: { title: 'Fontes e derivação central', body: t`Uma fonte pode usar transformador abaixador para obter uma CA menor, seguida de retificação e filtragem. Um secundário com derivação central simétrica fornece, entre a derivação e cada ponta, metade da tensão eficaz entre as pontas. Essas tensões são medidas em relação à derivação.`, tip: 'O transformador sozinho não retifica: sua saída continua alternada.' }, exercises: [
         mcq('Em uma fonte convencional, o transformador abaixador atua principalmente para:', ['Reduzir a tensão alternada', 'Retificar a tensão', 'Armazenar carga como capacitor', 'Dobrar a frequência'], 0, 'A relação de espiras reduz a tensão CA; a retificação é tarefa dos diodos.'),
         tf('A saída de um transformador alimentado por senoide é contínua sem retificador.', false, 'A saída continua alternada; diodos são usados para retificação.'),
-        ajuste(0.5, 'Ajuste o modelo para representar um abaixador de tensão pela metade.'),
+        num('Num secundário com derivação central simétrica, mede-se 9 V eficazes entre uma ponta e a derivação. Qual a tensão eficaz entre as duas pontas?', 18, 'As duas metades em série somam 9 + 9 = 18 V entre as pontas.', { unit: 'V' }),
         num(t`Um secundário simétrico tem $24\,\text{V}$ eficazes entre pontas. Qual a tensão eficaz entre a derivação central e uma ponta, em V, sem casas decimais?`, 12, t`Metade do enrolamento fornece $24/2=12\,\text{V}$.`, { unit: 'V', tol: 0.5 }),
         gen((rng) => { const v = randInt(rng, 2, 9) * 2; return num(t`Um secundário simétrico fornece $${v}\,\text{V}$ eficazes de ponta a ponta. Quanto há de cada ponta à derivação central, em V, sem casas decimais?`, v / 2, t`As metades têm o mesmo número de espiras: $${v}/2=${v / 2}\,\text{V}$.`, { unit: 'V', tol: 0.5 }); }),
         mcq('Em uma fonte com transformador, retificador e filtro, qual é a sequência típica da rede até a carga?', ['Transformar, retificar, filtrar', 'Filtrar, gerar rede, transformar', 'Retificar, aumentar frequência, gerar rede', 'Transformar, inverter fluxo, gerar rede'], 0, 'O transformador ajusta a CA, o retificador produz sinal pulsante e o filtro suaviza a saída.'),

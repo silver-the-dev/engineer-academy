@@ -1,23 +1,8 @@
-import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, inter, match, mcq, multi, num, order, plot, tf } from '../../helpers';
-import { FnCurve, Pt } from '../../../components/plot/Plot';
-import { C } from '../../../theme';
+import { gen, match, mcq, multi, num, order, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
 
 const t = String.raw;
-
-// Modelos didáticos: os controles não substituem a medição de um circuito real.
-const bancadaPlot = (label: string, max: number, initial: number, slope: number, yMax: number) => plot({
-  view: { xMin: 0, xMax: max, yMin: 0, yMax },
-  params: [{ key: 'x', label, min: 0, max, step: 1, value: initial, color: C.p2 }],
-  render: ({ p }: any) => <><FnCurve f={(x: number) => slope * x} color={C.p5} /><Pt x={p.x} y={slope * p.x} color={C.gold} /></>,
-  info: ({ p }: any) => t`Ajuste ${label}: $${p.x}$ · valor no eixo vertical: $${slope * p.x}$`,
-}, 220);
-const segurancaLab = () => bancadaPlot('V', 10, 2, 1, 10);
-const fonteLab = () => bancadaPlot('V', 10, 2, 1, 10);
-const dadosLab = () => bancadaPlot('V', 10, 2, 1, 10);
-const protoLab = () => bancadaPlot('nós', 6, 1, 1, 6);
 
 export const bancada: UnitDef = {
   id: 'of-banc', title: 'Bancada, segurança e instrumentos', icon: '🧰',
@@ -32,11 +17,11 @@ No datasheet, compare condições recomendadas, limites absolutos, encapsulament
     { id: 'of-banc-seg', title: 'Segurança elétrica na bancada', parts: [
       { card: { title: 'Antes de energizar', body: t`Use fonte isolada própria para eletrônica e comece com tensões baixas, como $5\,\text{V}$, em circuitos adequados. Não ligue a rede diretamente à protoboard. Baixa tensão não elimina risco: baterias podem fornecer corrente de curto intensa e aquecer fios. Não há valor universal de tensão ou corrente inofensivo: percurso, duração, umidade e fonte importam.
 
-Desligue e desconecte antes de mudar fios; confira tensão ausente com instrumento adequado e verificado. Capacitores podem continuar carregados: siga procedimento apropriado antes de tocar. Nunca provoque curto numa bateria de lítio.`, visual: segurancaLab(), tip: 'O gráfico representa apenas um ajuste de tensão, não um limite de segurança para o corpo.' }, exercises: [
+Desligue e desconecte antes de mudar fios; confira tensão ausente com instrumento adequado e verificado. Capacitores podem continuar carregados: siga procedimento apropriado antes de tocar. Nunca provoque curto numa bateria de lítio.` }, exercises: [
         mcq('Antes de mudar a fiação, qual é o primeiro passo?', ['Desligar e desconectar a alimentação', 'Aumentar a tensão', 'Tocar nos fios para testar', 'Pôr o multímetro em corrente'], 0, 'Desligue e desconecte a alimentação; depois confirme ausência de tensão e energia armazenada.'),
         tf('Uma bateria de baixa tensão pode aquecer fios durante um curto.', true, 'Uma bateria pode fornecer corrente elevada num curto, mesmo em baixa tensão.'),
         mcq('Onde deve ficar a rede elétrica neste aprendizado?', ['Atrás de uma fonte adequada e isolada', 'Diretamente nos trilhos da protoboard', 'Ligada ao corpo da bancada', 'Nas pontas de um amperímetro'], 0, 'Use uma fonte adequada e isolada; não conecte a rede diretamente à montagem.'),
-        inter('No modelo, ajuste a fonte para 5 V antes de conectar uma carga de 5 V.', 'plot', segurancaLab().props, (v) => v?.p.x === 5, 'Ajuste V para 5.', 'O controle deve indicar 5 V; isso não dispensa conferir a fonte real e os limites da carga.'),
+        mcq('Uma carga pede 5 V. A fonte isolada marca 5 V, mas os cabos chegam com polaridade invertida. O que fazer antes de ligar?', ['Manter desligado e corrigir a polaridade', 'Ligar porque a tensão é 5 V', 'Aumentar a corrente limite', 'Inverter o seletor do multímetro'], 0, 'Tensão correta não compensa polaridade invertida. Corrija e confirme a ligação antes de energizar.'),
         gen((rng) => { const v = randInt(rng, 2, 9); return num(t`Uma fonte isolada está ajustada em $${v}\,\text{V}$. Em um resistor ideal de $1\,\text{k}\Omega$, qual a corrente em mA?`, v, t`$I=V/R=${v}/1000\,\text{A}=${v}\,\text{mA}$. Isso é uma conta do circuito, não um limite seguro para uma pessoa.`, { unit: 'mA', tol: 0.001 }); }),
         multi('Quais atitudes são adequadas antes de tocar numa montagem desligada?', ['Desconectar a fonte', 'Verificar ausência de tensão', 'Considerar carga armazenada', 'Supor que todo capacitor descarrega instantaneamente'], [0, 1, 2], 'Desconecte, verifique e trate energia armazenada; um capacitor pode manter tensão após o desligamento.'),
         order('Ordene a preparação para alterar uma montagem.', ['Desligar e desconectar a alimentação', 'Verificar ausência de tensão e energia armazenada', 'Alterar e inspecionar a fiação', 'Reenergizar após conferir'], 'A sequência evita trabalhar energizado e permite inspecionar antes de aplicar energia.'),
@@ -56,7 +41,7 @@ Para componentes sensíveis a ESD, use área e pulseira antiestáticas corretame
     { id: 'of-banc-inst', title: 'Multímetro, fonte e osciloscópio', parts: [
       { card: { title: 'Procedimento de medição', body: t`Confira pontas, bornes, função, faixa e limites do instrumento. Para tensão, use o borne de tensão e conecte as pontas em paralelo aos pontos de interesse. Para corrente, use o borne e a faixa corretos e insira o instrumento em série após desligar o circuito. Nunca coloque o amperímetro diretamente nos terminais de uma fonte.
 
-Resistência e continuidade: desenergize, verifique carga armazenada e, quando necessário, isole o componente. Uma leitura em circuito pode incluir caminhos paralelos.`, visual: fonteLab() }, exercises: [
+Resistência e continuidade: desenergize, verifique carga armazenada e, quando necessário, isole o componente. Uma leitura em circuito pode incluir caminhos paralelos.` }, exercises: [
         mcq('Antes de medir resistência, você deve…', ['Desenergizar e verificar carga armazenada', 'Aplicar a tensão máxima', 'Colocar as pontas no borne de corrente', 'Unir os polos de uma bateria'], 0, 'O ohmímetro aplica seu próprio sinal de teste; circuito energizado pode danificar o instrumento e alterar a leitura.'),
         match('Associe a função à ligação.', [['Tensão', 'Em paralelo'], ['Corrente', 'Em série'], ['Continuidade', 'Circuito desenergizado']], 'Tensão compara dois pontos; corrente passa pelo instrumento; continuidade exige circuito sem energia.'),
         tf('Medir corrente diretamente entre os polos de uma fonte pode causar um curto.', true, 'O amperímetro tem baixa resistência e pode permitir corrente muito alta.'),
@@ -71,7 +56,7 @@ No osciloscópio de bancada comum, a garra de referência costuma estar ligada a
         mcq('Antes de conectar a fonte à carga, ajuste…', ['Tensão e limite de corrente adequados', 'Somente o brilho do visor', 'A resistência do cabo com rede ligada', 'A tensão acima do limite da carga'], 0, 'Ajuste tensão e limite de corrente com saída desligada e confira a polaridade.'),
         tf('A garra de terra de um osciloscópio de bancada comum pode estar ligada ao terra de proteção.', true, 'Em muitos modelos a garra e o terra de proteção são comuns; confirme no manual.'),
         mcq('A garra de terra do osciloscópio deve ser conectada…', ['Ao ponto de referência apropriado após verificar a ligação ao terra', 'A qualquer ponto da rede', 'Sempre ao terminal positivo', 'Sem verificar o circuito'], 0, 'A garra pode estar aterrada: confirme o caminho elétrico antes de conectar.'),
-        inter('Ajuste o modelo de fonte para 4 V, saída ainda desligada.', 'plot', fonteLab().props, (v) => v?.p.x === 4, 'Ajuste V para 4.', 'O controle indica 4 V. Na bancada, confira ainda limite, polaridade e especificação da carga.'),
+        order('Organize o preparo da fonte para uma nova carga.', ['Conferir tensão, polaridade e corrente da carga', 'Configurar tensão e limite com a saída desabilitada', 'Conectar a carga com polaridade correta', 'Habilitar a saída e verificar a leitura'], 'Ajuste e confira a alimentação antes de energizar a montagem.'),
         gen((rng) => { const a = randInt(rng, 2, 7); return num(t`Na tela do osciloscópio, uma altura de $${a}$ divisões a $2\,\text{V/div}$ representa quantos V? Considere a atenuação já configurada.`, 2 * a, t`Altura vezes escala: $${a}\cdot 2=${2 * a}\,\text{V}$.`, { unit: 'V', tol: 0.001 }); }),
         tf('Retirar o terra de proteção do osciloscópio é uma forma recomendada de evitar curto.', false, 'Nunca remova o terra de proteção; use instrumento e método apropriados conforme o fabricante.'),
         mcq('A ponta está em 10×, mas o canal foi configurado para 1×. O que fazer?', ['Corrigir a configuração conforme a ponta e conferir o manual', 'Ignorar a diferença', 'Ligar a garra ao ponto de maior tensão', 'Aumentar a tensão até a tela encher'], 0, 'A atenuação da ponta deve corresponder à configuração do canal para a leitura ser correta.'),
@@ -80,11 +65,11 @@ No osciloscópio de bancada comum, a garra de referência costuma estar ligada a
     { id: 'of-banc-esq', title: 'Esquemáticos e datasheets', parts: [
       { card: { title: 'Do desenho às conexões', body: t`O esquemático mostra relações elétricas, não a posição física dos componentes. Fios no mesmo nó estão eletricamente conectados. Um ponto de junção indica conexão; cruzamentos sem ponto seguem a convenção do desenho. Rótulos iguais podem identificar o mesmo nó mesmo sem fio desenhado entre eles.
 
-Terra (GND) pode ser apenas referência de $0\,\text{V}$ do circuito: não presuma que todo GND é isolado ou conectado ao terra de proteção.`, visual: dadosLab(), tip: 'O controle ilustra uma diferença de potencial em relação à referência, não o desenho físico dos fios.' }, exercises: [
+Terra (GND) pode ser apenas referência de $0\,\text{V}$ do circuito: não presuma que todo GND é isolado ou conectado ao terra de proteção.`, tip: 'O controle ilustra uma diferença de potencial em relação à referência, não o desenho físico dos fios.' }, exercises: [
         mcq('Qual é a principal informação de um esquemático?', ['Como os componentes estão eletricamente ligados', 'A posição exata de cada peça na mesa', 'A cor obrigatória dos jumpers', 'O fabricante de toda ferramenta'], 0, 'O esquemático descreve nós e ligações; a montagem física pode ter outro arranjo.'),
         tf('Dois pontos com o mesmo nome de nó em um esquemático podem estar conectados sem um fio desenhado entre eles.', true, 'Rótulos iguais identificam a mesma rede elétrica segundo a convenção do projeto.'),
         mcq('Em um desenho que usa ponto de junção, o ponto indica…', ['Conexão elétrica entre os fios', 'Um resistor invisível', 'Ausência de corrente em todos os fios', 'Um componente sempre aterrado'], 0, 'O ponto marca a junção dos condutores; confira a convenção do desenho.'),
-        inter('Ajuste o modelo para uma diferença de 3 V em relação à referência de 0 V.', 'plot', dadosLab().props, (v) => v?.p.x === 3, 'Ajuste V para 3.', 'Uma diferença de potencial de 3 V em relação a 0 V corresponde ao ajuste de 3 V no modelo.'),
+        num('O nó A está a 5 V e B está a 2 V, ambos em relação ao terra. Quanto indica o multímetro com a ponta positiva em A e a negativa em B?', 3, 'A leitura é V_A menos V_B, ou 5 − 2 = 3 V.', { unit: 'V' }),
         gen((rng) => { const a = randInt(rng, 3, 9); const b = randInt(rng, 1, 2); return num(t`Um nó está em $${a}\,\text{V}$ e outro em $${b}\,\text{V}$ em relação ao mesmo GND. Qual a tensão do primeiro em relação ao segundo, em V?`, a - b, t`Subtraia potenciais na ordem pedida: $${a}-${b}=${a - b}\,\text{V}$.`, { unit: 'V', tol: 0.001 }); }),
         mcq('O símbolo GND garante, sozinho, isolação da rede?', ['Não; é preciso verificar o circuito e a fonte', 'Sim, em qualquer equipamento', 'Sim, desde que o fio seja preto', 'Sim, se o multímetro estiver desligado'], 0, 'GND indica referência ou rede definida no projeto; sua ligação física depende do equipamento.'),
         match('Associe a representação ao significado.', [['Ponto de junção', 'Fios conectados'], ['Rótulos de nó iguais', 'Mesma rede'], ['GND', 'Referência definida no circuito']], 'Os símbolos identificam a conectividade e a referência, não necessariamente a posição física.'),
@@ -104,11 +89,11 @@ Terra (GND) pode ser apenas referência de $0\,\text{V}$ do circuito: não presu
     { id: 'of-banc-proto', title: 'Protoboard e boas práticas', parts: [
       { card: { title: 'Como as trilhas se conectam', body: t`Numa protoboard comum, grupos de cinco furos em cada lado da canaleta central formam nós separados; o padrão varia entre modelos. A canaleta permite instalar um CI DIP com uma fileira de pinos de cada lado. Trilhos laterais podem estar interrompidos no meio: confira com continuidade sem alimentação, em vez de presumir.
 
-As marcações + e − são apenas rótulos: a polaridade é definida pela ligação real da fonte.`, visual: protoLab(), tip: 'O controle representa uma contagem de nós, não uma imagem das conexões da sua protoboard.' }, exercises: [
+As marcações + e − são apenas rótulos: a polaridade é definida pela ligação real da fonte.` }, exercises: [
         mcq('Em uma protoboard comum, qual região separa as duas metades da área central?', ['A canaleta central', 'A cor dos jumpers', 'O rótulo do fabricante', 'O número da linha sozinho'], 0, 'A canaleta separa os grupos centrais e permite instalar CIs DIP atravessando-a.'),
         tf('Todo trilho lateral de toda protoboard é contínuo de ponta a ponta.', false, 'Alguns trilhos são interrompidos; confira o modelo com teste de continuidade desenergizado.'),
         mcq('Como instalar normalmente um CI DIP na área central?', ['Atravessando a canaleta central', 'Com todos os pinos no mesmo grupo de furos', 'Ligado diretamente à rede', 'Com as duas fileiras no mesmo nó'], 0, 'Ao atravessar a canaleta, as fileiras de pinos ficam em grupos separados.'),
-        inter('No modelo, ajuste a contagem para 4 nós distintos.', 'plot', protoLab().props, (v) => v?.p.x === 4, 'Ajuste nós para 4.', 'O controle indica quatro nós; conexões reais devem ser verificadas na placa.'),
+        num('Dois grupos de cinco furos ficam em lados opostos da canaleta e não estão ligados. Você usa três furos de cada grupo. Quantos nós distintos são usados?', 2, 'Os furos de cada grupo já estão unidos; a canaleta separa os dois grupos.'),
         gen((rng) => { const n = randInt(rng, 2, 6); return num(t`Há $${n}$ grupos independentes, cada um com 5 furos conectados. Quantos furos há nesses grupos?`, n * 5, t`$${n}\cdot 5=${n * 5}$ furos; grupos independentes continuam sendo nós distintos.`, { tol: 0.001 }); }),
         mcq('Dois terminais de um resistor entram no mesmo grupo de cinco furos. O que ocorre?', ['Ficam ligados ao mesmo nó e o resistor é contornado', 'O resistor passa a limitar toda a corrente da fonte', 'A resistência dobra', 'Os furos deixam de estar conectados'], 0, 'Os terminais compartilham o mesmo nó; não há diferença de potencial ideal no resistor.'),
         mcq('Como confirmar se um trilho lateral é dividido?', ['Com continuidade e circuito desenergizado', 'Tocando os polos da fonte', 'Pondo o amperímetro entre os polos', 'Supondo que a linha colorida seja contínua'], 0, 'Desenergize e teste continuidade entre os pontos do trilho; a marca impressa não garante ligação.'),

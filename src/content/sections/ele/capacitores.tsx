@@ -49,7 +49,7 @@ export const capacitores: UnitDef = {
         tf(t`Um capacitor ideal de capacitância fixa dobra sua carga em módulo quando a tensão dobra.`, true, t`Com $C$ constante, $Q=CV$ é proporcional a $V$.`),
         gen((rng) => { const c = randInt(rng, 2, 8); const v = randInt(rng, 2, 9); return num(t`Um capacitor de $${c}\,\mu\text{F}$ recebe $${v}\,\text{V}$. Calcule a carga em µC, como inteiro.`, c*v, t`$Q=CV=${c}\cdot${v}=${c*v}\,\mu\text{C}$.`, { unit: 'µC', tol: 0.5 }); }),
       ] },
-      { card: { title: 'Geometria e dielétrico', body: t`Para placas paralelas ideais, $C=\varepsilon A/d$: aumentar a área $A$ ou a permissividade $\varepsilon$ aumenta $C$; aumentar a separação $d$ diminui $C$. Respeite a tensão nominal do componente e a polaridade dos eletrolíticos.`, visual: chargeLab() }, exercises: [
+      { card: { title: 'Geometria e dielétrico', body: t`Para placas paralelas ideais, $C=\varepsilon A/d$: aumentar a área $A$ ou a permissividade $\varepsilon$ aumenta $C$; aumentar a separação $d$ diminui $C$. Respeite a tensão nominal do componente e a polaridade dos eletrolíticos.` }, exercises: [
         tf(t`Com geometria e material fixos, a capacitância ideal não depende da carga aplicada.`, true, t`A relação $C=\varepsilon A/d$ depende da geometria e do dielétrico.`),
         mcq(t`Se a área dobra, com $d$ e $\varepsilon$ fixos, a capacitância…`, ['dobra', 'cai à metade', 'quadruplica', 'não muda'], 0, t`$C$ é proporcional a $A$.`),
         mcq(t`Se a distância entre placas dobra, mantendo o resto fixo, a capacitância…`, ['cai à metade', 'dobra', 'quadruplica', 'não muda'], 0, t`$C$ é inversamente proporcional a $d$.`),
@@ -60,12 +60,12 @@ export const capacitores: UnitDef = {
       ] },
     ] },
     { id: 'el-cap-assoc', title: 'Associação de capacitores', parts: [
-      { card: { title: 'Paralelo', body: t`Em paralelo, os capacitores compartilham os mesmos dois nós e a mesma tensão. As cargas se somam: $C_T=C_1+C_2+\cdots$ e $Q_T=C_TV$.`, visual: chargeLab(), example: t`$2\,\mu\text{F}$ em paralelo com $3\,\mu\text{F}$ resultam em $5\,\mu\text{F}$.` }, exercises: [
+      { card: { title: 'Paralelo', body: t`Em paralelo, os capacitores compartilham os mesmos dois nós e a mesma tensão. As cargas se somam: $C_T=C_1+C_2+\cdots$ e $Q_T=C_TV$.`, example: t`$2\,\mu\text{F}$ em paralelo com $3\,\mu\text{F}$ resultam em $5\,\mu\text{F}$.` }, exercises: [
         tf(t`Capacitores em paralelo estão sujeitos à mesma tensão.`, true, t`Ambos estão ligados aos mesmos dois nós.`),
         num(t`Em paralelo, $2\,\mu\text{F}$ e $3\,\mu\text{F}$ equivalem a quantos µF? Dê um inteiro.`, 5, t`$C_T=2+3=5\,\mu\text{F}$.`, { unit: 'µF', tol: 0.5 }),
         num(t`O conjunto anterior recebe $10\,\text{V}$. Qual a carga total em µC? Dê um inteiro.`, 50, t`$Q_T=C_TV=5\cdot10=50\,\mu\text{C}$.`, { unit: 'µC', tol: 0.5 }),
         num(t`Em paralelo com uma fonte de $12\,\text{V}$, quanto vale a tensão em um dos capacitores, em V? Dê um inteiro.`, 12, t`Em paralelo cada capacitor recebe a tensão da fonte: $12\,\text{V}$.`, { unit: 'V', tol: 0.5 }),
-        labQuestion(),
+        num('Uma placa já tem um capacitor de 4 µF. Qual capacitância deve ser ligada em paralelo para obter 10 µF?', 6, 'Em paralelo as capacitâncias somam. Falta 10 − 4 = 6 µF.', { unit: 'µF' }),
         num(t`Em paralelo sob $10\,\text{V}$, um capacitor de $2\,\mu\text{F}$ e outro de $3\,\mu\text{F}$ guardam cargas de módulos diferentes. Qual a carga do maior em µC? Dê um inteiro.`, 30, t`$Q_2=C_2V=3\cdot10=30\,\mu\text{C}$.`, { unit: 'µC', tol: 0.5 }),
         gen((rng) => { const a = randInt(rng, 2, 8); const b = randInt(rng, 2, 8); return num(t`Em paralelo estão $${a}\,\mu\text{F}$ e $${b}\,\mu\text{F}$. Determine $C_T$ em µF como inteiro.`, a+b, t`$C_T=${a}+${b}=${a+b}\,\mu\text{F}$.`, { unit: 'µF', tol: 0.5 }); }),
       ] },

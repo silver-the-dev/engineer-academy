@@ -242,20 +242,21 @@ const taylorExpLab = () =>
 const taylorLab = () =>
   plot({
     view: { xMin: -5.2, xMax: 5.2, yMin: -2.2, yMax: 2.2 },
-    params: [{ key: 'n', label: 'n', min: 1, max: 11, step: 2, value: 3, color: C.p2, format: (v: number) => String(v) }],
+    params: [{ key: 'terms', label: 'grau n', min: 1, max: 6, step: 1, value: 2, color: C.p2, format: (v: number) => String(2 * v - 1) }],
     render: ({ p }: any) => (
       <>
         <FnCurve f={(x) => Math.sin(x)} color={C.gold} dash="6 4" width={2.5} />
-        <FnCurve f={(x) => taylorSin(x, p.n)} color={C.p2} width={3} />
+        <FnCurve f={(x) => taylorSin(x, 2 * p.terms - 1)} color={C.p2} width={3} />
         <Pt x={0} y={0} color={C.gold} r={4.5} />
-        <Pt x={2} y={taylorSin(2, p.n)} color={C.p2} r={5.5} />
+        <Pt x={2} y={taylorSin(2, 2 * p.terms - 1)} color={C.p2} r={5.5} />
       </>
     ),
     info: ({ p }: any) => {
-      const approx = taylorSin(2, p.n);
+      const n = 2 * p.terms - 1;
+      const approx = taylorSin(2, n);
       const exact = Math.sin(2);
       const err = Math.abs(exact - approx);
-      return t`Grau $n=${p.n}$: $P_{${p.n}}(2)=${fmt(approx, 4)}$ vs $\operatorname{sen}(2)=${fmt(exact, 4)}$ · erro $${fmt(err, 4)}$`;
+      return t`Grau $n=${n}$: $P_{${n}}(2)=${fmt(approx, 4)}$ vs $\operatorname{sen}(2)=${fmt(exact, 4)}$ · erro $${fmt(err, 4)}$`;
     },
   });
 
@@ -1401,7 +1402,7 @@ export const potencias: UnitDef = {
               t`No laboratório de $\operatorname{sen}x$, aumente o grau $n$ para o **menor** grau ímpar capaz de aproximar $\operatorname{sen}(2)$ com erro menor que $0{,}01$.`,
               'plot',
               taylorLab().props,
-              (v: any) => v && near(v.p.n, 7, 0.1),
+              (v: any) => v && v.p.terms === 4,
               t`$n=7$`,
               t`Em $x=2$: grau $5$ tem erro $0{,}024$; grau $7$ tem erro $0{,}0014<0{,}01$. Veja como o polinômio abraça mais voltas da onda!`,
             ),

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, inter, mcq, num, order, tf } from '../../helpers';
+import { gen, mcq, num, order, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
 import { Label } from '../../../components/plot/Plot';
 
@@ -15,8 +15,6 @@ const passos = (lines: string[]) => ({
     info: (k: number) => lines[k],
   },
 });
-const marcador = (prompt: string, target: number, min: number, max: number, explain: string) =>
-  inter(prompt, 'numberline', { min, max, step: 1, value: min }, (v: number) => v === target, `$${target}$`, explain);
 
 export const aritBinaria: UnitDef = {
   id: 'dg-arit', title: 'Aritmética binária', icon: '➕',
@@ -30,7 +28,7 @@ export const aritBinaria: UnitDef = {
         tf(t`Em $1+1+1$, escreve-se 1 e leva-se 1.`, true, t`$3=11_2$: o bit baixo é 1 e o transporte é 1.`),
         num(t`Calcule $10_2+1_2$. Digite os dígitos binários.`, 11, t`$2+1=3=11_2$.`),
         mcq(t`Na coluna $1+1+1$, qual é o transporte de saída?`, ['$1$', '$0$', '$2$', '$3$'], 0, t`$1+1+1=11_2$, com transporte 1.`),
-        marcador(t`Marque na reta decimal o valor do transporte final de $11_2+1_2$, em duas colunas.`, 1, 0, 3, t`$11_2+01_2=100_2$; o bit além das duas colunas é 1.`),
+        num(t`Qual é o bit de transporte final de $11_2+1_2$, em duas colunas?`, 1, t`$11_2+01_2=100_2$; o bit além das duas colunas é 1.`),
         gen((rng) => { const a = randInt(rng, 1, 7), b = randInt(rng, 1, 7); return num(t`Calcule $(${bin(a)})_2+(${bin(b)})_2$. Digite os dígitos binários.`, Number(bin(a+b)), t`Em decimal, $${a}+${b}=${a+b}$; em binário, $(${bin(a+b)})_2$.`); }),
         num(t`Calcule $111_2+1_2$. Digite os dígitos binários.`, 1000, t`As três colunas propagam o vai-um: $7+1=8=1000_2$.`),
       ] },
@@ -50,7 +48,7 @@ export const aritBinaria: UnitDef = {
         tf('Ao emprestar 1 da coluna vizinha, a coluna atual recebe 2 unidades de seu próprio peso.', true, t`Cada coluna vale o dobro da coluna à direita; por isso recebe $10_2$ unidades.`),
         num(t`Calcule $11_2-1_2$. Digite os dígitos binários.`, 10, t`$3-1=2=10_2$.`),
         num(t`Calcule $100_2-1_2$. Digite os dígitos binários.`, 11, t`O empréstimo atravessa a coluna zero: $4-1=3=11_2$.`),
-        marcador(t`Em $110_2-011_2$, marque o resultado em decimal.`, 3, 0, 7, t`$110_2=6$ e $011_2=3$; logo $6-3=3$.`),
+        num(t`Em $110_2-011_2$, qual é o resultado em decimal?`, 3, t`$110_2=6$ e $011_2=3$; logo $6-3=3$.`),
         gen((rng) => { const a = randInt(rng, 5, 15), b = randInt(rng, 1, a-1); return num(t`Calcule $(${bin(a)})_2-(${bin(b)})_2$. Digite os dígitos binários.`, Number(bin(a-b)), t`$${a}-${b}=${a-b}=(${bin(a-b)})_2$.`); }),
         num(t`Calcule $10000_2-11_2$. Digite os dígitos binários.`, 1101, t`$16-3=13=1101_2$; o empréstimo se propaga pelos zeros.`),
       ] },
@@ -70,7 +68,7 @@ export const aritBinaria: UnitDef = {
         mcq(t`Em 4 bits com sinal, $1111$ representa…`, ['$-1$', '$15$', '$-7$', '$1$'], 0, t`$-8+4+2+1=-1$.`),
         num(t`Qual o menor valor decimal em complemento de 2 com 4 bits?`, -8, t`A faixa é de $-2^3=-8$ a $2^3-1=7$.`),
         tf(t`Em 4 bits com sinal, $1000$ representa $-8$.`, true, t`O único bit ligado tem peso $-8$.`),
-        marcador(t`Marque em decimal o valor de $1011$ em complemento de 2 com 4 bits.`, -5, -8, 7, t`$-8+2+1=-5$.`),
+        num(t`Qual é o valor decimal de $1011$ em complemento de 2 com 4 bits?`, -5, t`$-8+2+1=-5$.`),
         gen((rng) => { const x = randInt(rng, 1, 7), bits = bin(16-x).padStart(4, '0'); return mcq(t`Qual é o valor decimal de $${bits}$ em complemento de 2 com 4 bits?`, [`$-${x}$`, `$${16-x}$`, `$${x}$`, `$-${x+8}$`], 0, t`O padrão vale $${16-x}-16=-${x}$ em complemento de 2 de 4 bits.`); }),
         mcq(t`Qual padrão representa $-6$ em 4 bits?`, ['$1010$', '$0110$', '$1001$', '$1110$'], 0, t`$+6=0110$; inverta para $1001$ e some 1: $1010$.`),
       ] },
@@ -89,7 +87,7 @@ export const aritBinaria: UnitDef = {
         num(t`Quanto é $1_2\times 0_2$?`, 0, t`Qualquer bit multiplicado por zero é zero.`),
         tf(t`Multiplicar $101_2$ por $10_2$ dá $1010_2$.`, true, t`Multiplicar por 2 desloca o padrão uma posição à esquerda: $5\times2=10$.`),
         num(t`Calcule $11_2\times 10_2$. Digite os dígitos binários.`, 110, t`$3\times2=6=110_2$.`),
-        marcador(t`Marque em decimal o produto $101_2\times11_2$.`, 15, 0, 16, t`$101_2=5$ e $11_2=3$; $5\times3=15$.`),
+        num(t`Qual é o valor decimal do produto $101_2\times11_2$?`, 15, t`$101_2=5$ e $11_2=3$; $5\times3=15$.`),
         mcq(t`Qual produto parcial corresponde ao bit de peso 4 em $101_2\times101_2$?`, ['$10100_2$', '$101_2$', '$1010_2$', '$0_2$'], 0, t`O bit é 1 e está duas posições à esquerda: $101_2$ deslocado duas posições é $10100_2$.`),
         gen((rng) => { const a = randInt(rng, 2, 7), b = randInt(rng, 2, 5); return num(t`Calcule $(${bin(a)})_2\times(${bin(b)})_2$. Digite os dígitos binários.`, Number(bin(a*b)), t`$${a}\times${b}=${a*b}=(${bin(a*b)})_2$.`); }),
         num(t`Calcule $101_2\times101_2$. Digite os dígitos binários.`, 11001, t`$101_2+10100_2=11001_2$; em decimal, $5\times5=25$.`),

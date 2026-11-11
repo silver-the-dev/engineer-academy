@@ -23,18 +23,6 @@ const uartLab = () => plot({
 }, 200);
 
 // Um byte genérico, transmitido MSB primeiro; os controles alteram os dados.
-const byteLab = (label: string) => plot({
-  view: { xMin: 0, xMax: 8, yMin: -0.4, yMax: 1.5 }, grid: false,
-  params: [{ key: 'valor', label, min: 0, max: 15, step: 1, value: 3, color: C.p3 }],
-  render: ({ p }: any) => {
-    const bits = Array.from({ length: 8 }, (_, i) => (p.valor >> (7 - i)) & 1);
-    const pts: [number, number][] = [[0, bits[0]]];
-    bits.forEach((b, i) => { if (i) pts.push([i, bits[i - 1]], [i, b]); pts.push([i + 1, b]); });
-    return <PolylineW pts={pts} color={C.p3} width={3} />;
-  },
-  info: ({ p }: any) => `Da esquerda para a direita, MSB primeiro: ${p.valor.toString(2).padStart(8, '0')}.`,
-}, 200);
-
 const spiLab = () => plot({
   view: { xMin: 0, xMax: 4, yMin: -0.4, yMax: 1.5 }, grid: false,
   params: [
@@ -53,11 +41,6 @@ const spiLab = () => plot({
   info: ({ p }: any) => `Repouso: ${p.cpol}. Modo ${2 * p.cpol + p.cpha}: amostre na ${p.cpha ? 'segunda' : 'primeira'} borda de cada ciclo.`,
 }, 200);
 
-const setByte = (target: number, context: string) => inter(
-  `Ajuste o controle para representar ${target} ${context}.`, 'plot', byteLab('valor').props,
-  (v) => v.p.valor === target, `valor = ${target}`,
-  `O controle determina o byte; ${target} em binário é ${target.toString(2).padStart(8, '0')}, da esquerda para a direita.`,
-);
 const countGen = (thing: string, factor: number, unit: string) => gen((rng) => {
   const n = randInt(rng, 2, 8);
   return num(`Cada ${thing} usa ${factor} ${unit}. Para ${n}, quantos ${unit} são necessários?`, n * factor,
@@ -80,7 +63,7 @@ export const comunicacao: UnitDef = {
             num('Em 8E1, quantos bits há no quadro, incluindo start e stop?', 11, '1 + 8 + 1 + 1 = 11 bits.', { unit: 'bits' }),
             mcq('No byte 5, qual é a sequência dos quatro primeiros bits de dados transmitidos?', ['1, 0, 1, 0', '0, 1, 0, 1', '0, 0, 0, 1', '1, 1, 0, 0'], 0, '5 = 00000101 em ordem usual; da direita para a esquerda saem 1, 0, 1, 0.'),
             gen((rng) => { const n = randInt(rng, 1, 15); const parity = n.toString(2).split('1').length - 1; return num(`Em 8E1, qual bit de paridade par completa o byte ${n}? Digite 0 ou 1.`, parity % 2, `O byte tem ${parity} bits 1; a paridade é ${parity % 2} para completar um total par.`); }),
-            inter('Ajuste o byte UART para 9 e observe seus bits no gráfico.', 'plot', uartLab().props, (v) => v.p.byte === 9, 'byte = 9', '9 = 00001001: os bits 0 e 3 são 1; a paridade par é 0.'),
+            inter('Encontre no quadro UART o byte cujos bits de dados, do primeiro ao último transmitido, são 1 0 0 1 0 0 0 0.', 'plot', uartLab().props, (v) => v.p.byte === 9, 'Byte 9.', 'UART transmite LSB primeiro. Os bits de pesos 1 e 8 estão em nível alto, somando 9.'),
           ] },
         { card: [{ title: 'Velocidade e ligação', body: t`Em UART binária, o baud rate é a taxa de bits na linha: $T_{bit}=1/B$. Em 9600 baud, cada bit dura aproximadamente $104,17\,\mu\text{s}$. Em 8N1, cada byte ocupa 10 bits; sem intervalos, a vazão útil máxima é $B/10$ bytes/s. Cruze TX com RX e compartilhe GND, respeitando níveis de tensão.`, visual: code('void setup() {\n  Serial.begin(9600);\n}\nvoid loop() {\n  Serial.println("Oi");\n  delay(1000);\n}', [2], 'Arduino: UART') }],
           exercises: [
@@ -96,7 +79,7 @@ export const comunicacao: UnitDef = {
     },
     {
       id: 'mc-com-i2c', title: 'I²C', parts: [
-        { card: { title: 'Endereço e reconhecimento', body: 'I²C usa SDA para dados e SCL para clock. Após START, o controlador envia endereço de 7 bits, MSB primeiro, seguido de R/W: 0 escreve e 1 lê. No nono clock o receptor confirma com ACK baixo; NACK é alto. STOP encerra a transação.', visual: byteLab('byte'), example: 'Endereço 0x3C: byte de escrita 0x78 e byte de leitura 0x79. APIs frequentemente recebem só 0x3C.' },
+        { card: { title: 'Endereço e reconhecimento', body: 'I²C usa SDA para dados e SCL para clock. Após START, o controlador envia endereço de 7 bits, MSB primeiro, seguido de R/W: 0 escreve e 1 lê. No nono clock o receptor confirma com ACK baixo; NACK é alto. STOP encerra a transação.', example: 'Endereço 0x3C: byte de escrita 0x78 e byte de leitura 0x79. APIs frequentemente recebem só 0x3C.' },
           exercises: [
             mcq('Qual linha transporta o clock I²C?', ['SCL', 'SDA', 'TX', 'CS'], 0, 'SCL é o clock; SDA transporta os dados.'),
             tf('No campo R/W, 1 solicita leitura.', true, 'R/W = 1 indica leitura do periférico pelo controlador.'),
@@ -104,7 +87,7 @@ export const comunicacao: UnitDef = {
             mcq('Qual nível representa ACK no nono clock?', ['Baixo', 'Alto', 'Alternado', 'Desconectado sempre'], 0, 'O receptor puxa SDA para baixo durante o nono clock para confirmar.'),
             order('Ordene uma escrita simples após START.', ['Endereço + W', 'ACK do endereço', 'Byte de dados', 'ACK dos dados', 'STOP'], 'O receptor confirma cada byte no nono clock antes do STOP.'),
             gen((rng) => { const a = randInt(rng, 8, 15); return num(`Endereço de 7 bits ${a} decimal: qual o byte de endereço de escrita em decimal?`, 2 * a, `Desloque o endereço uma posição e acrescente W = 0: 2 × ${a} = ${2 * a}.`); }),
-            setByte(7, 'no byte observado, em decimal'),
+            num('Um controlador vai escrever no dispositivo I²C de endereço de 7 bits 0x22. Qual byte decimal ele envia logo após START?', 68, 'O endereço é deslocado uma posição para acomodar R/W = 0. 0x22 é 34, e 34 × 2 = 68.'),
           ] },
         { card: { title: 'Pull-ups e barramento', body: t`As saídas I²C usuais são dreno aberto: puxam a linha para baixo ou a liberam. Resistores de pull-up levam SDA e SCL ao nível alto. Em $3,3\,\text{V}$ com $3,3\,\text{k}\Omega$, a corrente ideal em nível baixo é $1\,\text{mA}$. A capacitância e a resistência influenciam a subida; confira limites dos dispositivos e tensão do barramento.`, visual: code('#include <Wire.h>\nvoid setup() {\n  Wire.begin();\n  Wire.beginTransmission(0x3C);\n  byte erro = Wire.endTransmission();\n}', [4, 5], 'Sonda de endereço') },
           exercises: [
@@ -120,14 +103,14 @@ export const comunicacao: UnitDef = {
     },
     {
       id: 'mc-com-spi', title: 'SPI', parts: [
-        { card: { title: 'Linhas e seleção', body: 'SPI usa SCK, dados do controlador para o periférico (MOSI), dados no sentido contrário (MISO) e seleção CS. Em geral cada periférico tem CS próprio, ativo em nível baixo. O clock é gerado pelo controlador; envio e recepção podem ocorrer simultaneamente.', visual: byteLab('dados') },
+        { card: { title: 'Linhas e seleção', body: 'SPI usa SCK, dados do controlador para o periférico (MOSI), dados no sentido contrário (MISO) e seleção CS. Em geral cada periférico tem CS próprio, ativo em nível baixo. O clock é gerado pelo controlador; envio e recepção podem ocorrer simultaneamente.' },
           exercises: [
             mcq('Qual linha leva dados do controlador ao periférico?', ['MOSI', 'MISO', 'SCK', 'CS'], 0, 'MOSI significa saída do controlador e entrada do periférico.'),
             tf('SPI pode enviar e receber bits simultaneamente.', true, 'MOSI e MISO são linhas separadas e podem operar no mesmo clock.'),
             match('Associe as linhas às funções.', [['SCK', 'Clock'], ['CS', 'Seleção'], ['MISO', 'Dados para o controlador']], 'SCK sincroniza; CS seleciona; MISO devolve dados.'),
             num('Quantos pulsos de clock transferem um byte SPI comum?', 8, 'Um pulso por bit: 8 pulsos por byte.', { unit: 'pulsos' }),
             countGen('byte SPI', 8, 'pulsos'),
-            setByte(10, 'no byte MOSI de exemplo'),
+            num('Com CS ativo, o controlador SPI envia 0x0A, do bit mais significativo para o menos significativo. Quantos dos oito bits em MOSI ficam em nível alto?', 2, '0x0A é 00001010; apenas dois bits são 1.'),
             mcq('Dois dispositivos SPI comuns compartilham SCK, MOSI e MISO. Como selecioná-los separadamente?', ['Use um CS para cada dispositivo', 'Una seus CS e ative ambos', 'Remova o GND', 'Troque MOSI por alimentação'], 0, 'CS independente permite selecionar apenas o periférico desejado.'),
           ] },
         { card: { title: 'CPOL e CPHA', body: 'CPOL define o nível de repouso do clock; CPHA define a borda de amostragem: 0 na primeira borda após o repouso, 1 na segunda. Modo = 2 × CPOL + CPHA. No modo 0, o repouso é baixo e a amostragem ocorre na borda de subida. Ajuste os controles para explorar os quatro modos.', visual: spiLab(), tip: 'Primeira e segunda são relativas ao início do ciclo; não significam sempre subida e descida.' },
@@ -137,20 +120,20 @@ export const comunicacao: UnitDef = {
             num('Qual é o número do modo com CPOL = 1 e CPHA = 0?', 2, 'Modo = 2 × 1 + 0 = 2.'),
             gen((rng) => { const cpol = randInt(rng, 0, 1), cpha = randInt(rng, 0, 1); return num(`Com CPOL = ${cpol} e CPHA = ${cpha}, qual é o modo SPI?`, 2 * cpol + cpha, `Modo = 2 × ${cpol} + ${cpha} = ${2 * cpol + cpha}.`); }),
             mcq('No modo 2, em qual borda ocorre a amostragem?', ['Descida', 'Subida', 'Em ambas', 'Sem borda'], 0, 'Modo 2 tem CPOL = 1 e CPHA = 0: primeira borda sai do alto para baixo.'),
-            inter('Ajuste o gráfico para o modo 3.', 'plot', spiLab().props, (v) => v.p.cpol === 1 && v.p.cpha === 1, 'CPOL = 1 e CPHA = 1', 'Modo 3 = 2 × 1 + 1; o repouso é alto e a amostra ocorre na segunda borda.'),
+            inter('Um periférico SPI exige clock em repouso alto e amostragem na segunda borda. Configure os dois controles e compare as formas de onda.', 'plot', spiLab().props, (v) => v.p.cpol === 1 && v.p.cpha === 1, 'CPOL = 1 e CPHA = 1 (modo 3).', 'CPOL determina o repouso; CPHA = 1 seleciona a segunda borda, que é de subida neste modo.'),
             mcq('Controlador e periférico usam modos SPI diferentes. Qual efeito é possível?', ['Amostragem na borda errada e dados incorretos', 'Endereço I²C muda', 'A alimentação dobra', 'O byte sempre é corrigido'], 0, 'A borda de amostragem pode cair durante uma transição de dados; configure o modo exigido.'),
           ] },
       ],
     },
     {
       id: 'mc-com-disp', title: 'Displays e armazenamento', parts: [
-        { card: [{ title: 'Display e RTC', body: 'Um OLED pode usar I²C ou SPI conforme o módulo. No I²C, display e RTC podem compartilhar SDA/SCL quando seus endereços não conflitam. Confira tensão, pinagem e controlador do display; bibliotecas e endereços dependem do módulo.', visual: byteLab('dados') }, { title: 'Atualização da tela', body: 'Atualize apenas quando houver novos dados ou em uma cadência definida. Um buffer permite compor a imagem antes de enviá-la, reduzindo cintilação em muitos displays.', visual: code('if (agora - anterior >= 1000) {\n  anterior = agora;\n  atualizarTela();\n}', undefined, 'Atualização periódica') }],
+        { card: [{ title: 'Display e RTC', body: 'Um OLED pode usar I²C ou SPI conforme o módulo. No I²C, display e RTC podem compartilhar SDA/SCL quando seus endereços não conflitam. Confira tensão, pinagem e controlador do display; bibliotecas e endereços dependem do módulo.' }, { title: 'Atualização da tela', body: 'Atualize apenas quando houver novos dados ou em uma cadência definida. Um buffer permite compor a imagem antes de enviá-la, reduzindo cintilação em muitos displays.', visual: code('if (agora - anterior >= 1000) {\n  anterior = agora;\n  atualizarTela();\n}', undefined, 'Atualização periódica') }],
           exercises: [
             mcq('Para que serve um RTC?', ['Manter data e hora', 'Converter SPI em UART sempre', 'Alimentar o display', 'Substituir todos os sensores'], 0, 'O RTC mantém uma contagem de data e hora; alguns modelos têm bateria de backup.'),
             tf('OLED e RTC I²C podem compartilhar as linhas quando usam endereços diferentes.', true, 'O endereço seleciona o destinatário no barramento compartilhado.'),
             num('Uma tela de 16 colunas por 2 linhas tem quantas posições de caracteres?', 32, '16 × 2 = 32 posições.', { unit: 'posições' }),
             countGen('linha de 16 caracteres', 16, 'posições'),
-            setByte(6, 'como byte de dados para o display'),
+            mcq('Depois de conectar OLED e RTC ao mesmo barramento I²C, ambos respondem ao mesmo endereço. O que precisa mudar?', ['O endereço de um módulo ou a separação dos barramentos', 'A ordem de desenho no display', 'O texto enviado ao RTC', 'O valor binário do último byte'], 0, 'O endereço seleciona o periférico. Sem endereços distintos ou barramentos separados, os dois responderão juntos.'),
             mcq('Qual cuidado reduz cintilação ao atualizar um display?', ['Compor em buffer e atualizar na cadência necessária', 'Apagar e redesenhar continuamente sem necessidade', 'Retirar o GND', 'Enviar dados em tensão incompatível'], 0, 'Compor antes e atualizar somente quando necessário reduz redesenhos visíveis.'),
             mcq('O RTC com bateria compatível perde a hora após desligar a placa. O que verificar?', ['Bateria, configuração e alimentação de backup', 'Somente o tamanho do texto', 'Somente a cor do OLED', 'O baud da UART apenas'], 0, 'Uma bateria ausente ou descarregada, ou configuração inadequada, pode interromper a contagem.'),
           ] },
@@ -168,13 +151,13 @@ export const comunicacao: UnitDef = {
     },
     {
       id: 'mc-com-debug', title: 'Depuração e analisador lógico', parts: [
-        { card: { title: 'Do sintoma à hipótese', body: 'Comece por alimentação, GND comum, tensão e pinagem; depois confira configuração de protocolo e código. Um analisador lógico registra níveis digitais ao longo do tempo. Ajuste limiar e taxa de amostragem conforme o sinal e o instrumento; ele não substitui o osciloscópio para medir detalhes analógicos.', visual: byteLab('amostra') },
+        { card: { title: 'Do sintoma à hipótese', body: 'Comece por alimentação, GND comum, tensão e pinagem; depois confira configuração de protocolo e código. Um analisador lógico registra níveis digitais ao longo do tempo. Ajuste limiar e taxa de amostragem conforme o sinal e o instrumento; ele não substitui o osciloscópio para medir detalhes analógicos.' },
           exercises: [
             mcq('Qual ferramenta registra vários sinais digitais ao longo do tempo?', ['Analisador lógico', 'Chave de fenda', 'Dissipador', 'Fusível'], 0, 'O analisador captura canais digitais e pode decodificar protocolos.'),
             tf('A referência GND do analisador deve estar ligada ao GND do circuito medido.', true, 'A referência comum permite interpretar os níveis em relação ao circuito.'),
             mcq('Qual instrumento é mais apropriado para inspecionar a forma analógica de uma borda?', ['Osciloscópio', 'Editor de texto', 'Compilador', 'Relógio RTC'], 0, 'O osciloscópio mostra tensão no tempo e ajuda a investigar subida, ruído e overshoot.'),
             gen((rng) => { const f = randInt(rng, 1, 5); return num(`Um sinal tem períodos de ${f} ms. Qual a duração de 4 períodos em ms?`, 4 * f, `4 × ${f} = ${4 * f} ms.`, { unit: 'ms' }); }),
-            setByte(11, 'como valor da captura digital'),
+            num('O analisador mostra os quatro bits 1011, com o mais significativo à esquerda. Qual é o valor em decimal?', 11, 'Os bits ativos têm pesos 8, 2 e 1: 8 + 2 + 1 = 11.'),
             mcq('Um periférico não responde. Qual primeira verificação é mais útil?', ['Alimentação, GND e pinagem', 'Alterar todas as bibliotecas ao acaso', 'Aumentar o tamanho da fonte', 'Apagar os registros de erro'], 0, 'Sem alimentação, referência e conexões corretas, a comunicação não funciona.'),
             mcq('Por que uma captura com poucas amostras por bit pode enganar?', ['Pode perder transições e posicionar bordas incorretamente', 'Garante o valor analógico exato', 'Muda fisicamente o protocolo', 'Corrige automaticamente o ruído'], 0, 'A resolução temporal insuficiente pode ocultar pulsos ou deslocar as bordas detectadas.'),
           ] },
@@ -184,7 +167,7 @@ export const comunicacao: UnitDef = {
             tf('Um stop baixo quando se espera stop alto pode indicar erro de enquadramento.', true, 'O receptor esperava nível alto no intervalo de stop; configuração ou sinal pode estar errado.'),
             num('Dados UART amostrados LSB primeiro: 1, 1, 0, 0, 0, 0, 0, 0. Qual valor decimal?', 3, 'Os bits 0 e 1 valem 1: 1 + 2 = 3.'),
             gen((rng) => { const bit = randInt(rng, 0, 3); return num(`Uma captura UART tem somente o bit de dados ${bit} em 1; os demais são 0. Qual o valor decimal?`, 2 ** bit, `O peso do bit ${bit} é 2^${bit} = ${2 ** bit}.`); }),
-            inter('Ajuste o quadro UART para o valor 10 e compare os dados LSB primeiro.', 'plot', uartLab().props, (v) => v.p.byte === 10, 'byte = 10', '10 = 00001010; saem 0, 1, 0, 1, 0, 0, 0, 0 e a paridade par é 0.'),
+            inter('Reconstrua uma captura UART que mostra, após o start, os dados 0 1 0 1 0 0 0 0 nessa ordem.', 'plot', uartLab().props, (v) => v.p.byte === 10, 'Byte 10.', 'Os bits altos têm pesos 2 e 8. A paridade par vale zero.'),
             mcq('No byte I²C 0x79, qual endereço de 7 bits e operação?', ['0x3C, leitura', '0x79, escrita', '0x3C, escrita', '0x78, leitura'], 0, '0x79 deslocado à direita dá 0x3C; o bit menos significativo 1 indica leitura.'),
             mcq('O decodificador SPI mostra bytes errados, mas há pulsos e CS. O que conferir?', ['Modo CPOL/CPHA, ordem dos bits e taxa de captura', 'Só a cor dos fios', 'Somente o nome do projeto', 'O valor da bateria do RTC'], 0, 'Uma borda ou ordem de bits incorreta muda a interpretação; captura insuficiente também perde informação.'),
           ] },

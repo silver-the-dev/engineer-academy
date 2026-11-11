@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { code, gen, inter, mcq, num, order, plot, tf } from '../../helpers';
+import { code, gen, mcq, num, order, tf } from '../../helpers';
 import { Pt } from '../../../components/plot/Plot';
 import { randInt } from '../../../lib/random';
 import { C } from '../../../theme';
@@ -13,20 +13,6 @@ const trilha = (etapas: string[]) => ({
     view: { xMin: -0.5, xMax: etapas.length - 0.5, yMin: -1, yMax: 1 },
     render: (k: number) => <Pt x={k} y={0} color={C.gold} r={6} />,
     info: (k: number) => etapas[k],
-  },
-});
-
-// O controle representa uma entrada inteira; a legenda mostra o efeito.
-const entrada = (tipo: 'if' | 'switch' | 'while' | 'for') => plot({
-  view: { xMin: -0.5, xMax: 5.5, yMin: -1, yMax: 1 },
-  params: [{ key: 'n', label: 'entrada', min: 0, max: 5, step: 1, value: 0 }],
-  render: ({ p }: any) => <Pt x={p.n} y={0} color={C.gold} r={6} />,
-  info: ({ p }: any) => {
-    const n = p.n as number;
-    if (tipo === 'if') return `Entrada ${n}: ${n >= 3 ? 'ramo verdadeiro' : 'ramo alternativo'}.`;
-    if (tipo === 'switch') return `Entrada ${n}: ${n === 1 ? 'caso 1' : n === 2 ? 'caso 2' : 'caso padrão'}.`;
-    if (tipo === 'while') return `De zero até antes de ${n}: ${n} iterações.`;
-    return `De 1 até ${n}, inclusive: ${n} iterações.`;
   },
 });
 
@@ -98,7 +84,7 @@ export const cFluxo: UnitDef = {
             mcq('Na listagem, qual ramo é executado?', ['o primeiro', 'o alternativo', 'os dois', 'nenhum'], 0, 'A comparação é verdadeira, portanto somente o primeiro ramo é executado.', { visual: code(decisao) }),
             gen((rng) => { const x = randInt(rng, 1, 8); const lim = 4; return num('Qual é o valor final de y na listagem?', x > lim ? 1 : 0, `A entrada é ${x}; a comparação com 4 é ${x > lim ? 'verdadeira' : 'falsa'}, então a saída é ${x > lim ? 1 : 0}.`, { visual: code(`int x = ${x};\nint y = 0;\nif (x > 4) y = 1;`) }); }),
             mcq('Qual operador compara igualdade entre valores?', ['==', '=', '+=', '++'], 0, 'O operador de igualdade compara os valores; o sinal simples atribui.'),
-            inter('Ajuste a entrada para 3 e observe qual ramo é escolhido.', 'plot', entrada('if').props, (v) => v?.p.n === 3, 'Entrada 3.', 'Como 3 alcança o limite, o ramo verdadeiro é escolhido.'),
+            num('Para o teste x > 3, qual é o menor inteiro que entra no ramo verdadeiro?', 4, 'O operador > é estrito: 3 ainda dá falso e 4 já dá verdadeiro.'),
             mcq('No teste destacado, qual é o erro provável se a intenção era comparar igualdade?', ['Há uma atribuição em vez de comparação.', 'A variável é incrementada.', 'O teste sempre compara igualdade.', 'O bloco alternativo é obrigatório.'], 0, 'A atribuição grava 1 e também produz valor não nulo; para comparar igualdade use o operador de comparação.', { visual: code('int x = 0;\nif (x = 1) {\n  x = 2;\n}', [2], 'Erro de comparação') }),
           ],
         },
@@ -128,7 +114,7 @@ export const cFluxo: UnitDef = {
             tf('O caso padrão pode atender valores sem caso correspondente.', true, 'Quando nenhum rótulo corresponde, o caso padrão é escolhido se estiver presente.'),
             mcq('O que a interrupção faz dentro de uma seleção?', ['Sai da seleção.', 'Reinicia a seleção.', 'Apaga a variável.', 'Sai necessariamente da função.'], 0, 'A interrupção sai da seleção envolvente e continua após ela.'),
             gen((rng) => { const x = randInt(rng, 0, 3); return num('Qual é o valor final de y?', x === 1 ? 5 : 9, `A entrada é ${x}; ${x === 1 ? 'o caso 1 atribui 5' : 'nenhum caso corresponde e o padrão atribui 9'}.`, { visual: code(`int x = ${x};\nint y = 0;\nswitch (x) {\n  case 1: y = 5; break;\n  default: y = 9;\n}`) }); }),
-            inter('Ajuste a entrada para escolher o caso 2 no laboratório.', 'plot', entrada('switch').props, (v) => v?.p.n === 2, 'Entrada 2.', 'O valor 2 corresponde ao rótulo do segundo caso.'),
+            num('No switch do exemplo, que valor recebe saida quando modo vale 8?', 30, 'Nenhum case corresponde a 8, então o bloco default atribui 30.', { visual: code(escolha.replace('modo = 2', 'modo = 8')) }),
             num('Qual valor final de y?', 5, 'O caso 1 soma 2; sem interrupção, a execução continua no caso 2 e soma 3, chegando a 5.', { visual: code(queda) }),
             mcq('Se nenhum caso corresponder e não houver caso padrão, o que acontece?', ['A seleção termina sem executar seus casos.', 'O primeiro caso é executado.', 'O programa reinicia.', 'O último caso é executado.'], 0, 'Sem correspondência e sem padrão, o fluxo segue depois da seleção.'),
           ],
@@ -159,7 +145,7 @@ export const cFluxo: UnitDef = {
             num('Qual o valor final de soma?', 3, 'As passagens somam 0, depois 1 e depois 2: resultado 3.', { visual: code(enquanto) }),
             tf('Se a condição inicial for falsa, o corpo pode executar zero vezes.', true, 'O teste ocorre antes da primeira passagem.'),
             gen((rng) => { const n = randInt(rng, 1, 6); return num('Quantas vezes o corpo executa?', n, `O contador percorre de 0 até ${n - 1}, totalizando ${n} passagens.`, { visual: code(`int i = 0;\nwhile (i < ${n}) {\n  i++;\n}`) }); }),
-            inter('Ajuste a entrada para obter 4 iterações.', 'plot', entrada('while').props, (v) => v?.p.n === 4, 'Entrada 4.', 'A contagem de zero até antes de 4 percorre 0, 1, 2 e 3: quatro passagens.'),
+            num('Um laço começa com i = 0 e incrementa i de dois em dois enquanto i < 7. Quantas vezes executa?', 4, 'O corpo é executado para i igual a 0, 2, 4 e 6.'),
             mcq('Qual problema ocorre na listagem?', ['A condição permanece verdadeira e o laço não termina.', 'O corpo executa uma vez.', 'O contador chega a 3.', 'A condição começa falsa.'], 0, 'O contador começa em zero e não muda; portanto permanece menor que 3.', { visual: code('int i = 0;\nwhile (i < 3) {\n  int x = 1;\n}') }),
             num('Qual o valor final de i?', 6, 'O contador passa por 0, 2 e 4 no corpo; depois avança para 6, quando o teste falha.', { visual: code('int i = 0;\nwhile (i < 5) {\n  i += 2;\n}') }),
           ],
@@ -190,7 +176,7 @@ export const cFluxo: UnitDef = {
             num('Qual é o valor final de soma?', 6, 'Somam-se 1, 2 e 3, obtendo 6.', { visual: code(para) }),
             tf('A inicialização do laço ocorre uma vez antes dos testes.', true, 'A inicialização prepara o contador; a condição é testada antes de cada passagem.'),
             gen((rng) => { const n = randInt(rng, 2, 6); return num('Quantas vezes o corpo executa?', n, `A contagem vai de 0 até ${n - 1}, com ${n} valores.`, { visual: code(`int n = 0;\nfor (int i = 0; i < ${n}; i++) {\n  n++;\n}`) }); }),
-            inter('Ajuste a entrada para que a contagem de 1 até ela, inclusive, tenha 5 passagens.', 'plot', entrada('for').props, (v) => v?.p.n === 5, 'Entrada 5.', 'A contagem percorre 1, 2, 3, 4 e 5, totalizando cinco passagens.'),
+            num('Um for começa em i = 1 e executa para i <= 5, mas pula i = 2 com continue. Quantas iterações chegam às instruções após o continue?', 4, 'As instruções finais executam para i igual a 1, 3, 4 e 5.'),
             num('Quantas vezes o corpo executa?', 4, 'A comparação inclui o limite: o contador assume 0, 1, 2 e 3. Esse detalhe pode causar um erro de uma posição.', { visual: code('int n = 0;\nfor (int i = 0; i <= 3; i++) {\n  n++;\n}') }),
             order('Ordene as etapas depois da inicialização, numa passagem que ocorre:', ['Testar a condição', 'Executar o corpo', 'Atualizar o contador', 'Testar novamente'], 'Com condição verdadeira, o corpo executa, o contador é atualizado e a condição é testada de novo.'),
           ],

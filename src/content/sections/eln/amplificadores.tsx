@@ -38,7 +38,6 @@ const adjust = (follower: boolean, high: boolean) => circuitEx(
 );
 const q = (prompt: string, correct: string, wrong: string[], explain: string) => mcq(prompt, [correct, ...wrong], 0, explain);
 const n = (prompt: string, answer: number, unit: string, explain: string, tol = 0.05) => num(prompt, answer, explain, { unit, tol });
-const interactive = (sign: number) => inter(t`No gráfico, ajuste o módulo do ganho para $3$ e compare a saída com a referência indicada.`, 'plot', graph(sign).props, v => v.p.a === 3, t`Ganho em módulo $3$.`, t`A saída tem pico de $3\,\text{V}$ para entrada de pico $1\,\text{V}$; o sinal do ganho indica a fase.`);
 const circuitTail = (follower: boolean) => [measure(follower), adjust(follower, true), adjust(follower, false)];
 
 export const amplificadores: UnitDef = {
@@ -53,16 +52,16 @@ export const amplificadores: UnitDef = {
         tf(t`$A_v<0$ indica inversão de fase para senoides na mesma frequência.`, true, t`O sinal negativo corresponde a uma diferença de fase de $180^\circ$ no modelo real.`),
         n(t`Entrada de pico $0,2\,\text{V}$ e saída de pico $1,0\,\text{V}$. Qual o módulo do ganho, com uma casa decimal?`, 5, '', t`$|A_v|=1,0/0,2=5,0$.`),
         gen(rng => { const a = randInt(rng, 2, 8); return n(t`Uma entrada de pico $0,1\,\text{V}$ passa por ganho $${a}$. Qual a saída de pico em V, com uma casa decimal?`, a / 10, 'V', t`$V_{o,p}=${a}\cdot0,1=${fmt(a / 10, 1)}\,\text{V}$.`); }),
-        interactive(-1),
+        inter('A entrada tem pico de 1 V. Ajuste o estágio inversor para que a saída tenha pico de 3 V e máxima quando a entrada for mínima.', 'plot', graph(-1).props, v => v.p.a === 3, 'Ganho de tensão −3.', 'O sinal negativo indica inversão; o módulo 3 triplica o pico.'),
         q(t`No osciloscópio, os picos positivos da entrada coincidem com os negativos da saída. Qual a fase relativa?`, t`$180^\circ$`, [t`$0^\circ$`, t`$90^\circ$`, t`$45^\circ$`], t`Senoides na mesma frequência e em oposição têm defasagem de $180^\circ$.`),
         n(t`Uma entrada de $20\,\text{mV}$ de pico produz saída invertida de $100\,\text{mV}$ de pico. Qual $A_v$ assinado, com uma casa decimal?`, -5, '', t`$A_v=-100/20=-5,0$; o sinal registra a inversão.`),
       ] },
-      { card: { title: 'Escala logarítmica', body: t`Para potência, $G_P=10\log_{10}(P_o/P_i)$. Para tensão, use $G_V=20\log_{10}|V_o/V_i|$. O ganho em tensão em dB coincide com o ganho de potência em dB quando as resistências de entrada e saída comparadas são iguais. Ganhos em dB somam em cascata.`, visual: graph(1) }, exercises: [
+      { card: { title: 'Escala logarítmica', body: t`Para potência, $G_P=10\log_{10}(P_o/P_i)$. Para tensão, use $G_V=20\log_{10}|V_o/V_i|$. O ganho em tensão em dB coincide com o ganho de potência em dB quando as resistências de entrada e saída comparadas são iguais. Ganhos em dB somam em cascata.` }, exercises: [
         q(t`Qual expressão calcula o ganho de potência em dB?`, t`$10\log_{10}(P_o/P_i)$`, [t`$20\log_{10}(P_o/P_i)$`, t`$P_o-P_i$`, t`$10(P_o/P_i)$`], t`Por definição de decibel de potência, multiplique o logaritmo da razão por 10.`),
         tf(t`$0\,\text{dB}$ de ganho de tensão corresponde a razão de módulos igual a 1.`, true, t`$20\log_{10}1=0\,\text{dB}$.`),
         n(t`Uma razão de tensão de $10$ corresponde a quantos dB? Dê uma casa decimal.`, 20, 'dB', t`$20\log_{10}10=20\,\text{dB}$.`),
         gen(rng => { const k = randInt(rng, 1, 3); return n(t`A razão de potência é $10^{${k}}$. Calcule o ganho em dB, com uma casa decimal.`, 10 * k, 'dB', t`$10\log_{10}(10^{${k}})=10\cdot${k}=${10 * k}\,\text{dB}$.`); }),
-        interactive(1),
+        num('Um estágio eleva a tensão de pico de 0,2 V para 2 V. Qual é o ganho em tensão em dB?', 20, 'A razão é 10; 20 log₁₀(10) = 20 dB.', { unit: 'dB' }),
         n(t`Dois estágios têm ganhos de tensão de $6\,\text{dB}$ e $14\,\text{dB}$. Qual o ganho total em dB, com uma casa decimal?`, 20, 'dB', t`Em cascata, somam-se os ganhos expressos em dB: $6+14=20\,\text{dB}$.`),
         n(t`Para razão de tensão $2$, calcule o ganho em dB com duas casas decimais.`, 20 * Math.log10(2), 'dB', t`$20\log_{10}2\approx6,02\,\text{dB}$.`, 0.005),
       ] },
@@ -100,21 +99,21 @@ export const amplificadores: UnitDef = {
       ] },
     ] },
     { id: 'ea-amp-classes', title: 'Classes de amplificadores', parts: [
-      { card: { title: 'Ângulo de condução', body: t`A classe descreve a fração do ciclo durante a qual cada dispositivo conduz: A conduz $360^\circ$; B, idealmente $180^\circ$; AB, mais de $180^\circ$ e menos de $360^\circ$. Em push-pull, dois dispositivos complementares podem compor o ciclo completo.`, visual: graph(1) }, exercises: [
+      { card: { title: 'Ângulo de condução', body: t`A classe descreve a fração do ciclo durante a qual cada dispositivo conduz: A conduz $360^\circ$; B, idealmente $180^\circ$; AB, mais de $180^\circ$ e menos de $360^\circ$. Em push-pull, dois dispositivos complementares podem compor o ciclo completo.` }, exercises: [
         q('Qual classe conduz durante todo o ciclo?', 'A', ['B', 'C', 'Nenhuma'], t`A classe A mantém o dispositivo conduzindo por $360^\circ$.`),
         tf(t`Na classe B ideal, cada dispositivo conduz por $180^\circ$.`, true, t`Cada dispositivo conduz metade do período: $180^\circ$ de $360^\circ$.`),
         n(t`Um dispositivo conduz por $270^\circ$ em cada ciclo. Qual fração do ciclo em %, com uma casa decimal?`, 75, '%', t`$270/360\cdot100=75,0\%$.`),
         gen(rng => { const k = randInt(rng, 1, 3); return n(t`Uma condução dura $${k}/4$ do ciclo. Qual o ângulo em graus, com uma casa decimal?`, k * 90, '°', t`$360^\circ\cdot${k}/4=${k * 90}^\circ$.`); }),
-        interactive(1),
+        num('Em um estágio push-pull de classe B ideal, quanto do ciclo cada transistor conduz, em graus?', 180, 'Cada dispositivo conduz apenas um semiciclo.', { unit: '°' }),
         q(t`Um dispositivo conduz por $220^\circ$. Qual classe descreve essa condução?`, 'AB', ['A', 'B ideal', 'C'], t`$180^\circ<220^\circ<360^\circ$, intervalo da classe AB.`),
         n(t`Para um ciclo de $20\,\text{ms}$, quanto tempo conduz um dispositivo classe B ideal? Responda em ms, com uma casa decimal.`, 10, 'ms', t`Metade de $20\,\text{ms}$ é $10,0\,\text{ms}$.`),
       ] },
-      { card: { title: 'Eficiência e distorção', body: t`Na classe B push-pull, a região próxima de zero pode apresentar distorção de cruzamento por causa das tensões de junção. Uma pequena polarização em AB reduz essa zona morta, mas aumenta a dissipação em repouso. Eficiência é $\eta=P_{out}/P_{DC}$; os limites dependem da topologia e do modelo.`, visual: graph(-1) }, exercises: [
+      { card: { title: 'Eficiência e distorção', body: t`Na classe B push-pull, a região próxima de zero pode apresentar distorção de cruzamento por causa das tensões de junção. Uma pequena polarização em AB reduz essa zona morta, mas aumenta a dissipação em repouso. Eficiência é $\eta=P_{out}/P_{DC}$; os limites dependem da topologia e do modelo.` }, exercises: [
         q('Que distorção pode aparecer perto de zero em push-pull classe B?', 'Distorção de cruzamento', ['Eco acústico', 'Refração', 'Distorção gravitacional'], 'As junções precisam de tensão para conduzir, criando uma região morta em torno de zero.'),
         tf('Uma polarização AB adequada reduz a zona morta em relação à classe B idealizada com junções reais.', true, 'A pequena corrente de repouso mantém os dispositivos próximos da condução durante a passagem por zero.'),
         n(t`Uma etapa entrega $4\,\text{W}$ à carga e recebe $10\,\text{W}$ DC. Qual a eficiência em %, com uma casa decimal?`, 40, '%', t`$\eta=4/10\cdot100=40,0\%$.`),
         gen(rng => { const p = randInt(rng, 2, 8); return n(t`Uma etapa recebe $10\,\text{W}$ DC e entrega $${p}\,\text{W}$ à carga. Qual a eficiência em %, com uma casa decimal?`, 10 * p, '%', t`$\eta=${p}/10\cdot100=${10 * p}\%$.`); }),
-        interactive(-1),
+        mcq('A saída de um estágio push-pull apresenta um entalhe ao cruzar zero, sem recorte nos picos. Qual causa combina com a observação?', ['A zona morta entre a condução dos dois transistores', 'Saturação nos picos da onda', 'Inversão de fase de 180 graus', 'Escala logarítmica do ganho'], 0, 'Próximo a zero, os dois dispositivos podem ficar cortados por causa das tensões de junção.'),
         q('Ao aumentar a polarização de repouso de B para AB, qual troca é esperada?', 'Menos zona morta e maior dissipação em repouso', ['Mais zona morta e menor dissipação sempre', 'Eficiência de 100% garantida', 'Ausência de necessidade de alimentação'], 'A sobreposição de condução reduz a zona morta, mas a corrente de repouso dissipa potência.'),
         n(t`Uma etapa recebe $20\,\text{W}$ DC e entrega $8\,\text{W}$ à carga. Desprezando outras saídas, qual potência dissipada em W, com uma casa decimal?`, 12, 'W', t`Pela conservação de energia, $P_{diss}=20-8=12,0\,\text{W}$.`),
       ] },

@@ -30,8 +30,8 @@ const sinesLab = () =>
     grid: false,
     points: [
       { id: 'A', x: 2 * Math.cos(2.4), y: 2 * Math.sin(2.4), color: C.p2, label: 'A' },
-      { id: 'B', x: 2 * Math.cos(-0.6), y: 2 * Math.sin(-0.6), color: C.p5, label: 'B' },
-      { id: 'C', x: 2 * Math.cos(1), y: 2 * Math.sin(1), color: C.gold, label: 'C' },
+      { id: 'B', x: 2 * Math.cos(-1.6), y: 2 * Math.sin(-1.6), color: C.p5, label: 'B' },
+      { id: 'C', x: 2 * Math.cos(0.4), y: 2 * Math.sin(0.4), color: C.gold, label: 'C' },
     ],
     constrain: onCircle(2),
     render: ({ pts }: any) => (
@@ -57,7 +57,7 @@ const ambiguousLab = () =>
     grid: false,
     params: [
       { key: 'A', label: '\\hat A', min: 15, max: 75, step: 1, value: 35, color: C.p2, format: (v: number) => v + '°' },
-      { key: 'a', label: 'a', min: 0.5, max: 4, step: 0.05, value: 2, color: C.gold },
+      { key: 'a', label: 'a', min: 0.5, max: 4, step: 0.05, value: 3.3, color: C.gold },
     ],
     render: ({ p }: any) => {
       const A = rad(p.A);

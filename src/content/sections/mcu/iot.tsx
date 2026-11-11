@@ -1,23 +1,10 @@
 import type { UnitDef } from '../../types';
-import { code, gen, inter, match, mcq, num, order, tf } from '../../helpers';
-import { fnLab } from '../../visuals';
-import { fmt, randInt } from '../../../lib/random';
+import { code, gen, match, mcq, num, order, tf } from '../../helpers';
+import { randInt } from '../../../lib/random';
 
 const t = String.raw;
 
 // Modelos idealizados para explorar relações antes de medir o hardware real.
-const lab = (label: string, max: number, value: number, factor: number, yMax: number) => fnLab({
-  f: (x, p) => factor * p.k * x,
-  params: [{ key: 'k', label, min: 0, max, step: 1, value }],
-  view: { xMin: 0, xMax: 1, yMin: 0, yMax },
-  info: (p) => t`No extremo direito: $${fmt(factor * p.k)}$.`,
-});
-const adcLab = () => lab('código (milhares)', 4, 1, 1, 4);
-const redeLab = () => lab('mensagens/min', 10, 2, 1, 10);
-const energiaLab = () => lab('duty (%)', 10, 2, 1, 10);
-const rtosLab = () => lab('períodos', 10, 2, 1, 10);
-const produtoLab = () => lab('amostras', 10, 2, 1, 10);
-
 export const iot: UnitDef = {
   id: 'mc-iot', title: 'ESP32 e Internet das Coisas', icon: '📶',
   subtitle: 'Do microcontrolador conectado ao produto',
@@ -27,7 +14,7 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-esp', title: 'ESP32: o que muda em relação ao Arduino', parts: [
         {
-          card: { title: 'Portar também é conferir tensões', body: t`Arduino é uma plataforma que inclui várias placas; compare aqui o Uno clássico de $5\,\text{V}$ com uma placa ESP32 típica de lógica $3,3\,\text{V}$. O ESP32 oferece Wi-Fi, Bluetooth e outros periféricos; pinos e recursos variam entre modelos. Antes de migrar, consulte o esquema da placa e os limites do chip. Um sinal de $5\,\text{V}$ não deve ser aplicado diretamente a uma entrada de $3,3\,\text{V}$ sem verificar tolerância. Use conversão de nível adequada e terra comum.`, visual: adcLab() },
+          card: { title: 'Portar também é conferir tensões', body: t`Arduino é uma plataforma que inclui várias placas; compare aqui o Uno clássico de $5\,\text{V}$ com uma placa ESP32 típica de lógica $3,3\,\text{V}$. O ESP32 oferece Wi-Fi, Bluetooth e outros periféricos; pinos e recursos variam entre modelos. Antes de migrar, consulte o esquema da placa e os limites do chip. Um sinal de $5\,\text{V}$ não deve ser aplicado diretamente a uma entrada de $3,3\,\text{V}$ sem verificar tolerância. Use conversão de nível adequada e terra comum.` },
           exercises: [
             mcq('Qual conectividade é comum no ESP32?', ['Wi-Fi e Bluetooth', 'Apenas cabo serial', 'Somente rádio AM', 'Nenhuma'], 0, 'Muitos ESP32 integram Wi-Fi e Bluetooth; confirme os recursos da variante.'),
             tf('Um pino de entrada de 3,3 V pode sempre receber 5 V diretamente.', false, 'A tolerância depende do componente; tensão acima do limite pode danificar a entrada.'),
@@ -44,7 +31,7 @@ export const iot: UnitDef = {
             num('Quantos códigos existem em 12 bits? Responda em códigos inteiros.', 4096, t`$2^{12}=4096$ códigos.`, { unit: 'códigos', tol: 0.5 }),
             num('Qual é o maior código sem sinal em 12 bits? Responda em códigos inteiros.', 4095, t`Os códigos começam em zero: $4096-1=4095$.`, { unit: 'códigos', tol: 0.5 }),
             tf('Um ADC real pode exigir calibração para melhorar a estimativa de tensão.', true, 'Referência, atenuação e não linearidade afetam a leitura real.'),
-            inter('No gráfico ideal, ajuste o controle para representar 3 milhares de códigos no extremo direito.', 'plot', adcLab().props, (v) => v.p.k === 3, 'Ajuste para 3.', 'Em x = 1, a altura coincide com o controle: 3 milhares.'),
+            num('Num ADC ideal de 12 bits, com fundo de escala 2,5 V, o sensor atinge o fundo de escala. Qual código máximo deve aparecer?', 4095, 'Há 4096 códigos, numerados de 0 a 4095. A tensão de fundo de escala corresponde ao último código.'),
             num(t`No modelo $c=4095V/V_{FS}$, com $V_{FS}=3,0\,\text{V}$ e $V=1,0\,\text{V}$, qual o código inteiro?`, 1365, t`$4095\cdot1/3=1365$.`, { unit: 'códigos', tol: 0.5 }),
             gen((rng) => { const n = randInt(rng, 1, 3); return num(t`Um ADC ideal de 12 bits usa $V_{FS}=4\,\text{V}$. Para $V=${n}\,\text{V}$, estime o código inteiro mais próximo.`, Math.round(4095 * n / 4), t`$c=4095\cdot${n}/4\approx${Math.round(4095 * n / 4)}$.`, { unit: 'códigos', tol: 0.5 }); }),
             mcq('Uma leitura analógica instável pede qual investigação?', ['Referência, ruído, faixa e aterramento', 'Supor que o sensor é digital', 'Aplicar 5 V sem verificar', 'Ignorar a calibração'], 0, 'Verifique o sinal e seus limites, alimentação, referência e ruído antes de interpretar o código.'),
@@ -55,13 +42,13 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-wifi', title: 'Wi-Fi, HTTP e MQTT', parts: [
         {
-          card: { title: 'Do rádio à aplicação', body: t`Wi-Fi conecta o dispositivo a uma rede. HTTP organiza requisições e respostas: um cliente pode pedir uma leitura a um servidor. Uma API remota exige conectividade além da rede local. Em HTTPS, TLS protege a comunicação quando certificados são validados. O gráfico mostra mensagens acumuladas em um minuto, supondo taxa constante; mova o controle.`, visual: redeLab() },
+          card: { title: 'Do rádio à aplicação', body: t`Wi-Fi conecta o dispositivo a uma rede. HTTP organiza requisições e respostas: um cliente pode pedir uma leitura a um servidor. Uma API remota exige conectividade além da rede local. Em HTTPS, TLS protege a comunicação quando certificados são validados.` },
           exercises: [
             mcq('Qual componente faz uma requisição HTTP?', ['Cliente', 'Resistor', 'ADC', 'Capacitor'], 0, 'O cliente envia uma requisição e o servidor responde.'),
             tf('Estar conectado ao Wi-Fi garante acesso à internet.', false, 'A rede local pode estar sem rota ou acesso à internet.'),
             match('Associe:', [['Wi-Fi', 'acesso sem fio à rede'], ['HTTP', 'requisição e resposta'], ['TLS', 'proteção do canal com validação']], 'Wi-Fi fornece acesso à rede; HTTP organiza a troca e TLS protege o canal quando bem configurado.'),
             gen((rng) => { const n = randInt(rng, 2, 8); return num(t`Um sensor envia $${n}$ requisições por minuto durante $5$ minutos. Quantas requisições inteiras?`, n * 5, t`$${n}\cdot5=${n * 5}$ requisições.`, { unit: 'requisições', tol: 0.5 }); }),
-            inter('Ajuste a taxa para 6 mensagens por minuto; no fim de um minuto o gráfico mostra 6 mensagens.', 'plot', redeLab().props, (v) => v.p.k === 6, 'Ajuste para 6.', 'Em um minuto, a quantidade é igual à taxa por minuto.'),
+            num('Um nó publica uma leitura a cada 10 s. Em 2 min, quantas mensagens publica sem contar o instante inicial?', 12, 'Dois minutos são 120 s. Dividindo por 10 s por mensagem, obtemos 12.'),
             mcq('Se a API não responde, o firmware deve:', ['tratar tempo limite e tentar novamente com espera', 'travar indefinidamente', 'ignorar qualquer erro', 'aumentar a tensão do pino'], 0, 'Timeout e nova tentativa espaçada evitam bloqueio indefinido e excesso de tráfego.'),
             tf('Desativar a validação de certificado elimina a autenticação confiável do servidor.', true, 'Sem validar o certificado, um intermediário pode se passar pelo servidor.'),
           ],
@@ -83,12 +70,12 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-energia', title: 'Baterias e economia de energia', parts: [
         {
-          card: { title: 'Corrente média e duty cycle', body: t`Capacidade em mAh é corrente vezes tempo. Se o sistema fica ativo por fração $d$ do ciclo, $I_{méd}=dI_{ativo}+(1-d)I_{sono}$. Use correntes medidas do conjunto, inclusive regulador e periféricos. No gráfico, o controle representa o duty em porcentagem; a altura no extremo direito corresponde à porcentagem.`, visual: energiaLab() },
+          card: { title: 'Corrente média e duty cycle', body: t`Capacidade em mAh é corrente vezes tempo. Se o sistema fica ativo por fração $d$ do ciclo, $I_{méd}=dI_{ativo}+(1-d)I_{sono}$. Use correntes medidas do conjunto, inclusive regulador e periféricos.` },
           exercises: [
             mcq('O que representa 1 mAh?', ['1 mA durante 1 h', '1 mA por segundo', '1 V durante 1 h', '1 W por segundo'], 0, 'mAh é unidade de carga: corrente em mA multiplicada por tempo em horas.'),
             num('Um nó acorda 2 s a cada 100 s. Qual duty cycle em %, sem casas decimais?', 2, t`$d=2/100=0,02=2\%$.`, { unit: '%', tol: 0.5 }),
             tf('A corrente de sono deve entrar na média, mesmo que seja pequena.', true, 'Ela atua durante a parte do ciclo em que o dispositivo dorme.'),
-            inter('Ajuste o duty para 5% no controle.', 'plot', energiaLab().props, (v) => v.p.k === 5, 'Ajuste para 5.', 'O controle está em porcentagem; 5 representa 5%.'),
+            num('Um sensor fica ativo por 50 ms em cada ciclo de 1 s. Calcule o duty em porcentagem.', 5, '1 s tem 1000 ms. A fração ativa é 50/1000 = 0,05, ou 5%.', { unit: '%' }),
             num(t`Um nó usa $100\,\text{mA}$ durante $10\%$ do ciclo e $1\,\text{mA}$ no restante. Qual a corrente média em mA, com uma casa decimal?`, 10.9, t`$0,1\cdot100+0,9\cdot1=10,9\,\text{mA}$.`, { unit: 'mA', tol: 0.05 }),
             gen((rng) => { const active = randInt(rng, 2, 9) * 10; return num(t`Um nó usa $${active}\,\text{mA}$ por $10\%$ do tempo e $0\,\text{mA}$ no restante, em modelo ideal. Qual a média em mA, sem casas decimais?`, active / 10, t`$I_{méd}=0,1\cdot${active}=${active / 10}\,\text{mA}$.`, { unit: 'mA', tol: 0.5 }); }),
             mcq('Para reduzir consumo médio sem perder leituras necessárias, uma possibilidade é:', ['reduzir o tempo ativo e medir o resultado', 'manter o rádio ligado permanentemente', 'ignorar a corrente de repouso', 'aumentar a frequência de envio sem avaliar'], 0, 'Menor tempo ativo pode reduzir a média; valide se ainda atende aos requisitos.'),
@@ -111,12 +98,12 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-rtos', title: 'Tarefas e noções de RTOS', parts: [
         {
-          card: { title: 'Concorrência e prioridades', body: t`Um RTOS organiza tarefas e suas prioridades. Uma tarefa pronta de maior prioridade normalmente preemp­ta outra de menor prioridade no mesmo núcleo, conforme o escalonador; tarefas bloqueadas aguardam evento ou tempo. Prioridade alta não torna uma tarefa mais rápida e pode privar as demais de CPU. O gráfico conta execuções periódicas ideais ao longo de um intervalo.`, visual: rtosLab() },
+          card: { title: 'Concorrência e prioridades', body: t`Um RTOS organiza tarefas e suas prioridades. Uma tarefa pronta de maior prioridade normalmente preemp­ta outra de menor prioridade no mesmo núcleo, conforme o escalonador; tarefas bloqueadas aguardam evento ou tempo. Prioridade alta não torna uma tarefa mais rápida e pode privar as demais de CPU.` },
           exercises: [
             mcq('O que uma tarefa bloqueada faz?', ['Aguarda uma condição ou prazo', 'Ocupa sempre toda a CPU', 'Apaga a memória', 'Muda a tensão do pino'], 0, 'Uma tarefa bloqueada não está pronta para executar enquanto aguarda evento ou tempo.'),
             tf('Uma tarefa sempre pronta e de alta prioridade pode impedir outra de baixa prioridade de executar.', true, 'No mesmo núcleo, a tarefa de menor prioridade pode sofrer inanição.'),
             num('Uma tarefa roda uma vez por segundo durante 10 segundos, começando após 1 s. Quantas execuções inteiras?', 10, 'Ela executa nos instantes 1, 2, ..., 10 s: 10 vezes.', { unit: 'execuções', tol: 0.5 }),
-            inter('Ajuste o controle para 8 períodos no intervalo representado.', 'plot', rtosLab().props, (v) => v.p.k === 8, 'Ajuste para 8.', 'No extremo direito, o número de períodos é o valor do controle.'),
+            num('Uma tarefa periódica registra uma leitura a cada 250 ms. Quantas leituras registra em 2 s, sem contar a inicial?', 8, 'Divida 2000 ms por 250 ms por execução: 8.'),
             gen((rng) => { const n = randInt(rng, 2, 9); return num(t`Uma tarefa periódica executa uma vez a cada $${n}\,\text{s}$, começando após o primeiro período. Quantas execuções em $${n * 4}\,\text{s}$?`, 4, t`$${n * 4}/${n}=4$ execuções.`, { unit: 'execuções', tol: 0.5 }); }),
             mcq('Qual tarefa merece prioridade conforme uma análise de prazo?', ['A que tem prazo crítico e precisa responder rapidamente', 'Sempre a que imprime mais texto', 'Sempre a criada primeiro', 'Sempre a que usa mais memória'], 0, 'Prioridades devem refletir prazos, tempo de execução e política do sistema.'),
             tf('Em um sistema com mais de um núcleo, a análise de concorrência deve considerar em qual núcleo cada tarefa pode executar.', true, 'Afinidade e disponibilidade de núcleos afetam o escalonamento.'),
@@ -139,12 +126,12 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-prod', title: 'Do protótipo ao produto', parts: [
         {
-          card: { title: 'Requisitos antes da montagem', body: t`Defina entradas, saídas, ambiente, alimentação, autonomia e critérios mensuráveis. Desenhe o caminho sensor → firmware → rede → interface e liste falhas possíveis. Um requisito verificável informa condição e limite; por exemplo, registrar uma leitura a cada 10 s. O gráfico representa a contagem de amostras durante um ensaio.`, visual: produtoLab() },
+          card: { title: 'Requisitos antes da montagem', body: t`Defina entradas, saídas, ambiente, alimentação, autonomia e critérios mensuráveis. Desenhe o caminho sensor → firmware → rede → interface e liste falhas possíveis. Um requisito verificável informa condição e limite; por exemplo, registrar uma leitura a cada 10 s.` },
           exercises: [
             mcq('Qual é um requisito verificável?', ['Registrar uma leitura a cada 10 s', 'Ser muito bom', 'Ter desempenho mágico', 'Ser moderno'], 0, 'O intervalo de 10 s pode ser medido e comparado ao requisito.'),
             match('Associe o bloco à função:', [['Sensor', 'mede a grandeza'], ['Firmware', 'processa e transmite'], ['Interface', 'mostra dados ao usuário']], 'O sensor mede, o firmware trata os dados e a interface os apresenta.'),
             tf('A alimentação e a faixa de operação devem constar na especificação.', true, 'Elas determinam limites de projeto e condições dos testes.'),
-            inter('Ajuste o gráfico para 7 amostras no fim do ensaio.', 'plot', produtoLab().props, (v) => v.p.k === 7, 'Ajuste para 7.', 'A contagem no fim do ensaio é igual ao ajuste.'),
+            num('Um teste de aceitação exige uma amostra a cada 10 s, começando em t = 10 s. Até t = 70 s, quantas amostras devem constar no log?', 7, 'Os instantes são 10, 20, 30, 40, 50, 60 e 70 s.'),
             gen((rng) => { const n = randInt(rng, 2, 9); return num(t`Um ensaio tem $${n}$ ciclos com $4$ leituras por ciclo. Quantas leituras inteiras são esperadas?`, n * 4, t`$${n}\cdot4=${n * 4}$ leituras.`, { unit: 'leituras', tol: 0.5 }); }),
             order('Ordene o desenvolvimento inicial:', ['Definir necessidade', 'Escrever requisitos mensuráveis', 'Desenhar arquitetura', 'Implementar e testar'], 'A necessidade orienta requisitos; eles guiam arquitetura, implementação e testes.'),
             mcq('Qual decisão precisa considerar o ambiente de uso?', ['Escolha de caixa e proteção dos conectores', 'Nome da variável apenas', 'Ordem alfabética dos arquivos apenas', 'Cor do gráfico apenas'], 0, 'Umidade, temperatura, acesso e esforços orientam caixa e conectores.'),

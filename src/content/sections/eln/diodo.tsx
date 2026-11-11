@@ -1,20 +1,11 @@
 import type { UnitDef } from '../../types';
-import { gen, inter, mcq, num, tf, near } from '../../helpers';
+import { gen, mcq, num, tf, near } from '../../helpers';
 import { circuit, circuitEx, circuitVisual, D, R, V, wires } from '../../circuits';
-import { fnLab } from '../../visuals';
 import { fmt, randInt } from '../../../lib/random';
 
 const t = String.raw;
 
 // Contagens ilustrativas, não concentrações físicas em equilíbrio.
-const portadores = () => fnLab({
-  view: { xMin: 0, xMax: 10, yMin: 0, yMax: 12 },
-  params: [{ key: 'n', label: 'Elétrons livres', min: 1, max: 10, step: 1, value: 3 }],
-  f: (_x, p) => p.n,
-  info: (p) => t`Contagem ilustrativa de elétrons livres: $${p.n}$.`,
-});
-
-// A fonte fornece tensão positiva no nó superior; o primeiro terminal do diodo é o anodo.
 const serie = (volts = 10.7, ohms = 1000, reverso = false) => circuit(
   V('fonte', [0, 0], [0, 3], volts, { locked: true, fixed: true }),
   wires([0, 0], [1, 0]), R('r1', [1, 0], [4, 0], ohms, { locked: true, min: 100, max: 5000, values: [500, 1000, 2000, 4000], show: ['i'] }),
@@ -59,20 +50,20 @@ export const diodos: UnitDef = {
 Defina $V_D=V_A-V_K$. A curva real é não linear; abaixo da ruptura há pequena corrente reversa. A PIV especifica a máxima tensão reversa repetitiva admissível: escolha-a acima do pico aplicado, com margem. Na primeira aproximação, diodo direto é curto ideal; na segunda, $V_D\approx0,7\,\text{V}$ para silício; na terceira, $V_D\approx0,7+I_Dr_d$. Em série, $I_D\approx(V_S-0,7)/R$ na segunda aproximação, se a hipótese de condução for consistente. A reta de carga é $I_D=(V_S-V_D)/R$; sua interseção com a curva dá o ponto Q.`,
   lessons: [
     { id: 'ea-semi-mat', title: 'Materiais semicondutores e dopagem', parts: [
-      { card: { title: 'Elétrons e lacunas', body: t`O silício tem quatro elétrons de valência e forma ligações covalentes. Energia térmica pode libertar um elétron, deixando uma **lacuna** que se comporta como portador positivo. No material intrínseco, elétrons e lacunas são criados aos pares: $n=p$. O gráfico mostra uma contagem ilustrativa, não uma escala de concentração real.`, visual: portadores() }, exercises: [
+      { card: { title: 'Elétrons e lacunas', body: t`O silício tem quatro elétrons de valência e forma ligações covalentes. Energia térmica pode libertar um elétron, deixando uma **lacuna** que se comporta como portador positivo. No material intrínseco, elétrons e lacunas são criados aos pares: $n=p$.` }, exercises: [
         mcq('Qual material é semicondutor?', ['Silício', 'Cobre', 'Vidro', 'Borracha'], 0, 'O silício tem condutividade intermediária e controlável por dopagem e temperatura.'),
         tf('Uma lacuna representa a ausência de um elétron em uma ligação.', true, 'A ausência pode se deslocar quando elétrons vizinhos ocupam a ligação, comportando-se como portador positivo.'),
         mcq('No silício intrínseco em equilíbrio, como se comparam as concentrações?', ['$n=p$', '$n=0$', '$p=0$', '$n=2p$'], 0, 'Cada par gerado fornece um elétron e uma lacuna, então $n=p$.'),
-        inter('No gráfico, ajuste a contagem ilustrativa de elétrons livres para 7.', 'plot', portadores().props, (v) => v.p.n === 7, 'Ajuste para 7.', 'O controle representa a contagem de elétrons; selecione 7.'),
+        num('No silício intrínseco, sete elétrons saem de ligações covalentes por geração térmica. Quantas lacunas esse processo deixa?', 7, 'Cada elétron libertado deixa uma lacuna; portadores são criados aos pares.'),
         gen((rng) => { const n = randInt(rng, 3, 9); return num(t`Um modelo intrínseco contém $${n}$ pares elétron-lacuna. Quantas lacunas há?`, n, t`Cada par contém uma lacuna, portanto há $${n}$ lacunas.`); }),
         tf('Ao criar um par em material intrínseco, surge um elétron livre e uma lacuna.', true, 'O elétron sai da ligação e deixa uma lacuna: os dois são criados juntos.'),
         mcq('O que ocorre na recombinação?', ['Um elétron preenche uma lacuna', 'Um elétron vira próton', 'Uma lacuna vira átomo dopante', 'A carga elétrica desaparece do universo'], 0, 'Um elétron livre ocupa uma lacuna; o par de portadores móveis deixa de existir.'),
       ] },
-      { card: { title: 'Dopagem controlada', body: t`Doadores como fósforo têm cinco elétrons de valência: no silício, contribuem com elétrons livres e formam material **N**. Aceitadores como boro têm três e favorecem lacunas, formando material **P**. Maioritário indica o portador mais abundante, não a carga líquida do cristal. O cristal dopado em equilíbrio continua aproximadamente neutro.`, visual: portadores() }, exercises: [
+      { card: { title: 'Dopagem controlada', body: t`Doadores como fósforo têm cinco elétrons de valência: no silício, contribuem com elétrons livres e formam material **N**. Aceitadores como boro têm três e favorecem lacunas, formando material **P**. Maioritário indica o portador mais abundante, não a carga líquida do cristal. O cristal dopado em equilíbrio continua aproximadamente neutro.` }, exercises: [
         mcq('Um dopante doador produz material de que tipo?', ['N', 'P', 'Isolante perfeito', 'Metal necessariamente'], 0, 'O doador aumenta a concentração de elétrons livres: tipo N.'),
         mcq('Qual portador é majoritário no tipo P?', ['Lacunas', 'Elétrons', 'Prótons móveis', 'Nêutrons'], 0, 'Aceitadores aumentam a concentração de lacunas; elas são majoritárias no tipo P.'),
         tf('O tipo N é necessariamente um cristal com carga líquida negativa.', false, 'Os íons doadores positivos compensam a carga dos elétrons; o material permanece aproximadamente neutro.'),
-        inter('Ajuste a contagem ilustrativa de elétrons para 5.', 'plot', portadores().props, (v) => v.p.n === 5, 'Ajuste para 5.', 'Mova o controle até indicar 5; a contagem é apenas ilustrativa.'),
+        num('Cinco pares elétron–lacuna foram criados. Dois pares recombinam, sem nova geração. Quantas lacunas restam?', 3, 'Cada recombinação elimina uma lacuna e um elétron livre: restam três de cada.'),
         gen((rng) => { const n = randInt(rng, 4, 9); return num(t`Em um modelo, há $${n}$ elétrons livres e $1$ lacuna. Quantos elétrons livres há a mais que lacunas?`, n - 1, t`A diferença é $${n}-1=${n - 1}$; elétrons são majoritários nesse modelo.`); }),
         mcq('Qual impureza é aceitadora no silício?', ['Boro', 'Fósforo', 'Arsênio', 'Antimônio'], 0, 'O boro tem três elétrons de valência e atua como aceitador, favorecendo lacunas.'),
         tf('Um material tipo P ainda pode conter elétrons como portadores minoritários.', true, 'A dopagem altera as concentrações, mas não elimina necessariamente os portadores minoritários.'),

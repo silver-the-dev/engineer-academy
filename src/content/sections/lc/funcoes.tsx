@@ -1,21 +1,6 @@
 import type { UnitDef } from '../../types';
-import { code, fill, gen, inter, mcq, num, order, tf } from '../../helpers';
-import { fnLab } from '../../visuals';
+import { code, fill, gen, mcq, num, order, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
-
-// O gráfico representa valores, não executa código C.
-const lab = (label: string, offset: number) => fnLab({
-  view: { xMin: 0, xMax: 6, yMin: 0, yMax: 10 },
-  params: [{ key: 'n', label, min: 0, max: 6, step: 1, value: 1 }],
-  f: (x) => x + offset,
-  info: (p) => `Entrada: ${p.n}; resultado: ${p.n + offset}.`,
-});
-const desafio = (label: string, offset: number, alvo: number) => {
-  const v = lab(label, offset);
-  return inter(`Ajuste ${label} para obter resultado ${alvo}.`, 'plot', v.props,
-    (v) => v.p.n + offset === alvo, `Use ${alvo - offset}.`,
-    `O resultado é a entrada mais ${offset}; portanto a entrada é ${alvo - offset}.`);
-};
 
 export const cFuncoes: UnitDef = {
   id: 'lc-func', title: 'Funções e organização do código', icon: '🧩',
@@ -28,14 +13,13 @@ export const cFuncoes: UnitDef = {
         {
           card: [
             { title: 'Uma função para cada tarefa', body: 'Uma função reúne instruções sob um nome. Na chamada, os argumentos fornecem valores aos parâmetros. O retorno entrega um resultado ao chamador; o tipo antes do nome indica o tipo desse resultado.', visual: code('int dobro(int x) {\n  return 2 * x;\n}\n\nint main(void) {\n  int valor = dobro(3);\n}', [1, 2, 6], 'Uma chamada') },
-            { title: 'Experimente a entrada', body: 'O controle representa o argumento; o resultado é a entrada acrescida de dois. O gráfico é um modelo dos valores, não um compilador.', visual: lab('argumento', 2) },
           ],
           exercises: [
             mcq('Na listagem, qual é o argumento passado à função?', ['3', '2', 'valor', '1'], 0, 'A chamada fornece 3 como argumento.', { visual: code('int dobro(int x) {\n  return 2 * x;\n}\nint main(void) {\n  int valor = dobro(3);\n}') }),
             tf('Um parâmetro recebe o valor do argumento correspondente na chamada.', true, 'O argumento é avaliado na chamada e seu valor inicializa o parâmetro.'),
             num('Qual é o valor de resultado ao final?', 8, 'A função multiplica 4 por 2 e retorna 8.', { visual: code('int dobro(int x) {\n  return 2 * x;\n}\nint main(void) {\n  int resultado = dobro(4);\n}') }),
             fill('Complete a ideia: a palavra que devolve um resultado é ___.', '___', ['return'], ['static', 'include', 'define'], 'A palavra return encerra a execução da função e entrega o valor indicado.'),
-            desafio('argumento', 2, 6),
+            num('A função soma2 devolve o argumento mais 2. Quanto vale soma2(soma2(4))?', 8, 'A chamada interna devolve 6; a externa acrescenta mais 2.'),
             gen((rng) => { const n = randInt(rng, 2, 8); return num('Qual valor fica em resultado?', n * 2, `O argumento é ${n}; seu dobro é ${n * 2}.`, { visual: code(`int dobro(int x) {\n  return 2 * x;\n}\nint main(void) {\n  int resultado = dobro(${n});\n}`) }); }),
             mcq('Qual afirmação descreve uma função sem valor de retorno?', ['Seu tipo de retorno é void.', 'Seu tipo de retorno é sempre int.', 'Ela não pode receber parâmetros.', 'Ela não pode chamar outra função.'], 0, 'O tipo void indica ausência de valor de retorno; a função ainda pode receber parâmetros e chamar outras funções.'),
           ],
@@ -59,14 +43,13 @@ export const cFuncoes: UnitDef = {
         {
           card: [
             { title: 'Onde um nome é visível', body: 'Uma variável local declarada em um bloco só pode ser usada dentro de seu escopo. Uma variável declarada fora das funções tem escopo de arquivo a partir de sua declaração. Um nome local pode ocultar outro de escopo externo.', visual: code('int nivel = 2;\n\nvoid tarefa(void) {\n  int nivel = 5;\n  nivel = nivel + 1;\n}', [1, 4, 5], 'Nome local e global') },
-            { title: 'Mudança local', body: 'Modele um valor local que aumenta em um; escolha a entrada e acompanhe o resultado.', visual: lab('valor local', 1) },
           ],
           exercises: [
             mcq('Onde uma variável local de bloco é visível?', ['Dentro de seu escopo no bloco.', 'Em todos os arquivos do projeto.', 'Somente em outras funções.', 'Em todo o programa antes de sua declaração.'], 0, 'Seu nome é visível no escopo que começa na declaração e termina no fim do bloco.'),
             tf('Uma variável local pode ocultar uma variável de mesmo nome de escopo externo.', true, 'No escopo interno, o nome local é o encontrado; a variável externa continua existindo.'),
             num('Quanto vale a variável global depois da chamada?', 2, 'A variável local oculta a global e é a única alterada; a global continua 2.', { visual: code('int nivel = 2;\nvoid tarefa(void) {\n  int nivel = 5;\n  nivel = nivel + 1;\n}\nint main(void) {\n  tarefa();\n}') }),
             fill('Complete: o alcance em que um nome é visível chama-se ___.', '___', ['escopo'], ['retorno', 'argumento', 'protótipo'], 'Escopo descreve onde o nome pode ser usado; não determina sozinho por quanto tempo o objeto existe.'),
-            desafio('valor local', 1, 5),
+            num('Uma função cria um contador local não estático com valor 0, incrementa e retorna. Qual retorno da segunda chamada?', 1, 'Cada chamada cria um novo contador e executa a inicialização de novo.'),
             gen((rng) => { const n = randInt(rng, 2, 7); return num('Quanto vale a variável global após a chamada?', n, `A alteração usa a variável local; a global continua ${n}.`, { visual: code(`int valor = ${n};\nvoid tarefa(void) {\n  int valor = 1;\n  valor = valor + 2;\n}\nint main(void) {\n  tarefa();\n}`) }); }),
             mcq('Qual é a consequência de tentar usar fora do bloco um nome local que só foi declarado nesse bloco?', ['O nome não está visível ali.', 'Seu valor passa a ser global automaticamente.', 'O nome vira um protótipo.', 'O compilador sempre reinicia o programa.'], 0, 'A declaração local não torna o nome visível fora do seu escopo.'),
           ],
@@ -90,13 +73,12 @@ export const cFuncoes: UnitDef = {
         {
           card: [
             { title: 'Separe interface e implementação', body: 'O cabeçalho costuma declarar a interface compartilhada; o arquivo de implementação define as funções. A inclusão insere o conteúdo do cabeçalho durante o pré-processamento. Compile e ligue os arquivos de implementação necessários.', visual: code('// sensor.h\nint ler(void);\n\n// sensor.c\n#include "sensor.h"\nint ler(void) {\n  return 4;\n}', [2, 5, 6], 'Interface e implementação') },
-            { title: 'Modelo de leitura', body: 'Represente a leitura de um sensor e uma correção fixa de dois. Ajuste a leitura para observar o valor corrigido.', visual: lab('leitura', 2) },
           ],
           exercises: [
             mcq('Onde geralmente fica a declaração compartilhada de uma função?', ['No cabeçalho.', 'Somente no arquivo executável.', 'Em um comentário do programa.', 'No valor de retorno.'], 0, 'Um cabeçalho fornece declarações para os arquivos que precisam conhecer a interface.'),
             tf('Incluir uma declaração de função dispensa ligar a implementação usada pelo programa.', false, 'A declaração informa a interface; a definição necessária deve estar disponível na ligação.'),
             fill('Complete: a diretiva que inclui um cabeçalho é ___.', '___', ['include'], ['return', 'static', 'void'], 'A diretiva de inclusão insere o conteúdo do arquivo durante o pré-processamento.'),
-            desafio('leitura', 2, 7),
+            fill('O arquivo sensor.c implementa ler. Complete a declaração que deve aparecer em sensor.h para outros arquivos chamarem a função:', '___', ['int ler(void);'], ['int ler(void)', 'ler();', 'return ler();'], 'O protótipo informa o retorno e a lista de parâmetros e termina em ponto e vírgula.'),
             num('Qual valor é retornado pela função definida na listagem?', 4, 'A definição devolve diretamente 4.', { visual: code('// sensor.c\nint ler(void) {\n  return 4;\n}') }),
             gen((rng) => { const n = randInt(rng, 1, 8); return num('Qual valor retorna a leitura corrigida?', n + 2, `A leitura é ${n} e a correção acrescenta 2: ${n + 2}.`, { visual: code(`int ler(void) {\n  return ${n};\n}\nint corrigir(void) {\n  return ler() + 2;\n}`) }); }),
             order('Ordene as etapas gerais para produzir um programa a partir de fontes C.', ['pré-processar', 'compilar', 'ligar'], 'O pré-processador trata diretivas; a compilação traduz as unidades e a ligação reúne as definições necessárias.'),

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, inter, match, mcq, num, order, plot, tf } from '../../helpers';
+import { gen, match, mcq, num, order, plot, tf } from '../../helpers';
 import { PolygonW, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { randInt } from '../../../lib/random';
@@ -20,8 +20,6 @@ const junta = () => plot({
   info: ({ p }: any) => p.modo ? 'Perfil ilustrativo: solda molha ilha e terminal.' : 'Perfil ilustrativo: massa arredondada com má molhagem.',
 }, 220);
 
-const exercicioJunta = (enunciado: string) => inter(enunciado, 'plot', junta().props, (v) => v.p.modo === 1, 'Selecione boa.', 'O perfil bom se espalha e molha a ilha e o terminal; aparência é indício, não prova elétrica.');
-
 const contagem = (item: string) => gen((rng) => {
   const total = randInt(rng, 8, 15);
   const ruins = randInt(rng, 2, 5);
@@ -40,12 +38,12 @@ export const soldagem: UnitDef = {
         {
           card: { title: 'Ferramentas e calor', body: t`O ferro transfere calor à junta; a solda é a liga de adição e o fluxo ajuda a remover óxidos e a molhar o metal. Use ponta limpa e estanhada, suporte e extração localizada dos fumos. Não toque na ponta; lave as mãos após manusear solda, especialmente com chumbo.
 
-Como ponto de partida, muitas montagens manuais usam cerca de $320$–$350\,°\text{C}$ com liga Sn/Pb e $350$–$380\,°\text{C}$ com liga sem chumbo. Ajuste conforme liga, ponta, massa térmica e fabricante: temperatura da ponta não é temperatura de fusão da liga.`, visual: junta() },
+Como ponto de partida, muitas montagens manuais usam cerca de $320$–$350\,°\text{C}$ com liga Sn/Pb e $350$–$380\,°\text{C}$ com liga sem chumbo. Ajuste conforme liga, ponta, massa térmica e fabricante: temperatura da ponta não é temperatura de fusão da liga.` },
           exercises: [
             mcq('Qual ferramenta aquece a junta?', ['Ferro de solda', 'Multímetro', 'Alicate de corte', 'Régua'], 0, 'A ponta do ferro transfere calor para as peças.'),
             tf('O fluxo ajuda a remover óxidos e favorece a molhagem.', true, 'O fluxo atua nas superfícies durante o aquecimento; não substitui limpeza e técnica.'),
             mcq('Onde repousar o ferro quente entre juntas?', ['No suporte apropriado', 'Sobre os fios', 'Na borda da mesa', 'Na placa plástica'], 0, 'O suporte mantém a ponta quente afastada de pessoas e materiais.'),
-            exercicioJunta('No desenho esquemático, selecione o perfil de boa molhagem.'),
+            mcq('A solda funde na ponta, mas não se espalha na ilha. Que ajuste do procedimento trata esse sintoma?', ['Aquecer terminal e ilha e aplicar solda à junta', 'Depositar mais solda só na ponta', 'Mover a peça antes de solidificar', 'Aumentar a solda até cobrir toda a placa'], 0, 'A junta precisa receber calor suficiente para que a liga se espalhe nas superfícies.'),
             contagem('juntas'),
             mcq('Uma junta grande não aquece bem na temperatura indicada. Qual ajuste faz sentido primeiro?', ['Usar ponta adequada e melhorar o contato térmico', 'Encostar a solda só na ponta e pingar', 'Eliminar o fluxo sempre', 'Aumentar a temperatura ao máximo sem limite'], 0, 'Uma ponta com área e capacidade térmica adequadas melhora a transferência; siga os limites dos componentes.'),
             order('Ordene a preparação segura.', ['Ligar a extração de fumos', 'Colocar o ferro no suporte e aquecer', 'Limpar e estanhar a ponta', 'Aquecer a junta'], 'Ventile, aqueça o ferro no suporte, prepare a ponta e só então aqueça a junta.'),
@@ -72,7 +70,7 @@ Como ponto de partida, muitas montagens manuais usam cerca de $320$–$350\,°\t
           exercises: [
             mcq('No PTH, onde passam os terminais?', ['Pelos furos da placa', 'Somente pela superfície', 'Dentro da caixa do ferro', 'Pela ponta da pinça'], 0, 'PTH usa terminais que atravessam furos na placa.'),
             tf('Aqueça terminal e ilha para que a solda molhe ambos.', true, 'As duas superfícies precisam receber calor para formar a junta.'),
-            exercicioJunta('Selecione a ilustração do perfil de junta bem molhada.'),
+            mcq('A junta formou uma esfera presa ao terminal sem se espalhar pela ilha. O que a forma sugere?', ['Falta de molhagem da ilha', 'Boa ligação garantida', 'Curto garantido com o pino vizinho', 'Temperatura correta comprovada'], 0, 'Observe se a solda se espalha tanto no terminal quanto na ilha. A inspeção visual deve ser complementada pelo teste adequado.'),
             order('Ordene uma soldagem PTH.', ['Inserir e conferir o componente', 'Aquecer ilha e terminal', 'Alimentar solda na junta', 'Retirar solda e ferro e deixar imóvel'], 'Confira a peça, aqueça ambas as superfícies, alimente a liga e deixe solidificar sem movimento.'),
             contagem('terminais'),
             mcq('Uma junta apresenta uma bola que não aderiu à ilha. Qual é o diagnóstico provável?', ['Molhagem insuficiente', 'Conexão garantida', 'Polaridade correta', 'Furo perfeitamente preenchido'], 0, 'A bola sem aderência sugere falta de molhagem; limpe, aplique fluxo e refaça sem sobreaquecer.'),
@@ -96,12 +94,12 @@ Como ponto de partida, muitas montagens manuais usam cerca de $320$–$350\,°\t
     {
       id: 'of-sold-smd', title: 'SMD e retrabalho', parts: [
         {
-          card: { title: 'SMD com ferro', body: t`SMD é montado sobre ilhas superficiais. Para um resistor 0805, estanhe uma ilha, segure a peça alinhada com pinça, aqueça essa ilha para fixá-la e solde o outro lado. Para SOIC, confira a marca de pino 1, fixe cantos opostos e solde os demais pinos com fluxo. A lupa ajuda a encontrar pontes e falta de molhagem.`, visual: junta() },
+          card: { title: 'SMD com ferro', body: t`SMD é montado sobre ilhas superficiais. Para um resistor 0805, estanhe uma ilha, segure a peça alinhada com pinça, aqueça essa ilha para fixá-la e solde o outro lado. Para SOIC, confira a marca de pino 1, fixe cantos opostos e solde os demais pinos com fluxo. A lupa ajuda a encontrar pontes e falta de molhagem.` },
           exercises: [
             mcq('Onde fica um componente SMD?', ['Sobre ilhas na superfície', 'Atravessando necessariamente a placa', 'Dentro da protoboard', 'Dentro do ferro'], 0, 'SMD usa terminais ou contatos montados na superfície.'),
             tf('No SOIC, confira a orientação do pino 1 antes de soldar.', true, 'A marca identifica a orientação; confira também o desenho da placa e o datasheet.'),
             order('Ordene a montagem manual de um 0805.', ['Estanhar uma ilha', 'Alinhar a peça com pinça e fixar nessa ilha', 'Soldar o outro terminal', 'Inspecionar as duas juntas'], 'A primeira ilha fixa o alinhamento; depois solde o outro lado e inspecione ambos.'),
-            exercicioJunta('Compare os perfis esquemáticos e selecione a boa molhagem.'),
+            mcq('No SOIC, a lupa mostra solda unindo dois terminais de redes distintas. Qual defeito deve ser investigado?', ['Ponte entre os pinos', 'Troca da numeração do encapsulamento', 'Furo metalizado', 'Temperatura ambiente baixa'], 0, 'Solda que une redes distintas pode formar um curto; uma ponte visível pede correção e conferência.'),
             contagem('juntas SMD'),
             mcq('Um SOIC apresenta solda unindo dois pinos vizinhos que devem ser separados. Qual defeito?', ['Ponte de solda', 'Junta isolada normal', 'Desacoplamento', 'Marcação de pino 1'], 0, 'Uma ponte cria conexão indesejada; remova o excesso e teste os pinos.'),
             mcq('Um 0805 está desalinhado após fixar um lado. Qual procedimento?', ['Reaquecer a junta e realinhar com pinça sem forçar', 'Empurrar a frio até a ilha ceder', 'Acrescentar solda sobre a peça', 'Testar energizado com a pinça'], 0, 'Aqueça a junta apenas o necessário e realinhe; evite arrancar a ilha.'),
@@ -124,12 +122,12 @@ Como ponto de partida, muitas montagens manuais usam cerca de $320$–$350\,°\t
     {
       id: 'of-sold-placa', title: 'Da protoboard à placa definitiva', parts: [
         {
-          card: { title: 'Planeje as conexões', body: t`A protoboard permite experimentar; a placa perfurada exige planejar cada nó a partir do esquemático. Há placas com ilhas isoladas e outras com tiras conectadas: confira o padrão real e corte trilhas quando necessário. Posicione peças, desenhe fios e pontes intencionais e confira alimentação e polaridade antes de soldar.`, visual: junta() },
+          card: { title: 'Planeje as conexões', body: t`A protoboard permite experimentar; a placa perfurada exige planejar cada nó a partir do esquemático. Há placas com ilhas isoladas e outras com tiras conectadas: confira o padrão real e corte trilhas quando necessário. Posicione peças, desenhe fios e pontes intencionais e confira alimentação e polaridade antes de soldar.` },
           exercises: [
             mcq('Qual documento define as conexões elétricas a preservar?', ['Esquemático', 'Cor da caixa', 'Tamanho da ponta', 'Preço dos fios'], 0, 'O esquemático identifica nós e ligações que devem ser transferidos à placa.'),
             tf('Toda placa perfurada tem o mesmo padrão de cobre.', false, 'Existem ilhas isoladas e tiras; inspecione e teste o padrão da placa usada.'),
             mcq('Em uma placa de ilhas isoladas, como ligar ilhas distintas do mesmo nó?', ['Com fio ou ponte de solda intencional adequada', 'Apenas aproximando os componentes', 'Pintando as ilhas', 'Supor que todos os furos estão ligados'], 0, 'Ilhas isoladas precisam de condutor entre elas para pertencer ao mesmo nó.'),
-            exercicioJunta('Ao preparar a montagem, escolha no desenho a junta bem molhada.'),
+            mcq('Uma placa perfurada tem tiras de cobre. Dois terminais de redes distintas caíram na mesma tira intacta. O que precisa mudar?', ['Separar os nós com corte ou reposicionamento', 'Adicionar mais solda na tira', 'Inverter apenas os rótulos', 'Manter a tira e testar com a fonte ligada'], 0, 'Uma tira contínua une eletricamente os terminais; a montagem deve respeitar as redes do esquemático.'),
             contagem('conexões'),
             order('Ordene a passagem para placa perfurada.', ['Conferir o circuito na protoboard', 'Planejar posições e conexões pelo esquemático', 'Montar e soldar', 'Inspecionar e testar antes de energizar'], 'Teste o protótipo, planeje a placa, monte e confira conexões e curtos antes de ligar.'),
             mcq('Uma tira de cobre une dois nós que devem ser independentes. Como corrigir?', ['Cortar a tira no ponto planejado e verificar isolamento', 'Adicionar outra ponte entre os nós', 'Ignorar a ligação', 'Aumentar a tensão'], 0, 'Interrompa a tira onde necessário e confirme com multímetro que os nós ficaram isolados.'),

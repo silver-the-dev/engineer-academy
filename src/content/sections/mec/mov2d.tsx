@@ -98,12 +98,12 @@ export const movimento2d: UnitDef = {
       ] },
     ] },
     { id: 'm-2d-mcu', title: 'Movimento circular uniforme', parts: [
-      { card: { title: 'Período e velocidade', body: t`No MCU o módulo da velocidade é constante e sua direção muda. O período $T$ é o tempo de uma volta; $f=1/T$, $\omega=2\pi/T$ e $v=\omega R$. O vetor velocidade é tangente à circunferência.`, visual: vectorLab('module') }, exercises: [
+      { card: { title: 'Período e velocidade', body: t`No MCU o módulo da velocidade é constante e sua direção muda. O período $T$ é o tempo de uma volta; $f=1/T$, $\omega=2\pi/T$ e $v=\omega R$. O vetor velocidade é tangente à circunferência.` }, exercises: [
         mcq(t`No MCU, a velocidade instantânea aponta:`, ['Na direção tangente à trajetória', 'Sempre para o centro', 'Sempre para fora', 'Sempre para cima'], 0, t`A velocidade instantânea é tangente à trajetória no ponto considerado.`),
         tf(t`No MCU, a velocidade vetorial é constante.`, false, t`Seu módulo é constante, mas a direção muda ao longo da volta.`),
         gen((rng) => { const n = randInt(rng, 2, 6); return num(t`Um corpo completa uma volta em $${n}\,\text{s}$. Qual o período em s, sem casas decimais?`, n, t`Por definição, o período é o tempo de uma volta: $${n}\,\text{s}$.`, { unit: 's', tol: 0.5 }); }),
         num(t`Um disco completa $4$ voltas em $2\,\text{s}$. Qual a frequência em Hz, sem casas decimais?`, 2, t`$f=4/2=2\,\text{Hz}$.`, { unit: 'Hz', tol: 0.5 }),
-        vectorExercise(t`No ponto à direita do centro, para movimento anti-horário, represente uma velocidade tangente de componentes $(0,\,2)\,\text{m/s}$.`, 0, 2, t`Nesse ponto a tangente aponta para cima, na direção do movimento.`),
+        num('Um ponto na borda de uma roda gira no sentido horário a 2 m/s. No ponto mais à direita da roda, qual a componente vertical da velocidade em m/s? Tome o sentido para cima como positivo.', -2, 'A tangente aponta para baixo nesse ponto. A velocidade é toda vertical, logo a componente é −2 m/s.', { unit: 'm/s' }),
         num(t`Se $\omega=3\,\text{rad/s}$ e $R=2\,\text{m}$, qual $v$ em m/s, sem casas decimais?`, 6, t`$v=\omega R=3\cdot2=6\,\text{m/s}$.`, { unit: 'm/s', tol: 0.5 }),
         num(t`Com período $T=2\,\text{s}$, qual $\omega$ em rad/s, com duas casas decimais?`, Math.PI, t`$\omega=2\pi/T=\pi\approx3,14\,\text{rad/s}$.`, { unit: 'rad/s', tol: 0.005 }),
       ] },

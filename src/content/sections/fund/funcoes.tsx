@@ -10,8 +10,8 @@ const t = String.raw;
 
 const ineqLab = () =>
   plot({
-    view: { xMin: -5, xMax: 5, yMin: -6, yMax: 8 },
-    params: [{ key: 'c', label: 'c', min: -5, max: 5, step: 0.5, value: 4, color: C.p3 }],
+    view: { xMin: -5, xMax: 5, yMin: -11, yMax: 8 },
+    params: [{ key: 'c', label: 'c', min: -5, max: 10, step: 0.5, value: 4, color: C.p3 }],
     render: ({ p }: any) => {
       const f = (x: number) => x * x - p.c;
       const segs = [];

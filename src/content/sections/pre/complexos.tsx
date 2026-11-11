@@ -114,7 +114,7 @@ const multLab = () =>
     view: { xMin: -4, xMax: 4, yMin: -4, yMax: 4 },
     params: [
       { key: 'r', label: 'r', min: -3, max: 3, step: 0.5, value: -1, color: C.p5 },
-      { key: 'm', label: 'mult. de r', min: 1, max: 3, step: 1, value: 2, color: C.gold, format: (v: number) => String(v) },
+      { key: 'm', label: 'mult. de r', min: 1, max: 3, step: 1, value: 1, color: C.gold, format: (v: number) => String(v) },
       { key: 's', label: 's', min: -3, max: 3, step: 0.5, value: 2, color: C.p2 },
     ],
     render: ({ p }: any) => {

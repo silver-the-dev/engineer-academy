@@ -19,7 +19,7 @@ const circuitLab = () =>
     axes: false,
     tickLabels: false,
     params: [
-      { key: 'p', label: 'p', min: 0, max: 1, step: 1, value: 1, color: C.p2, format: (v: number) => (v ? 'V (fechada)' : 'F (aberta)') },
+      { key: 'p', label: 'p', min: 0, max: 1, step: 1, value: 0, color: C.p2, format: (v: number) => (v ? 'V (fechada)' : 'F (aberta)') },
       { key: 'q', label: 'q', min: 0, max: 1, step: 1, value: 0, color: C.p5, format: (v: number) => (v ? 'V (fechada)' : 'F (aberta)') },
     ],
     render: ({ p }: any) => {

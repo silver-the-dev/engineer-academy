@@ -1,5 +1,5 @@
 import type { UnitDef } from '../../types';
-import { gen, inter, mcq, num, tf } from '../../helpers';
+import { gen, mcq, num, tf } from '../../helpers';
 import { circuit, circuitEx, circuitVisual, LAMP, SW, V, wires } from '../../circuits';
 import { fmt, randInt } from '../../../lib/random';
 
@@ -21,7 +21,6 @@ const apagar = () => circuitEx('Abra a chave para interromper a corrente e apaga
   'A chave aberta interrompe o caminho; a corrente na lâmpada fica nula.', { on: { ch: false } });
 const leitura = () => num(t`Com a chave fechada, toque na lâmpada e leia a corrente no simulador. Responda em A, com uma casa decimal.`, 0.5,
   t`A leitura é $0,5\,\text{A}$: $I=6\,\text{V}/12\,\Omega$.`, { unit: 'A', tol: 0.05, visual: visual() });
-const reta = { name: 'numberline', props: { min: 0, max: 9, step: 1, value: 0 } };
 
 export const grandezas: UnitDef = {
   id: 'el-base', title: 'Grandezas elétricas', icon: '🔋',
@@ -78,18 +77,18 @@ export const grandezas: UnitDef = {
       ] },
     ] },
     { id: 'el-base-cores', title: 'Resistores reais e código de cores', parts: [
-      { card: { title: 'Dígitos e multiplicador', body: t`No código de quatro faixas, as duas primeiras são dígitos, a terceira é multiplicador e a quarta tolerância. Leia a partir da faixa mais próxima de uma ponta; a tolerância costuma ficar mais afastada. Dígitos: preto 0, marrom 1, vermelho 2, laranja 3, amarelo 4, verde 5, azul 6, violeta 7, cinza 8, branco 9. Multiplicador dessas cores: $10^n$; ouro é $0,1$ e prata $0,01$.`, visual: reta }, exercises: [
+      { card: { title: 'Dígitos e multiplicador', body: t`No código de quatro faixas, as duas primeiras são dígitos, a terceira é multiplicador e a quarta tolerância. Leia a partir da faixa mais próxima de uma ponta; a tolerância costuma ficar mais afastada. Dígitos: preto 0, marrom 1, vermelho 2, laranja 3, amarelo 4, verde 5, azul 6, violeta 7, cinza 8, branco 9. Multiplicador dessas cores: $10^n$; ouro é $0,1$ e prata $0,01$.` }, exercises: [
         mcq('Qual dígito corresponde ao vermelho?', ['2', '1', '3', '4'], 0, 'Vermelho representa o dígito 2.'),
-        inter('Arraste até o dígito da faixa laranja.', 'numberline', reta.props, (v: number) => v === 3, '3', 'Laranja corresponde ao dígito 3.'),
+        num('Em um resistor com as faixas laranja, branco e preto, qual é o valor nominal em ohms?', 39, 'Laranja e branco formam 39. O multiplicador preto é 1, então o resistor vale 39 Ω.', { unit: 'Ω' }),
         mcq('Marrom, preto e vermelho nas três primeiras faixas representam qual valor nominal?', [t`$1\,\text{k}\Omega$`, t`$100\,\Omega$`, t`$10\,\text{k}\Omega$`, t`$120\,\Omega$`], 0, 'Marrom e preto formam 10; vermelho multiplica por 100: 1000 Ω.'),
         num(t`Vermelho, violeta e marrom: qual valor nominal em Ω, com uma casa decimal?`, 270, t`$27\times10=270\,\Omega$.`, { unit: 'Ω', tol: 0.05 }),
         gen(rng => { const n = randInt(rng, 1, 9); const nomes = ['preto', 'marrom', 'vermelho', 'laranja', 'amarelo', 'verde', 'azul', 'violeta', 'cinza', 'branco']; return num(t`Faixas ${nomes[n]}, preto, marrom: qual valor nominal em Ω, com uma casa decimal?`, n * 100, t`Os dígitos formam $${n * 10}$; marrom multiplica por $10$: $${n * 100}\,\Omega$.`, { unit: 'Ω', tol: 0.05 }); }),
         mcq('Amarelo, violeta e ouro representam:', [t`$4,7\,\Omega$`, t`$47\,\Omega$`, t`$470\,\Omega$`, t`$0,47\,\Omega$`], 0, 'Amarelo e violeta formam 47; ouro multiplica por 0,1: 4,7 Ω.'),
         tf('O terceiro anel é um multiplicador no código de quatro faixas.', true, 'O terceiro anel multiplica o número formado pelos dois primeiros.'),
       ] },
-      { card: { title: 'Tolerância e valor real', body: t`A quarta faixa informa a tolerância em torno do valor nominal: ouro $\pm5\%$, prata $\pm10\%$, marrom $\pm1\%$, vermelho $\pm2\%$. A potência nominal é outro limite do componente e não é dada por essas quatro faixas.`, visual: reta }, exercises: [
+      { card: { title: 'Tolerância e valor real', body: t`A quarta faixa informa a tolerância em torno do valor nominal: ouro $\pm5\%$, prata $\pm10\%$, marrom $\pm1\%$, vermelho $\pm2\%$. A potência nominal é outro limite do componente e não é dada por essas quatro faixas.` }, exercises: [
         mcq('Qual tolerância indica a faixa ouro?', [t`$\pm5\%$`, t`$\pm1\%$`, t`$\pm2\%$`, t`$\pm10\%$`], 0, 'A quarta faixa ouro indica tolerância de ±5%.'),
-        inter('Arraste até o percentual de tolerância da faixa prata.', 'numberline', { min: 0, max: 10, step: 1, value: 0 }, (v: number) => v === 10, '10%', 'Prata indica ±10%.'),
+        num('Um resistor de 470 Ω tem a quarta faixa prata. Qual é a maior resistência dentro da tolerância?', 517, 'Prata indica ±10%. O limite superior é 470 + 47 = 517 Ω.', { unit: 'Ω' }),
         mcq('Vermelho, vermelho, marrom, ouro: qual valor e tolerância?', [t`$220\,\Omega\ \pm5\%$`, t`$22\,\Omega\ \pm5\%$`, t`$220\,\Omega\ \pm10\%$`, t`$2,2\,\text{k}\Omega\ \pm5\%$`], 0, '22 vezes 10 é 220 Ω; ouro indica ±5%.'),
         num(t`Um resistor de $100\,\Omega$ com faixa ouro tem limite inferior de quantos Ω? Responda com uma casa decimal.`, 95, t`$5\%$ de $100$ é $5\,\Omega$; o limite inferior é $100-5=95\,\Omega$.`, { unit: 'Ω', tol: 0.05 }),
         gen(rng => { const n = randInt(rng, 1, 9); return num(t`Faixas ${['', 'marrom', 'vermelho', 'laranja', 'amarelo', 'verde', 'azul', 'violeta', 'cinza', 'branco'][n]}, preto, marrom, prata: qual valor nominal em Ω, com uma casa decimal?`, 100 * n, t`Os dígitos dão $${n * 10}$ e o multiplicador marrom é $10$: $${100 * n}\,\Omega$; prata indica $\pm10\%$.`, { unit: 'Ω', tol: 0.05 }); }),

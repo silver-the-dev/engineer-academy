@@ -1,7 +1,6 @@
 import type { ExerciseSource, UnitDef } from '../../types';
-import { gen, inter, mcq, near, num, tf } from '../../helpers';
+import { gen, mcq, near, num, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
-import { fnLab } from '../../visuals';
 import { circuit, circuitEx, circuitVisual, GND, OPAMP, R, V, wires } from '../../circuits';
 
 const t = String.raw;
@@ -56,9 +55,6 @@ const part = (d: Data) => ({
   card: { title: d.title, body: d.body, visual: circuitVisual({ ...spec(d.kind), caption: 'Toque nos componentes para medir e varie os valores disponíveis.' }) },
   exercises: [...d.questions, ...practice(d.kind)],
 });
-const lab = () => fnLab({ f: (x, p) => Math.max(-15, Math.min(15, p.a * x)), view: { xMin: -4, xMax: 4, yMin: -16, yMax: 16 }, params: [{ key: 'a', label: 'inclinação', min: -4, max: 4, step: 1, value: 1 }], info: p => t`A inclinação é $${p.a}$; a curva é limitada a $\pm15\,\text{V}$.` });
-const labExercise = () => inter(t`Ajuste a inclinação para $-2$.`, 'plot', lab().props, v => near(v.p.a, -2, 0.01), t`Inclinação $-2$.`, t`Uma rampa de entrada com coeficiente $-2$ tem inclinação $-2$.`);
-
 export const ampOp: UnitDef = {
   id: 'ea-opamp', title: 'Amplificadores operacionais', icon: '🔼',
   subtitle: 'Realimentação, comparação e operações com sinais',
@@ -136,23 +132,23 @@ export const ampOp: UnitDef = {
       ] }),
     ] },
     { id: 'ea-opamp-int', title: 'Integrador e diferenciador', parts: [
-      { card: { title: 'Integrador inversor', body: t`Com resistor na entrada e capacitor na realimentação, em regime ideal linear, $V_o(t)=V_o(0)-\frac1{RC}\int_0^t V_i(\tau)\,d\tau$. Entrada constante gera rampa de saída; a condição inicial importa. O gráfico permite variar a inclinação, limitada a $\pm15\,\text{V}$.`, visual: lab() }, exercises: [
+      { card: { title: 'Integrador inversor', body: t`Com resistor na entrada e capacitor na realimentação, em regime ideal linear, $V_o(t)=V_o(0)-\frac1{RC}\int_0^t V_i(\tau)\,d\tau$. Entrada constante gera rampa de saída; a condição inicial importa.` }, exercises: [
         q('Uma entrada constante positiva produz qual saída no integrador inversor ideal?', 'Uma rampa decrescente', 'Uma rampa crescente', 'Uma senoide', 'Uma saída sempre constante', t`$dV_o/dt=-V_i/(RC)$ é negativo para entrada positiva.`),
         tf('A tensão inicial da saída influencia a resposta do integrador.', true, 'A integral determina a variação; a tensão inicial soma-se a ela.'),
         n(t`Para $RC=1\,\text{s}$, $V_i=2\,\text{V}$ e $V_o(0)=0$, qual a inclinação em V/s, com uma casa decimal?`, -2, t`$dV_o/dt=-2/1=-2\,\text{V/s}$.`, 'V/s'),
         n(t`Na situação anterior, qual $V_o$ após $3\,\text{s}$, em V, com uma casa decimal?`, -6, t`$V_o=0-2\cdot3=-6\,\text{V}$, dentro dos trilhos.`),
         gen(rng => { const x = randInt(rng, 1, 4); return num(t`Um integrador tem $RC=1\,\text{s}$, entrada constante de $${x}\,\text{V}$ e saída inicial zero. Qual a saída após $2\,\text{s}$, em V, com uma casa decimal?`, -2*x, t`$V_o=0-${x}\cdot2=-${2*x}\,\text{V}$; não há saturação.`, { unit: 'V', tol: 0.05 }); }),
         tf(t`Uma rampa calculada até $-20\,\text{V}$ continua linear com trilhos $\pm15\,\text{V}$.`, false, t`A saída chega ao trilho de $-15\,\text{V}$ antes; o modelo linear deixa de valer.`),
-        labExercise(),
+        num('Um integrador ideal recebe 2 V constantes, começa com saída 0 V e tem RC = 0,5 s. Qual é a inclinação de saída em V/s?', -4, 'A derivada da saída é −Vi/RC = −2/0,5 = −4 V/s.', { unit: 'V/s' }),
       ] },
-      { card: { title: 'Diferenciador inversor', body: t`Com capacitor na entrada e resistor na realimentação, o modelo ideal linear dá $V_o=-RC\,dV_i/dt$. Uma rampa de entrada gera saída constante; sinais rápidos e ruído são muito amplificados, exigindo limitação prática de banda. O gráfico representa uma entrada em rampa.`, visual: lab() }, exercises: [
+      { card: { title: 'Diferenciador inversor', body: t`Com capacitor na entrada e resistor na realimentação, o modelo ideal linear dá $V_o=-RC\,dV_i/dt$. Uma rampa de entrada gera saída constante; sinais rápidos e ruído são muito amplificados, exigindo limitação prática de banda.` }, exercises: [
         q('Qual grandeza da entrada determina a saída do diferenciador ideal?', 'Sua taxa de variação', 'Seu valor inicial isoladamente', 'Sua integral acumulada', 'A resistência da carga apenas', t`A fórmula é $V_o=-RC\,dV_i/dt$.`),
         tf('Uma entrada constante gera saída zero no diferenciador ideal linear.', true, 'A derivada de uma constante é zero.'),
         n(t`Para $RC=2\,\text{s}$ e rampa de inclinação $3\,\text{V/s}$, calcule a saída em V, com uma casa decimal.`, -6, t`$V_o=-2\cdot3=-6\,\text{V}$.`),
         n(t`Para $RC=1\,\text{s}$ e rampa de inclinação $-4\,\text{V/s}$, calcule a saída em V, com uma casa decimal.`, 4, t`$V_o=-1\cdot(-4)=4\,\text{V}$.`),
         gen(rng => { const x = randInt(rng, 1, 4); return num(t`Um diferenciador com $RC=2\,\text{s}$ recebe rampa de inclinação $${x}\,\text{V/s}$. Qual a saída em V, com uma casa decimal?`, -2*x, t`$V_o=-2\cdot${x}=-${2*x}\,\text{V}$, dentro dos trilhos.`, { unit: 'V', tol: 0.05 }); }),
         tf('O diferenciador ideal amplifica mais as variações rápidas que as lentas.', true, t`Quanto maior o módulo de $dV_i/dt$, maior o módulo da saída, até os limites reais.`),
-        labExercise(),
+        num('A entrada de um diferenciador ideal sobe 3 V em 1 s. Com RC = 2 s, qual é a tensão de saída durante a rampa?', -6, 'A inclinação de entrada é 3 V/s; a saída é −RC vezes a inclinação, ou −6 V.', { unit: 'V' }),
       ] },
     ] },
   ],

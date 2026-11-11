@@ -31,7 +31,7 @@ const distanceLab = () =>
     snap: 1,
     points: [
       { id: 'A', x: 1, y: 1, color: C.p2, label: 'A' },
-      { id: 'B', x: 5, y: 4, color: C.p3, label: 'B' },
+      { id: 'B', x: 4, y: 4, color: C.p3, label: 'B' },
     ],
     render: ({ pts }: any) => (
       <>

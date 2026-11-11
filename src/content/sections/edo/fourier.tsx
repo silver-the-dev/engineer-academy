@@ -69,7 +69,7 @@ const harmonicLab = (target?: [number, number, number]) =>
 const filterLab = () =>
   plot({
     view: { xMin: -PI, xMax: 12, yMin: -1.8, yMax: 1.8 },
-    params: [{ key: 'fc', label: 'corte', min: 1, max: 11, step: 2, value: 5, color: C.p5, format: (v: number) => String(v) }],
+    params: [{ key: 'fc', label: 'corte', min: 1, max: 11, step: 1, value: 5, color: C.p5, format: (v: number) => String(v) }],
     render: ({ p }: any) => {
       const stems: React.ReactNode[] = [];
       for (let n = 1; n <= 11; n += 2) {
@@ -316,7 +316,7 @@ Mova o corte do filtro:`,
           },
           exercises: [
             mcq(t`Um filtro passa-baixas aplicado à onda quadrada a deixa…`, ['mais arredondada', 'com saltos mais bruscos', 'igual', 'com frequência dobrada'], 0, t`Sem os harmônicos altos, não dá para fazer cantos vivos.`),
-            inter(t`Ajuste o filtro para manter só a fundamental.`, 'plot', filterLab().props, (v: any) => v && Math.round(v.p.fc) === 1, t`Corte $=1$: sobra $\frac4\pi\operatorname{sen}x$.`, t`Um passa-baixas com corte em $n=1$ elimina os harmônicos $3,5,\ldots$ e sobra o primeiro termo da série da onda quadrada.`),
+            inter(t`Ajuste o filtro para manter só a fundamental.`, 'plot', filterLab().props, (v: any) => v && v.p.fc < 3, t`Corte em $1$ ou $2$: sobra $\frac4\pi\operatorname{sen}x$.`, t`A onda quadrada tem apenas harmônicos ímpares. Um corte em $1$ ou $2$ deixa passar a fundamental e elimina $3,5,\ldots$.`),
             gen((rng) => {
               const a = randInt(rng, 1, 6);
               const b = randInt(rng, 1, 6);

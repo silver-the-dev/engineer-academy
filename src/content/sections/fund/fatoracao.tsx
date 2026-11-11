@@ -150,7 +150,7 @@ const sysLinesLab = () =>
     equalAspect: true,
     params: [
       { key: 'm', label: 'm', min: -2, max: 3, step: 0.5, value: 1, color: C.p2 },
-      { key: 'b', label: 'b', min: -4, max: 4, step: 0.5, value: -2, color: C.p3 },
+      { key: 'b', label: 'b', min: -4, max: 4, step: 0.5, value: 0, color: C.p3 },
     ],
     render: ({ p }: any) => {
       // Line 1 (fixed): x + y = 2 => y = -x + 2

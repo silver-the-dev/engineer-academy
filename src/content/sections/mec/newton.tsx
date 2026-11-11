@@ -42,13 +42,13 @@ export const leisNewton: UnitDef = {
   guide: t`Em referencial inercial, isole o corpo e desenhe seu diagrama de corpo livre (DCL): só forças que **agem nele**. Some por eixos: $\sum\vec F=m\vec a$. Peso $P=mg$; normal é perpendicular ao contato; tração segue o fio. Atrito estático satisfaz $f_s\le\mu_sN$; no deslizamento, $f_k=\mu_kN$. Na rampa, $P_\parallel=mg\sin\theta$ e $P_\perp=mg\cos\theta$.`,
   lessons: [
     { id: 'm-newton-1', title: 'Força e primeira lei', parts: [
-      { card: { title: 'Forças e diagrama de corpo livre', body: t`Força é vetor, medido em newtons: $1\,\text{N}=1\,\text{kg}\cdot\text{m/s}^2$. Isole o corpo no DCL e desenhe cada força externa. Some componentes com sinais. Exemplo: no DCL de uma caixa, $8\,\text{N}$ à direita e $3\,\text{N}$ à esquerda dão $5\,\text{N}$ à direita; peso e normal se equilibram verticalmente.`, visual: rampa() }, exercises: [
+      { card: { title: 'Forças e diagrama de corpo livre', body: t`Força é vetor, medido em newtons: $1\,\text{N}=1\,\text{kg}\cdot\text{m/s}^2$. Isole o corpo no DCL e desenhe cada força externa. Some componentes com sinais. Exemplo: no DCL de uma caixa, $8\,\text{N}$ à direita e $3\,\text{N}$ à esquerda dão $5\,\text{N}$ à direita; peso e normal se equilibram verticalmente.` }, exercises: [
         mcq(t`No DCL de uma caixa, duas forças horizontais valem $8\,\text{N}$ à direita e $3\,\text{N}$ à esquerda. Qual a resultante horizontal?`, [t`$5\,\text{N}$ à direita`, t`$11\,\text{N}$ à direita`, t`$5\,\text{N}$ à esquerda`, t`$11\,\text{N}$ à esquerda`], 0, t`Direita positiva: $8-3=5\,\text{N}$.`),
         tf(t`No DCL de uma caixa, desenhamos apenas forças que agem sobre ela.`, true, t`O DCL isola o corpo; forças que ele exerce em outros corpos ficam nos DCLs desses outros corpos.`),
         gen(rng => { const a=randInt(rng,5,12), b=randInt(rng,1,4); return n(t`No DCL de uma caixa, $${a}\,\text{N}$ apontam à direita e $${b}\,\text{N}$ à esquerda. Qual a resultante para a direita, em N?`,a-b,t`Direita positiva: $${a}-${b}=${a-b}\,\text{N}$.`,'N'); }),
         n(t`No DCL de uma partícula, há $3\,\text{N}$ à direita e $4\,\text{N}$ para cima. Qual o módulo da resultante, em N?`,5,t`As componentes são perpendiculares: $\sqrt{3^2+4^2}=5\,\text{N}$.`,'N'),
         mcq(t`No DCL de uma caixa apoiada, qual força aponta perpendicularmente para fora do piso?`, ['Normal', 'Peso', 'Tração vertical necessariamente', 'Atrito'],0,t`A normal é a força de contato perpendicular à superfície.`),
-        pratica(),
+        num('Uma caixa recebe 9 N para a direita e 4 N para a esquerda. Qual é a resultante no eixo horizontal, positivo à direita?', 5, 'Somam-se as forças com sinal: 9 − 4 = 5 N.', { unit: 'N' }),
         n(t`No DCL de uma caixa, atuam $10\,\text{N}$ à direita e $6\,\text{N}$ à esquerda. Quanto falta aplicar à esquerda para zerar a resultante horizontal, em N?`,4,t`A resultante inicial é $10-6=4\,\text{N}$ à direita; faltam $4\,\text{N}$ à esquerda.`,'N'),
       ] },
       { card: { title: 'Inércia e equilíbrio', body: t`Em referencial inercial, resultante nula implica velocidade constante: repouso é apenas um caso. No DCL de uma caixa sobre piso horizontal, $N$ para cima e $P$ para baixo se equilibram. Forças podem existir mesmo com resultante nula.` }, exercises: [
@@ -62,12 +62,12 @@ export const leisNewton: UnitDef = {
       ] },
     ] },
     { id:'m-newton-2', title:'Segunda lei', parts:[
-      { card:{title:'Resultante e aceleração',body:t`Em cada eixo, $\sum F=ma$. No DCL de uma caixa de $2\,\text{kg}$, $10\,\text{N}$ para a direita e $4\,\text{N}$ para a esquerda geram $a=(10-4)/2=3\,\text{m/s}^2$ à direita.`,visual:rampa()}, exercises:[
+      { card:{title:'Resultante e aceleração',body:t`Em cada eixo, $\sum F=ma$. No DCL de uma caixa de $2\,\text{kg}$, $10\,\text{N}$ para a direita e $4\,\text{N}$ para a esquerda geram $a=(10-4)/2=3\,\text{m/s}^2$ à direita.`}, exercises:[
         n(t`No DCL de um bloco de $2\,\text{kg}$, a resultante horizontal é $10\,\text{N}$ à direita. Qual a aceleração em m/s²?`,5,t`$a=F/m=10/2=5\,\text{m/s}^2$.`,'m/s²'),
         gen(rng=>{const m=randInt(rng,2,8), a=randInt(rng,1,5); return n(t`No DCL de um bloco de $${m}\,\text{kg}$, a resultante é $${m*a}\,\text{N}$ à direita. Qual a aceleração para a direita, em m/s²?`,a,t`$a=${m*a}/${m}=${a}\,\text{m/s}^2$.`,'m/s²');}),
         n(t`No DCL de um bloco de $3\,\text{kg}$, a resultante aponta à direita e a aceleração é $4\,\text{m/s}^2$. Qual seu módulo em N?`,12,t`$F=ma=3\cdot4=12\,\text{N}$.`,'N'),
         tf(t`No DCL de um corpo, a aceleração tem o sentido da força resultante não nula.`,true,t`Como $m>0$, $\vec a=\sum\vec F/m$ tem o mesmo sentido da resultante.`),
-        pratica(),
+        num('Um carrinho de 3 kg sofre força resultante de 12 N. Calcule o módulo da aceleração.', 4, 'Pela segunda lei, a = 12/3 = 4 m/s².', { unit: 'm/s²' }),
         n(t`No DCL de um bloco de $2\,\text{kg}$, atuam $10\,\text{N}$ à direita e $4\,\text{N}$ à esquerda. Qual a aceleração para a direita, em m/s²?`,3,t`$a=(10-4)/2=3\,\text{m/s}^2$.`,'m/s²'),
         n(t`No DCL de um corpo, a resultante é $18\,\text{N}$ e a aceleração tem módulo $3\,\text{m/s}^2$. Qual a massa em kg?`,6,t`$m=F/a=18/3=6\,\text{kg}$.`,'kg'),
       ]},
@@ -82,12 +82,12 @@ export const leisNewton: UnitDef = {
       ]},
     ]},
     { id:'m-newton-3', title:'Terceira lei, peso, normal e tração', parts:[
-      {card:{title:'Ação, reação e peso',body:t`Se A exerce força em B, B exerce força de mesmo módulo e sentido oposto em A. O par age em corpos distintos. No DCL da maçã em queda livre aparece só o peso $P=mg$; a força da maçã sobre a Terra pertence ao DCL da Terra. Use $g=9{,}8\,\text{m/s}^2$.`,visual:rampa()}, exercises:[
+      {card:{title:'Ação, reação e peso',body:t`Se A exerce força em B, B exerce força de mesmo módulo e sentido oposto em A. O par age em corpos distintos. No DCL da maçã em queda livre aparece só o peso $P=mg$; a força da maçã sobre a Terra pertence ao DCL da Terra. Use $g=9{,}8\,\text{m/s}^2$.`}, exercises:[
         tf(t`No DCL da maçã, o peso e a força da maçã sobre a Terra formam um par ação-reação no mesmo corpo.`,false,t`O peso age na maçã; a reação age na Terra, em outro DCL.`),
         n(t`No DCL de uma maçã de $2\,\text{kg}$, qual o peso em N? Use $g=9{,}8\,\text{m/s}^2$.`,19.6,t`$P=mg=2\cdot9{,}8=19{,}6\,\text{N}$.`,'N'),
         gen(rng=>{const m=randInt(rng,1,9); return n(t`No DCL de um corpo de $${m}\,\text{kg}$, qual o peso em N? Use $g=9{,}8\,\text{m/s}^2$ e uma casa decimal.`,m*9.8,t`$P=mg=${m}\cdot9{,}8=${fmt(m*9.8,1)}\,\text{N}$.`,'N',0.05);}),
         mcq(t`No DCL de um livro sobre a mesa, a reação ao peso do livro é…`,['A atração gravitacional do livro sobre a Terra','A normal da mesa sobre o livro','A força do livro sobre a mesa','O atrito da mesa sobre o livro'],0,t`A interação gravitacional é entre Terra e livro; a reação atua na Terra.`),
-        pratica(),
+        mcq('A Terra atrai a maçã. Em qual corpo atua a força do par de ação e reação?', ['Na Terra', 'Na maçã', 'No ar ao redor', 'No chão abaixo da maçã'], 0, 'A maçã também atrai a Terra. As duas forças do par agem em corpos distintos.'),
         tf(t`No DCL de um corpo, a normal e o peso podem se equilibrar sem formar um par ação-reação.`,true,t`Ambas agem no mesmo corpo, enquanto forças de ação e reação agem em corpos diferentes.`),
         n(t`No DCL de uma carga, o peso é $98\,\text{N}$. Qual a massa em kg? Use $g=9{,}8\,\text{m/s}^2$.`,10,t`$m=P/g=98/9{,}8=10\,\text{kg}$.`,'kg'),
       ]},
@@ -102,12 +102,12 @@ export const leisNewton: UnitDef = {
       ]},
     ]},
     {id:'m-newton-atrito',title:'Atrito',parts:[
-      {card:{title:'Atrito estático',body:t`O atrito estático se ajusta para impedir deslizamento, até $f_s\le\mu_sN$. No DCL de um bloco em repouso sobre piso, uma força horizontal de $3\,\text{N}$ à direita é equilibrada por atrito de $3\,\text{N}$ à esquerda, se o limite permitir.`,visual:rampa()},exercises:[
+      {card:{title:'Atrito estático',body:t`O atrito estático se ajusta para impedir deslizamento, até $f_s\le\mu_sN$. No DCL de um bloco em repouso sobre piso, uma força horizontal de $3\,\text{N}$ à direita é equilibrada por atrito de $3\,\text{N}$ à esquerda, se o limite permitir.`},exercises:[
         tf(t`No DCL de um bloco sem tendência a deslizar, o atrito estático é necessariamente igual a $\mu_sN$.`,false,t`Ele se ajusta de zero até o máximo necessário; só atinge $\mu_sN$ no limiar.`),
         n(t`No DCL de um bloco em repouso, a força aplicada é $3\,\text{N}$ à direita. O único outro esforço horizontal é o atrito. Qual seu módulo em N?`,3,t`Equilíbrio: $3-f_s=0$, então $f_s=3\,\text{N}$.`,'N'),
         gen(rng=>{const N=randInt(rng,2,10)*10; return n(t`No DCL de um bloco, $N=${N}\,\text{N}$ e $\mu_s=0{,}5$. Qual o atrito estático máximo em N?`,N/2,t`$f_{s,\max}=\mu_sN=0{,}5\cdot${N}=${N/2}\,\text{N}$.`,'N');}),
         mcq(t`No DCL de um bloco em repouso puxado para a direita, o atrito estático do piso aponta…`,['Para a esquerda','Para a direita','Para cima','Para baixo'],0,t`Ele se opõe à tendência de movimento relativo no contato.`),
-        pratica(),
+        num('Um bloco em repouso é puxado por 4 N. O atrito estático máximo é 6 N. Qual o módulo do atrito antes do deslizamento?', 4, 'O atrito estático ajusta-se a 4 N para equilibrar a força aplicada. Os 6 N são o limite.', { unit: 'N' }),
         n(t`No DCL de uma caixa, $N=40\,\text{N}$ e $\mu_s=0{,}3$. Qual a maior força horizontal em N que pode ser equilibrada pelo atrito estático?`,12,t`O limite é $\mu_sN=0{,}3\cdot40=12\,\text{N}$.`,'N'),
         tf(t`No DCL de uma caixa em repouso, uma força horizontal de $8\,\text{N}$ pode ser equilibrada pelo atrito se $f_{s,\max}=10\,\text{N}$.`,true,t`O atrito necessário é $8\,\text{N}$, abaixo do limite de $10\,\text{N}$.`),
       ]},

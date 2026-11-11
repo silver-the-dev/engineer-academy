@@ -64,7 +64,7 @@ const polygonLab = () =>
     grid: false,
     axes: false,
     tickLabels: false,
-    params: [{ key: 'n', label: 'n', min: 3, max: 12, step: 1, value: 6, color: C.gold, format: (v: number) => String(v) }],
+    params: [{ key: 'n', label: 'n', min: 3, max: 12, step: 1, value: 5, color: C.gold, format: (v: number) => String(v) }],
     render: ({ p }: any) => {
       const n = Math.round(p.n);
       const V: [number, number][] = Array.from({ length: n }, (_, i) => [2.2 * Math.cos(-PI / 2 + (2 * PI * i) / n), 2.2 * Math.sin(-PI / 2 + (2 * PI * i) / n)]);
@@ -212,7 +212,7 @@ const similarLab = () =>
     view: { xMin: -0.5, xMax: 9, yMin: -0.5, yMax: 6 },
     equalAspect: true,
     grid: false,
-    params: [{ key: 'k', label: 'k', min: 0.5, max: 3, step: 0.1, value: 2, color: C.gold }],
+    params: [{ key: 'k', label: 'k', min: 0.5, max: 3, step: 0.1, value: 1.5, color: C.gold }],
     render: ({ p }: any) => (
       <>
         <PolygonW pts={[[0, 0], [2, 0], [0.6, 1.6]]} color={C.p2} opacity={0.45} stroke={C.p2} />

@@ -32,6 +32,38 @@ function exStrings(e: Exercise): string[] {
 }
 
 function structural(e: Exercise): string | null {
+  if (e.kind === 'interactive' && e.widget === 'plot') {
+    const params = (e.props.params ?? []) as { key: string; value: number; min: number; max: number; step?: number }[];
+    const points = (e.props.points ?? []) as { id: string; x: number; y: number }[];
+    if (!params.length && !points.length) return 'plot: exercício sem controles';
+    const p = Object.fromEntries(params.map((q) => [q.key, q.value]));
+    const pts = Object.fromEntries(points.map((q) => [q.id, { x: q.x, y: q.y }]));
+    try {
+      if (e.check({ p, pts })) return 'plot: exercício já começa resolvido';
+      // A malha do Slider usa múltiplos de step a partir de zero, limitados a [min, max].
+      // Pontos arrastáveis e malhas grandes exigem validação por outro meio.
+      if (!points.length) {
+        const ranges = params.map(({ key, min, max, step = 0.1 }) => ({
+          key, min, max, step, first: Math.round(min / step), last: Math.round(max / step),
+        }));
+        const size = ranges.reduce((n, q) => n * (q.last - q.first + 1), 1);
+        if (size > 0 && size <= 40000) {
+          const reachable = (i: number): boolean => {
+            if (i === ranges.length) return e.check({ p, pts });
+            const q = ranges[i];
+            for (let j = q.first; j <= q.last; j++) {
+              p[q.key] = Number(Math.max(q.min, Math.min(q.max, j * q.step)).toFixed(6));
+              if (reachable(i + 1)) return true;
+            }
+            return false;
+          };
+          if (!reachable(0)) return 'plot: solução fora do alcance dos controles';
+        }
+      }
+    } catch {
+      return 'plot: verificação falhou com valores dos controles';
+    }
+  }
   if (e.kind === 'interactive' && e.widget === 'c-lab') {
     const challenge = e.props as CChallenge;
     if (!challenge.cases.length || challenge.cases.some((c) => c.value === undefined && c.output === undefined)) return 'c-lab: teste sem resultado esperado';

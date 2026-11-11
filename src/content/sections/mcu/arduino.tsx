@@ -1,12 +1,9 @@
 import type { UnitDef } from '../../types';
-import { code, gen, inter, mcq, num, tf, near } from '../../helpers';
-import { fnLab } from '../../visuals';
+import { code, gen, match, mcq, num, order, tf, near } from '../../helpers';
 import { fmt, randInt } from '../../../lib/random';
 import { circuit, circuitEx, circuitVisual, wires, V, R, LED, SW, OUT, CLK } from '../../circuits';
 
 const t = String.raw;
-const lab = () => fnLab({ f: (x, p) => p.a * x, params: [{ key: 'a', label: 'a', min: 0, max: 5, step: 1, value: 1 }], view: { xMin: 0, xMax: 5, yMin: 0, yMax: 25 } });
-const target = (prompt: string, a: number, explanation: string) => inter(prompt, 'plot', lab().props, (v) => v.p.a === a, t`Ajuste $a=${a}$.`, explanation);
 const led = (r: number) => circuit(V('pin', [0, 0], [0, 3], 5, { fixed: true, locked: true }), wires([0, 0], [2, 0]), R('r', [2, 0], [5, 0], r, { min: 100, max: 1000, locked: true }), LED('led', [5, 0], [5, 3], 'red', { locked: true, show: ['i'] }), wires([5, 3], [0, 3]));
 const button = (pullup: boolean) => circuit(V('v', [0, 0], [0, 4], 5, { fixed: true, locked: true }), ...(pullup ? [R('r', [0, 0], [3, 0], 10000, { fixed: true, locked: true }), SW('s', [3, 2], [3, 4], false, { locked: true })] : [SW('s', [0, 0], [3, 0], false, { locked: true }), R('r', [3, 2], [3, 4], 10000, { fixed: true, locked: true })]), wires([3, 0], [3, 2]), OUT('out', [3, 2]), wires([3, 4], [0, 4]));
 const divider = (r: number) => circuit(V('v', [0, 0], [0, 4], 5, { fixed: true, locked: true }), R('top', [0, 0], [3, 0], 10000, { fixed: true, locked: true }), wires([3, 0], [3, 2]), OUT('adc', [3, 2]), R('bottom', [3, 2], [3, 4], r, { min: 1000, max: 30000, locked: true }), wires([3, 4], [0, 4]));
@@ -23,14 +20,14 @@ export const arduino: UnitDef = {
   guide: t`No exemplo Arduino Uno clássico, o ADC tem 10 bits e referência de $5\,\text{V}$: $V\approx 5N/1023$. PWM ideal tem média $V_{méd}=D V_H$. Para LED vermelho, $R\approx(5-1,8)/I$. Use tempos sem sinal e compare $agora-anterior\ge intervalo$ para lidar com a virada de millis(). Botão com pull-up lê LOW ao pressionar.`,
   lessons: [
     { id: 'mc-ard-arq', title: 'Por dentro de um microcontrolador', parts: [
-      { card: [{ title: 'Um computador em um chip', body: 'CPU executa instruções; Flash guarda o programa; SRAM guarda variáveis de trabalho; periféricos conectam o programa ao mundo. No gráfico, varie a e observe como a quantidade cresce.', visual: lab() }, { title: 'Estrutura Arduino', body: 'setup executa uma vez após iniciar; loop é chamado repetidamente. A placa e o chip não são a mesma coisa.', visual: code('void setup() {\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n}', undefined, 'Estrutura básica') }], exercises: [
+      { card: [{ title: 'Um computador em um chip', body: 'CPU executa instruções; Flash guarda o programa; SRAM guarda variáveis de trabalho; periféricos conectam o programa ao mundo.' }, { title: 'Estrutura Arduino', body: 'setup executa uma vez após iniciar; loop é chamado repetidamente. A placa e o chip não são a mesma coisa.', visual: code('void setup() {\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n}', undefined, 'Estrutura básica') }], exercises: [
         mcq('Qual bloco executa instruções?', ['CPU', 'Flash', 'conector USB', 'LED'], 0, 'A CPU busca e executa instruções.'),
         tf('A SRAM mantém variáveis de trabalho enquanto o programa executa.', true, 'A SRAM é memória de trabalho volátil.'),
         mcq('Onde o programa gravado costuma ficar no Uno?', ['Flash', 'SRAM', 'pino GPIO', 'resistor'], 0, 'A Flash não volátil armazena o programa.'),
         num('Quantas vezes setup é chamado após uma inicialização normal?', 1, 'setup é chamado uma vez, antes das chamadas de loop.'),
         gen(rng => { const n = randInt(rng, 2, 8); return num(t`Se loop completar $${n}$ voltas e cada volta ler um sensor uma vez, quantas leituras ocorrem?`, n, t`Uma leitura por volta dá $${n}$ leituras.`); }),
         mcq('O que um periférico GPIO permite?', ['Interagir com pinos digitais', 'Substituir toda a CPU', 'Guardar o programa sem energia', 'Criar energia'], 0, 'GPIO configura e usa pinos digitais.'),
-        target('No gráfico, ajuste a para 3: com x = 2, o resultado será 6.', 3, 'A relação é y = a x; 3 vezes 2 é 6.'),
+        match('Associe cada parte do microcontrolador a uma função.', [['CPU', 'Executar instruções'], ['Flash', 'Guardar o firmware sem alimentação'], ['SRAM', 'Guardar dados de trabalho enquanto alimentado'], ['GPIO', 'Ler ou comandar níveis digitais']], 'Processamento, armazenamento e interface com o circuito são funções distintas.'),
       ] },
       { card: { title: 'Bits, bytes e fluxo', body: 'Um byte tem 8 bits. Uma condição escolhe um caminho; uma variável guarda um valor. No Uno clássico, int tem 16 bits e unsigned long tem 32 bits.', visual: code('int leitura = 0;\nvoid loop() {\n  leitura = analogRead(A0);\n  if (leitura > 500) {\n    digitalWrite(13, HIGH);\n  } else {\n    digitalWrite(13, LOW);\n  }\n}', undefined, 'Leitura e decisão') }, exercises: [
         num('Quantos bits há em 1 byte?', 8, 'Por definição, um byte tem 8 bits.'),
@@ -79,13 +76,13 @@ export const arduino: UnitDef = {
       ] },
     ] },
     { id: 'mc-ard-tempo', title: 'Temporização sem bloqueio', parts: [
-      { card: [{ title: 'Tempo decorrido', body: 'delay pausa o fluxo daquela rotina. Com millis, cada volta de loop verifica o tempo e pode atender outras tarefas. O gráfico ilustra tarefas repetidas: ajuste a para mudar a taxa.', visual: lab() }, { title: 'Pisca cooperativo', body: 'A subtração entre unsigned long funciona também quando millis dá a volta, desde que o intervalo seja representável e as verificações não sejam adiadas por uma volta inteira.', visual: code('unsigned long anterior = 0;\nvoid loop() {\n  unsigned long agora = millis();\n  if (agora - anterior >= 500UL) {\n    anterior = agora;\n    // alternar LED\n  }\n}', undefined, 'Sem delay') }], exercises: [
+      { card: [{ title: 'Tempo decorrido', body: 'delay pausa o fluxo daquela rotina. Com millis, cada volta de loop verifica o tempo e pode atender outras tarefas.' }, { title: 'Pisca cooperativo', body: 'A subtração entre unsigned long funciona também quando millis dá a volta, desde que o intervalo seja representável e as verificações não sejam adiadas por uma volta inteira.', visual: code('unsigned long anterior = 0;\nvoid loop() {\n  unsigned long agora = millis();\n  if (agora - anterior >= 500UL) {\n    anterior = agora;\n    // alternar LED\n  }\n}', undefined, 'Sem delay') }], exercises: [
         mcq('O que millis informa?', ['Milissegundos desde a inicialização, com volta do contador', 'A tensão do pino', 'A corrente do LED', 'A hora civil exata'], 0, 'millis conta tempo decorrido desde o início e seu contador eventualmente retorna a zero.'),
         num('Anterior é 1000 ms e agora é 1450 ms. Quantos ms decorreram?', 450, '1450 − 1000 = 450 ms.', { unit: 'ms' }),
         gen(rng => { const n = randInt(rng, 1, 9) * 100; return num(t`Anterior vale $1000\,\text{ms}$ e agora vale $${1000 + n}\,\text{ms}$. Qual o tempo decorrido em ms?`, n, t`$${1000 + n}-1000=${n}\,\text{ms}$.`, { unit: 'ms' }); }),
         tf('Um loop sem delay pode verificar botão e tempo em cada volta.', true, 'Verificações rápidas permitem intercalar as tarefas.'),
         mcq('Para verificar um intervalo, que operação resiste à volta do contador sem sinal?', ['Subtrair anterior de agora em unsigned long', 'Comparar apenas agora com anterior + intervalo sem tratar a volta', 'Zerar o relógio a cada volta', 'Usar números negativos com sinal'], 0, 'A subtração sem sinal é modular e preserva o tempo decorrido dentro da faixa representável.'),
-        target('Ajuste a para 2: no gráfico, em x = 3 o resultado será 6.', 2, 'Com a = 2, y = 2 × 3 = 6.'),
+        num('O LED trocou de estado em 1200 ms e deve esperar 500 ms para trocar de novo. Qual é o primeiro instante permitido, em ms?', 1700, 'A diferença agora − anterior deve ser pelo menos 500 ms: 1200 + 500 = 1700.', { unit: 'ms' }),
         num('Um LED alterna a cada 500 ms. Quanto dura um ciclo completo ligado e desligado, em ms?', 1000, 'São duas alternâncias de 500 ms: 1000 ms.', { unit: 'ms' }),
       ] },
       { card: { title: 'Duas tarefas', body: 'Cada tarefa guarda seu instante anterior. Verifique as duas em cada passagem do loop; mantenha o trabalho de cada uma curto. Atualizar anterior para agora pode acumular atraso de execução.', visual: code('if (agora - t1 >= 200UL) {\n  t1 = agora;\n  // tarefa 1\n}\nif (agora - t2 >= 500UL) {\n  t2 = agora;\n  // tarefa 2\n}', undefined, 'Intervalos independentes') }, exercises: [
@@ -99,13 +96,13 @@ export const arduino: UnitDef = {
       ] },
     ] },
     { id: 'mc-ard-int', title: 'Interrupções e debounce', parts: [
-      { card: [{ title: 'Eventos e ISR', body: 'Uma interrupção suspende temporariamente o fluxo principal para executar uma rotina curta (ISR). Use o pino e a borda suportados pela placa; sinalize o evento e processe o trabalho no loop.', visual: lab() }, { title: 'Sinalizando o evento', body: 'No Uno clássico, o pino 2 suporta interrupção externa. Uma flag volatile impede que o compilador suponha que ela não muda fora do fluxo normal.', visual: code('volatile bool evento = false;\nvoid mudou() {\n  evento = true;\n}\nvoid setup() {\n  attachInterrupt(\n    digitalPinToInterrupt(2),\n    mudou, FALLING);\n}', undefined, 'Interrupção externa') }], exercises: [
+      { card: [{ title: 'Eventos e ISR', body: 'Uma interrupção suspende temporariamente o fluxo principal para executar uma rotina curta (ISR). Use o pino e a borda suportados pela placa; sinalize o evento e processe o trabalho no loop.' }, { title: 'Sinalizando o evento', body: 'No Uno clássico, o pino 2 suporta interrupção externa. Uma flag volatile impede que o compilador suponha que ela não muda fora do fluxo normal.', visual: code('volatile bool evento = false;\nvoid mudou() {\n  evento = true;\n}\nvoid setup() {\n  attachInterrupt(\n    digitalPinToInterrupt(2),\n    mudou, FALLING);\n}', undefined, 'Interrupção externa') }], exercises: [
         mcq('Qual é a função de uma ISR?', ['Responder a um evento de interrupção', 'Guardar o programa na Flash', 'Alimentar um motor', 'Gerar uma tensão de referência'], 0, 'A rotina é chamada quando ocorre o evento configurado.'),
         tf('Uma ISR deve ser curta e evitar trabalho demorado.', true, 'Isso reduz a latência e deixa o processamento maior para o loop.'),
         mcq('FALLING seleciona qual transição?', ['De alto para baixo', 'De baixo para alto', 'Somente nível alto constante', 'Qualquer tensão analógica'], 0, 'FALLING corresponde à borda descendente.'),
         gen(rng => { const n = randInt(rng, 2, 9); return num(t`Em um cenário ideal, cada borda gera uma interrupção. Quantas interrupções para $${n}$ bordas?`, n, t`Uma por borda: $${n}$.`); }),
         tf('volatile torna automaticamente atômica qualquer operação compartilhada.', false, 'volatile trata a visibilidade para o compilador; acessos multibyte podem exigir proteção atômica.'),
-        target('Ajuste a para 4: a relação do gráfico em x = 2 representa 8 eventos.', 4, 'A relação y = a x dá 4 × 2 = 8.'),
+        order('Ordene o caminho de um evento que deve atualizar um display sem trabalho demorado na interrupção.', ['Detectar a borda no pino', 'Registrar o evento na ISR', 'Ler e tratar o evento no loop', 'Atualizar o display'], 'A rotina de interrupção registra o evento; o trabalho demorado acontece no fluxo principal.'),
         mcq('Por que uma flag booleana pode perder contagem de eventos?', ['Vários eventos antes da leitura continuam produzindo apenas true', 'Ela aumenta uma unidade por interrupção', 'Ela é uma fonte de tensão', 'Ela impede toda interrupção'], 0, 'Uma flag registra ocorrência, não a quantidade; um contador protegido pode registrar eventos.'),
       ] },
       { card: { title: 'Debounce sem bloquear', body: 'Um botão mecânico pode oscilar durante uma única pressão. Aceite a mudança depois de um intervalo estável; use millis no loop. A ISR pode apenas sinalizar atividade, sem delay.', visual: code('if (leitura != anterior) {\n  mudouEm = agora;\n  anterior = leitura;\n}\nif (agora - mudouEm >= 30UL) {\n  // aceitar estado estavel\n}', undefined, 'Filtro temporal') }, exercises: [
