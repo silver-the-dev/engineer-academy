@@ -6,6 +6,7 @@ import { CardView } from '../components/lesson/CardView';
 import { ExerciseHost } from '../components/lesson/ExerciseHost';
 import { CheckResult } from '../components/exercises/common';
 import { C, F } from '../theme';
+import { LayoutSweep } from '../components/lesson/LayoutSweep';
 
 /**
  * Internal layout audit (web preview): `/audit?id=<lessonId>` renders every card and
@@ -15,7 +16,7 @@ import { C, F } from '../theme';
  * `/audit` alone lists the lesson ids (element `audit-ids`).
  */
 export default function Audit() {
-  const params = useLocalSearchParams<{ id?: string; seed?: string }>();
+  const params = useLocalSearchParams<{ id?: string; seed?: string; sweep?: string }>();
   const [id, setId] = useState(params.id);
   const seed = params.seed;
   useEffect(() => {
@@ -31,6 +32,10 @@ export default function Audit() {
     const s = Number(seed ?? 1);
     return loc.lesson.exercises.map((src, i) => resolve(src, s + i * 7919));
   }, [loc, seed]);
+
+  if ((__DEV__ || process.env.EXPO_PUBLIC_LAYOUT_AUDIT === '1') && params.sweep === '1') {
+    return <LayoutSweep key={`${seed}:${params.id}`} seed={Number(seed ?? 1)} only={params.id} />;
+  }
 
   if (!id) {
     return (

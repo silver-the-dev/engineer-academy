@@ -76,10 +76,11 @@ type Props = {
 export const RichText = memo(function RichText({ children, size = 17, color = C.text, align = 'left', hlColor = C.gold, style, maxWidth }: Props) {
   const { width } = useWindowDimensions();
   // The real width of the box we are in (cards, info panels, options are narrower than the screen).
-  // A content-sized parent reports the content width, which never makes a formula shrink further.
+  // Some containers size themselves from the formula. Use the measured width
+  // without subtracting padding again, or each layout pass shrinks the formula.
   const [measured, setMeasured] = useState(0);
   const onLayout = useCallback((e: LayoutChangeEvent) => {
-    const w = Math.floor(e.nativeEvent.layout.width);
+    const w = e.nativeEvent.layout.width;
     setMeasured((old) => (Math.abs(old - w) > 1 ? w : old));
   }, []);
   const screenAvail = width - 48;
@@ -127,9 +128,7 @@ function Line({ line, size, color, align, hlColor, avail }: { line: string; size
     } else if (sg.t === 'math') {
       const t = texToSvg(sg.s, false);
       const natural = t.wEx * size * 0.5;
-      // inline formulas leave a little room so they never touch the box edge
-      const room = avail - 5;
-      const msize = natural > room ? (size * room) / natural : size;
+      const msize = natural > avail ? (size * avail) / natural : size;
       current.push(<MathView key={'m' + si} tex={sg.s} size={msize} color={color} />);
     } else {
       const parts = sg.s.split(/(\s+)/);

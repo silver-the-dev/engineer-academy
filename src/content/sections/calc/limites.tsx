@@ -287,7 +287,7 @@ $h(x)=(3x+1)^5$: dentro $g(x)=3x+1$, fora $f(u)=u^5$.`,
             tip: t`A **regra da cadeia** das derivadas é sobre funções compostas. Reconhecer "a de fora" e "a de dentro" é o segredo.`,
           },
           exercises: [
-            mcq(t`Em $h(x)=(2x-1)^3$, qual é a função **de dentro**?`, ['$2x-1$', '$u^3$', '$2x$', '$x^3$'], 0, t`Primeiro calcula-se $2x-1$; depois eleva-se ao cubo.`),
+            order('Calibre o cálculo de h para uma entrada x: monte a sequência que calcula (2x − 1)³.', ['Multiplicar x por 2', 'Subtrair 1 do resultado', 'Elevar o resultado ao cubo'], 'A expressão entre parênteses é calculada antes da potência.'),
             mcq(t`Em $h(x)=\sqrt{x^2+1}$, qual é a função **de fora**?`, ['$f(u)=\\sqrt{u}$', '$f(u)=u^2+1$', '$f(u)=u^2$', '$f(u)=u+1$'], 0, t`A última operação é tirar a raiz.`),
             gen((rng) => {
               const k = randInt(rng, 2, 9);
@@ -304,7 +304,7 @@ $h(x)=(3x+1)^5$: dentro $g(x)=3x+1$, fora $f(u)=u^5$.`,
               [t`$\ln(x^2+1)$`, t`$x^2+1$`],
             ], t`A parte de dentro é o que se calcula primeiro, o "argumento" da última operação: a base da potência, o ângulo do cosseno, o expoente da exponencial, o que está dentro do $\ln$.`),
             mcq(t`Como decompor $h(x)=\dfrac{1}{(x+3)^2}$?`, ['$f(u)=\\frac{1}{u^2}$ e $g(x)=x+3$', '$f(u)=u+3$ e $g(x)=\\frac{1}{x^2}$', '$f(u)=\\frac1u$ e $g(x)=x^2+3$', '$f(u)=u^2$ e $g(x)=\\frac{1}{x+3}$'], 0, t`Dentro: $x+3$. Fora: $\frac{1}{u^2}$.`),
-            mcq(t`$h(x)=\operatorname{sen}^2(3x)=[\operatorname{sen}(3x)]^2$ é uma composição tripla. Qual é a ordem de cálculo?`, ['$3x$, depois seno, depois elevar ao quadrado', 'seno, depois $3x$, depois quadrado', 'quadrado, depois seno, depois $3x$', '$3x$, depois quadrado, depois seno'], 0, t`De dentro para fora: $u=3x$, $v=\operatorname{sen}u$, $h=v^2$.`),
+            order('Monte o processamento em três etapas: a saída é o quadrado do seno de três vezes a entrada.', ['Multiplicar a entrada por 3', 'Aplicar seno ao valor obtido', 'Elevar a saída do seno ao quadrado'], 'A composição é avaliada do argumento mais interno ao mais externo.'),
           ],
         },
         {
@@ -358,7 +358,7 @@ Mexa em $h$ e $k$ partindo de $y=x^2$:`,
             visual: transformLab(),
           },
           exercises: [
-            mcq(t`O gráfico de $y=(x-3)^2$ é o de $y=x^2$ deslocado…`, ['3 unidades para a direita', '3 unidades para a esquerda', '3 para cima', '3 para baixo'], 0, t`$x-3=0$ em $x=3$: o vértice vai para a direita.`),
+            inter('Mova a parábola de referência de modo que o vértice esteja em (3, 0), mantendo sua abertura e curvatura.', 'plot', transformLab().props, (v) => near(v.p.h, 3, 0.01) && near(v.p.k, 0, 0.01) && near(v.p.a, 1, 0.01), 'h = 3, k = 0 e a = 1.', 'O termo x − 3 zera em x = 3. O vértice se desloca três unidades para a direita.'),
             mcqS(t`Qual transformação leva $y=\operatorname{sen}x$ em $y=\operatorname{sen}x+2$?`, '2 unidades para cima', ['2 para a direita', 'amplitude 2', 'período 2'], t`Somar fora da função desloca na vertical.`),
             mcq(t`O gráfico de $y=f(x+4)$ é o de $y=f(x)$ deslocado…`, ['4 para a esquerda', '4 para a direita', '4 para cima', '4 para baixo'], 0, t`$x+4=x-(-4)$: $h=-4$, para a esquerda.`),
             inter(t`Posicione a parábola com vértice em $(2,\,-1)$, mantendo a abertura de $y=x^2$.`, 'plot', transformLab().props, (v: any) => v && near(v.p.a, 1, 0.01) && near(v.p.h, 2, 0.01) && near(v.p.k, -1, 0.01), t`$a=1$, $h=2$, $k=-1$`, t`Em $y=a(x-h)^2+k$ o vértice é $(h,\,k)$: $h=2$, $k=-1$, e a mesma abertura de $x^2$ pede $a=1$.`),

@@ -4,6 +4,7 @@ import { gen, mcq, mcqS, num, tf, fill, match, order, inter, plot, rmcq, near } 
 import { FnCurve, Pt, Seg, RectW, Label } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt } from '../../../lib/random';
+import { fnLab, lineLab } from '../../visuals';
 
 const t = String.raw;
 
@@ -443,7 +444,7 @@ $$\frac{a}{b}=\frac{c}{d}\iff a\cdot d=b\cdot c$$`,
             }),
           },
           exercises: [
-            mcq(t`O gráfico de duas grandezas **diretamente proporcionais** é…`, ['uma reta que passa pela origem', 'uma hipérbole', 'uma parábola', 'uma reta horizontal'], 0, t`$y=kx$ é uma reta pela origem com inclinação $k$.`),
+            inter('Modele uma torneira que enche 3 litros por minuto. Ajuste a reta até que, em 2 minutos, ela indique 6 litros e parta de zero.', 'plot', lineLab({ a: 1, b: 2, target: [3, 0] }).props, (v) => near(v.p.a, 3, 0.01) && near(v.p.b, 0, 0.01), 'a = 3; b = 0.', 'Começa sem água, portanto b = 0. Cada minuto acrescenta 3 L, então a inclinação é 3.'),
             gen((rng) => {
               const kg = randInt(rng, 2, 6);
               const price = kg * randInt(rng, 3, 12);
@@ -494,7 +495,7 @@ Arraste o ponto: a área do retângulo $x\cdot y$ nunca muda!`,
             }),
           },
           exercises: [
-            mcq(t`Para percorrer uma **distância fixa**, velocidade e tempo são grandezas…`, ['inversamente proporcionais', 'diretamente proporcionais', 'não proporcionais', 'iguais'], 0, t`$v\cdot t=d$ constante: dobrar a velocidade corta o tempo pela metade.`),
+            inter('Um veículo percorre 12 km. Ajuste a velocidade até que o trajeto dure 2 horas.', 'plot', fnLab({ f: (x) => x > 0 ? 12 / x : NaN, view: { xMin: 0, xMax: 12, yMin: 0, yMax: 6 }, params: [{ key: 'v', label: 'velocidade (km/h)', min: 2, max: 12, step: 1, value: 3 }], extra: (p) => <Pt x={p.v} y={12 / p.v} color={C.gold} />, info: (p) => 'Duração: ' + fmt(12 / p.v) + ' h' }).props, (v) => v.p.v === 6, '6 km/h.', 'A distância é velocidade vezes tempo. A 6 km/h, 12 km levam 2 h.'),
             tf(t`Se $x\cdot y$ é constante, dobrar $x$ faz $y$ cair pela metade.`, true, t`$(2x)\cdot\frac{y}{2}=x\cdot y$: o produto continua o mesmo.`),
             gen((rng) => {
               const n = pick(rng, [2, 3, 4, 6]);
@@ -694,7 +695,7 @@ Compare com juros simples ($M=C(1+i\,t)$, uma reta): o composto cresce **exponen
             }),
           },
           exercises: [
-            mcq(t`Um capital $C$ aplicado a juros compostos de taxa $i$ por $t$ períodos vira:`, [t`$C(1+i)^t$`, t`$C(1+i\,t)$`, t`$C\cdot i\cdot t$`, t`$C+i^t$`], 0, t`A cada período o valor é multiplicado por $(1+i)$; em $t$ períodos, por $(1+i)^t$.`),
+            inter('A aplicação começou com 100 reais e rende 10% por mês. Ajuste o prazo até que o saldo chegue a 121 reais.', 'plot', fnLab({ f: (x) => 100 * 1.1 ** x, view: { xMin: 0, xMax: 5, yMin: 80, yMax: 165 }, params: [{ key: 'meses', label: 'meses', min: 0, max: 5, step: 1, value: 0 }], extra: (p) => <Pt x={p.meses} y={100 * 1.1 ** p.meses} color={C.gold} />, info: (p) => 'Saldo em reais: ' + fmt(100 * 1.1 ** p.meses, 2) }).props, (v) => v.p.meses === 2, '2 meses.', 'No primeiro mês, 100 × 1,10 dá 110; no segundo, 110 × 1,10 dá 121.'),
             num(t`R\$ $1000$ aplicados a juros compostos de $10\%$ ao mês. Qual o montante após $2$ meses?`, 1210, t`$1000\cdot1{,}1^2=1000\cdot1{,}21=1210$.`, { unit: 'R$' }),
             gen((rng) => {
               const Cc = pick(rng, [1000, 2000, 5000]);

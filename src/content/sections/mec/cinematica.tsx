@@ -1,9 +1,10 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, inter, mcq, num, plot, tf } from '../../helpers';
+import { gen, inter, mcq, near, num, plot, tf } from '../../helpers';
 import { FnCurve, Pt } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, randInt } from '../../../lib/random';
+import { fnLab, tangentLab } from '../../visuals';
 
 const t = String.raw;
 
@@ -36,7 +37,7 @@ export const cinematica: UnitDef = {
   lessons: [
     { id: 'm-cin-pos', title: 'Posição e deslocamento', parts: [
       { card: { title: 'Origem e posição', body: t`A posição $x$ localiza o corpo em um eixo com origem e sentido positivo escolhidos. Uma posição negativa fica no lado negativo da origem, não significa necessariamente movimento para trás.`, visual: movimento(), tip: t`No laboratório, a curva 1 mostra $x=t^2/2$ em metros; deslize o tempo para acompanhar a posição.` }, exercises: [
-        mcq(t`Em um eixo, onde está $x=-3\,\text{m}$?`, ['No lado negativo da origem', 'No lado positivo da origem', 'Na origem', 'Não é uma posição possível'], 0, t`O sinal negativo indica o lado negativo do eixo escolhido.`),
+        inter('Posicione o carrinho três metros antes da origem, na direção negativa do eixo.', 'numberline', { min: -6, max: 6, step: 1, value: 0 }, (v) => v === -3, 'x = −3 m.', 'A origem é zero. Três unidades no sentido negativo levam à marca −3.'),
         tf(t`Uma posição negativa exige velocidade negativa.`, false, t`Posição indica onde está; velocidade indica como a posição muda. São sinais independentes.`),
         num(t`Um corpo está em $x=4\,\text{m}$. Qual sua distância à origem, em m, sem casas decimais?`, 4, t`A distância à origem é $|4|=4\,\text{m}$.`, {unit:'m',tol:0.5}),
         gen(rng => { const n=randInt(rng,2,9); return num(t`Um corpo está em $x=-${n}\,\text{m}$. Qual a distância à origem, em m, sem casas decimais?`, n, t`A distância é $|- ${n}|=${n}\,\text{m}$.`, {unit:'m',tol:0.5}); }),
@@ -50,7 +51,7 @@ export const cinematica: UnitDef = {
         tf(t`Um deslocamento negativo indica movimento líquido no sentido negativo do eixo.`, true, t`Como $x_f<x_i$, a mudança líquida aponta para o sentido negativo.`),
         num(t`Alguém vai de $0$ a $5\,\text{m}$ e volta a $2\,\text{m}$. Qual a distância percorrida em m, sem casas decimais?`, 8, t`São $5\,\text{m}$ na ida e $3\,\text{m}$ na volta: $5+3=8\,\text{m}$.`, {unit:'m',tol:0.5}),
         num(t`No mesmo trajeto, de $0$ a $5\,\text{m}$ e depois a $2\,\text{m}$, qual o deslocamento em m, sem casas decimais?`, 2, t`Só as extremidades contam: $2-0=2\,\text{m}$.`, {unit:'m',tol:0.5}),
-        mcq(t`Após uma ida e volta ao ponto inicial, o deslocamento é…`, ['zero', 'igual à distância total', 'necessariamente negativo', 'sempre maior que a distância'], 0, t`Como $x_f=x_i$, a diferença é zero, ainda que o percurso não seja zero.`),
+        inter('O carrinho saiu de −2 m, virou em 5 m e voltou ao ponto inicial. Marque a posição final no eixo.', 'numberline', { min: -6, max: 6, step: 1, value: 5 }, (v) => v === -2, 'x final = −2 m.', 'O retorno termina na posição inicial: o deslocamento é zero, embora a distância percorrida seja 14 m.'),
         num(t`Um corpo vai de $-2$ a $4\,\text{m}$ e depois a $-1\,\text{m}$. Qual a distância em m, sem casas decimais?`, 11, t`Primeiro percorre $4-(-2)=6\,\text{m}$; depois $4-(-1)=5\,\text{m}$. Total: $11\,\text{m}$.`, {unit:'m',tol:0.5}),
       ] },
     ] },
@@ -65,7 +66,7 @@ export const cinematica: UnitDef = {
         num(t`Para $x=t^2/2$, qual a velocidade média entre $t=1$ e $t=3\,\text{s}$, em m/s, sem casas decimais?`, 2, t`As posições são $0,5$ e $4,5\,\text{m}$; a secante tem inclinação $(4,5-0,5)/(3-1)=2\,\text{m/s}$.`, {unit:'m/s',tol:0.5}),
       ] },
       { card: { title: 'Velocidade instantânea', body: t`A velocidade instantânea é o limite da velocidade média quando o intervalo tende a zero: $v=\mathrm{d}x/\mathrm{d}t$. É a inclinação da tangente ao gráfico $x(t)$. A rapidez instantânea é $|v|$.`, visual: movimento() }, exercises: [
-        mcq(t`A inclinação da tangente ao gráfico $x(t)$ fornece…`, ['a velocidade instantânea', 'a posição inicial', 'a distância total', 'o tempo decorrido'], 0, t`Por definição, a derivada de $x$ em relação ao tempo é a velocidade.`),
+        inter('Mova o ponto dourado até que o carrinho tenha velocidade instantânea de 4 m/s. A tangente dourada indica a velocidade.', 'plot', tangentLab((x) => x * x / 2, (x) => x, 1, { xMin: 0, xMax: 5, yMin: 0, yMax: 13 }).props, (v) => near(v.p.x, 4, 0.025), 'Em t = 4 s.', 'A posição é t²/2, cuja derivada é t. A velocidade chega a 4 m/s em t = 4 s.'),
         num(t`Se $v=-5\,\text{m/s}$, qual a rapidez instantânea em m/s, sem casas decimais?`, 5, t`Rapidez é o módulo: $|-5|=5\,\text{m/s}$.`, {unit:'m/s',tol:0.5}),
         gen(rng => { const k=randInt(rng,2,6), s=randInt(rng,1,4); return num(t`Para $x=${k}t$ em unidades SI, qual $v$ em $t=${s}\,\text{s}$, em m/s, sem casas decimais?`, k, t`A inclinação constante de $x=${k}t$ é $${k}\,\text{m/s}$.`,{unit:'m/s',tol:0.5}); }),
         tf(t`Uma tangente horizontal em $x(t)$ indica velocidade instantânea nula.`, true, t`A inclinação da tangente horizontal é zero.`),
@@ -90,7 +91,7 @@ export const cinematica: UnitDef = {
         gen(rng => { const a=randInt(rng,1,5), v=randInt(rng,1,5); return num(t`Se $v=${v}+${a}t$ em unidades SI, qual a aceleração em m/s², sem casas decimais?`,a,t`A derivada de $v=${v}+${a}t$ é $a=${a}\,\text{m/s}^2$.`,{unit:'m/s²',tol:0.5}); }),
         num(t`Se $v=12-3t$ em unidades SI, qual a aceleração em m/s², sem casas decimais?`, -3, t`A inclinação da reta $v(t)$ é $-3\,\text{m/s}^2$.`, {unit:'m/s²',tol:0.5}),
         num(t`Se $x=2t^2$ em unidades SI, qual a aceleração em m/s², sem casas decimais?`, 4, t`$v=4t$ e, derivando de novo, $a=4\,\text{m/s}^2$.`, {unit:'m/s²',tol:0.5}),
-        mcq(t`Em uma parada momentânea com $v=0$, a aceleração…`, ['pode ser diferente de zero', 'deve ser zero', 'não tem unidade', 'é igual à posição'], 0, t`No ponto de retorno de um lançamento vertical, por exemplo, $v=0$ e a aceleração da gravidade persiste.`),
+        inter('O corpo começa a subir a 8 m/s e sua velocidade cai 2 m/s a cada segundo. Mova o marcador ao instante de parada momentânea.', 'plot', fnLab({ f: (x) => 8 - 2 * x, view: { xMin: 0, xMax: 6, yMin: -5, yMax: 9 }, params: [{ key: 'tempo', label: 'tempo (s)', min: 0, max: 6, step: 0.25, value: 1 }], extra: (p) => <Pt x={p.tempo} y={8 - 2 * p.tempo} color={C.gold} />, info: (p) => 'Velocidade: ' + fmt(8 - 2 * p.tempo) + ' m/s' }).props, (v) => v.p.tempo === 4, 'Em t = 4 s.', 'No cruzamento com o eixo horizontal, a velocidade zera. A reta ainda tem inclinação −2 m/s².'),
         num(t`Se $v=t^2$ em unidades SI, qual a aceleração em $t=3\,\text{s}$, em m/s², sem casas decimais?`, 6, t`$a=\mathrm{d}v/\mathrm{d}t=2t=6\,\text{m/s}^2$.`, {unit:'m/s²',tol:0.5}),
       ] },
     ] },

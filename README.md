@@ -78,6 +78,17 @@ npx expo start --web
 
 Abra o endereço mostrado no terminal. A página **`/debug`** faz o QA de todo o conteúdo: valida cada fórmula TeX, a estrutura dos exercícios (testando várias sementes dos geradores aleatórios) e mostra quantas lições/partes/exercícios cada seção tem. O esperado é `erros=1` (a linha do autoteste do detector) e nenhum aviso novo.
 
+### Laboratórios de C
+
+Os exercícios de código permitem editar e executar um subconjunto de C localmente: `int` de 32 bits, operadores, funções, condições, laços e saída com `printf`. O interpretador trabalha apenas com valores do exercício e tem limites para o tamanho do programa, os passos, a profundidade e a saída. Exercícios sobre ponteiros, tipos e APIs de placas que ficam fora desse subconjunto usam blocos de código para montar um trecho.
+
+```bash
+node scripts/test-c.cjs
+node scripts/qa-content.cjs
+```
+
+Para conferir o layout de cada exercício no Android, abra `engineeracademy://audit?sweep=1&seed=17` em um build de desenvolvimento ou em um APK de teste compilado com `EXPO_PUBLIC_LAYOUT_AUDIT=1`. O logcat recebe linhas `EA_LAYOUT` com progresso e alertas. Para restringir a uma lição, adicione `&id=<lição>`. A varredura mede a geometria de respostas e fórmulas; o fluxo de interação pode ser conferido na tela da própria lição.
+
 ### Verificação de tipos
 
 ```bash
@@ -125,7 +136,7 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64
 
 **Assinatura**: o build de release usa a keystore de debug gerada pelo template do Expo, suficiente para instalar e testar. Para publicar em loja, configure a sua própria assinatura.
 
-**Publicar uma versão**: suba `version` e `android.versionCode` no `app.json`, gere o APK e crie uma Release no GitLab com a tag da versão, anexando o APK (com o SHA-256 na descrição). A pasta local `releases/` (se usada como `APK_OUT_DIR`) é ignorada pelo git.
+**Publicar uma versão**: suba `version` e `android.versionCode` no `app.json`, gere o APK e crie releases com a mesma tag no GitLab e no GitHub. Use o link do APK hospedado no S3 e informe o SHA-256 na descrição. O mirror replica o histórico Git; as releases são cadastradas nas duas plataformas. A pasta local `releases/` (se usada como `APK_OUT_DIR`) é ignorada pelo git.
 
 ## Estrutura
 

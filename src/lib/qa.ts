@@ -7,6 +7,7 @@ import { makeRng } from './random';
 import { compareOptions } from './texEval';
 import { texToSvg, tidyOnes } from '../components/math/tex';
 import { applyEdit, makeValue, solveDC, type CircuitSpec, type Edit } from './circuit';
+import { checkC, type CChallenge } from './c/challenge';
 
 function extractMath(s: string): string[] {
   const out: string[] = [];
@@ -31,6 +32,21 @@ function exStrings(e: Exercise): string[] {
 }
 
 function structural(e: Exercise): string | null {
+  if (e.kind === 'interactive' && e.widget === 'c-lab') {
+    const challenge = e.props as CChallenge;
+    if (!challenge.cases.length || challenge.cases.some((c) => c.value === undefined && c.output === undefined)) return 'c-lab: teste sem resultado esperado';
+    if (typeof e.solution !== 'string' || !e.check(checkC(e.solution, challenge))) return 'c-lab: solução não passou nos testes';
+    if (e.check(checkC(challenge.starter, challenge))) return 'c-lab: exemplo inicial já resolve o desafio';
+  }
+  if (e.kind === 'interactive' && e.widget === 'code-puzzle') {
+    const pieces = (e.props.pieces as string[]).slice();
+    if (!Array.isArray(e.solution) || e.solution.length !== e.props.slots || !e.check(e.solution)) return 'code-puzzle: solução inválida';
+    for (const line of e.solution) {
+      const index = pieces.indexOf(line);
+      if (index < 0) return 'code-puzzle: bloco da solução não está no banco';
+      pieces.splice(index, 1);
+    }
+  }
   if (e.kind === 'mcq' && (e.answer < 0 || e.answer >= e.options.length)) return 'mcq answer index';
   if (e.kind === 'mcq' && new Set(e.options).size !== e.options.length) return 'mcq duplicate options';
   if (e.kind === 'multi' && (!e.answers.length || e.answers.some((a) => a < 0 || a >= e.options.length))) return 'multi answer index';

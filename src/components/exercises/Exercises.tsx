@@ -7,6 +7,7 @@ import { Choice, ChoiceState, ExProps, Token, parseNumber } from './common';
 import { fmt, makeRng, shuffle } from '../../lib/random';
 import { tapFeedback, wrongFeedback, correctFeedback } from '../../lib/feedback';
 import { renderWidget } from '../visuals/registry';
+import { useLayoutProbe } from '../lesson/LayoutProbe';
 
 /* ---------------- Multiple choice ---------------- */
 export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
@@ -128,8 +129,9 @@ export function NumericView({ ex, locked, onReady, registerCheck }: ExProps<Nume
       {KEY_ROWS.map((row, ri) => (
         <View key={ri} style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
           {row.map((k) => (
-            <Pressable
+            <ProbedPressable
               key={k}
+              part="keypad"
               onPress={() => press(k)}
               style={({ pressed }) => ({
                 flex: 1,
@@ -142,7 +144,7 @@ export function NumericView({ ex, locked, onReady, registerCheck }: ExProps<Nume
               })}
             >
               <Text style={{ color: k === '⌫' ? C.danger : /[0-9]/.test(k) ? C.text : C.cyan, fontFamily: F.black, fontSize: 22 }}>{k}</Text>
-            </Pressable>
+            </ProbedPressable>
           ))}
         </View>
       ))}
@@ -235,7 +237,8 @@ export function OrderView({ ex, locked, onReady, registerCheck }: ExProps<Order>
       {bank.map(({ t, i }) => {
         const used = chosen.includes(i);
         return (
-          <Pressable
+          <ProbedPressable
+            part="order"
             key={i}
             onPress={locked || used ? undefined : () => {
               tapFeedback();
@@ -246,7 +249,7 @@ export function OrderView({ ex, locked, onReady, registerCheck }: ExProps<Order>
             <View style={{ opacity: used ? 0.15 : 1 }}>
               <RichText size={15}>{t}</RichText>
             </View>
-          </Pressable>
+          </ProbedPressable>
         );
       })}
     </View>
@@ -288,7 +291,8 @@ export function FillView({ ex, locked, onReady, registerCheck }: ExProps<Fill>) 
               </RichText>
             ) : null}
             {k < slots ? (
-              <Pressable
+                <ProbedPressable
+                  part="slot"
                 onPress={locked ? undefined : () => {
                   const n = [...filled];
                   n[k] = null;
@@ -297,7 +301,7 @@ export function FillView({ ex, locked, onReady, registerCheck }: ExProps<Fill>) 
                 style={{ minWidth: 60, minHeight: 40, marginHorizontal: 4, marginVertical: 4, paddingHorizontal: 8, borderBottomWidth: 3, borderColor: slotColor, justifyContent: 'center', alignItems: 'center', backgroundColor: filled[k] !== null ? alpha(slotColor, 0.12) : 'transparent', borderRadius: 8 }}
               >
                 {filled[k] !== null ? <RichText size={17}>{ex.bank[filled[k]!]}</RichText> : <Text style={{ color: C.textDim }}> </Text>}
-              </Pressable>
+                </ProbedPressable>
             ) : null}
           </React.Fragment>
         ))}
@@ -311,8 +315,14 @@ export function FillView({ ex, locked, onReady, registerCheck }: ExProps<Fill>) 
   );
 }
 
+function ProbedPressable({ part, ...props }: React.ComponentProps<typeof Pressable> & { part: 'slot' | 'order' | 'keypad' }) {
+  const onLayout = useLayoutProbe(part);
+  return <Pressable {...props} onLayout={onLayout} />;
+}
+
 /* ---------------- Interactive (widget-driven) ---------------- */
 export function InteractiveView({ ex, locked, onReady, registerCheck, width }: ExProps<Interactive>) {
+  const onLayout = useLayoutProbe('widget');
   const value = useRef<any>(null);
   const [touched, setTouched] = useState(false);
   const [checked, setChecked] = useState<null | boolean>(null);
@@ -323,17 +333,17 @@ export function InteractiveView({ ex, locked, onReady, registerCheck, width }: E
       ok = !!ex.check(value.current);
     } catch {}
     setChecked(ok);
-    return { correct: ok, answer: ex.answerText };
+    return { correct: ok, answer: ex.answerText, code: !ok && ex.widget === 'code-puzzle' && Array.isArray(ex.solution) ? ex.solution.join('\n') : undefined };
   });
   return (
-    <View pointerEvents={locked ? 'none' : 'auto'}>
+    <View onLayout={onLayout} pointerEvents={locked ? 'none' : 'auto'}>
       {renderWidget(ex.widget, {
         ...ex.props,
         width,
         checked,
-        onChange: (v: any) => {
+        onChange: (v: any, ready = true) => {
           value.current = v;
-          if (!touched) setTouched(true);
+          setTouched(ready);
         },
       })}
     </View>

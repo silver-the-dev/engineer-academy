@@ -34,7 +34,7 @@ export const leiOhm: UnitDef = {
       {
         card: { title: 'Tensão e corrente', body: t`Em um resistor ôhmico, a tensão e a corrente são proporcionais: $V=RI$. Use volts, ohms e ampères. Toque no resistor para ver as leituras.`, visual: visual(12, 100) },
         exercises: [
-          mcq(t`Qual relação vale para um resistor ôhmico?`, [t`$V=RI$`, t`$V=R/I$`, t`$V=I/R$`, t`$V=R+I$`], 0, t`A lei de Ohm é $V=RI$.`),
+          ajustar(6, 300, 120, 'A bancada tem uma fonte de 6 V. Calibre o resistor até o multímetro indicar aproximadamente 50 mA.', 'Use R = V/I. Para 6 V e 0,05 A, R = 120 Ω.'),
           num(t`Um resistor de $10\,\Omega$ conduz $2\,\text{A}$. Calcule a tensão em V, sem casas decimais.`, 20, t`$V=RI=10\cdot2=20\,\text{V}$.`, { unit: 'V', tol: 0.5 }),
           gen((rng) => { const r = randInt(rng, 2, 9); const i = randInt(rng, 2, 5); return num(t`Um resistor de $${r}\,\Omega$ conduz $${i}\,\text{A}$. Calcule a tensão em V, sem casas decimais.`, r*i, t`$V=RI=${r}\cdot${i}=${r*i}\,\text{V}$.`, { unit: 'V', tol: 0.5 }); }),
           medir(12, 100),
@@ -78,7 +78,7 @@ export const leiOhm: UnitDef = {
           medir(6, 200),
           ajustar(6, 100, 200, t`Ajuste o resistor para o ponto $V=6\,\text{V}$ e $I=30\,\text{mA}$.`, t`$R=6/0{,}030=200\,\Omega$.`),
           ajustar(6, 200, 100, t`Ajuste o resistor para o ponto $V=6\,\text{V}$ e $I=60\,\text{mA}$.`, t`$R=6/0{,}060=100\,\Omega$.`),
-          mcq(t`Com $I$ no eixo vertical e $V$ no horizontal, a inclinação de um resistor ôhmico é…`, [t`$1/R$`, t`$R$`, t`$R^2$`, t`$P$`], 0, t`Como $I=V/R$, a inclinação é $1/R$.`),
+          ajustar(6, 200, 400, 'A reta de corrente contra tensão deve ter inclinação 2,5 mA/V. Ajuste a bancada para que, com 6 V, a corrente seja 15 mA.', 'A corrente por volt é 1/R. Uma inclinação de 0,0025 A/V corresponde a R = 400 Ω.'),
         ],
       },
     ] },
@@ -86,7 +86,7 @@ export const leiOhm: UnitDef = {
       {
         card: { title: 'Potência é energia por tempo', body: t`A potência elétrica absorvida é $P=VI$, em watts. Para um resistor, substitua $V=RI$: $P=RI^2$. As leituras do circuito permitem calcular as duas formas.`, visual: visual(12, 100) },
         exercises: [
-          mcq(t`Qual é a unidade de potência?`, ['watt', 'joule', 'ohm', 'ampère'], 0, t`O watt mede joules por segundo.`),
+          circuitEx('A bancada tem uma fonte de 10 V. Ajuste a carga até a potência ficar próxima de 2 W.', { comps: malha(10, 200), mode: 'adjust' }, (v) => near(v.p('r'), 2, 0.05), 'Ajuste para 50 Ω.', 'Com 10 V fixos, a potência é 100/R. O alvo de 2 W pede 50 Ω.', { set: { r: 50 } }),
           num(t`Uma carga recebe $12\,\text{V}$ e $2\,\text{A}$. Qual a potência em W, sem casas decimais?`, 24, t`$P=VI=12\cdot2=24\,\text{W}$.`, { unit: 'W', tol: 0.5 }),
           gen((rng) => { const i = randInt(rng, 2, 5); return num(t`Um resistor de $10\,\Omega$ conduz $${i}\,\text{A}$. Calcule a potência em W, sem casas decimais.`, 10*i*i, t`$P=RI^2=10\cdot${i}^2=${10*i*i}\,\text{W}$.`, { unit: 'W', tol: 0.5 }); }),
           medir(12, 100),

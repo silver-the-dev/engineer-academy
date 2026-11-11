@@ -10,6 +10,7 @@ import { CardView } from '../../components/lesson/CardView';
 import { ExerciseHost } from '../../components/lesson/ExerciseHost';
 import { LessonComplete } from '../../components/lesson/LessonComplete';
 import { RichText } from '../../components/math/RichText';
+import { CodeBlock } from '../../components/visuals/Code';
 import { CheckResult } from '../../components/exercises/common';
 import { ScrollLockProvider } from '../../components/ScrollLock';
 import { completeFeedback, correctFeedback, wrongFeedback } from '../../lib/feedback';
@@ -265,6 +266,11 @@ export default function LessonScreen() {
                   <View style={{ marginTop: 8 }}>
                     <Text style={{ color: fbColor, fontFamily: F.black, fontSize: 14, marginBottom: 4 }}>Resposta correta:</Text>
                     <RichText size={16} color={C.text}>{feedback.answer}</RichText>
+                  </View>
+                ) : null}
+                {feedback.code ? (
+                  <View style={{ marginTop: 8 }}>
+                    <CodeBlock title="Uma solução" code={feedback.code} width={Math.min(width - 36, 700)} />
                   </View>
                 ) : null}
                 {feedback.explain && (!feedback.correct || showWhy) ? (

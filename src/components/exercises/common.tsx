@@ -3,8 +3,9 @@ import { Pressable, View, ViewStyle } from 'react-native';
 import { C, alpha } from '../../theme';
 import { RichText } from '../math/RichText';
 import { tapFeedback } from '../../lib/feedback';
+import { useLayoutProbe } from '../lesson/LayoutProbe';
 
-export type CheckResult = { correct: boolean; answer?: string };
+export type CheckResult = { correct: boolean; answer?: string; code?: string };
 
 export type ExProps<E> = {
   ex: E;
@@ -17,11 +18,15 @@ export type ExProps<E> = {
 export type ChoiceState = 'idle' | 'selected' | 'correct' | 'wrong' | 'dim';
 
 export function Choice({ text, state, onPress, style, size = 17, center }: { text: string; state: ChoiceState; onPress?: () => void; style?: ViewStyle; size?: number; center?: boolean }) {
+  const onLayout = useLayoutProbe('choice');
   const border =
     state === 'selected' ? C.cyan : state === 'correct' ? C.success : state === 'wrong' ? C.danger : C.border;
   const bg = state === 'selected' ? alpha(C.cyan, 0.12) : state === 'correct' ? alpha(C.success, 0.14) : state === 'wrong' ? alpha(C.danger, 0.14) : C.surface;
   return (
     <Pressable
+      onLayout={onLayout}
+      accessibilityRole="button"
+      accessibilityState={{ selected: state === 'selected', disabled: !onPress }}
       onPress={() => {
         tapFeedback();
         onPress?.();
@@ -51,8 +56,12 @@ export function Choice({ text, state, onPress, style, size = 17, center }: { tex
 }
 
 export function Token({ text, onPress, used, color }: { text: string; onPress?: () => void; used?: boolean; color?: string }) {
+  const onLayout = useLayoutProbe('token');
   return (
     <Pressable
+      onLayout={onLayout}
+      accessibilityRole="button"
+      disabled={used || !onPress}
       onPress={() => {
         if (used) return;
         tapFeedback();
@@ -68,7 +77,9 @@ export function Token({ text, onPress, used, color }: { text: string; onPress?: 
         paddingHorizontal: 12,
         margin: 4,
         minWidth: 44,
+        minHeight: 44,
         alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       <View style={{ opacity: used ? 0 : 1 }}>

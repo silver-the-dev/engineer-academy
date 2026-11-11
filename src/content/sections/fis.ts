@@ -50,6 +50,9 @@ import { arduino } from './mcu/arduino';
 import { sensoresAtuadores } from './mcu/sensores';
 import { comunicacao } from './mcu/comunicacao';
 import { iot } from './mcu/iot';
+import { withPractice } from '../codePractice';
+import { cPractice } from './lc/pratica';
+import { mcuPractice } from './mcu/pratica';
 
 /** Sections of the Física e Eletricidade and Sistemas Embarcados courses, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
@@ -114,7 +117,7 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'C do zero até o código que conversa com o hardware',
     color: '#90BE6D',
     emoji: '💻',
-    units: [cFundamentos, cFluxo, cFuncoes, cDados, cHardware],
+    units: [cFundamentos, cFluxo, cFuncoes, cDados, cHardware].map((unit) => withPractice(unit, cPractice)),
   },
   {
     id: 'mcu',
@@ -123,6 +126,6 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Arduino, sensores e atuadores, comunicação serial, ESP32 e IoT',
     color: '#F4A261',
     emoji: '🤖',
-    units: [arduino, sensoresAtuadores, comunicacao, iot],
+    units: [arduino, sensoresAtuadores, comunicacao, iot].map((unit) => withPractice(unit, mcuPractice)),
   },
 ];

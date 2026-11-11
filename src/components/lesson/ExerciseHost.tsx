@@ -6,6 +6,7 @@ import { RichText } from '../math/RichText';
 import { Visual } from '../visuals/registry';
 import { CheckResult } from '../exercises/common';
 import { FillView, InteractiveView, MCQView, MatchView, MultiView, NumericView, OrderView, TFView } from '../exercises/Exercises';
+import { useLayoutProbe } from './LayoutProbe';
 
 const KIND_LABEL: Record<Exercise['kind'], string> = {
   mcq: 'ESCOLHA A RESPOSTA',
@@ -33,6 +34,7 @@ export function ExerciseHost({
   width: number;
   retry?: boolean;
 }) {
+  const onLayout = useLayoutProbe('exercise');
   const registerCheck = useCallback((fn: () => CheckResult) => {
     checkRef.current = fn;
   }, [checkRef]);
@@ -65,7 +67,7 @@ export function ExerciseHost({
       break;
   }
   return (
-    <View>
+    <View onLayout={onLayout}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
         <Text style={{ color: ex.kind === 'interactive' ? C.gold : C.primary, fontFamily: F.black, fontSize: 13, letterSpacing: 1.2 }}>
           {ex.kind === 'interactive' ? '✨ ' : ''}

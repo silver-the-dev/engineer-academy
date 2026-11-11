@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { C } from '../../theme';
 import { PlotLab } from './PlotLab';
 import { CodeBlock } from './Code';
+import { CLab, CodePuzzle } from './CPractice';
 import { CircuitSim } from './CircuitSim';
 import { Space3D } from './Space3D';
 import { Bars, NumberLine, Simulator, Stepper, TableView, Venn } from './Misc';
@@ -12,6 +13,8 @@ const REGISTRY: Record<string, React.ComponentType<any>> = {
   circuit: CircuitSim,
   plot: PlotLab,
   code: CodeBlock,
+  'c-lab': CLab,
+  'code-puzzle': CodePuzzle,
   space3d: Space3D,
   stepper: Stepper,
   table: TableView,

@@ -3,6 +3,7 @@ import { LayoutChangeEvent, ScrollView, Text, View, ViewStyle } from 'react-nati
 import { SvgXml } from 'react-native-svg';
 import { C, F } from '../../theme';
 import { sizedSvg, texToSvg } from './tex';
+import { useLayoutProbe } from '../lesson/LayoutProbe';
 
 type Props = {
   tex: string;
@@ -17,6 +18,7 @@ type Props = {
  * of the surrounding text line (rows use alignItems: 'center').
  */
 export const MathView = memo(function MathView({ tex, size = 18, color = C.text, display = false }: Props) {
+  const onLayout = useLayoutProbe('math');
   const t = useMemo(() => texToSvg(tex, display), [tex, display]);
   const exPx = size * 0.5;
   const s = useMemo(() => sizedSvg(t, exPx, color), [t, exPx, color]);
@@ -33,7 +35,7 @@ export const MathView = memo(function MathView({ tex, size = 18, color = C.text,
     else mb = -2 * delta;
   }
   return (
-    <View style={{ width: s.w, height: s.h, marginTop: mt, marginBottom: mb }}>
+    <View onLayout={onLayout} style={{ width: s.w, height: s.h, marginTop: mt, marginBottom: mb }}>
       <SvgXml xml={s.xml} width={s.w} height={s.h} />
     </View>
   );
@@ -45,7 +47,7 @@ const MIN_SCALE = 0.62;
 /** Display formula that fits `avail` px: shrinks it, and past MIN_SCALE lets it scroll horizontally. */
 export const FitMath = memo(function FitMath({ tex, size, color = C.text, avail, style }: { tex: string; size: number; color?: string; avail: number; style?: ViewStyle }) {
   const t = useMemo(() => texToSvg(tex, true), [tex]);
-  const room = Math.max(40, avail - 4);
+  const room = Math.max(1, avail);
   const natural = t.wEx * size * 0.5;
   const scale = natural > room ? room / natural : 1;
   if (scale >= MIN_SCALE) {
