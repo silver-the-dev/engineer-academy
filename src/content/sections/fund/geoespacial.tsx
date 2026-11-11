@@ -68,11 +68,11 @@ const platonicLab = (k0 = 1): Spec => ({
   },
 });
 
-const positionLab = (): Spec => ({
+const positionLab = (initial = 2): Spec => ({
   name: 'space3d',
   props: {
     scale: 40,
-    params: [{ key: 'm', label: 'posição', min: 0, max: 2, step: 1, value: 2, color: C.gold, format: (v: number) => ['paralelas', 'concorrentes', 'reversas'][Math.round(v)] }],
+    params: [{ key: 'm', label: 'posição', min: 0, max: 2, step: 1, value: initial, color: C.gold, format: (v: number) => ['paralelas', 'concorrentes', 'reversas'][Math.round(v)] }],
     render: ({ p }: any) => {
       const m = Math.round(p.m);
       const s: [V3, V3] = m === 0 ? [[-2, 1.5, 0], [2, 1.5, 0]] : m === 1 ? [[-1.5, -1.5, 0], [1.5, 1.5, 0]] : [[0, -2, 1.5], [0, 2, 1.5]];
@@ -243,11 +243,11 @@ const netLab = () =>
   });
 
 /** Similar solids: cube of side 1 and of side k. */
-const similarSolidLab = (): Spec => ({
+const similarSolidLab = (initial = 2): Spec => ({
   name: 'space3d',
   props: {
     scale: 28,
-    params: [{ key: 'k', label: 'k', min: 1, max: 3, step: 0.5, value: 2, color: C.gold }],
+    params: [{ key: 'k', label: 'k', min: 1, max: 3, step: 0.5, value: initial, color: C.gold }],
     render: ({ p }: any) => {
       const [V1, E] = box(1, 1, 1);
       const [V2] = box(p.k, p.k, p.k);
@@ -289,7 +289,7 @@ Uma reta e um plano podem ser: **contida**, **paralela** (sem ponto comum) ou **
           exercises: [
             match('Associe a posição relativa de duas retas.', [['paralelas', 'coplanares, sem ponto comum'], ['concorrentes', 'exatamente um ponto comum'], ['reversas', 'não coplanares'], ['coincidentes', 'todos os pontos em comum']], 'Reversas só existem no espaço.'),
             tf('Duas retas que não se cortam são necessariamente paralelas.', false, 'No espaço podem ser reversas.'),
-            inter('Escolha a posição em que NÃO existe plano contendo as duas retas.', 'space3d', positionLab().props, (v) => Math.round(v.p.m) === 2, 'reversas', 'Retas reversas não são coplanares.'),
+            inter('Escolha a posição em que NÃO existe plano contendo as duas retas.', 'space3d', positionLab(0).props, (v) => Math.round(v.p.m) === 2, 'reversas', 'Retas reversas não são coplanares.'),
             mcqS('Num cubo ABCDEFGH (ABCD embaixo, EFGH em cima, AE vertical), as retas AB e EH são:', 'reversas', ['paralelas', 'concorrentes', 'coincidentes'], 'AB está no plano de baixo, EH no de cima, e as direções são diferentes (x e y).'),
             mcqS('Quantos pontos não colineares determinam um plano?', '3', ['2', '4', '1'], 'Três pontos não colineares (ou reta + ponto fora dela, ou duas retas concorrentes/paralelas).'),
             tf('Se uma reta é perpendicular a uma única reta de um plano, ela é perpendicular ao plano.', false, 'Precisa ser perpendicular a duas retas concorrentes do plano.'),
@@ -524,7 +524,7 @@ O **tronco** é o que sobra: $V_{tronco}=V\,(1-k^3)$. Fórmula direta (bases $B$
               const k = randInt(rng, 2, 5);
               return num(`Dois cubos semelhantes com razão de arestas ${k}. Quantas vezes o volume do maior é o do menor?`, k ** 3, `k³ = ${k ** 3}.`);
             }),
-            inter('Ajuste k para que caibam 8 cubinhos no cubo maior.', 'space3d', similarSolidLab().props, (v) => near(v.p.k, 2, 0.01), 'k = 2', 'k³ = 8 ⇒ k = 2.'),
+            inter('Ajuste k para que caibam 8 cubinhos no cubo maior.', 'space3d', similarSolidLab(1).props, (v) => near(v.p.k, 2, 0.01), 'k = 2', 'k³ = 8 ⇒ k = 2.'),
             gen((rng) => {
               const V = 27 * randInt(rng, 1, 5);
               return num(`Um cone de volume ${V} é cortado por um plano paralelo à base a 1/3 da altura, a partir do vértice. Qual o volume do tronco?`, V - V / 27, `Cone pequeno: ${V}·(1/3)³ = ${V / 27}; tronco = ${V} − ${V / 27} = ${V - V / 27}.`);

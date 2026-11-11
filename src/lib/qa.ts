@@ -32,14 +32,17 @@ function exStrings(e: Exercise): string[] {
 }
 
 function structural(e: Exercise): string | null {
-  if (e.kind === 'interactive' && e.widget === 'plot') {
+  if (e.kind === 'interactive' && (e.widget === 'plot' || e.widget === 'space3d')) {
+    const widget = e.widget;
     const params = (e.props.params ?? []) as { key: string; value: number; min: number; max: number; step?: number }[];
     const points = (e.props.points ?? []) as { id: string; x: number; y: number }[];
-    if (!params.length && !points.length) return 'plot: exercício sem controles';
+    if (!params.length && !points.length) return `${widget}: exercício sem controles`;
     const p = Object.fromEntries(params.map((q) => [q.key, q.value]));
     const pts = Object.fromEntries(points.map((q) => [q.id, { x: q.x, y: q.y }]));
+    const view = { yaw: e.props.initialYaw ?? -0.75, pitch: e.props.initialPitch ?? 0.42 };
+    const check = () => e.check(widget === 'plot' ? { p, pts } : { p, ...view });
     try {
-      if (e.check({ p, pts })) return 'plot: exercício já começa resolvido';
+      if (check()) return `${widget}: exercício já começa resolvido`;
       // A malha do Slider usa múltiplos de step a partir de zero, limitados a [min, max].
       // Pontos arrastáveis e malhas grandes exigem validação por outro meio.
       if (!points.length) {
@@ -49,7 +52,7 @@ function structural(e: Exercise): string | null {
         const size = ranges.reduce((n, q) => n * (q.last - q.first + 1), 1);
         if (size > 0 && size <= 40000) {
           const reachable = (i: number): boolean => {
-            if (i === ranges.length) return e.check({ p, pts });
+            if (i === ranges.length) return check();
             const q = ranges[i];
             for (let j = q.first; j <= q.last; j++) {
               p[q.key] = Number(Math.max(q.min, Math.min(q.max, j * q.step)).toFixed(6));
@@ -57,11 +60,11 @@ function structural(e: Exercise): string | null {
             }
             return false;
           };
-          if (!reachable(0)) return 'plot: solução fora do alcance dos controles';
+          if (!reachable(0)) return `${widget}: solução fora do alcance dos controles`;
         }
       }
     } catch {
-      return 'plot: verificação falhou com valores dos controles';
+      return `${widget}: verificação falhou com valores dos controles`;
     }
   }
   if (e.kind === 'interactive' && e.widget === 'c-lab') {
@@ -89,12 +92,18 @@ function structural(e: Exercise): string | null {
   if (e.kind === 'fill') {
     const slots = e.template.split('___').length - 1;
     if (slots !== e.answers.length) return `fill slots ${slots} != answers ${e.answers.length}`;
-    for (const a of e.answers) if (!e.bank.includes(a)) return 'fill answer not in bank';
+    const remaining = [...e.bank];
+    for (const answer of e.answers) {
+      const index = remaining.indexOf(answer);
+      if (index < 0) return 'fill: ficha da resposta indisponível';
+      remaining.splice(index, 1);
+    }
     // the screen renders each piece between blanks on its own: a blank inside $…$ breaks the formula
     const dollars = (p: string) => (p.match(/(^|[^\\])\$/g) ?? []).length;
     if (e.template.split('___').some((p) => dollars(p) % 2)) return 'fill: lacuna ___ dentro de $…$';
   }
   if (e.kind === 'match' && new Set(e.pairs.map((p) => p[1])).size !== e.pairs.length) return 'match duplicate right side';
+  if (e.kind === 'match' && new Set(e.pairs.map((p) => p[0])).size !== e.pairs.length) return 'match duplicate left side';
   if (e.kind === 'order' && new Set(e.items).size !== e.items.length) return 'order duplicate items';
   return null;
 }

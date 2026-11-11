@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Exercise, UnitDef } from '../../types';
-import { fill, gen, match, mcq, num, order, plot, tf } from '../../helpers';
+import { fill, gen, match, mcq, num, order, plot, table, tf } from '../../helpers';
 import { circuit, circuitEx, circuitVisual, CLK, DFF, GATE, GND, IN, OUT, wires } from '../../circuits';
 import { FnCurve } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
@@ -58,7 +58,7 @@ const practice = {
     fill('Um latch NOR foi colocado em Q=1. Complete os níveis de S e R que mantêm o valor sem forçar nenhum comando.', 'S = ___; R = ___.', ['0', '0'], ['1', '1'], 'Com as duas entradas inativas, a realimentação mantém o estado.'),
     num('Depois de limpar o latch, as duas entradas voltam a 0. Qual é Q?', 0, 'O estado anterior era zero; S=R=0 conserva esse estado.'),
     tf('Liberar S e R juntos após a condição proibida garante que Q voltará ao valor anterior.', false, 'As duas saídas foram forçadas a 0. A liberação simultânea não determina qual porta responderá primeiro.'),
-    order('Ordene o uso de S para gravar um 1 e depois manter a memória.', ['Manter R inativo', 'Ativar S e confirmar Q em 1', 'Desativar S sem ativar R'], 'Remover o pulso S leva ao modo de retenção.'),
+    order('S e R começam em 0. Ordene os passos para gravar 1, soltar S e comprovar a retenção.', ['Ativar S e confirmar Q em 1', 'Desativar S com R em 0', 'Verificar que Q continua em 1'], 'Depois de retirar o pulso S, as duas entradas em 0 deixam Q no estado gravado.'),
   ],
   d: [
     num('D vale 1 na borda de subida e muda para 0 entre bordas. Qual Q imediatamente depois da mudança em D?', 1, 'Q guarda o 1 amostrado e só muda na próxima borda ativa.'),
@@ -109,9 +109,15 @@ const practice = {
     fill('O registrador caiu em um código não usado. Complete o destino mais adequado para uma recuperação definida no projeto:', 'Voltar ao ___.', ['estado seguro especificado'], ['código anterior desconhecido', 'estado que gastar mais energia'], 'A recuperação de um código inválido deve seguir uma regra explícita.'),
   ],
 } satisfies Record<string, Practice>;
+const theoryVisuals: Partial<Record<keyof typeof practice, ReturnType<typeof table>>> = {
+  latchHold: table(['Passo', 'S', 'R', 'Q'], [['Definir', 1, 0, 1], ['Soltar S', 0, 0, 1], ['Limpar', 0, 1, 0], ['Soltar R', 0, 0, 0]], [1, 3]),
+  jk: table(['J', 'K', 'Q após a borda'], [[0, 0, 'Q anterior'], [0, 1, 0], [1, 0, 1], [1, 1, 'Inverte Q']]),
+  shift: table(['Borda', 'Bit que entra', 'Conteúdo', 'Bit que sai'], [['Inicial', '—', '0011', '—'], [1, 1, '1001', 1], [2, 0, '0100', 1]]),
+  fsm: table(['Estado atual', 'Entrada', 'Próximo estado'], [['Fechado', 'Cartão válido', 'Aberto'], ['Fechado', 'Cartão inválido', 'Fechado'], ['Aberto', 'Tempo esgotado', 'Fechado']]),
+};
 const part = (o: Topic, kind: keyof typeof practice) => ({
   card: {
-    title: o.title, body: o.body,
+    title: o.title, body: o.body, visual: theoryVisuals[kind],
     ...(kind === 'd' ? { visual: timing(), tip: 'Mude D e observe Q depois da primeira borda de subida.' } : {}),
     ...(kind === 'latchSet' ? { visual: circuitVisual(latchSpec(true, false)), tip: 'Compare Q ao alternar os comandos S e R, um de cada vez.' } : {}),
   },

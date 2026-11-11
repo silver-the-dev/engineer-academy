@@ -1,32 +1,40 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
 import { gen, inter, mcq, near, num, plot, tf } from '../../helpers';
-import { FnCurve, Pt } from '../../../components/plot/Plot';
+import { FnCurve, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, randInt } from '../../../lib/random';
 import { fnLab, tangentLab } from '../../visuals';
 
 const t = String.raw;
 
-// As duas curvas compartilham o tempo; cada ordenada usa sua própria unidade.
 const movimento = () => plot({
-  view: { xMin: 0, xMax: 4, yMin: 0, yMax: 8 },
+  view: { xMin: -0.3, xMax: 4.3, yMin: -0.3, yMax: 4.3 },
   params: [{ key: 'tempo', label: 'tempo (s)', min: 0, max: 4, step: 0.5, value: 1, color: C.gold }],
   render: ({ p }: any) => <>
-    <FnCurve f={(s) => s * s / 2} color={C.p1} />
-    <FnCurve f={(s) => s} color={C.p2} />
-    <Pt x={p.tempo} y={p.tempo * p.tempo / 2} color={C.p1} label="x" />
-    <Pt x={p.tempo} y={p.tempo} color={C.p2} label="v" />
+    <FnCurve f={(s) => s} from={0} to={4} color={C.p2} />
+    <Pt x={p.tempo} y={p.tempo} color={C.gold} />
   </>,
-  caption: 'Tempo (s) → · posição e velocidade sobrepostas',
-  info: ({ p }: any) => t`Em $t=${fmt(p.tempo)}\,\text{s}$: posição (curva 1) $x=${fmt(p.tempo ** 2 / 2)}\,\text{m}$; velocidade (reta 2) $v=${fmt(p.tempo)}\,\text{m/s}$.`,
+  caption: 'Horizontal: tempo (s). Vertical: velocidade (m/s).',
+  info: ({ p }: any) => t`Em $t=${fmt(p.tempo)}\,\text{s}$, a velocidade é $v=${fmt(p.tempo)}\,\text{m/s}$.`,
 });
+
+const signedArea = plot({
+  view: { xMin: -0.45, xMax: 4.55, yMin: -1.8, yMax: 3.8 },
+  render: () => <>
+    <RectW x={0} y={0} w={2} h={3} color={C.p2} opacity={0.28} />
+    <RectW x={2} y={-1} w={2} h={1} color={C.gold} opacity={0.32} />
+    <Seg x1={0} y1={3} x2={2} y2={3} color={C.p2} width={4} />
+    <Seg x1={2} y1={-1} x2={4} y2={-1} color={C.gold} width={4} />
+  </>,
+  caption: 'Horizontal: tempo (s). Vertical: velocidade (m/s).',
+}, 192);
 
 const praticaGrafico = () => inter(
   t`No laboratório, ajuste o tempo para que a velocidade seja $3\,\text{m/s}$.`,
   'plot', movimento().props, (v) => Math.abs(v.p.tempo - 3) < 0.01,
   t`Ajuste para $3\,\text{s}$.`,
-  t`A reta representa $v=t$ nas unidades indicadas. Logo, $v=3\,\text{m/s}$ em $t=3\,\text{s}$; nesse instante $x=4,5\,\text{m}$.`,
+  t`A reta representa $v=t$ nas unidades indicadas. Logo, $v=3\,\text{m/s}$ em $t=3\,\text{s}$.`,
 );
 
 export const cinematica: UnitDef = {
@@ -125,7 +133,7 @@ export const cinematica: UnitDef = {
         num(t`Para $x=t^2/2$, qual a inclinação da tangente em $t=2\,\text{s}$, em m/s, sem casas decimais?`, 2, t`A derivada $v=t$ dá inclinação $2\,\text{m/s}$ em $t=2\,\text{s}$.`, {unit:'m/s',tol:0.5}),
         mcq(t`Uma curva $x(t)$ tem inclinação negativa cada vez menos intensa. Qual é o sinal de $v$ e de $a$ nesse intervalo?`, ['$v<0$ e $a>0$', '$v>0$ e $a<0$', '$v<0$ e $a<0$', '$v=0$ e $a=0$'], 0, t`A inclinação é negativa, mas cresce em direção a zero: velocidade negativa e aceleração positiva.`),
       ] },
-      { card: { title: 'Área sob a velocidade', body: t`A área algébrica entre $v(t)$ e o eixo do tempo é o deslocamento: áreas acima contam positivas e abaixo negativas. Para distância total, somamos os módulos das áreas, separando os intervalos em que a velocidade muda de sinal.` }, exercises: [
+      { card: { title: 'Área sob a velocidade', body: t`A área algébrica entre $v(t)$ e o eixo do tempo é o deslocamento: áreas acima contam positivas e abaixo negativas. Para distância total, somamos os módulos das áreas, separando os intervalos em que a velocidade muda de sinal.`, visual: signedArea, example: t`Em cada trecho de $2\,\text{s}$, multiplique a velocidade pelo tempo. Os deslocamentos são $3\cdot2=6\,\text{m}$ e $(-1)\cdot2=-2\,\text{m}$. O deslocamento total é $4\,\text{m}$ e a distância percorrida é $8\,\text{m}$.` }, exercises: [
         num(t`Velocidade constante de $3\,\text{m/s}$ por $4\,\text{s}$: qual a área algébrica sob $v(t)$, em m, sem casas decimais?`, 12, t`O retângulo tem área $3\cdot4=12\,\text{m}$, igual ao deslocamento.`, {unit:'m',tol:0.5}),
         gen(rng => { const v=randInt(rng,2,6), s=randInt(rng,2,5); return num(t`Velocidade constante $-${v}\,\text{m/s}$ durante $${s}\,\text{s}$. Qual o deslocamento em m, sem casas decimais?`,-v*s,t`A área com sinal é $(-${v})\cdot${s}=-${v*s}\,\text{m}$.`,{unit:'m',tol:0.5}); }),
         num(t`Velocidade cresce linearmente de zero a $6\,\text{m/s}$ em $4\,\text{s}$. Qual o deslocamento em m, sem casas decimais?`, 12, t`A área triangular é $\frac12\cdot4\cdot6=12\,\text{m}$.`, {unit:'m',tol:0.5}),

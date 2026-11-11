@@ -1,10 +1,9 @@
 import type { UnitDef } from '../../types';
-import { code, gen, match, mcq, num, order, tf } from '../../helpers';
+import { code, gen, match, mcq, num, order, table, tf } from '../../helpers';
 import { randInt } from '../../../lib/random';
 
 const t = String.raw;
 
-// Modelos idealizados para explorar relações antes de medir o hardware real.
 export const iot: UnitDef = {
   id: 'mc-iot', title: 'ESP32 e Internet das Coisas', icon: '📶',
   subtitle: 'Do microcontrolador conectado ao produto',
@@ -42,13 +41,13 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-wifi', title: 'Wi-Fi, HTTP e MQTT', parts: [
         {
-          card: { title: 'Do rádio à aplicação', body: t`Wi-Fi conecta o dispositivo a uma rede. HTTP organiza requisições e respostas: um cliente pode pedir uma leitura a um servidor. Uma API remota exige conectividade além da rede local. Em HTTPS, TLS protege a comunicação quando certificados são validados.` },
+          card: { title: 'Do rádio à aplicação', body: t`Wi-Fi conecta o dispositivo a uma rede. HTTP organiza requisições e respostas: um cliente pode pedir uma leitura a um servidor. Uma API remota exige conectividade além da rede local. Em HTTPS, TLS protege a comunicação quando certificados são validados.`, example: 'O nó já está no Wi-Fi e envia uma leitura por HTTP. Se o servidor responde com 503, o nó conseguiu trocar mensagens pela rede, mas o serviço informou que está indisponível.' },
           exercises: [
             mcq('Qual componente faz uma requisição HTTP?', ['Cliente', 'Resistor', 'ADC', 'Capacitor'], 0, 'O cliente envia uma requisição e o servidor responde.'),
             tf('Estar conectado ao Wi-Fi garante acesso à internet.', false, 'A rede local pode estar sem rota ou acesso à internet.'),
             match('Associe:', [['Wi-Fi', 'acesso sem fio à rede'], ['HTTP', 'requisição e resposta'], ['TLS', 'proteção do canal com validação']], 'Wi-Fi fornece acesso à rede; HTTP organiza a troca e TLS protege o canal quando bem configurado.'),
             gen((rng) => { const n = randInt(rng, 2, 8); return num(t`Um sensor envia $${n}$ requisições por minuto durante $5$ minutos. Quantas requisições inteiras?`, n * 5, t`$${n}\cdot5=${n * 5}$ requisições.`, { unit: 'requisições', tol: 0.5 }); }),
-            num('Um nó publica uma leitura a cada 10 s. Em 2 min, quantas mensagens publica sem contar o instante inicial?', 12, 'Dois minutos são 120 s. Dividindo por 10 s por mensagem, obtemos 12.'),
+            mcq('O nó recebe HTTP 503 ao enviar uma leitura. Qual ação atende melhor a um requisito de entrega posterior sem inundar o servidor?', ['Guardar a leitura e tentar novamente após um intervalo', 'Apagar a leitura e considerar que foi entregue', 'Enviar em um laço sem pausa', 'Trocar a tensão de alimentação'], 0, 'O serviço respondeu que está indisponível. Preservar a leitura e espaçar tentativas permite reenviar quando o serviço voltar.'),
             mcq('Se a API não responde, o firmware deve:', ['tratar tempo limite e tentar novamente com espera', 'travar indefinidamente', 'ignorar qualquer erro', 'aumentar a tensão do pino'], 0, 'Timeout e nova tentativa espaçada evitam bloqueio indefinido e excesso de tráfego.'),
             tf('Desativar a validação de certificado elimina a autenticação confiável do servidor.', true, 'Sem validar o certificado, um intermediário pode se passar pelo servidor.'),
           ],
@@ -98,12 +97,12 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-rtos', title: 'Tarefas e noções de RTOS', parts: [
         {
-          card: { title: 'Concorrência e prioridades', body: t`Um RTOS organiza tarefas e suas prioridades. Uma tarefa pronta de maior prioridade normalmente preemp­ta outra de menor prioridade no mesmo núcleo, conforme o escalonador; tarefas bloqueadas aguardam evento ou tempo. Prioridade alta não torna uma tarefa mais rápida e pode privar as demais de CPU.` },
+          card: { title: 'Concorrência e prioridades', body: t`Num RTOS preemptivo, uma tarefa pronta de maior prioridade pode interromper outra no mesmo núcleo. Uma tarefa bloqueada aguarda um evento ou tempo. A tabela mostra o caso de um alarme com prioridade maior que a telemetria, que já estava executando.`, visual: table(['Instante', 'Estado do alarme', 'CPU executa'], [['Antes do alerta', 'Bloqueado', 'Telemetria'], ['Após escalonar', 'Executando', 'Alarme'], ['Ao voltar a esperar', 'Bloqueado', 'Telemetria']]) },
           exercises: [
             mcq('O que uma tarefa bloqueada faz?', ['Aguarda uma condição ou prazo', 'Ocupa sempre toda a CPU', 'Apaga a memória', 'Muda a tensão do pino'], 0, 'Uma tarefa bloqueada não está pronta para executar enquanto aguarda evento ou tempo.'),
             tf('Uma tarefa sempre pronta e de alta prioridade pode impedir outra de baixa prioridade de executar.', true, 'No mesmo núcleo, a tarefa de menor prioridade pode sofrer inanição.'),
             num('Uma tarefa roda uma vez por segundo durante 10 segundos, começando após 1 s. Quantas execuções inteiras?', 10, 'Ela executa nos instantes 1, 2, ..., 10 s: 10 vezes.', { unit: 'execuções', tol: 0.5 }),
-            num('Uma tarefa periódica registra uma leitura a cada 250 ms. Quantas leituras registra em 2 s, sem contar a inicial?', 8, 'Divida 2000 ms por 250 ms por execução: 8.'),
+            mcq('No mesmo núcleo, a telemetria está executando quando a tarefa de alarme, de maior prioridade, fica pronta. Num RTOS preemptivo, qual tarefa passa a executar?', ['Alarme', 'Telemetria até a próxima medição', 'Nenhuma até reiniciar', 'A de menor prioridade disponível'], 0, 'A tarefa pronta de maior prioridade preempta a de telemetria. Quando o alarme volta a bloquear, a telemetria pode continuar.'),
             gen((rng) => { const n = randInt(rng, 2, 9); return num(t`Uma tarefa periódica executa uma vez a cada $${n}\,\text{s}$, começando após o primeiro período. Quantas execuções em $${n * 4}\,\text{s}$?`, 4, t`$${n * 4}/${n}=4$ execuções.`, { unit: 'execuções', tol: 0.5 }); }),
             mcq('Qual tarefa merece prioridade conforme uma análise de prazo?', ['A que tem prazo crítico e precisa responder rapidamente', 'Sempre a que imprime mais texto', 'Sempre a criada primeiro', 'Sempre a que usa mais memória'], 0, 'Prioridades devem refletir prazos, tempo de execução e política do sistema.'),
             tf('Em um sistema com mais de um núcleo, a análise de concorrência deve considerar em qual núcleo cada tarefa pode executar.', true, 'Afinidade e disponibilidade de núcleos afetam o escalonamento.'),
@@ -126,7 +125,7 @@ export const iot: UnitDef = {
     {
       id: 'mc-iot-prod', title: 'Do protótipo ao produto', parts: [
         {
-          card: { title: 'Requisitos antes da montagem', body: t`Defina entradas, saídas, ambiente, alimentação, autonomia e critérios mensuráveis. Desenhe o caminho sensor → firmware → rede → interface e liste falhas possíveis. Um requisito verificável informa condição e limite; por exemplo, registrar uma leitura a cada 10 s.` },
+          card: { title: 'Requisitos antes da montagem', body: t`Defina entradas, saídas, ambiente, alimentação, autonomia e critérios mensuráveis. Desenhe o caminho sensor → firmware → rede → interface e liste falhas possíveis. Um requisito verificável informa condição e limite; por exemplo, registrar uma leitura a cada 10 s.`, example: 'Para testar a perda de rede, desconecte o acesso por 30 s. Se o requisito for preservar as três leituras coletadas no período, confira que elas chegam com o horário original após reconectar.' },
           exercises: [
             mcq('Qual é um requisito verificável?', ['Registrar uma leitura a cada 10 s', 'Ser muito bom', 'Ter desempenho mágico', 'Ser moderno'], 0, 'O intervalo de 10 s pode ser medido e comparado ao requisito.'),
             match('Associe o bloco à função:', [['Sensor', 'mede a grandeza'], ['Firmware', 'processa e transmite'], ['Interface', 'mostra dados ao usuário']], 'O sensor mede, o firmware trata os dados e a interface os apresenta.'),

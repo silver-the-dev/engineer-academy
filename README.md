@@ -89,6 +89,8 @@ node scripts/qa-content.cjs
 
 Para conferir o layout de cada exercício no Android, abra `engineeracademy://audit?sweep=1&seed=17` em um build de desenvolvimento ou em um APK de teste compilado com `EXPO_PUBLIC_LAYOUT_AUDIT=1`. O logcat recebe linhas `EA_LAYOUT` com progresso e alertas. Para restringir a uma lição, adicione `&id=<lição>`. A varredura mede a geometria de respostas e fórmulas; o fluxo de interação pode ser conferido na tela da própria lição.
 
+`node scripts/qa-exercise-playthrough.cjs` tenta as respostas de todos os tipos fora do simulador de circuitos. `node scripts/qa-circuit-playthrough.cjs` monta as soluções com as peças, posições e valores que o editor aceita. Use os dois junto com o QA de conteúdo e a varredura de layout.
+
 ### Verificação de tipos
 
 ```bash

@@ -4,7 +4,7 @@ import { gen, mcq, mcqS, num, tf, match, inter, plot, near, table } from '../../
 import { FnCurve, Pt } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, pick, randInt, randNZ, polyTex, term } from '../../../lib/random';
-import { eulerLab, interpolationLab, quadratureLab, regressionLab } from '../../visuals';
+import { eulerLab, interpolationLab, quadratureLab, regressionError, regressionLab } from '../../visuals';
 
 const t = String.raw;
 
@@ -58,8 +58,8 @@ Por $n+1$ pontos com abscissas distintas passa **um único** polinômio de grau 
             visual: interpolationLab(),
           },
           exercises: [
-            mcq(t`Quantos pontos (com abscissas distintas) determinam uma parábola interpoladora única?`, ['3', '2', '4', 'infinitos'], 0, t`Grau $2$ precisa de $2+1=3$ pontos.`),
-            tf(t`O polinômio interpolador de grau $\le n$ por $n+1$ pontos distintos é único.`, true, t`É o teorema de existência e unicidade da interpolação.`),
+            mcq(t`Quantos pontos com abscissas distintas determinam um polinômio interpolador de grau no máximo $2$?`, ['3', '2', '4', 'infinitos'], 0, t`Três valores determinam os três coeficientes. Se os pontos estiverem alinhados, o grau pode ser menor que $2$.`),
+            tf(t`O polinômio interpolador de grau $\le n$ por $n+1$ pontos com abscissas distintas é único.`, true, t`Abscissas distintas garantem a existência e a unicidade da interpolação.`),
             gen((rng) => {
               const a = randInt(rng, -3, 3);
               const b = randNZ(rng, -3, 3);
@@ -68,10 +68,10 @@ Por $n+1$ pontos com abscissas distintas passa **um único** polinômio de grau 
               const xq = (x0 + x1) / 2;
               return num(t`A reta interpoladora por $(${x0},\,${a + b * x0})$ e $(${x1},\,${a + b * x1})$ vale quanto em $x=${fmt(xq)}$?`, a + b * xq, t`Inclinação $${b}$; $P(${fmt(xq)})=${fmt(a + b * xq)}$.`);
             }),
-            inter(t`Arraste os 4 pontos para que o polinômio interpolador seja uma **reta**.`, 'plot', interpolationLab().props, (v: any) => {
+            inter(t`Mova os pontos para cima ou para baixo até que o polinômio interpolador seja uma **reta**.`, 'plot', interpolationLab(true).props, (v: any) => {
               if (!v) return false;
               const ps = Object.values(v.pts) as { x: number; y: number }[];
-              if (ps.length < 3) return false;
+              if (ps.length !== 4 || new Set(ps.map(q => q.x)).size !== ps.length) return false;
               const [p0, p1] = ps;
               if (Math.abs(p1.x - p0.x) < 1e-9) return false;
               const m = (p1.y - p0.y) / (p1.x - p0.x);
@@ -258,11 +258,10 @@ export const ajuste: UnitDef = {
               const r = [randInt(rng, -2, 2), randInt(rng, -2, 2), randInt(rng, -2, 2)];
               return num(t`Os resíduos de uma reta foram $${r[0]}$, $${r[1]}$ e $${r[2]}$. Quanto vale $S=\sum r_i^2$?`, r[0] ** 2 + r[1] ** 2 + r[2] ** 2, t`$${r[0] ** 2}+${r[1] ** 2}+${r[2] ** 2}=${r[0] ** 2 + r[1] ** 2 + r[2] ** 2}$.`);
             }),
-            inter(t`Ajuste $a$ e $b$ até a soma dos quadrados ficar abaixo de $0{,}6$.`, 'plot', regressionLab().props, (v: any) => {
-              if (!v) return false;
-              const ps = Object.values(v.pts) as { x: number; y: number }[];
-              return ps.reduce((s, q) => s + (q.y - (v.p.a * q.x + v.p.b)) ** 2, 0) < 0.6;
-            }, t`perto de $y\approx0{,}9x+0{,}6$`, t`Os mínimos quadrados escolhem $a$ e $b$ que minimizam $\sum(y_i-ax_i-b)^2$; a reta ótima fica perto de $y\approx0{,}9x+0{,}6$.`),
+            inter(t`Ajuste $a$ e $b$ até a soma dos quadrados dos resíduos dos dados ficar abaixo de $0{,}6$.`, 'plot', regressionLab(false).props,
+              v => !!v && regressionError(v.p.a, v.p.b) < 0.6,
+              t`perto de $y\approx0{,}9x+0{,}6$`,
+              t`Os mínimos quadrados escolhem $a$ e $b$ que minimizam $\sum(y_i-ax_i-b)^2$. Com os dados do gráfico, a reta ótima fica perto de $y\approx0{,}9x+0{,}6$.`),
             gen((rng) => {
               const a = randNZ(rng, -2, 3);
               const b = randInt(rng, -3, 3);

@@ -122,7 +122,7 @@ Como ponto de partida, muitas montagens manuais usam cerca de $320$–$350\,°\t
     {
       id: 'of-sold-placa', title: 'Da protoboard à placa definitiva', parts: [
         {
-          card: { title: 'Planeje as conexões', body: t`A protoboard permite experimentar; a placa perfurada exige planejar cada nó a partir do esquemático. Há placas com ilhas isoladas e outras com tiras conectadas: confira o padrão real e corte trilhas quando necessário. Posicione peças, desenhe fios e pontes intencionais e confira alimentação e polaridade antes de soldar.` },
+          card: { title: 'Planeje as conexões', body: t`A protoboard permite experimentar; a placa perfurada exige planejar cada nó a partir do esquemático. Há placas com ilhas isoladas e outras com tiras conectadas: confira o padrão real e corte trilhas quando necessário. Posicione peças, desenhe fios e pontes intencionais e confira alimentação e polaridade antes de soldar.`, example: 'Em uma placa de tiras, dois terminais em posições diferentes da mesma tira ainda compartilham um nó. Se o esquemático exige nós distintos, mova um terminal para outra tira ou planeje uma interrupção entre eles.' },
           exercises: [
             mcq('Qual documento define as conexões elétricas a preservar?', ['Esquemático', 'Cor da caixa', 'Tamanho da ponta', 'Preço dos fios'], 0, 'O esquemático identifica nós e ligações que devem ser transferidos à placa.'),
             tf('Toda placa perfurada tem o mesmo padrão de cobre.', false, 'Existem ilhas isoladas e tiras; inspecione e teste o padrão da placa usada.'),

@@ -186,8 +186,13 @@ export function Venn({ width, onChange, initial = [], labels = ['A', 'B'], readO
   return (
     <View style={{ alignItems: 'center' }}>
       <Pressable onPress={(e) => onTap(e.nativeEvent.locationX, e.nativeEvent.locationY)}>
-        <Svg width={width} height={H}>
-          <Rect x={2} y={2} width={width - 4} height={H - 4} rx={14} fill={fillFor('U')} stroke={C.border} strokeWidth={2} />
+        <Svg pointerEvents="none" width={width} height={H}>
+          <Rect x={2} y={2} width={width - 4} height={H - 4} rx={14} fill={C.bgDeep} stroke={C.border} strokeWidth={2} />
+          {sel.includes('U') ? <>
+            <Rect x={3} y={3} width={width - 6} height={H - 6} rx={13} fill={fillFor('U')} />
+            <Circle cx={cx1} cy={cy} r={r} fill={C.bgDeep} />
+            <Circle cx={cx2} cy={cy} r={r} fill={C.bgDeep} />
+          </> : null}
           <Path d={onlyA} fill={fillFor('A')} />
           <Path d={onlyB} fill={fillFor('B')} />
           <Path d={lens} fill={fillFor('AB')} />
@@ -313,6 +318,7 @@ export function Bars({
   onChange,
   color = C.primary,
   showMean,
+  histogram = false,
   step = 1,
 }: {
   width: number;
@@ -323,6 +329,7 @@ export function Bars({
   onChange?: (v: number[]) => void;
   color?: string;
   showMean?: boolean;
+  histogram?: boolean;
   step?: number;
 }) {
   const [vals, setVals] = useState(values);
@@ -372,13 +379,18 @@ export function Bars({
   const mean = total / vals.length;
   return (
     <View style={{ alignItems: 'center' }} {...pan.panHandlers}>
-      <Svg width={width} height={H + 26}>
+      <Svg pointerEvents="none" width={width} height={H + 26}>
         {Array.from({ length: max + 1 }, (_, i) => i).filter((i) => max <= 12 || i % Math.ceil(max / 10) === 0).map((i) => (
           <Line key={i} x1={12} x2={width - 12} y1={toY(i)} y2={toY(i)} stroke={C.plotGrid} strokeWidth={1} />
         ))}
         {vals.map((v, i) => (
           <G key={i}>
-            <Rect x={12 + i * bw + 4} y={toY(v)} width={bw - 8} height={H - toY(v)} rx={5} fill={color} />
+            <Rect
+              x={12 + i * bw + (histogram ? 0 : 4)} y={toY(v)}
+              width={histogram ? bw : bw - 8} height={H - toY(v)}
+              rx={histogram ? 0 : 5} fill={color}
+              stroke={histogram ? C.bgDeep : undefined} strokeWidth={histogram ? 1 : 0}
+            />
             <SvgText x={12 + i * bw + bw / 2} y={toY(v) - 4} fill={C.text} fontSize={12} textAnchor="middle" fontFamily={F.black}>
               {String(v).replace('.', ',')}
             </SvgText>

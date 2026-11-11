@@ -132,7 +132,7 @@ export const ampOp: UnitDef = {
       ] }),
     ] },
     { id: 'ea-opamp-int', title: 'Integrador e diferenciador', parts: [
-      { card: { title: 'Integrador inversor', body: t`Com resistor na entrada e capacitor na realimentação, em regime ideal linear, $V_o(t)=V_o(0)-\frac1{RC}\int_0^t V_i(\tau)\,d\tau$. Entrada constante gera rampa de saída; a condição inicial importa.` }, exercises: [
+      { card: { title: 'Integrador inversor', body: t`Com resistor na entrada e capacitor na realimentação, em regime ideal linear, $V_o(t)=V_o(0)-\frac1{RC}\int_0^t V_i(\tau)\,d\tau$. Entrada constante gera rampa de saída; a condição inicial importa.`, example: t`Com entrada de $1\,\text{V}$, $RC=0{,}25\,\text{s}$ e saída inicial zero, a saída cai com inclinação de $-4\,\text{V/s}$. Após meio segundo, chega a $-2\,\text{V}$, se ainda estiver na faixa linear.` }, exercises: [
         q('Uma entrada constante positiva produz qual saída no integrador inversor ideal?', 'Uma rampa decrescente', 'Uma rampa crescente', 'Uma senoide', 'Uma saída sempre constante', t`$dV_o/dt=-V_i/(RC)$ é negativo para entrada positiva.`),
         tf('A tensão inicial da saída influencia a resposta do integrador.', true, 'A integral determina a variação; a tensão inicial soma-se a ela.'),
         n(t`Para $RC=1\,\text{s}$, $V_i=2\,\text{V}$ e $V_o(0)=0$, qual a inclinação em V/s, com uma casa decimal?`, -2, t`$dV_o/dt=-2/1=-2\,\text{V/s}$.`, 'V/s'),
@@ -141,7 +141,7 @@ export const ampOp: UnitDef = {
         tf(t`Uma rampa calculada até $-20\,\text{V}$ continua linear com trilhos $\pm15\,\text{V}$.`, false, t`A saída chega ao trilho de $-15\,\text{V}$ antes; o modelo linear deixa de valer.`),
         num('Um integrador ideal recebe 2 V constantes, começa com saída 0 V e tem RC = 0,5 s. Qual é a inclinação de saída em V/s?', -4, 'A derivada da saída é −Vi/RC = −2/0,5 = −4 V/s.', { unit: 'V/s' }),
       ] },
-      { card: { title: 'Diferenciador inversor', body: t`Com capacitor na entrada e resistor na realimentação, o modelo ideal linear dá $V_o=-RC\,dV_i/dt$. Uma rampa de entrada gera saída constante; sinais rápidos e ruído são muito amplificados, exigindo limitação prática de banda.` }, exercises: [
+      { card: { title: 'Diferenciador inversor', body: t`Com capacitor na entrada e resistor na realimentação, o modelo ideal linear dá $V_o=-RC\,dV_i/dt$. Uma rampa de entrada gera saída constante; sinais rápidos e ruído são muito amplificados, exigindo limitação prática de banda.`, example: t`Se a entrada cai $2\,\text{V}$ em $1\,\text{s}$, a inclinação é $-2\,\text{V/s}$. Com $RC=0{,}5\,\text{s}$, a saída vale $+1\,\text{V}$ durante a rampa.` }, exercises: [
         q('Qual grandeza da entrada determina a saída do diferenciador ideal?', 'Sua taxa de variação', 'Seu valor inicial isoladamente', 'Sua integral acumulada', 'A resistência da carga apenas', t`A fórmula é $V_o=-RC\,dV_i/dt$.`),
         tf('Uma entrada constante gera saída zero no diferenciador ideal linear.', true, 'A derivada de uma constante é zero.'),
         n(t`Para $RC=2\,\text{s}$ e rampa de inclinação $3\,\text{V/s}$, calcule a saída em V, com uma casa decimal.`, -6, t`$V_o=-2\cdot3=-6\,\text{V}$.`),

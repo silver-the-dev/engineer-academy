@@ -184,6 +184,7 @@ export function Space3D({
               step={q.step ?? 0.1}
               value={p[q.key]}
               color={q.color ?? C.primary}
+              format={q.format}
               onChange={(v) => {
                 const n = { ...p, [q.key]: v };
                 setP(n);

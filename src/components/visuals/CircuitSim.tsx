@@ -2,19 +2,25 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PanResponder, Platform, Text, View } from 'react-native';
 import type { ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line } from 'react-native-svg';
-import { applyEdit, defaults, makeValue } from '../../lib/circuit';
+import { applyEdit, makeValue } from '../../lib/circuit';
 import type { CircuitSpec, CircuitValue, Comp, Pt } from '../../lib/circuit';
 import { C, F, R } from '../../theme';
 import { useScrollLock } from '../ScrollLock';
 import { CurrentLayer } from '../circuit/CurrentLayer';
 import { Action, Meter, Palette, styles } from '../circuit/Controls';
 import { Labels, labelsFor } from '../circuit/Labels';
-import { allTypes, engineering, gridFor, hitPart, isAnchored, names, nearest, nextId, measurable, paletteItem, pixel, terminals } from '../circuit/model';
+import { allTypes, boardPadding, boardPoint, boardViewport, engineering, gridFor, hitPart, isAnchored, names, nearest, measurable, paletteItem, pixel, placeOnGrid, samePoint } from '../circuit/model';
+import type { BoardViewport } from '../circuit/model';
 import { Scope } from '../circuit/Scope';
 import { Symbol } from '../circuit/Symbols';
 import { useSimulation } from '../circuit/useSimulation';
 
 export type CircuitSimProps = CircuitSpec & { width: number; onChange?: (v: CircuitValue) => void; checked?: boolean | null };
+
+type BoardGesture = {
+  origin: Pt; page: Pt; view: BoardViewport; start: Pt;
+  action: 'draw' | 'move' | 'overview' | 'inspect'; canceled: boolean;
+};
 
 export function CircuitSim(props: CircuitSimProps) {
   const { comps: initial, width, mode = 'adjust', palette = allTypes, onChange, checked, scope, caption, timeScale } = props;
@@ -23,22 +29,41 @@ export function CircuitSim(props: CircuitSimProps) {
   const [tool, setTool] = useState<number | null>(null);
   const [history, setHistory] = useState<Comp[][]>([]);
   const [drag, setDrag] = useState<{ a: Pt; b: Pt } | null>(null);
+  const [draft, setDraft] = useState<Pt | null>(null);
+  const [offset, setOffset] = useState<Pt>([0, 0]);
+  const [moving, setMoving] = useState(false);
+  const [overview, setOverview] = useState(false);
   const [notice, setNotice] = useState('');
   const lock = useScrollLock();
   const canvasWidth = Math.max(1, width - 2);
-  // Keep the coordinate system fixed as the user builds or deletes parts.
-  const grid = useMemo(() => gridFor({ comps: initial, cols: props.cols, rows: props.rows }, canvasWidth), [initial, props.cols, props.rows, canvasWidth]);
+  const building = mode === 'build';
+  const grid = useMemo(() => {
+    const fit = gridFor({ comps: initial, cols: props.cols, rows: props.rows }, canvasWidth);
+    return building ? { ...fit, cell: Math.max(44, fit.cell) } : fit;
+  }, [initial, props.cols, props.rows, canvasWidth, building]);
+  const padding = building ? boardPadding : 0;
+  const fullHeight = grid.rows * grid.cell + padding * 2;
+  const height = building ? Math.min(300, fullHeight) : fullHeight;
+  const gridDots = useMemo(() => Array.from({ length: grid.rows + 1 }, (_, y) =>
+    Array.from({ length: grid.cols + 1 }, (_, x) =>
+      <Circle key={`${x},${y}`} cx={x * grid.cell} cy={y * grid.cell} r={building ? 1.8 : 1} />
+    )
+  ), [grid, building]);
+  const viewport = boardViewport(grid, [canvasWidth, height], offset, overview, padding);
+  const canMove = viewport.board[0] > canvasWidth + 1 || viewport.board[1] > height + 1;
+  const currentTool = tool === null ? null : palette[tool] && paletteItem(palette[tool]);
   const sim = useSimulation(comps, scope, timeScale);
   const { solution } = sim;
   const labelData = useMemo(() => labelsFor(comps, solution, grid), [comps, solution, grid]);
   const maxV = Math.max(1e-9, ...solution.nodeV.map(Math.abs));
   const part = comps.find(c => c.id === selected);
-  const latest = useRef({ comps, tool, palette, mode, grid, history, onChange });
-  latest.current = { comps, tool, palette, mode, grid, history, onChange };
-  const gesture = useRef<{ origin: Pt; page: Pt; start: Pt; end: Pt; drawing: boolean } | null>(null);
+  const latest = useRef({ comps, currentTool, mode, grid, viewport, moving, overview, draft, onChange });
+  latest.current = { comps, currentTool, mode, grid, viewport, moving, overview, draft, onChange };
+  const gesture = useRef<BoardGesture | null>(null);
 
   useEffect(() => {
     setComps(applyEdit(initial, {})); setSelected(null); setHistory([]); setTool(null); setNotice('');
+    setDraft(null); setOffset([0, 0]); setMoving(false); setOverview(false);
   }, [initial]);
   useEffect(() => () => lock(false), [lock]);
 
@@ -60,62 +85,77 @@ export function CircuitSim(props: CircuitSimProps) {
   };
   const place = (a: Pt, b: Pt) => {
     const current = latest.current;
-    if (current.mode !== 'build' || current.tool === null) return;
-    const raw = current.palette[current.tool];
-    if (!raw) return;
-    const item = paletteItem(raw), type = item.type;
-    if (item.max !== undefined && current.comps.filter(c => c.type === type).length >= item.max) { setNotice('Limite desta ferramenta atingido.'); return; }
-    if (!isAnchored(type) && a[0] === b[0] && a[1] === b[1]) { setNotice('Arraste de um ponto da grade até outro.'); return; }
-    const pts = terminals(type, a, b);
-    if (pts.some(([x, y]) => x < grid.x || y < grid.y || x > grid.x + grid.cols || y > grid.y + grid.rows)) { setNotice('A peça precisa caber inteira na grade.'); return; }
-    if (type === 'wire' && current.comps.some(c => c.type === 'wire' && (JSON.stringify(c.pts) === JSON.stringify(pts) || JSON.stringify(c.pts) === JSON.stringify([...pts].reverse())))) {
-      setNotice('Já existe um fio entre estes pontos.'); return;
-    }
-    const id = nextId(type, current.comps);
-    const added: Comp = { ...defaults(type), id, label: id, type, pts, ...(item.value !== undefined && { value: item.value }),
-      ...(item.color && { color: item.color }), ...(item.fixed !== undefined && { fixed: item.fixed }), ...(item.label && { label: item.label }) };
-    commit(applyEdit(current.comps, { add: [added] }));
-    setSelected(id);
+    const item = current.currentTool;
+    if (current.mode !== 'build' || !item) return;
+    const result = placeOnGrid(current.comps, item, a, b, current.grid);
+    if ('error' in result) { setNotice(result.error); return; }
+    commit(applyEdit(current.comps, { add: [result.part] }));
+    setSelected(result.part.id);
+  };
+  const chooseTool = (next: number | null) => {
+    if (next !== tool) setDraft(null);
+    setTool(next); setMoving(false); setOverview(false); setNotice('');
   };
   const handlers = useRef({ tap, place }); handlers.current = { tap, place };
   const pan = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: e => {
       const s = latest.current;
-      return s.mode === 'build' && s.tool !== null || !!hitPart(s.comps, [e.nativeEvent.locationX, e.nativeEvent.locationY], s.grid);
+      const point = boardPoint([e.nativeEvent.locationX, e.nativeEvent.locationY], s.viewport);
+      return s.moving || s.overview || (s.mode === 'build' && !!s.currentTool) || !!hitPart(s.comps, point, s.grid);
     },
     onMoveShouldSetPanResponder: () => false,
-    onPanResponderTerminationRequest: () => !gesture.current?.drawing,
+    onPanResponderTerminationRequest: () => gesture.current?.action === 'inspect',
     onPanResponderGrant: e => {
       const { locationX, locationY, pageX, pageY } = e.nativeEvent;
-      const s = latest.current, point: Pt = [locationX, locationY], at = nearest(point, s.grid);
-      const drawing = s.mode === 'build' && s.tool !== null;
-      gesture.current = { origin: point, page: [pageX, pageY], start: at, end: at, drawing };
-      if (drawing) { lock(true); setDrag({ a: at, b: at }); }
+      const s = latest.current, origin: Pt = [locationX, locationY];
+      const at = nearest(boardPoint(origin, s.viewport), s.grid);
+      const action = s.overview ? 'overview' : s.moving ? 'move' : s.mode === 'build' && s.currentTool ? 'draw' : 'inspect';
+      const start = action === 'draw' ? s.draft ?? at : at;
+      gesture.current = { origin, page: [pageX, pageY], view: s.viewport, start, action, canceled: false };
+      if (action !== 'inspect') lock(true);
+      if (action === 'draw') setDrag({ a: start, b: at });
     },
-    onPanResponderMove: e => {
+    onPanResponderMove: (e, state) => {
       const g = gesture.current;
-      if (!g?.drawing) return;
-      const end = nearest([g.origin[0] + e.nativeEvent.pageX - g.page[0], g.origin[1] + e.nativeEvent.pageY - g.page[1]], latest.current.grid);
-      g.end = end; setDrag({ a: g.start, b: end });
+      if (!g || g.canceled) return;
+      if (state.numberActiveTouches > 1) { g.canceled = true; setDrag(null); return; }
+      const dx = e.nativeEvent.pageX - g.page[0], dy = e.nativeEvent.pageY - g.page[1];
+      if (g.action === 'move') {
+        setOffset([g.view.origin[0] + boardPadding - dx, g.view.origin[1] + boardPadding - dy]);
+      } else if (g.action === 'draw') {
+        const end = nearest(boardPoint([g.origin[0] + dx, g.origin[1] + dy], g.view), latest.current.grid);
+        setDrag({ a: g.start, b: end });
+      }
     },
     onPanResponderRelease: (e, state) => {
       const g = gesture.current;
       gesture.current = null; setDrag(null); lock(false);
-      if (!g) return;
-      if (g.drawing) handlers.current.place(g.start, g.end);
-      else if (Math.hypot(state.dx, state.dy) < 8) handlers.current.tap(g.origin);
+      if (!g || g.canceled) return;
+      const tapped = Math.hypot(state.dx, state.dy) < 8;
+      const s = latest.current;
+      if (g.action === 'overview' && tapped) {
+        const point = boardPoint(g.origin, g.view);
+        setOffset([point[0] + boardPadding - g.view.size[0] / 2, point[1] + boardPadding - g.view.size[1] / 2]);
+        setOverview(false); setMoving(false);
+      } else if (g.action === 'draw' && s.currentTool) {
+        const screenEnd: Pt = tapped ? g.origin : [g.origin[0] + e.nativeEvent.pageX - g.page[0], g.origin[1] + e.nativeEvent.pageY - g.page[1]];
+        const end = nearest(boardPoint(screenEnd, g.view), s.grid);
+        if (isAnchored(s.currentTool.type)) handlers.current.place(g.start, g.start);
+        else if (!samePoint(g.start, end)) { setDraft(null); handlers.current.place(g.start, end); }
+        else if (tapped) { setDraft(s.draft ? null : g.start); setNotice(''); }
+      } else if (g.action === 'inspect' && tapped) {
+        handlers.current.tap(boardPoint(g.origin, g.view));
+      }
     },
     onPanResponderTerminate: () => { gesture.current = null; setDrag(null); lock(false); },
   }), [lock]);
   const burnt = comps.filter(c => solution.comp[c.id]?.burnt);
-  const hasSource = comps.some(c => ['vsrc', 'acsrc', 'isrc', 'clock', 'input'].includes(c.type));
-  const incomplete = hasSource && solution.ok && !comps.some(c => Math.abs(solution.comp[c.id]?.i ?? 0) > 1e-8);
   const errorText = solution.error === 'short' ? '⚡ Curto-circuito!' : solution.error === 'singular' ? 'Fontes incompatíveis ou circuito singular.'
-    : solution.error === 'noconv' ? 'A simulação não convergiu. Revise as ligações.' : solution.error === 'empty' ? 'Escolha uma ferramenta para começar.' : incomplete ? 'Circuito incompleto · nenhuma corrente circula.' : '';
-  const currentTool = tool === null ? null : palette[tool] && paletteItem(palette[tool]);
+    : solution.error === 'noconv' ? 'A simulação não convergiu. Revise as ligações.' : solution.error === 'empty' ? 'Escolha uma ferramenta para começar.' : '';
   const dragA = drag && pixel(drag.a, grid), dragB = drag && pixel(drag.b, grid);
-  const height = grid.rows * grid.cell;
-  const webGestureStyle: ViewStyle & { touchAction?: string } = Platform.OS === 'web' ? { touchAction: currentTool ? 'none' : 'pan-y' } : {};
+  const draftPoint = draft && pixel(draft, grid);
+  const { origin, scale } = viewport;
+  const webGestureStyle: ViewStyle & { touchAction?: string } = Platform.OS === 'web' ? { touchAction: currentTool || moving || overview ? 'none' : 'pan-y' } : {};
 
   return <View style={{ width, backgroundColor: C.surface, borderRadius: R.md, overflow: 'hidden', borderWidth: 1, borderColor: checked == null ? C.border : checked ? C.success : C.danger }}>
     <View style={[styles.row, { padding: 10, justifyContent: 'space-between', flexWrap: 'wrap' }]}>
@@ -123,19 +163,25 @@ export function CircuitSim(props: CircuitSimProps) {
       <Text style={styles.small}>● +V <Text style={{ color: C.success }}>verde</Text> · −V <Text style={{ color: C.danger }}>vermelho</Text></Text>
     </View>
     {mode === 'build' && <>
-      <Palette items={palette} comps={comps} tool={tool} setTool={setTool} />
+      <Palette items={palette} comps={comps} tool={tool} setTool={chooseTool} />
+      {canMove && <View style={[styles.row, { paddingHorizontal: 10, marginBottom: 8, flexWrap: 'wrap' }]}>
+        <Action title={moving ? 'Voltar à montagem' : 'Mover bancada'} active={moving} onPress={() => { setOverview(false); setMoving(v => !v); }} />
+        <Action title={overview ? 'Voltar à montagem' : 'Ver tudo'} active={overview} onPress={() => { setMoving(false); setOverview(v => !v); }} />
+      </View>}
       <View style={[styles.row, { paddingHorizontal: 10, marginBottom: 8, flexWrap: 'wrap' }]}>
         <Action title="↶ Desfazer" disabled={!history.length} onPress={() => { const prev = history[history.length - 1]; if (prev) { commit(prev, false); setHistory(h => h.slice(0, -1)); setSelected(null); } }} />
-        <Action title="Limpar" disabled={JSON.stringify(comps) === JSON.stringify(initial)} onPress={() => { commit(applyEdit(initial, {})); setSelected(null); sim.restart(); }} />
+        <Action title="Limpar" disabled={JSON.stringify(comps) === JSON.stringify(initial)} onPress={() => { commit(applyEdit(initial, {})); setSelected(null); setDraft(null); sim.restart(); }} />
+        {draft && <Action title="Cancelar ponta" onPress={() => setDraft(null)} />}
       </View>
-      <Text style={[styles.small, { paddingHorizontal: 12, paddingBottom: 8 }]}>{currentTool ? `${names[currentTool.type]}: ${isAnchored(currentTool.type) ? 'toque no ponto âncora.' : 'arraste entre dois pontos.'}` : 'Toque numa peça para medir. Escolha uma ferramenta para montar.'}</Text>
+      <Text style={[styles.small, { paddingHorizontal: 12, paddingBottom: 8 }]}>{overview ? 'Toque numa região para ampliar.' : moving ? 'Arraste a bancada para os lados ou para cima e para baixo.' : currentTool ? `${names[currentTool.type]}: ${draft ? 'toque no ponto final.' : isAnchored(currentTool.type) ? 'toque onde quer colocar a peça.' : 'arraste ou toque nos dois pontos.'}` : 'Toque numa peça para medir. Escolha uma ferramenta para montar.'}</Text>
     </>}
     <View style={[{ width: canvasWidth, height }, webGestureStyle]} {...pan.panHandlers} accessible={false}>
-      <Svg pointerEvents="none" width={canvasWidth} height={height} viewBox={`0 0 ${canvasWidth} ${height}`}>
-        <G fill={C.plotAxis} opacity={drag ? 0.65 : 0.3}>{Array.from({ length: grid.rows + 1 }, (_, y) => Array.from({ length: grid.cols + 1 }, (_, x) => <Circle key={`${x},${y}`} cx={x * grid.cell} cy={y * grid.cell} r={drag ? 2 : 1} />))}</G>
+      <Svg pointerEvents="none" width={canvasWidth} height={height} viewBox={`${origin[0]} ${origin[1]} ${canvasWidth / scale} ${height / scale}`}>
+        <G fill={building ? C.textMuted : C.plotAxis} opacity={drag ? 0.7 : building ? 0.46 : 0.3}>{gridDots}</G>
         {comps.map(c => <Symbol key={c.id} c={c} grid={grid} state={solution.comp[c.id]} solution={solution} max={maxV} selected={selected === c.id} />)}
         <CurrentLayer comps={comps} solution={solution} grid={grid} running={sim.active && !sim.paused} />
         <Labels labels={labelData.labels} />
+        {draftPoint && !drag && <Circle cx={draftPoint[0]} cy={draftPoint[1]} r={7} fill={C.cyan} />}
         {dragA && dragB && <G stroke={C.cyan} fill={C.cyan}><Line x1={dragA[0]} y1={dragA[1]} x2={dragB[0]} y2={dragB[1]} strokeWidth={3} strokeDasharray="4 4" /><Circle cx={dragA[0]} cy={dragA[1]} r={5} /><Circle cx={dragB[0]} cy={dragB[1]} r={8} fillOpacity={0.25} strokeWidth={2} /></G>}
       </Svg>
     </View>
@@ -144,7 +190,7 @@ export function CircuitSim(props: CircuitSimProps) {
     <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}><Text style={styles.small}>Medir peça</Text>
       <PalettePicker comps={comps} selected={selected} select={setSelected} />
     </View>
-    {(errorText || burnt.length > 0 || notice) && <View accessibilityLiveRegion="polite" style={{ backgroundColor: solution.error && solution.error !== 'empty' || burnt.length ? C.dangerBg : C.surface2, padding: 12, gap: 4 }}>
+    {(!!errorText || burnt.length > 0 || !!notice) && <View accessibilityLiveRegion="polite" style={{ backgroundColor: solution.error && solution.error !== 'empty' || burnt.length ? C.dangerBg : C.surface2, padding: 12, gap: 4 }}>
       {!!errorText && <Text style={{ color: solution.error && solution.error !== 'empty' ? C.danger : C.gold, fontFamily: F.bold, fontSize: 13 }}>{errorText}</Text>}
       {burnt.map(c => <Text key={c.id} style={{ color: C.danger, fontFamily: F.bold, fontSize: 13 }}>💥 LED {c.label ?? c.id} queimado · reduza a corrente.</Text>)}
       {!!notice && <Text style={{ color: C.gold, fontFamily: F.bold, fontSize: 13 }}>{notice}</Text>}

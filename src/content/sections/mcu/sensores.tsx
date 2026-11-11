@@ -1,5 +1,5 @@
 import type { UnitDef } from '../../types';
-import { code, gen, mcq, near, num, tf } from '../../helpers';
+import { code, gen, mcq, near, num, table, tf } from '../../helpers';
 import { circuit, circuitEx, circuitVisual, D, GND, IN, LAMP, NMOS, NPN, R, V, wires } from '../../circuits';
 import { fmt, randInt } from '../../../lib/random';
 
@@ -81,7 +81,7 @@ export const sensoresAtuadores: UnitDef = {
       ] },
     ] },
     { id: 'mc-sens-motor', title: 'Motores DC, ponte H e servo', parts: [
-      { card: { title: 'Motor e ponte H', body: 'Um motor DC exige corrente maior que a de um pino. Um driver ou ponte H alimenta o motor; a ponte inverte a polaridade para mudar o sentido. PWM regula a tensão média ideal, mas velocidade e torque dependem da carga. Nunca ligue os dois ramos da ponte de modo a provocar curto. ' }, exercises: [
+      { card: { title: 'Motor e ponte H', body: 'Um motor DC exige corrente maior que a de um pino. Um driver ou ponte H alimenta o motor; a ponte inverte a polaridade para mudar o sentido. PWM regula a tensão média ideal, mas velocidade e torque dependem da carga. Nunca ligue os dois ramos da ponte de modo a provocar curto. As duas linhas da tabela mostram as tensões nos terminais do motor em um modelo ideal.', visual: table(['Terminal A', 'Terminal B', 'Efeito'], [['Alto', 'Baixo', 'Sentido 1'], ['Baixo', 'Alto', 'Sentido oposto']]) }, exercises: [
         mcq('Qual circuito permite inverter a polaridade no motor?', ['Ponte H', 'Divisor apenas', 'ADC', 'Pull-up isolado'], 0, 'A ponte H comuta os terminais do motor.'),
         tf('Um motor deve ser ligado diretamente ao pino lógico mesmo quando sua corrente excede o limite do pino.', false, 'Use driver dimensionado para a corrente de partida e de operação.'),
         num(t`PWM ideal de $25\%$ com fonte de $8\,\text{V}$ tem tensão média de quantos V?`, 2, t`$V_{médio}=0,25\cdot8=2\,\text{V}$.`, { unit: 'V', tol: 0.01 }),
@@ -128,7 +128,7 @@ export const sensoresAtuadores: UnitDef = {
         num(t`Uma carga de $5\,\text{V}$ e $200\,\text{mA}$ consome quantos watts?`, 1, t`$P=VI=5\cdot0,2=1\,\text{W}$.`, { unit: 'W', tol: 0.01 }),
         mcq('Por que o consumo na entrada de um regulador não pode ser calculado ignorando perdas em todos os casos?', ['A eficiência não é perfeita e as tensões podem diferir', 'Porque energia não se conserva', 'Porque corrente nunca passa pelo regulador', 'Porque a carga não consome potência'], 0, 'A potência de entrada inclui as perdas; a corrente depende também da tensão de entrada.'),
       ] },
-      { card: { title: 'Autonomia estimada', body: t`Para estados alternados, $I_{médio}=\sum I_k f_k$, com frações de tempo $f_k$ que somam 1. A autonomia ideal em horas é $C\,(\text{mAh})/I_{médio}\,(\text{mA})$. Capacidade útil, conversão e temperatura reduzem a precisão da estimativa.` }, exercises: [
+      { card: { title: 'Autonomia estimada', body: t`Para estados alternados, $I_{médio}=\sum I_k f_k$, com frações de tempo $f_k$ que somam 1. A autonomia ideal em horas é $C\,(\text{mAh})/I_{médio}\,(\text{mA})$. Capacidade útil, conversão e temperatura reduzem a precisão da estimativa.`, example: t`Um nó usa $40\,\text{mA}$ por $1\,\text{s}$ e $2\,\text{mA}$ pelos $19\,\text{s}$ seguintes. A média é $(40\cdot1+2\cdot19)/20=3{,}9\,\text{mA}$. Com $390\,\text{mAh}$ de capacidade útil na mesma tensão, a estimativa ideal é de $100\,\text{h}$.` }, exercises: [
         mcq('Uma bateria de 1000 mAh fornece idealmente 100 mA durante:', ['10 h', '100 h', '1 h', '0,1 h'], 0, '1000 mAh / 100 mA = 10 h.'),
         tf('Uma estimativa ideal de autonomia garante exatamente o mesmo tempo em qualquer temperatura e carga.', false, 'Capacidade útil e perdas variam com as condições.'),
         num(t`Um dispositivo consome $100\,\text{mA}$ por metade do tempo e $20\,\text{mA}$ na outra metade. Qual a média em mA?`, 60, t`$0,5\cdot100+0,5\cdot20=60\,\text{mA}$.`, { unit: 'mA', tol: 0.01 }),

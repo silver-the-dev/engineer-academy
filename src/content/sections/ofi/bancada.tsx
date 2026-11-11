@@ -1,8 +1,31 @@
+import React from 'react';
 import type { UnitDef } from '../../types';
-import { gen, match, mcq, multi, num, order, tf } from '../../helpers';
+import { gen, match, mcq, multi, num, order, plot, tf } from '../../helpers';
+import { Label, Pt, RectW, Seg } from '../../../components/plot/Plot';
+import { C } from '../../../theme';
 import { randInt } from '../../../lib/random';
 
 const t = String.raw;
+
+const breadboardRows = plot({
+  view: { xMin: 0, xMax: 12, yMin: 0, yMax: 6 },
+  axes: false, grid: false, tickLabels: false,
+  render: () => <>
+    <RectW x={5.55} y={0.7} w={0.9} h={4} color={C.surface3} />
+    <Label x={6} y={5.2} text="Canaleta" anchor="middle" size={13} />
+    {[3.9, 2.7, 1.5].map((y, row) => {
+      const color = row === 1 ? C.p2 : C.textDim;
+      return <React.Fragment key={y}>
+        <Seg x1={1} y1={y} x2={5} y2={y} color={color} width={3} />
+        <Seg x1={7} y1={y} x2={11} y2={y} color={color} width={3} />
+        {[1, 2, 3, 4, 5, 7, 8, 9, 10, 11].map((x) =>
+          <Pt key={x} x={x} y={y} color={color} hollow r={4} />
+        )}
+      </React.Fragment>;
+    })}
+  </>,
+  caption: 'Os traços mostram as conexões internas entre os furos.',
+}, 154);
 
 export const bancada: UnitDef = {
   id: 'of-banc', title: 'Bancada, segurança e instrumentos', icon: '🧰',
@@ -89,11 +112,11 @@ Terra (GND) pode ser apenas referência de $0\,\text{V}$ do circuito: não presu
     { id: 'of-banc-proto', title: 'Protoboard e boas práticas', parts: [
       { card: { title: 'Como as trilhas se conectam', body: t`Numa protoboard comum, grupos de cinco furos em cada lado da canaleta central formam nós separados; o padrão varia entre modelos. A canaleta permite instalar um CI DIP com uma fileira de pinos de cada lado. Trilhos laterais podem estar interrompidos no meio: confira com continuidade sem alimentação, em vez de presumir.
 
-As marcações + e − são apenas rótulos: a polaridade é definida pela ligação real da fonte.` }, exercises: [
+As marcações + e − são apenas rótulos: a polaridade é definida pela ligação real da fonte.`, visual: breadboardRows }, exercises: [
         mcq('Em uma protoboard comum, qual região separa as duas metades da área central?', ['A canaleta central', 'A cor dos jumpers', 'O rótulo do fabricante', 'O número da linha sozinho'], 0, 'A canaleta separa os grupos centrais e permite instalar CIs DIP atravessando-a.'),
         tf('Todo trilho lateral de toda protoboard é contínuo de ponta a ponta.', false, 'Alguns trilhos são interrompidos; confira o modelo com teste de continuidade desenergizado.'),
         mcq('Como instalar normalmente um CI DIP na área central?', ['Atravessando a canaleta central', 'Com todos os pinos no mesmo grupo de furos', 'Ligado diretamente à rede', 'Com as duas fileiras no mesmo nó'], 0, 'Ao atravessar a canaleta, as fileiras de pinos ficam em grupos separados.'),
-        num('Dois grupos de cinco furos ficam em lados opostos da canaleta e não estão ligados. Você usa três furos de cada grupo. Quantos nós distintos são usados?', 2, 'Os furos de cada grupo já estão unidos; a canaleta separa os dois grupos.'),
+        num('Considere só os furos da linha central destacada no desenho. Quantos nós distintos eles formam?', 2, 'Os cinco furos de cada lado compartilham um nó. A canaleta separa os dois nós.', { visual: breadboardRows }),
         gen((rng) => { const n = randInt(rng, 2, 6); return num(t`Há $${n}$ grupos independentes, cada um com 5 furos conectados. Quantos furos há nesses grupos?`, n * 5, t`$${n}\cdot 5=${n * 5}$ furos; grupos independentes continuam sendo nós distintos.`, { tol: 0.001 }); }),
         mcq('Dois terminais de um resistor entram no mesmo grupo de cinco furos. O que ocorre?', ['Ficam ligados ao mesmo nó e o resistor é contornado', 'O resistor passa a limitar toda a corrente da fonte', 'A resistência dobra', 'Os furos deixam de estar conectados'], 0, 'Os terminais compartilham o mesmo nó; não há diferença de potencial ideal no resistor.'),
         mcq('Como confirmar se um trilho lateral é dividido?', ['Com continuidade e circuito desenergizado', 'Tocando os polos da fonte', 'Pondo o amperímetro entre os polos', 'Supondo que a linha colorida seja contínua'], 0, 'Desenergize e teste continuidade entre os pontos do trilho; a marca impressa não garante ligação.'),

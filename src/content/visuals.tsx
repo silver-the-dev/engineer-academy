@@ -5,6 +5,7 @@
 import React from 'react';
 import type { VisualSpec } from './types';
 import { Arrow, AreaUnder, ArcW, CircleW, FnCurve, InfLine, Label, PolygonW, PolylineW, Pt, RectW, Seg } from '../components/plot/Plot';
+import type { LabState } from '../components/visuals/PlotLab';
 import { Arrow3, Axes3, Grid3, Line3, Point3, Poly3, type V3 } from '../components/visuals/Space3D';
 import { C } from '../theme';
 import { fmt } from '../lib/random';
@@ -527,32 +528,44 @@ const lagrange = (pts: { x: number; y: number }[]) => (x: number) => {
   return s;
 };
 
-export const interpolationLab = (init: [number, number][] = [[-3, 1], [-1, 3], [1, -1], [3, 2]]): V =>
+const interpolationSample: [number, number][] = [[-3, 1], [-1, 3], [1, -1], [3, 2]];
+
+export const interpolationLab = (fixedX = false): V =>
   plotSpec({
     view: { xMin: -4.5, xMax: 4.5, yMin: -4, yMax: 5 },
-    points: init.map(([x, y], i) => ({ id: 'p' + i, x, y, color: C.gold })),
+    points: interpolationSample.map(([x, y], i) => ({ id: 'p' + i, x, y, color: C.gold })),
     snap: 0.25,
+    constrain: (id: string, x: number, y: number, { pts }: LabState) => {
+      const sharesX = Object.entries(pts).some(([other, point]) => other !== id && point.x === x);
+      return { x: fixedX || sharesX ? pts[id].x : x, y };
+    },
     render: ({ pts }: any) => {
       const arr = Object.keys(pts)
         .sort()
         .map((k) => pts[k]);
       return <FnCurve f={lagrange(arr)} color={C.p4} />;
     },
-    info: ({ pts }: any) => t`Polinômio interpolador de grau $${Object.keys(pts).length - 1}$ passa por **todos** os pontos`,
+    info: ({ pts }: any) => t`O polinômio interpolador tem grau no máximo $${Object.keys(pts).length - 1}$ e passa por **todos** os pontos.`,
   });
 
-export const regressionLab = (init: [number, number][] = [[1, 1.5], [2, 2.2], [3, 3.6], [4, 3.9], [5, 5.4], [6, 5.8]]): V =>
+const regressionSample = [[1, 1.5], [2, 2.2], [3, 3.6], [4, 3.9], [5, 5.4], [6, 5.8]].map(([x, y]) => ({ x, y }));
+
+export function regressionError(a: number, b: number, points = regressionSample): number {
+  return points.reduce((sum, q) => sum + (q.y - (a * q.x + b)) ** 2, 0);
+}
+
+export const regressionLab = (movePoints = true): V =>
   plotSpec({
     view: { xMin: 0, xMax: 7, yMin: 0, yMax: 7 },
     equalAspect: true,
-    points: init.map(([x, y], i) => ({ id: 'p' + i, x, y, color: C.gold, r: 7 })),
+    points: movePoints ? regressionSample.map(({ x, y }, i) => ({ id: 'p' + i, x, y, color: C.gold, r: 7 })) : [],
     snap: 0.1,
     params: [
       { key: 'a', label: 'a', min: -1, max: 2, step: 0.02, value: 0.4, color: C.p2 },
       { key: 'b', label: 'b', min: -2, max: 5, step: 0.05, value: 2, color: C.p3 },
     ],
     render: ({ pts, p }: any) => {
-      const arr = Object.values(pts) as { x: number; y: number }[];
+      const arr = movePoints ? Object.values(pts) as { x: number; y: number }[] : regressionSample;
       return (
         <>
           {arr.map((q, i) => {
@@ -561,19 +574,22 @@ export const regressionLab = (init: [number, number][] = [[1, 1.5], [2, 2.2], [3
             return <RectW key={i} x={q.x} y={yh} w={Math.abs(r) * (r >= 0 ? -1 : 1)} h={r} color={C.p5} opacity={0.2} />;
           })}
           <FnCurve f={(x) => p.a * x + p.b} color={C.p2} />
+          {!movePoints && arr.map(({ x, y }, i) => <Pt key={i} x={x} y={y} color={C.gold} r={5} />)}
         </>
       );
     },
     info: ({ pts, p }: any) => {
-      const arr = Object.values(pts) as { x: number; y: number }[];
+      const arr = movePoints ? Object.values(pts) as { x: number; y: number }[] : regressionSample;
       const n = arr.length;
       const sx = arr.reduce((s, q) => s + q.x, 0);
       const sy = arr.reduce((s, q) => s + q.y, 0);
       const sxx = arr.reduce((s, q) => s + q.x * q.x, 0);
       const sxy = arr.reduce((s, q) => s + q.x * q.y, 0);
-      const aa = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+      const sse = regressionError(p.a, p.b, arr);
+      const variance = n * sxx - sx * sx;
+      if (variance < 1e-9) return t`Soma dos quadrados: $${fmt(sse, 3)}$. Sem variação em $x$, a inclinação da melhor reta não é única.`;
+      const aa = (n * sxy - sx * sy) / variance;
       const bb = (sy - aa * sx) / n;
-      const sse = arr.reduce((s, q) => s + (q.y - (p.a * q.x + p.b)) ** 2, 0);
       return t`Soma dos quadrados (sua reta): $${fmt(sse, 3)}$ · melhor reta: $y=${fmt(aa, 3)}x+${fmt(bb, 3)}$`;
     },
   });

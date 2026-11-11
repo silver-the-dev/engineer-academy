@@ -1,6 +1,6 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
-import { code, gen, inter, match, mcq, num, order, plot, tf } from '../../helpers';
+import { code, gen, inter, match, mcq, num, order, plot, table, tf } from '../../helpers';
 import { PolylineW } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, randInt } from '../../../lib/random';
@@ -79,7 +79,7 @@ export const comunicacao: UnitDef = {
     },
     {
       id: 'mc-com-i2c', title: 'I²C', parts: [
-        { card: { title: 'Endereço e reconhecimento', body: 'I²C usa SDA para dados e SCL para clock. Após START, o controlador envia endereço de 7 bits, MSB primeiro, seguido de R/W: 0 escreve e 1 lê. No nono clock o receptor confirma com ACK baixo; NACK é alto. STOP encerra a transação.', example: 'Endereço 0x3C: byte de escrita 0x78 e byte de leitura 0x79. APIs frequentemente recebem só 0x3C.' },
+        { card: { title: 'Endereço e reconhecimento', body: 'I²C usa SDA para dados e SCL para clock. Após START, o controlador envia endereço de 7 bits, MSB primeiro, seguido de R/W: 0 escreve e 1 lê. No nono clock, o transmissor libera SDA. O receptor puxa SDA para baixo para ACK. Se SDA fica alta, o resultado é NACK. STOP encerra a transação.', visual: table(['Clock', 'Quem controla SDA', 'Conteúdo'], [['1 a 7', 'Controlador', 'Endereço'], [8, 'Controlador', 'Bit R/W'], [9, 'Receptor', 'ACK ou NACK']]), example: 'Endereço 0x3C: byte de escrita 0x78 e byte de leitura 0x79. APIs frequentemente recebem só 0x3C.' },
           exercises: [
             mcq('Qual linha transporta o clock I²C?', ['SCL', 'SDA', 'TX', 'CS'], 0, 'SCL é o clock; SDA transporta os dados.'),
             tf('No campo R/W, 1 solicita leitura.', true, 'R/W = 1 indica leitura do periférico pelo controlador.'),
@@ -103,7 +103,7 @@ export const comunicacao: UnitDef = {
     },
     {
       id: 'mc-com-spi', title: 'SPI', parts: [
-        { card: { title: 'Linhas e seleção', body: 'SPI usa SCK, dados do controlador para o periférico (MOSI), dados no sentido contrário (MISO) e seleção CS. Em geral cada periférico tem CS próprio, ativo em nível baixo. O clock é gerado pelo controlador; envio e recepção podem ocorrer simultaneamente.' },
+        { card: { title: 'Linhas e seleção', body: 'SPI usa SCK, dados do controlador para o periférico (MOSI), dados no sentido contrário (MISO) e seleção CS. Em geral cada periférico tem CS próprio, ativo em nível baixo. O clock é gerado pelo controlador; envio e recepção podem ocorrer simultaneamente.', example: 'Para escrever em um dos dois sensores, mantenha o CS do outro em nível alto. Baixe o CS do alvo, gere os pulsos em SCK e só depois desative o CS do alvo.' },
           exercises: [
             mcq('Qual linha leva dados do controlador ao periférico?', ['MOSI', 'MISO', 'SCK', 'CS'], 0, 'MOSI significa saída do controlador e entrada do periférico.'),
             tf('SPI pode enviar e receber bits simultaneamente.', true, 'MOSI e MISO são linhas separadas e podem operar no mesmo clock.'),

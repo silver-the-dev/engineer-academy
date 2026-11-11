@@ -149,7 +149,7 @@ export const retificadores: UnitDef = {
       ] },
     ] },
     { id: 'ea-ret-reg', title: 'Reguladores e projeto de fonte', parts: [
-      { card: { title: 'Regulação linear 78xx', body: t`Um regulador 78xx fornece tensão positiva nominal: por exemplo, o 7805 fornece cerca de $5\,\text{V}$. Ele precisa de tensão de entrada suficientemente acima da saída, inclusive no vale da ondulação. A diferença mínima depende do componente, corrente e temperatura: consulte a folha de dados.` }, exercises: [
+      { card: { title: 'Regulação linear 78xx', body: t`Um regulador 78xx fornece tensão positiva nominal: por exemplo, o 7805 fornece cerca de $5\,\text{V}$. Ele precisa de tensão de entrada suficientemente acima da saída, inclusive no vale da ondulação. A diferença mínima depende do componente, corrente e temperatura: consulte a folha de dados.`, example: t`Um regulador de $5\,\text{V}$ exige entrada de pelo menos $7\,\text{V}$ nas condições do exemplo. Se a entrada oscila entre $6{,}8$ e $9\,\text{V}$, o vale viola a condição e a saída pode perder regulação mesmo que a média da entrada esteja acima de $7\,\text{V}$.` }, exercises: [
         tf('Um 7805 é um regulador de tensão positiva nominal de 5 V.', true, 'Na família 78xx, o sufixo 05 indica tensão nominal de saída de 5 V.'),
         mcq('Qual condição verifica a margem de entrada de um regulador?', ['Comparar o vale da entrada com a tensão mínima exigida', 'Comparar só o pico com a saída', 'Igualar corrente e tensão', 'Ignorar a ondulação'], 0, 'O regulador precisa de margem também no instante de menor tensão de entrada.'),
         num(t`A entrada varia de $9$ a $10\,\text{V}$. Qual seu valor mínimo em V? Dê inteiro.`, 9, t`O vale é $9\,\text{V}$.`, { unit: 'V', tol: 0.5 }),

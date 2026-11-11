@@ -1,11 +1,24 @@
 import React from 'react';
 import type { UnitDef } from '../../types';
 import { gen, inter, mcq, num, plot, tf } from '../../helpers';
-import { Arrow, Pt, Seg } from '../../../components/plot/Plot';
+import { Arrow, Pt, RectW, Seg } from '../../../components/plot/Plot';
 import { C } from '../../../theme';
 import { fmt, randInt } from '../../../lib/random';
 
 const t = String.raw;
+
+const horizontalDcl = (right: number, left: number) => plot({
+  view: { xMin: -5, xMax: 5, yMin: -3, yMax: 3 },
+  axes: false, grid: false, tickLabels: false,
+  render: () => <>
+    <RectW x={-0.55} y={-0.45} w={1.1} h={0.9} color={C.gold} opacity={0.35} />
+    <Arrow x1={0} y1={0} x2={right * 0.44} y2={0} label={right + ' N'} color={C.p2} />
+    <Arrow x1={0} y1={0} x2={-left * 0.44} y2={0} label={left + ' N'} color={C.p2} />
+    <Arrow x1={0} y1={0} x2={0} y2={2.25} label="Normal" color={C.p3} />
+    <Arrow x1={0} y1={0} x2={0} y2={-2.25} label="Peso" color={C.p1} />
+  </>,
+  caption: 'Diagrama de corpo livre da caixa.',
+}, 172);
 
 // DCL de um bloco que já desliza para baixo; μ é cinético.
 const rampa = () => plot({
@@ -42,13 +55,13 @@ export const leisNewton: UnitDef = {
   guide: t`Em referencial inercial, isole o corpo e desenhe seu diagrama de corpo livre (DCL): só forças que **agem nele**. Some por eixos: $\sum\vec F=m\vec a$. Peso $P=mg$; normal é perpendicular ao contato; tração segue o fio. Atrito estático satisfaz $f_s\le\mu_sN$; no deslizamento, $f_k=\mu_kN$. Na rampa, $P_\parallel=mg\sin\theta$ e $P_\perp=mg\cos\theta$.`,
   lessons: [
     { id: 'm-newton-1', title: 'Força e primeira lei', parts: [
-      { card: { title: 'Forças e diagrama de corpo livre', body: t`Força é vetor, medido em newtons: $1\,\text{N}=1\,\text{kg}\cdot\text{m/s}^2$. Isole o corpo no DCL e desenhe cada força externa. Some componentes com sinais. Exemplo: no DCL de uma caixa, $8\,\text{N}$ à direita e $3\,\text{N}$ à esquerda dão $5\,\text{N}$ à direita; peso e normal se equilibram verticalmente.` }, exercises: [
+      { card: { title: 'Forças e diagrama de corpo livre', body: t`Força é vetor, medido em newtons: $1\,\text{N}=1\,\text{kg}\cdot\text{m/s}^2$. Isole o corpo no DCL e desenhe cada força externa. No desenho, peso e normal se equilibram. Escolhendo a direita como positiva, a resultante horizontal é $8-3=5\,\text{N}$.`, visual: horizontalDcl(8, 3) }, exercises: [
         mcq(t`No DCL de uma caixa, duas forças horizontais valem $8\,\text{N}$ à direita e $3\,\text{N}$ à esquerda. Qual a resultante horizontal?`, [t`$5\,\text{N}$ à direita`, t`$11\,\text{N}$ à direita`, t`$5\,\text{N}$ à esquerda`, t`$11\,\text{N}$ à esquerda`], 0, t`Direita positiva: $8-3=5\,\text{N}$.`),
         tf(t`No DCL de uma caixa, desenhamos apenas forças que agem sobre ela.`, true, t`O DCL isola o corpo; forças que ele exerce em outros corpos ficam nos DCLs desses outros corpos.`),
         gen(rng => { const a=randInt(rng,5,12), b=randInt(rng,1,4); return n(t`No DCL de uma caixa, $${a}\,\text{N}$ apontam à direita e $${b}\,\text{N}$ à esquerda. Qual a resultante para a direita, em N?`,a-b,t`Direita positiva: $${a}-${b}=${a-b}\,\text{N}$.`,'N'); }),
         n(t`No DCL de uma partícula, há $3\,\text{N}$ à direita e $4\,\text{N}$ para cima. Qual o módulo da resultante, em N?`,5,t`As componentes são perpendiculares: $\sqrt{3^2+4^2}=5\,\text{N}$.`,'N'),
         mcq(t`No DCL de uma caixa apoiada, qual força aponta perpendicularmente para fora do piso?`, ['Normal', 'Peso', 'Tração vertical necessariamente', 'Atrito'],0,t`A normal é a força de contato perpendicular à superfície.`),
-        num('Uma caixa recebe 9 N para a direita e 4 N para a esquerda. Qual é a resultante no eixo horizontal, positivo à direita?', 5, 'Somam-se as forças com sinal: 9 − 4 = 5 N.', { unit: 'N' }),
+        num('Leia as forças horizontais no diagrama. Qual é a resultante em N, tomando a direita como positiva?', 5, 'Somam-se as forças com sinal: 9 − 4 = 5 N.', { unit: 'N', visual: horizontalDcl(9, 4) }),
         n(t`No DCL de uma caixa, atuam $10\,\text{N}$ à direita e $6\,\text{N}$ à esquerda. Quanto falta aplicar à esquerda para zerar a resultante horizontal, em N?`,4,t`A resultante inicial é $10-6=4\,\text{N}$ à direita; faltam $4\,\text{N}$ à esquerda.`,'N'),
       ] },
       { card: { title: 'Inércia e equilíbrio', body: t`Em referencial inercial, resultante nula implica velocidade constante: repouso é apenas um caso. No DCL de uma caixa sobre piso horizontal, $N$ para cima e $P$ para baixo se equilibram. Forças podem existir mesmo com resultante nula.` }, exercises: [

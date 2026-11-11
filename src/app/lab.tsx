@@ -23,9 +23,9 @@ export default function Lab() {
       <Text style={{ color: C.text, fontFamily: F.heavy, fontSize: 20, flex: 1 }}>Laboratório</Text></View>
     <ScrollLockProvider setLocked={setLocked}>
       <ScrollView scrollEnabled={!locked} contentContainerStyle={{ padding: 12, alignItems: 'center', gap: 16, paddingBottom: 40 }}>
-        <View style={{ width: widgetWidth, gap: 8 }}><Text style={{ color: C.textMuted, fontFamily: F.regular, fontSize: 14 }}>Monte, meça e experimente. Escolha uma peça e arraste entre os pontos. Para conectar um fio no meio de outro, divida-o em dois fios.</Text>
+        <View style={{ width: widgetWidth, gap: 8 }}><Text style={{ color: C.textMuted, fontFamily: F.regular, fontSize: 14 }}>Escolha uma peça e use os pontos da grade. Para ligar um fio no meio de outro, divida o fio existente em dois na junção.</Text>
           <Text style={styles.name}>{selected?.title ?? 'Circuito livre'}</Text></View>
-        <CircuitActivity.Provider value={focused}><CircuitSim key={`${example ?? 'empty'}-${revision}`} {...selected?.spec} comps={selected?.spec.comps ?? EMPTY} cols={9} rows={12} mode="build" palette={allTypes} width={widgetWidth} /></CircuitActivity.Provider>
+        <CircuitActivity.Provider value={focused}><CircuitSim key={`${example ?? 'empty'}-${revision}`} {...selected?.spec} comps={selected?.spec.comps ?? EMPTY} cols={24} rows={16} mode="build" palette={allTypes} width={widgetWidth} /></CircuitActivity.Provider>
         <View style={{ width: widgetWidth, gap: 10 }}><Text style={styles.name}>Exemplos prontos</Text>
           <Text style={styles.small}>Escolher um exemplo abre uma nova montagem.</Text>
           <Action title="＋ Nova montagem vazia" onPress={() => { setExample(null); setRevision(r => r + 1); }} />

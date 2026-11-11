@@ -49,7 +49,7 @@ Em regime senoidal: $X_L=2\pi fL$, $X_C=1/(2\pi fC)$ e, em série, $Z=R+j(X_L-X_
       ] },
     ] },
     { id: 'el-ca-rms', title: 'Valor eficaz', parts: [
-      { card: { title: 'Efeito térmico', body: t`O valor eficaz (RMS) é a raiz da média do quadrado ao longo de um período. É o valor DC que produz a mesma potência média em um resistor. Para senoide sem offset: $V_{ef}=V_p/\sqrt2$.` }, exercises: [
+      { card: { title: 'Efeito térmico', body: t`O valor eficaz (RMS) é a raiz da média do quadrado ao longo de um período. É o valor DC que produz a mesma potência média em um resistor. Para senoide sem offset: $V_{ef}=V_p/\sqrt2$.`, example: t`Uma senoide de pico $10\sqrt2\,\text{V}$ tem valor eficaz de $10\,\text{V}$. Em um resistor de $20\,\Omega$, ela dissipa $10^2/20=5\,\text{W}$, assim como uma fonte contínua de $10\,\text{V}$.` }, exercises: [
         tf(t`O valor eficaz permite comparar o aquecimento em um mesmo resistor com o de uma tensão contínua.`, true, t`Ambas produzem a mesma potência média no resistor.`),
         mcq(t`Uma senoide sem offset tem pico $10\sqrt2\,\text{V}$. Qual o eficaz?`, [t`$10\,\text{V}$`, t`$20\,\text{V}$`, t`$10\sqrt2\,\text{V}$`, t`$5\,\text{V}$`], 0, t`$V_{ef}=V_p/\sqrt2=10\,\text{V}$.`),
         num(t`Qual o valor eficaz de uma senoide de pico $20\,\text{V}$, em V com uma casa decimal?`, 20/Math.SQRT2, t`$20/\sqrt2\approx14{,}1\,\text{V}$.`, { unit: 'V', tol: 0.05 }),

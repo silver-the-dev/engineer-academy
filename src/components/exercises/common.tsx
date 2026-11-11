@@ -90,17 +90,3 @@ export function Token({ text, onPress, used, color }: { text: string; onPress?: 
     </Pressable>
   );
 }
-
-export function parseNumber(s: string): number | null {
-  const t = s.replace(/\s/g, '').replace(/−/g, '-').replace(',', '.');
-  if (!t) return null;
-  if (t.includes('/')) {
-    const [a, b] = t.split('/');
-    const p = parseFloat(a);
-    const q = parseFloat(b);
-    if (!isFinite(p) || !isFinite(q) || q === 0) return null;
-    return p / q;
-  }
-  const v = parseFloat(t);
-  return isFinite(v) ? v : null;
-}

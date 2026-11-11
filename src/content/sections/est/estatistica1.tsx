@@ -271,14 +271,14 @@ A notação $160\vdash170$ inclui $160$ e exclui $170$.`,
         {
           card: {
             title: 'Monte o histograma',
-            body: t`No histograma, cada barra é uma **classe** (sem espaço entre elas) e a altura é a frequência. Arraste as barras para representar a tabela de alturas ($4,\ 12,\ 16,\ 8$):`,
-            visual: { name: 'bars', props: { labels: ['150', '160', '170', '180'], values: [2, 5, 8, 3], max: 20 } },
+            body: t`Cada barra ocupa o intervalo de uma **classe**. Como as quatro classes têm a mesma largura, a altura pode representar a frequência. Arraste as barras até as alturas $4,\ 12,\ 16,\ 8$ para comparar as classes.`,
+            visual: { name: 'bars', props: { labels: ['150–160', '160–170', '170–180', '180–190'], values: [2, 5, 8, 3], max: 20, histogram: true } },
           },
           exercises: [
-            inter(t`Arraste as barras para formar o histograma da tabela: $4,\ 12,\ 16,\ 8$.`, 'bars', { labels: ['150', '160', '170', '180'], values: [2, 5, 8, 3], max: 20 }, (v: number[]) => Array.isArray(v) && v.join(',') === '4,12,16,8', 'alturas 4, 12, 16, 8', t`No histograma, a altura de cada barra é a frequência da classe: $4$, $12$, $16$ e $8$.`),
+            inter(t`Ajuste as quatro barras para as frequências $4,\ 12,\ 16,\ 8$, da esquerda para a direita.`, 'bars', { labels: ['150–160', '160–170', '170–180', '180–190'], values: [2, 5, 8, 3], max: 20, histogram: true }, (v: number[]) => Array.isArray(v) && v.join(',') === '4,12,16,8', 'alturas 4, 12, 16, 8', t`Com classes de largura igual, use as frequências $4$, $12$, $16$ e $8$ como alturas.`),
             tf(t`Num histograma de variável contínua, as barras ficam separadas por espaços.`, false, t`As classes são contíguas, então as barras se encostam.`),
             mcq(t`Num histograma com classes de mesma largura, a classe modal é…`, ['a de barra mais alta', 'a primeira', 'a do meio', 'a última'], 0, t`Moda = maior frequência.`),
-            inter(t`Monte um histograma **simétrico** com pico no meio: alturas $3,\ 9,\ 9,\ 3$.`, 'bars', { labels: ['1', '2', '3', '4'], values: [1, 1, 1, 1], max: 20 }, (v: number[]) => Array.isArray(v) && v.join(',') === '3,9,9,3', 'alturas 3, 9, 9, 3', t`Simétrico significa que o lado esquerdo espelha o direito: $3,\ 9\mid 9,\ 3$.`),
+            inter(t`Monte um histograma **simétrico** com pico no meio: alturas $3,\ 9,\ 9,\ 3$.`, 'bars', { labels: ['0–1', '1–2', '2–3', '3–4'], values: [1, 1, 1, 1], max: 20, histogram: true }, (v: number[]) => Array.isArray(v) && v.join(',') === '3,9,9,3', 'alturas 3, 9, 9, 3', t`Simétrico significa que o lado esquerdo espelha o direito: $3,\ 9\mid 9,\ 3$.`),
             mcq(t`Um histograma com uma "cauda" longa para a direita é chamado de…`, ['assimétrico à direita (positivo)', 'simétrico', 'assimétrico à esquerda', 'bimodal'], 0, t`Poucos valores grandes puxam a cauda para a direita (ex.: salários).`),
             mcq(t`Um histograma com **dois** picos sugere…`, ['dois grupos misturados nos dados (bimodal)', 'erro de digitação', 'dados simétricos', 'que não há moda'], 0, t`Ex.: alturas de homens e mulheres juntas.`),
             tf(t`No histograma, a área de cada barra é proporcional à frequência da classe (com larguras iguais).`, true, t`Com larguras iguais, área e altura contam a mesma história.`),

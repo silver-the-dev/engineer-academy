@@ -3,7 +3,8 @@ import { Pressable, Text, View } from 'react-native';
 import { C, F, alpha } from '../../theme';
 import type { Fill, Interactive, MCQ, Match, MultiSelect, Numeric, Order, TrueFalse } from '../../content/types';
 import { RichText } from '../math/RichText';
-import { Choice, ChoiceState, ExProps, Token, parseNumber } from './common';
+import { Choice, ChoiceState, ExProps, Token } from './common';
+import { checkNumeric, NUMERIC_INPUT_LIMIT, parseNumber } from '../../lib/numericAnswer';
 import { fmt, makeRng, shuffle } from '../../lib/random';
 import { tapFeedback, wrongFeedback, correctFeedback } from '../../lib/feedback';
 import { renderWidget } from '../visuals/registry';
@@ -104,9 +105,7 @@ export function NumericView({ ex, locked, onReady, registerCheck }: ExProps<Nume
   const [checked, setChecked] = useState<null | boolean>(null);
   useEffect(() => onReady(parseNumber(s) !== null), [s, onReady]);
   registerCheck(() => {
-    const v = parseNumber(s);
-    const tol = ex.tol ?? Math.max(1e-6, Math.abs(ex.answer) * 1e-6);
-    const ok = v !== null && Math.abs(v - ex.answer) <= tol + 1e-12;
+    const ok = checkNumeric(ex, s);
     setChecked(ok);
     return { correct: ok, answer: `$${fmt(ex.answer)}$${ex.unit ? ' ' + ex.unit : ''}` };
   });
@@ -115,7 +114,7 @@ export function NumericView({ ex, locked, onReady, registerCheck }: ExProps<Nume
     tapFeedback();
     if (k === '⌫') setS(s.slice(0, -1));
     else if (k === '−') setS(s.startsWith('−') ? s.slice(1) : '−' + s);
-    else if (s.length < 14) setS(s + k);
+    else if (s.length < NUMERIC_INPUT_LIMIT) setS(s + k);
   };
   const color = checked === null ? C.cyan : checked ? C.success : C.danger;
   return (

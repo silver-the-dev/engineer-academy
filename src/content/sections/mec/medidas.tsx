@@ -4,7 +4,6 @@ import { randInt } from '../../../lib/random';
 
 const t = String.raw;
 
-// A single adjustable quantity connects the visual scale to its equivalent expression.
 export const medidas: UnitDef = {
   id: 'm-med', title: 'Medidas e unidades', icon: '📏',
   subtitle: 'SI, conversões e precisão das medidas',
@@ -32,7 +31,7 @@ export const medidas: UnitDef = {
       ] },
     ] },
     { id: 'm-med-conv', title: 'Conversão de unidades', parts: [
-      { card: { title: 'Prefixos e fatores', body: t`Prefixos multiplicam a unidade: quilo ($\text{k}$) é $10^3$, centi ($\text{c}$) é $10^{-2}$, mili ($\text{m}$) é $10^{-3}$ e micro ($\mu$) é $10^{-6}$. Um fator de conversão é uma razão igual a 1, como $1000\,\text{m}/1\,\text{km}$. Cancele as unidades em cadeia.` }, exercises: [
+      { card: { title: 'Prefixos e fatores', body: t`Prefixos multiplicam a unidade: quilo ($\text{k}$) é $10^3$, centi ($\text{c}$) é $10^{-2}$, mili ($\text{m}$) é $10^{-3}$ e micro ($\mu$) é $10^{-6}$. Um fator de conversão é uma razão igual a 1, como $1000\,\text{m}/1\,\text{km}$. Cancele as unidades em cadeia.`, example: t`Para converter $35\,\text{cm}$ em metros, use $35\,\text{cm}\cdot\dfrac{1\,\text{m}}{100\,\text{cm}}=0{,}35\,\text{m}$. A unidade cm cancela.` }, exercises: [
         mcq('O prefixo quilo representa qual fator?', ['$10^3$', '$10^{-3}$', '$10^2$', '$10^{-6}$'], 0, t`Quilo significa $10^3=1000$.`),
         mcq('O prefixo mili representa qual fator?', ['$10^{-3}$', '$10^3$', '$10^{-2}$', '$10^{-6}$'], 0, t`Mili significa um milésimo: $10^{-3}$.`),
         num(t`Converta $3\,\text{km}$ para m, sem casas decimais.`, 3000, t`$3\,\text{km}\cdot1000\,\text{m}/\text{km}=3000\,\text{m}$.`, { unit: 'm', tol: 1e-6 }),
@@ -57,7 +56,7 @@ export const medidas: UnitDef = {
         mcq(t`Qual é a forma científica de $0,0045$?`, ['$4{,}5\\times10^{-3}$', '$4{,}5\\times10^3$', '$45\\times10^{-4}$', '$0{,}45\\times10^{-2}$'], 0, t`$4,5/1000=0,0045$.`),
         num(t`Qual é o expoente de 10 em $72000=7,2\times10^n$? Digite o inteiro.`, 4, t`A vírgula anda quatro casas: $n=4$.`, { tol: 1e-6 }),
         gen((rng) => { const n = randInt(rng, 2, 6); return num(t`Qual o expoente inteiro $n$ em $10^{${n}}=1\times10^n$?`, n, t`As potências são iguais: $n=${n}$.`, { tol: 1e-6 }); }),
-        num('Para escrever 0,003 m como 3 × 10 elevado a n, qual é o expoente n?', -3, 'O 3 está três casas à direita da vírgula na representação decimal.'),
+        num('Para escrever 0,003 m como 3 × 10 elevado a n, qual é o expoente n?', -3, 'Para chegar a 3 a partir de 0,003, multiplique por 1000. Para escrever a medida original a partir de 3, divida por 1000: o expoente é −3.'),
         num(t`Quanto é $(2\times10^3)(3\times10^2)$? Dê o valor inteiro.`, 600000, t`Multiplique os coeficientes e some os expoentes: $6\times10^5=600000$.`, { tol: 1e-6 }),
         mcq(t`Qual é a forma científica de $(8\times10^4)/(2\times10^2)$?`, ['$4\\times10^2$', '$4\\times10^6$', '$6\\times10^2$', '$4\\times10^{-2}$'], 0, t`Divida os coeficientes e subtraia os expoentes: $4\times10^{4-2}$.`),
       ] },

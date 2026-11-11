@@ -1,14 +1,55 @@
+import React from 'react';
 import type { UnitDef } from '../../types';
-import { code, gen, match, mcq, num, order, tf, near } from '../../helpers';
+import { code, gen, match, mcq, num, order, plot, table, tf, near } from '../../helpers';
+import { Label, RectW, Seg } from '../../../components/plot/Plot';
+import { C } from '../../../theme';
 import { fmt, randInt } from '../../../lib/random';
 import { circuit, circuitEx, circuitVisual, wires, V, R, LED, SW, OUT, CLK } from '../../circuits';
 
 const t = String.raw;
+
+const chipBlocks = plot({
+  view: { xMin: 0, xMax: 12, yMin: 0, yMax: 6 },
+  axes: false, grid: false, tickLabels: false,
+  render: () => <>
+    <Seg x1={2.1} y1={3} x2={9.9} y2={3} color={C.textDim} />
+    <Seg x1={6} y1={2} x2={6} y2={4.15} color={C.textDim} />
+    <Seg x1={2.1} y1={2} x2={2.1} y2={3} color={C.textDim} />
+    <Seg x1={9.9} y1={2} x2={9.9} y2={3} color={C.textDim} />
+    <RectW x={4.4} y={4.15} w={3.2} h={1.3} color={C.p2} opacity={0.28} />
+    <Label x={6} y={4.8} text="CPU" anchor="middle" />
+    <Label x={8.7} y={3.55} text="Barramento interno" anchor="middle" size={12} />
+    {['Flash', 'SRAM', 'GPIO'].map((label, i) => {
+      const x = 2.1 + i * 3.9;
+      return <React.Fragment key={label}>
+        <RectW x={x - 1.6} y={0.7} w={3.2} h={1.3} color={C.p3} opacity={0.25} />
+        <Label x={x} y={1.35} text={label} anchor="middle" />
+      </React.Fragment>;
+    })}
+  </>,
+}, 165);
 const led = (r: number) => circuit(V('pin', [0, 0], [0, 3], 5, { fixed: true, locked: true }), wires([0, 0], [2, 0]), R('r', [2, 0], [5, 0], r, { min: 100, max: 1000, locked: true }), LED('led', [5, 0], [5, 3], 'red', { locked: true, show: ['i'] }), wires([5, 3], [0, 3]));
 const button = (pullup: boolean) => circuit(V('v', [0, 0], [0, 4], 5, { fixed: true, locked: true }), ...(pullup ? [R('r', [0, 0], [3, 0], 10000, { fixed: true, locked: true }), SW('s', [3, 2], [3, 4], false, { locked: true })] : [SW('s', [0, 0], [3, 0], false, { locked: true }), R('r', [3, 2], [3, 4], 10000, { fixed: true, locked: true })]), wires([3, 0], [3, 2]), OUT('out', [3, 2]), wires([3, 4], [0, 4]));
 const divider = (r: number) => circuit(V('v', [0, 0], [0, 4], 5, { fixed: true, locked: true }), R('top', [0, 0], [3, 0], 10000, { fixed: true, locked: true }), wires([3, 0], [3, 2]), OUT('adc', [3, 2]), R('bottom', [3, 2], [3, 4], r, { min: 1000, max: 30000, locked: true }), wires([3, 4], [0, 4]));
 const pwm = (volts: number) => circuit(CLK('clk', [0, 0], [0, 3], 100, volts, { min: 1, max: 5, locked: true }), R('load', [0, 0], [3, 0], 1000, { fixed: true, locked: true }), wires([3, 0], [3, 3], [0, 3]));
 const ledEx = (current: number, resistance: number) => circuitEx(t`Ajuste o resistor para a corrente do LED ficar perto de $${current}\,\text{mA}$, sem ultrapassar $20\,\text{mA}$.`, { comps: led(1000), mode: 'adjust' }, v => near(v.i('led'), current / 1000, 0.001) && v.i('led') <= 0.020 && !v.burnt('led'), t`Cerca de $${resistance}\,\Omega$.`, t`Com LED vermelho de aproximadamente $1,8\,\text{V}$, $R=(5-1,8)/(${current}/1000)=${resistance}\,\Omega$.`, { set: { r: resistance } });
+
+const assembleLed = () => circuitEx(
+  'Ligue a saída GPIO ao anodo do LED passando pelo resistor de 330 Ω. Use fios para completar a ligação e meça a corrente do LED.',
+  {
+    comps: circuit(
+      V('GPIO', [1, 1], [1, 5], 5, { fixed: true, locked: true }),
+      LED('LED', [8, 1], [8, 5], 'red', { locked: true, show: ['i'] }),
+      wires([8, 5], [1, 5]),
+    ),
+    mode: 'build', cols: 10, rows: 6,
+    palette: [{ type: 'resistor', value: 330, fixed: true, max: 1 }, 'wire'],
+  },
+  v => v.ok && v.count('resistor') === 1 && near(v.i('LED'), 0.0097, 0.001) && !v.burnt('LED'),
+  'Resistor de 330 Ω em série entre a saída GPIO e o anodo.',
+  'O resistor limita a corrente a cerca de 9,7 mA. O catodo já está ligado ao retorno do circuito.',
+  { add: [R('serie', [2, 1], [5, 1], 330), ...wires([1, 1], [2, 1]), ...wires([5, 1], [8, 1])] },
+);
 const switchEx = (on: boolean, pullup = true) => circuitEx(pullup ? 'Feche o botão e faça a entrada pull-up ler nível baixo.' : 'Feche o botão e faça a entrada pull-down ler nível alto.', { comps: (() => { const c = button(pullup); return c.map(x => x.id === 's' ? { ...x, on: !on } : x); })(), mode: 'adjust' }, v => v.on('out') === !pullup, 'Feche a chave.', pullup ? 'O resistor puxa a entrada para 5 V aberta; fechada, a chave liga a entrada ao terra.' : 'O resistor puxa a entrada ao terra aberta; fechada, a chave liga a entrada a 5 V.', { on: { s: on } });
 const divEx = (volts: number, resistance: number) => circuitEx(t`Ajuste o resistor inferior para a entrada ADC medir aproximadamente $${volts}\,\text{V}$.`, { comps: divider(1000), mode: 'adjust' }, v => near(v.v('adc'), volts, 0.05), t`Use $${resistance / 1000}\,\text{k}\Omega$.`, t`No divisor, $V=5R_{inf}/(10000+R_{inf})=${volts}\,\text{V}$.`, { set: { bottom: resistance } });
 const pwmEx = (volts: number) => circuitEx(t`Com onda de $50\%$, ajuste a amplitude para obter média de $${fmt(volts / 2)}\,\text{V}$.`, { comps: pwm(1), mode: 'adjust' }, v => near(v.wave('load').avg, volts / 2, 0.04), t`Amplitude $${volts}\,\text{V}$.`, t`A média de uma onda entre zero e $${volts}\,\text{V}$, alta por metade do período, é $${fmt(volts / 2)}\,\text{V}$.`, { set: { clk: volts } });
@@ -20,7 +61,7 @@ export const arduino: UnitDef = {
   guide: t`No exemplo Arduino Uno clássico, o ADC tem 10 bits e referência de $5\,\text{V}$: $V\approx 5N/1023$. PWM ideal tem média $V_{méd}=D V_H$. Para LED vermelho, $R\approx(5-1,8)/I$. Use tempos sem sinal e compare $agora-anterior\ge intervalo$ para lidar com a virada de millis(). Botão com pull-up lê LOW ao pressionar.`,
   lessons: [
     { id: 'mc-ard-arq', title: 'Por dentro de um microcontrolador', parts: [
-      { card: [{ title: 'Um computador em um chip', body: 'CPU executa instruções; Flash guarda o programa; SRAM guarda variáveis de trabalho; periféricos conectam o programa ao mundo.' }, { title: 'Estrutura Arduino', body: 'setup executa uma vez após iniciar; loop é chamado repetidamente. A placa e o chip não são a mesma coisa.', visual: code('void setup() {\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n}', undefined, 'Estrutura básica') }], exercises: [
+      { card: [{ title: 'Um computador em um chip', body: 'A CPU busca as instruções na Flash, usa a SRAM para dados de trabalho e acessa periféricos como os pinos de entrada e saída (GPIO).', visual: chipBlocks, example: 'Ao apertar um botão, a CPU lê a entrada GPIO e atualiza um contador na SRAM. O firmware continua salvo na Flash mesmo quando a placa é desligada.' }, { title: 'Estrutura Arduino', body: 'setup executa uma vez após iniciar; loop é chamado repetidamente. A placa e o chip não são a mesma coisa.', visual: code('void setup() {\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n}', undefined, 'Estrutura básica') }], exercises: [
         mcq('Qual bloco executa instruções?', ['CPU', 'Flash', 'conector USB', 'LED'], 0, 'A CPU busca e executa instruções.'),
         tf('A SRAM mantém variáveis de trabalho enquanto o programa executa.', true, 'A SRAM é memória de trabalho volátil.'),
         mcq('Onde o programa gravado costuma ficar no Uno?', ['Flash', 'SRAM', 'pino GPIO', 'resistor'], 0, 'A Flash não volátil armazena o programa.'),
@@ -46,7 +87,7 @@ export const arduino: UnitDef = {
         num(t`Com $5\,\text{V}$, LED de $1,8\,\text{V}$ e $320\,\Omega$, estime a corrente em mA.`, 10, t`$I=(5-1,8)/320=0,010\,\text{A}=10\,\text{mA}$.`, { unit: 'mA' }),
         gen(rng => { const i = randInt(rng, 4, 16); return num(t`Uma saída fornece $${i}\,\text{mA}$. Quanto falta para $20\,\text{mA}$? Responda em mA.`, 20 - i, t`$20-${i}=${20 - i}\,\text{mA}$.`, { unit: 'mA' }); }),
         mcq(t`Meça a corrente no LED do circuito de $330\,\Omega$. Qual valor é mais próximo?`, [t`$9,7\,\text{mA}$`, t`$30\,\text{mA}$`, t`$100\,\text{mA}$`, t`$0\,\text{mA}$`], 0, t`$(5-1,8)/330\approx9,7\,\text{mA}$.`, { visual: circuitVisual({ comps: led(330), mode: 'adjust' }) }),
-        ledEx(10, 320), ledEx(16, 200),
+        ledEx(10, 320), assembleLed(),
       ] },
       { card: [{ title: 'Botão e resistores', body: 'Uma entrada desconectada pode flutuar. No pull-up, o resistor leva a entrada ao alto; ao fechar o botão para o terra, a leitura fica baixa. Pull-down faz o inverso: resistor ao terra e botão ao positivo.', visual: circuitVisual({ comps: button(true), mode: 'adjust' }) }, { title: 'Leitura com pull-up interno', body: 'INPUT_PULLUP ativa o resistor interno; neste arranjo, LOW indica botão pressionado.', visual: code('void setup() {\n  pinMode(2, INPUT_PULLUP);\n}\nvoid loop() {\n  bool apertado =\n    digitalRead(2) == LOW;\n}', undefined, 'Botão ativo em LOW') }], exercises: [
         mcq('Com pull-up e botão aberto, qual nível se espera?', ['HIGH', 'LOW', 'tensão flutuante', 'corrente de 5 A'], 0, 'O resistor liga a entrada ao positivo.'),
@@ -76,7 +117,7 @@ export const arduino: UnitDef = {
       ] },
     ] },
     { id: 'mc-ard-tempo', title: 'Temporização sem bloqueio', parts: [
-      { card: [{ title: 'Tempo decorrido', body: 'delay pausa o fluxo daquela rotina. Com millis, cada volta de loop verifica o tempo e pode atender outras tarefas.' }, { title: 'Pisca cooperativo', body: 'A subtração entre unsigned long funciona também quando millis dá a volta, desde que o intervalo seja representável e as verificações não sejam adiadas por uma volta inteira.', visual: code('unsigned long anterior = 0;\nvoid loop() {\n  unsigned long agora = millis();\n  if (agora - anterior >= 500UL) {\n    anterior = agora;\n    // alternar LED\n  }\n}', undefined, 'Sem delay') }], exercises: [
+      { card: [{ title: 'Tempo decorrido', body: 'Para alternar um LED a cada 500 ms, compare millis() com o instante da última troca, que começa em 0. Em cada passagem pelo loop, o botão também pode ser lido.', visual: table(['Agora (ms)', 'Desde a troca', 'Ação no LED'], [[300, '300 ms', 'Mantém'], [500, '500 ms', 'Alterna'], [700, '200 ms', 'Mantém'], [1000, '500 ms', 'Alterna']], [1, 3]) }, { title: 'Pisca cooperativo', body: 'A subtração entre unsigned long funciona também quando millis dá a volta, desde que o intervalo seja representável e as verificações não sejam adiadas por uma volta inteira.', visual: code('unsigned long anterior = 0;\nvoid loop() {\n  unsigned long agora = millis();\n  if (agora - anterior >= 500UL) {\n    anterior = agora;\n    // alternar LED\n  }\n}', undefined, 'Sem delay') }], exercises: [
         mcq('O que millis informa?', ['Milissegundos desde a inicialização, com volta do contador', 'A tensão do pino', 'A corrente do LED', 'A hora civil exata'], 0, 'millis conta tempo decorrido desde o início e seu contador eventualmente retorna a zero.'),
         num('Anterior é 1000 ms e agora é 1450 ms. Quantos ms decorreram?', 450, '1450 − 1000 = 450 ms.', { unit: 'ms' }),
         gen(rng => { const n = randInt(rng, 1, 9) * 100; return num(t`Anterior vale $1000\,\text{ms}$ e agora vale $${1000 + n}\,\text{ms}$. Qual o tempo decorrido em ms?`, n, t`$${1000 + n}-1000=${n}\,\text{ms}$.`, { unit: 'ms' }); }),

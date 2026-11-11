@@ -8,27 +8,30 @@ import { C } from '../../../theme';
 const t = String.raw;
 
 // Vetores orientados no referencial destro: x × y = z.
-const direcao = (tipo: 'forca' | 'fio' | 'fontes' | 'mat') => ({
+const direcao = (tipo: 'forca' | 'fio' | 'fontes' | 'mat', inicial = 1) => ({
   name: 'space3d',
   props: {
     scale: 38,
-    params: [{ key: 's', label: tipo === 'forca' ? 'sinal de q' : tipo === 'mat' ? 'orientação' : 'sentido da corrente', min: -1, max: 1, step: 2, value: 1, color: C.gold }],
-    render: ({ p }: any) => (
+    params: [{ key: 's', label: tipo === 'forca' ? 'sinal de q' : tipo === 'mat' ? 'orientação' : 'sentido da corrente', min: 0, max: 1, step: 1, value: inicial, color: C.gold, format: (v: number) => v === 1 ? '+1' : '−1' }],
+    render: ({ p }: any) => {
+      const sentido = p.s === 1 ? 1 : -1;
+      return (
       <>
         <Axes3 size={2.5} />
         {tipo === 'fontes' ? <>
-          <Arrow3 from={[0, 0, -1.5 * p.s]} to={[0, 0, 1.5 * p.s]} color={C.p1} />
-          <Arrow3 from={[1.5, 0, 0]} to={[1.5, p.s, 0]} color={C.gold} />
+          <Arrow3 from={[0, 0, -1.5 * sentido]} to={[0, 0, 1.5 * sentido]} color={C.p1} />
+          <Arrow3 from={[1.5, 0, 0]} to={[1.5, sentido, 0]} color={C.gold} />
         </> : tipo === 'mat' ? <>
           <Arrow3 from={[-1.5, 0, 0]} to={[1.5, 0, 0]} color={C.p1} />
-          <Arrow3 from={[0, 0.7, 0]} to={[1.5 * p.s, 0.7, 0]} color={C.gold} />
+          <Arrow3 from={[0, 0.7, 0]} to={[1.5 * sentido, 0.7, 0]} color={C.gold} />
         </> : <>
-          <Arrow3 from={[0, 0, 0]} to={[2 * (tipo === 'fio' ? p.s : 1), 0, 0]} color={C.p1} />
+          <Arrow3 from={[0, 0, 0]} to={[2 * (tipo === 'fio' ? sentido : 1), 0, 0]} color={C.p1} />
           <Arrow3 from={[0, 0, 0]} to={[0, 2, 0]} color={C.p2} />
-          <Arrow3 from={[0, 0, 0]} to={[0, 0, 2 * p.s]} color={C.gold} />
+          <Arrow3 from={[0, 0, 0]} to={[0, 0, 2 * sentido]} color={C.gold} />
         </>}
       </>
-    ),
+      );
+    },
     info: ({ p }: any) => tipo === 'fontes'
       ? t`Azul: corrente no eixo $z$. No ponto $x>0$, dourado: sentido tangente de $\vec B$ ($${p.s > 0 ? '+y' : '-y'}$).`
       : tipo === 'mat'
@@ -51,7 +54,7 @@ export const magnetismo: UnitDef = {
           exercises: [
             tf(t`Uma carga parada sofre força magnética devida apenas a $\vec B$.`, false, t`Como $v=0$, $q\vec v\times\vec B=0$.`),
             mcq(t`Para carga positiva com $\vec v$ em $+x$ e $\vec B$ em $+y$, a força aponta em…`, ['$+z$', '$-z$', '$+x$', '$-y$'], 0, t`Pela mão direita, $\hat\imath\times\hat\jmath=\hat k$.`),
-            inter(t`Na cena, selecione carga negativa e observe a força em $-z$.`, 'space3d', direcao('forca').props, (v: any) => v?.p.s === -1, t`Sinal de q: $-1$.`, t`Para carga negativa, a força inverte o sentido de $\vec v\times\vec B$: vai para $-z$.`),
+            inter(t`Na cena, selecione carga negativa e observe a força em $-z$.`, 'space3d', direcao('forca').props, (v: any) => v?.p.s === 0, t`Sinal de q: $-1$.`, t`Para carga negativa, a força inverte o sentido de $\vec v\times\vec B$: vai para $-z$.`),
             num(t`Uma carga de $2\,\text{C}$ move-se perpendicularmente a $0,5\,\text{T}$ com $3\,\text{m/s}$. Qual a força em N, com uma casa decimal?`, 3, t`$F=2\cdot3\cdot0,5=3,0\,\text{N}$.`, { unit: 'N', tol: 0.05 }),
             gen((rng) => { const q = randInt(rng, 1, 5); const v = randInt(rng, 1, 5); return num(t`Uma carga de $${q}\,\text{mC}$ move-se a $${v}\,\text{m/s}$ perpendicular a $2\,\text{T}$. Qual $F$ em mN, com uma casa decimal?`, 2*q*v, t`$F=qvB=${q}\cdot${v}\cdot2=${2*q*v}\,\text{mN}$.`, {unit:'mN', tol:0.05}); }),
             mcq(t`Se a velocidade é paralela ao campo, a força magnética é…`, ['nula', 'máxima', 'paralela ao campo', 'oposta à velocidade'], 0, t`O ângulo é $0^\circ$ ou $180^\circ$ e seu seno é zero.`),
@@ -79,7 +82,7 @@ export const magnetismo: UnitDef = {
           exercises: [
             tf(t`Um fio paralelo a um campo magnético uniforme sofre força magnética resultante nesse trecho.`, false, t`$F=ILB\sin0^\circ=0$.`),
             mcq(t`Corrente em $+x$ e campo em $+y$: qual o sentido da força?`, ['$+z$', '$-z$', '$+y$', '$-x$'],0,t`$\vec L\times\vec B$ aponta em $+z$ pela mão direita.`),
-            inter(t`Inverta a corrente para mostrar a força em $-z$.`, 'space3d', direcao('fio').props, (v:any)=>v?.p.s===-1, t`Corrente em $-x$.`, t`$(-\hat\imath)\times\hat\jmath=-\hat k$.`),
+            inter(t`Inverta a corrente para mostrar a força em $-z$.`, 'space3d', direcao('fio').props, (v:any)=>v?.p.s===0, t`Corrente em $-x$.`, t`$(-\hat\imath)\times\hat\jmath=-\hat k$.`),
             num(t`Um fio perpendicular de $2\,\text{m}$ conduz $3\,\text{A}$ num campo de $0,5\,\text{T}$. Qual a força em N, com uma casa decimal?`,3,t`$F=ILB=3\cdot2\cdot0,5=3,0\,\text{N}$.`,{unit:'N',tol:0.05}),
             gen((rng)=>{const i=randInt(rng,1,5); const l=randInt(rng,1,4); return num(t`Um fio de $${l}\,\text{m}$ perpendicular a $2\,\text{T}$ conduz $${i}\,\text{A}$. Qual $F$ em N, com uma casa decimal?`,2*i*l,t`$F=ILB=${i}\cdot${l}\cdot2=${2*i*l}\,\text{N}$.`,{unit:'N',tol:0.05});}),
             mcq(t`Ao inverter simultaneamente corrente e campo, a força no fio…`, ['mantém o sentido', 'inverte o sentido', 'zera necessariamente', 'dobra'],0,t`Os dois sinais negativos se cancelam no produto vetorial.`),
@@ -107,7 +110,7 @@ export const magnetismo: UnitDef = {
           exercises: [
             tf(t`O campo de um fio retilíneo longo forma círculos em torno do fio.`,true,t`A simetria e a regra da mão direita dão linhas circulares ao redor do eixo do fio.`),
             mcq(t`Um fio leva corrente em $+z$. No ponto do eixo $+x$, o campo aponta em…`,['$+y$','$-y$','$+z$','$-x$'],0,t`Com o polegar em $+z$, os dedos passam em $+y$ no lado $+x$.`),
-            inter(t`Inverta a corrente no fio: no ponto $x>0$, o campo deve apontar em $-y$.`, 'space3d', direcao('fontes').props, (v:any)=>v?.p.s===-1, t`Corrente em $-z$.`, t`Inverter a corrente inverte o sentido de todas as linhas de campo.`),
+            inter(t`Inverta a corrente no fio: no ponto $x>0$, o campo deve apontar em $-y$.`, 'space3d', direcao('fontes').props, (v:any)=>v?.p.s===0, t`Corrente em $-z$.`, t`Inverter a corrente inverte o sentido de todas as linhas de campo.`),
             num(t`Para fio longo no vácuo, use $\mu_0=4\pi\times10^{-7}\,\text{T}\cdot\text{m/A}$. Com $I=5\,\text{A}$ e $r=0,1\,\text{m}$, qual $B$ em µT, com uma casa decimal?`,10,t`$B=\frac{4\pi\times10^{-7}\cdot5}{2\pi\cdot0,1}=10^{-5}\,\text{T}=10,0\,\mu\text{T}$.`,{unit:'µT',tol:0.05}),
             gen((rng)=>{const i=randInt(rng,1,8);return num(t`Fio longo no vácuo: $I=${i}\,\text{A}$, $r=0,2\,\text{m}$ e $\mu_0=4\pi\times10^{-7}\,\text{T}\cdot\text{m/A}$. Qual $B$ em µT, com uma casa decimal?`,i,t`$B=\mu_0I/(2\pi r)=${i}\times10^{-6}\,\text{T}=${i}\,\mu\text{T}$.`,{unit:'µT',tol:0.05});}),
             mcq(t`Ao dobrar a distância a um fio longo, com corrente fixa, $B$…`,['cai à metade','dobra','cai a um quarto','não muda'],0,t`$B\propto1/r$: dobrar $r$ reduz o campo à metade.`),
@@ -134,7 +137,7 @@ export const magnetismo: UnitDef = {
           card: { title: 'Momentos e magnetização', body: t`A magnetização $\vec M$ é o momento magnético por unidade de volume, em $\text{A/m}$. Momentos microscópicos podem se orientar num campo; em certos materiais existem domínios. Na cena, o campo externo azul aponta em $+x$ e a seta dourada representa um momento de domínio.`, visual: direcao('mat') },
           exercises: [
             mcq(t`Magnetização é momento magnético por unidade de…`,['volume','massa','tempo','corrente'],0,t`Por definição, $M$ é a densidade volumétrica de momento magnético.`),
-            inter(t`Alinhe o momento de domínio dourado com o campo externo azul.`, 'space3d', {...direcao('mat').props, params:[{key:'s',label:'orientação',min:-1,max:1,step:2,value:-1,color:C.gold}]}, (v:any)=>v?.p.s===1, t`Orientação $+1$.`, t`As duas setas devem apontar para $+x$, orientação de menor energia $U=-\vec\mu\cdot\vec B$.`),
+            inter(t`Alinhe o momento de domínio dourado com o campo externo azul.`, 'space3d', direcao('mat', 0).props, (v:any)=>v?.p.s===1, t`Orientação $+1$.`, t`As duas setas devem apontar para $+x$, orientação de menor energia $U=-\vec\mu\cdot\vec B$.`),
             num(t`Um corpo uniforme tem momento magnético total $6\,\text{A}\cdot\text{m}^2$ e volume $2\,\text{m}^3$. Qual $M$ em A/m, com uma casa decimal?`,3,t`$M=\mu/V=6/2=3,0\,\text{A/m}$.`,{unit:'A/m',tol:0.05}),
             gen((rng)=>{const m=randInt(rng,1,8);return num(t`Um corpo uniforme de volume $2\,\text{m}^3$ tem momento magnético $${2*m}\,\text{A}\cdot\text{m}^2$. Qual $M$ em A/m, com uma casa decimal?`,m,t`$M=\mu/V=${2*m}/2=${m}\,\text{A/m}$.`,{unit:'A/m',tol:0.05});}),
             tf(t`Domínios de um ferromagneto podem estar magnetizados localmente mesmo quando a magnetização total é pequena.`,true,t`Domínios orientados em sentidos diferentes podem cancelar grande parte dos momentos macroscópicos.`),

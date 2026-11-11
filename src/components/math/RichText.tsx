@@ -39,8 +39,16 @@ function parseInline(src: string): Seg[] {
       if (close > i) {
         flush();
         const tex = src.slice(i + (isDisplay ? 2 : 1), close);
-        out.push({ t: isDisplay ? 'dmath' : 'math', s: tex });
         i = close + (isDisplay ? 2 : 1);
+        if (isDisplay) {
+          out.push({ t: 'dmath', s: tex });
+        } else {
+          const suffix = /^[,.;:!?…)\]}]+/.exec(src.slice(i))?.[0];
+          // Keep closing punctuation in the formula's layout box so it wraps with the formula.
+          const escaped = suffix?.replaceAll('}', '\\}');
+          out.push({ t: 'math', s: escaped ? tex + '\\text{' + escaped + '}' : tex });
+          i += suffix?.length ?? 0;
+        }
         continue;
       }
     }

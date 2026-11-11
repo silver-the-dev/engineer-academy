@@ -27,6 +27,7 @@ for (const ext of ['.ts', '.tsx']) Module._extensions[ext] = (module, filename) 
   }).outputText, filename);
 };
 const { engineering, partValue, nextId, measurable, limits, offeredValues, stepValue, sliderValue, sliderMap, frequencyValue, frequencyMap, stepFrequency, gridFor, nearest, pixel, terminals, hitPart, allTypes } = require('../src/components/circuit/model');
+const { boardPadding, boardPoint, boardViewport, placeOnGrid } = require('../src/components/circuit/model');
 const { labelsFor, symbolBox } = require('../src/components/circuit/Labels');
 const { timing } = require('../src/components/circuit/useSimulation');
 const { examples, demoExamples, demoTypes } = require('../src/components/circuit/examples');
@@ -111,6 +112,26 @@ test('Grid pixel conversion, negative coordinates, rounding and clamps', () => {
   assert.deepEqual(nearest(pixel([-2, -1], g), g), [-2, -1]);
   assert.deepEqual(nearest([-1000, 10000], g), [g.x, g.y + g.rows]);
   assert.deepEqual(nearest([g.cell * 2.49, g.cell * 3.51], g), [g.x + 2, g.y + 4]);
+});
+test('Pan and overview keep endpoints in the same circuit coordinates', () => {
+  const grid = { ...gridFor({ cols: 24, rows: 16, comps: [] }, 344), cell: 44 };
+  const size = [344, 300];
+  const initial = boardViewport(grid, size, [0, 0], false);
+  const start = nearest(boardPoint([boardPadding + 44, boardPadding + 44], initial), grid);
+  const panned = boardViewport(grid, size, [440, 352], false);
+  const end = nearest(boardPoint([boardPadding + 88, boardPadding + 44], panned), grid);
+  const placed = placeOnGrid([], { type: 'wire' }, start, end, grid);
+  assert.deepEqual(placed.part.pts, [[1, 1], [12, 9]]);
+  assert.ok(placeOnGrid([placed.part], { type: 'wire' }, end, start, grid).error);
+  assert.deepEqual(hitPart([placed.part], pixel(end, grid), grid).pts, placed.part.pts);
+  const overview = boardViewport(grid, size, [440, 352], true);
+  const edge = boardViewport(grid, size, [1e6, 1e6], false);
+  for (const view of [overview, edge]) {
+    const corner = pixel([24, 16], grid);
+    const screen = corner.map((v, i) => (v - view.origin[i]) * view.scale);
+    assert(screen.every((v, i) => v >= 0 && v <= size[i]));
+    assert.deepEqual(nearest(boardPoint(screen, view), grid), [24, 16]);
+  }
 });
 test('Multi-terminal placement follows P exactly', () => {
   const at = [2, 4];

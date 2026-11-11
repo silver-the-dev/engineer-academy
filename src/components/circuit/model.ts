@@ -110,6 +110,25 @@ export function gridFor(spec: CircuitSpec, width: number): Grid {
 export const pixel = (p: Pt, g: Grid): Pt => [(p[0] - g.x) * g.cell, (p[1] - g.y) * g.cell];
 export const nearest = (p: Pt, g: Grid): Pt => [Math.max(0, Math.min(g.cols, Math.round(p[0] / g.cell))) + g.x,
   Math.max(0, Math.min(g.rows, Math.round(p[1] / g.cell))) + g.y];
+
+export const boardPadding = 14;
+export type BoardViewport = { origin: Pt; scale: number; size: Pt; board: Pt };
+
+export function boardViewport(grid: Grid, size: Pt, offset: Pt, overview: boolean, padding = boardPadding): BoardViewport {
+  const board: Pt = [grid.cols * grid.cell + padding * 2, grid.rows * grid.cell + padding * 2];
+  const scale = overview ? Math.min(1, size[0] / board[0], size[1] / board[1]) : 1;
+  const originAt = (axis: 0 | 1) => {
+    const visible = size[axis] / scale;
+    const hidden = board[axis] - visible;
+    return (hidden <= 0 || overview ? hidden / 2 : Math.max(0, Math.min(hidden, offset[axis]))) - padding;
+  };
+  return { origin: [originAt(0), originAt(1)], scale, size, board };
+}
+
+export function boardPoint(point: Pt, view: BoardViewport): Pt {
+  return [view.origin[0] + point[0] / view.scale, view.origin[1] + point[1] / view.scale];
+}
+
 export function terminals(type: CompType, at: Pt, end: Pt): Pt[] {
   if (['ground', 'input', 'output'].includes(type)) return [at];
   if (type === 'npn' || type === 'pnp') return Object.values(P.bjt(at));
@@ -123,6 +142,29 @@ export function terminals(type: CompType, at: Pt, end: Pt): Pt[] {
 }
 export const isAnchored = (type: CompType) => terminals(type, [0, 0], [0, 0]).length !== 2 || type === 'not';
 export const paletteItem = (p: PaletteItem | CompType): PaletteItem => typeof p === 'string' ? { type: p } : p;
+export const samePoint = (a: Pt, b: Pt) => a[0] === b[0] && a[1] === b[1];
+
+export function placeOnGrid(comps: Comp[], item: PaletteItem, a: Pt, b: Pt, grid: Grid): { part: Comp } | { error: string } {
+  const { type } = item;
+  if (item.max !== undefined && comps.filter(c => c.type === type).length >= item.max) return { error: 'Limite desta ferramenta atingido.' };
+  if (!isAnchored(type) && samePoint(a, b)) return { error: 'Escolha dois pontos diferentes.' };
+  const pts = terminals(type, a, b);
+  if (pts.some(([x, y]) => x < grid.x || y < grid.y || x > grid.x + grid.cols || y > grid.y + grid.rows)) {
+    return { error: 'A peça precisa caber inteira na grade.' };
+  }
+  if (type === 'wire' && comps.some(c => c.type === 'wire' && c.pts.length === 2 && (
+    (samePoint(c.pts[0], pts[0]) && samePoint(c.pts[1], pts[1])) ||
+    (samePoint(c.pts[0], pts[1]) && samePoint(c.pts[1], pts[0]))
+  ))) return { error: 'Já existe um fio entre estes pontos.' };
+  const id = nextId(type, comps);
+  return { part: {
+    ...defaults(type), id, label: item.label ?? id, type, pts,
+    ...(item.value !== undefined && { value: item.value }),
+    ...(item.color && { color: item.color }),
+    ...(item.fixed !== undefined && { fixed: item.fixed }),
+  } };
+}
+
 export function hitPart(comps: Comp[], point: Pt, grid: Grid): Comp | undefined {
   const distance = (a: Pt, b: Pt) => {
     const dx = b[0] - a[0], dy = b[1] - a[1];
