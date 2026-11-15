@@ -110,6 +110,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 - `num(…)`: a tolerância padrão é relativa 1e-6. Para respostas arredondadas ("2 casas"), passe `{ tol: … }`. Unidade: `{ unit: 'm' }`.
 - Use um controle quando ele mostrar uma consequência do modelo, permitir uma medida ou exigir uma decisão ligada ao objetivo da lição. Evite sliders cujo valor já vem pronto no enunciado e confira que o exercício não começa resolvido.
 - Valor recebido pelo `check` de `inter(…)`: `plot` → `v.p` (sliders) e `v.pts` (pontos arrastáveis); `venn` → lista de regiões (`'A'`, `'AB'`, `'B'`, `'U'`, compare ordenando); `numberline` → número; `bars` → lista de alturas; `simulator` → número de lançamentos; `space3d` → `v.p`.
+- Marcação do `RichText`: `**negrito**`, `==destaque==`, `*itálico*` (palavra ou expressão curta) e `` `código` `` em linha (monoespaçado); `$…$` e `$$…$$` para TeX.
 - O `RichText` não tem tabelas em markdown: para tabelas use `$$\begin{array}…\end{array}$$` ou o visual `table(...)`. Toda lição precisa de pelo menos 2 partes (o QA avisa "lição sem partes" se tiver uma só).
 - Padrão usado nas lições já convertidas: 2 ou 3 partes por lição, 7 a 9 exercícios por parte, do mais fácil ao mais difícil, misturando tipos e com ao menos um gerador aleatório (`gen`) por parte. Exemplos completos: `sections/fund/elementar.tsx`, `sections/calc/limites.tsx`, `sections/num/numerico1.tsx`.
 
