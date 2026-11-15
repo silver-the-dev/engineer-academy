@@ -436,7 +436,8 @@ $ cargo clippy -- -D warnings`,
     if b == 0 {
         Err("divisao por zero")
     } else {
-        a.checked_div(b).ok_or("overflow")
+        a.checked_div(b)
+            .ok_or("overflow")
     }
 }`,
                 [4, 6, 8],
@@ -510,7 +511,8 @@ $ cargo clippy -- -D warnings`,
                 visual: code(
                   `fn divide(a: i32, b: i32)
 -> Result<i32, &'static str> {
-    a.checked_div(b).ok_or("divisao invalida")
+    a.checked_div(b)
+        .ok_or("divisao invalida")
 }
 
 fn main() {
@@ -518,7 +520,7 @@ fn main() {
         Ok(v) => println!("{v}"),
     }
 }`,
-                  [7, 8, 9],
+                  [8, 9, 10],
                   'Match incompleto',
                 ),
               },
@@ -580,7 +582,7 @@ fn main() {
                 '    if b == 0 {',
                 '        Err("zero")',
                 '    } else {',
-                '        a.checked_rem(b).ok_or("overflow")',
+                '        a.checked_rem(b)\n            .ok_or("overflow")',
                 '    }',
               ],
               [
@@ -842,7 +844,9 @@ fn sum_strs(
                 src: `fn sum_strs(
     a: &str,
     b: &str,
-) -> Result<i32, std::num::ParseIntError> {
+) -> Result<
+    i32, std::num::ParseIntError,
+> {
     let x: i32 = a.parse()?;
     let y: i32 = b.parse()?;
     Ok(x + y)
@@ -854,30 +858,30 @@ fn main() {
                 head: ['Expressão avaliada', 'Resultado do parse', 'Ação do ?'],
                 frames: [
                   {
-                    line: [11],
+                    line: [13],
                     rows: [['sum_strs("10", "xyz")', '—', 'inicia chamada']],
                     label: 'Passo 1: chamada',
                     info: '`main` chama `sum_strs` com `a = "10"` e `b = "xyz"`.',
                   },
                   {
-                    line: [5],
+                    line: [7],
                     rows: [['"10".parse::<i32>()?', 'Ok(10)', 'desembrulha x = 10']],
                     highlightRow: [0],
                     label: 'Passo 2: 1º ? (Ok)',
-                    info: '`"10".parse()` devolve `Ok(10)`. O `?` extrai `10`, guarda em `x` e avança para a linha 6.',
+                    info: '`"10".parse()` devolve `Ok(10)`. O `?` extrai `10`, guarda em `x` e avança para a linha 8.',
                   },
                   {
-                    line: [6],
+                    line: [8],
                     rows: [
                       ['"10".parse::<i32>()?', 'Ok(10)', 'x = 10'],
                       ['"xyz".parse::<i32>()?', 'Err(ParseIntError)', 'return Err(...) imediato!'],
                     ],
                     highlightRow: [1],
                     label: 'Passo 3: 2º ? (Err)',
-                    info: '`"xyz".parse()` devolve `Err`. O `?` **aborta a função na hora** e retorna `Err` para `main`. A linha 7 (`Ok(x + y)`) nunca executa!',
+                    info: '`"xyz".parse()` devolve `Err`. O `?` **aborta a função na hora** e retorna `Err` para `main`. A linha 9 (`Ok(x + y)`) nunca executa!',
                   },
                   {
-                    line: [11],
+                    line: [13],
                     rows: [['r em main()', 'Err(ParseIntError)', 'recebeu o erro propagado']],
                     highlightRow: [0],
                     label: 'Passo 4: retorno em main',
@@ -941,7 +945,7 @@ fn main() {
             ),
             fill(
               'Complete a função para extrair `n` de `s.parse()` propagando erros e devolver o triplo em caso de sucesso:',
-              'fn triple(s: &str) -> Result<i32, std::num::ParseIntError> {\n    let n: i32 = s.parse()___;\n    ___(n * 3)\n}',
+              'fn triple(\n    s: &str,\n) -> Result<\n    i32, std::num::ParseIntError,\n> {\n    let n: i32 = s.parse()___;\n    ___(n * 3)\n}',
               ['?', 'Ok'],
               ['!', 'unwrap', 'Some'],
               'O `?` após `s.parse()` desembrulha o `i32` ou retorna o `Err`, e `Ok(n * 3)` embrulha o resultado final no `Result`.',
@@ -1181,7 +1185,7 @@ fn main() {
               'Monte a função `main` que retorna `Result<(), Box<dyn std::error::Error>>`, converte `"42"` com `?`, imprime o número e encerra com sucesso:',
               [
                 'fn main()',
-                '-> Result<(), Box<dyn std::error::Error>> {',
+                '-> Result<\n    (), Box<dyn std::error::Error>,\n> {',
                 '    let n: i32 = "42".parse()?;',
                 '    println!("{n}");',
                 '    Ok(())',
@@ -1319,22 +1323,25 @@ fn main() {
 }
 
 fn main() {
-    let res: Result<i32, AccountError> = Ok(50);
+    let res: Result<i32, AccountError> =
+        Ok(50);
     match res {
-        Ok(bal) => println!("saldo: {bal}"),
+        Ok(bal) => {
+            println!("saldo: {bal}");
+        }
         Err(AccountError::NoFunds) => {
             println!("sem saldo");
         }
     }
 }`,
-                  [8, 10],
+                  [9, 13],
                   'Variante esquecida no match',
                 ),
               },
             ),
             fill(
               'Complete a assinatura do método exigido pela trait `std::fmt::Display`:',
-              'impl fmt::Display for AccountError {\n    fn fmt(&self, f: &mut fmt::Formatter<\'_>) -> fmt::___ {\n        write!(f, "erro na conta")\n    }\n}',
+              'impl fmt::Display for AccountError {\n    fn fmt(\n        &self,\n        f: &mut fmt::Formatter<\'_>,\n    ) -> fmt::___ {\n        write!(f, "erro na conta")\n    }\n}',
               ['Result'],
               ['Error', 'String', 'Option'],
               'O método `fmt` devolve `fmt::Result` (um apelido para `Result<(), fmt::Error>`), que é exatamente o que a macro `write!(f, ...)` retorna.',
@@ -1553,7 +1560,7 @@ enum AppError {
 fn load(
     s: &str,
 ) -> Result<i32, AppError> {
-    let n: i32 = s.parse()?;
+    let n: i32 = s.parse::<i32>()?;
     Ok(n)
 }`,
                   [11],
@@ -1568,7 +1575,7 @@ fn load(
             ),
             fill(
               'Complete a chamada que converte manualmente o erro de `parse()` em `AppError::Parse` na própria linha, sem precisar implementar `From`:',
-              'let n: i32 = s.parse().___(AppError::Parse)?;',
+              'let n: i32 = s.parse()\n    .___(AppError::Parse)?;',
               ['map_err'],
               ['map', 'unwrap_or', 'ok_or'],
               '`.map_err(f)` aplica a função (ou construtor de variante `AppError::Parse`) apenas se o `Result` for `Err(e)`, mantendo `Ok(v)` intocado.',
@@ -1639,8 +1646,7 @@ fn main() {
                 'impl From<ParseIntError> for AppError {',
                 '    fn from(e: ParseIntError) -> Self {',
                 '        Self::Parse(e)',
-                '    }',
-                '}',
+                '    }\n}',
               ],
               [
                 '    fn from(e: AppError) -> Self {',
@@ -1948,7 +1954,7 @@ fn main() {
             ),
             fill(
               'Dada `struct Cpf(String);`, complete a conversão que exige 11 dígitos ASCII (sem validar os dígitos verificadores do CPF):',
-              'impl std::convert::___<&str> for Cpf {\n    type Error = &\'static str;\n    fn ___(s: &str) -> Result<Self, Self::Error> {\n        if s.len() == 11 && s.bytes().all(|b| b.is_ascii_digit()) { Ok(Cpf(s.to_string())) } else { Err("invalido") }\n    }\n}',
+              'impl std::convert::___<&str> for Cpf {\n    type Error = &\'static str;\n    fn ___(\n        s: &str,\n    ) -> Result<Self, Self::Error> {\n        if s.len() == 11\n            && s.bytes().all(|b| {\n                b.is_ascii_digit()\n            })\n        {\n            Ok(Cpf(s.to_string()))\n        } else {\n            Err("invalido")\n        }\n    }\n}',
               ['TryFrom', 'try_from'],
               ['From', 'from', 'Into'],
               'Enquanto `From::from` é para conversões infalíveis, `TryFrom::try_from` define conversões que validam a entrada e retornam `Result<Self, Self::Error>`.',
@@ -2014,8 +2020,7 @@ fn main() {
                 '            return None;',
                 '        }',
                 '        Some(Self { value: v })',
-                '    }',
-                '}',
+                '    }\n}',
               ],
               [
                 '        Self { value: v }',

@@ -281,7 +281,7 @@ fn main() {
               '    .map_err(|_| "pânico")?;',
               'println!("{n}");',
               'Ok(())',
-            ], ['let job = move || s;', 'println!("{s}");'], 'A String tem quatro bytes ASCII. move a leva à closure; s.len() retorna 4, recuperado por join. O distrator que devolve s entregaria uma String, imprimindo dado em vez de 4. Tentar imprimir s na principal após o move causaria E0382: “borrow of moved value: `s`”.'),
+            ], ['let job = || s.len();', 'println!("{s}");'], 'A String tem quatro bytes ASCII. move a leva à closure; s.len() retorna 4, recuperado por join. Sem move, a closure emprestaria s e spawn causaria E0373. Tentar imprimir s na principal após o move causaria E0382: “borrow of moved value: `s`”.'),
           ],
         },
       ],
@@ -314,7 +314,7 @@ fn main() {
               'let n = rx.recv()?;',
               'println!("{n}");',
               'Ok(())',
-            ], ['let n = rx.recv();', 'tx.recv(7)?;'], 'Crie o canal, envie, depois receba e imprima 7. Os dois ? propagam erros. Receber antes de enviar nesta mesma thread bloquearia. Sem ? na recepção, n seria um Result, que não tem o Display usado na impressão; tx possui send, não recv.'),
+            ], ['let n: i32 = rx.recv();', 'tx.recv(7)?;'], 'Crie o canal, envie, depois receba e imprima 7. Os dois ? propagam erros. Receber antes de enviar nesta mesma thread bloquearia. Sem ? na recepção, o Result não pode ser atribuído ao i32: E0308. tx possui send, não recv.'),
           ],
         },
         {
@@ -336,10 +336,7 @@ fn main() {
             multi('Quais duas ações permitem terminar um consumo até o fechamento?', ['Descartar o remetente original não usado', 'Deixar terminar e descartar todos os clones produtores', 'Manter um clone guardado sem enviar', 'Esperar que a fila vazia feche o canal sozinha'], [0, 1], 'Fila vazia não significa fim: ainda pode haver produção. O fim ocorre após todos os remetentes desaparecerem; o consumidor então drena o que restou e encerra.'),
             codePuzzle('Use dois remetentes na mesma fila: envie 3 pelo original, clone-o, receba o valor, envie seu sucessor pelo clone e imprima 4. Importe std::sync::mpsc; insira os blocos em main antes do Ok(()) já existente, com retorno Result<(), Box<dyn std::error::Error>>.', [
               'let (tx, rx) = mpsc::channel();',
-              'let tx2 = {',
-              '    tx.send(3)?;',
-              '    tx.clone()',
-              '};',
+              'let tx2 = { tx.send(3)?; tx.clone() };',
               'let n = rx.recv()?;',
               'tx2.send(n + 1)?;',
               'println!("{}", rx.recv()?);',
@@ -368,7 +365,7 @@ fn main() {
             gen((rng) => {
               const base = randInt(rng, 2, 10);
               const inc = randInt(rng, 2, 6);
-              return num('Sem falhas, qual contador será impresso?', base + inc, `O único incremento protegido soma ${inc} ao valor inicial ${base}, dando ${base + inc}. join acontece antes da leitura.`, { visual: code(mutexCode.replace('Mutex::new(0)', `Mutex::new(${base})`).replace('*n += 1;', `*n += ${inc};`), [4, 9], 'Novo estado inicial') });
+              return num('Sem falhas, qual contador será impresso?', base + inc, `O único incremento protegido soma ${inc} ao valor inicial ${base}, dando ${base + inc}. join acontece antes da leitura.`, { visual: code(mutexCode.replace('Arc::new(Mutex::new(0))', `Arc::new(\n        Mutex::new(${base}))`).replace('*n += 1;', `*n += ${inc};`), [4, 5, 10], 'Novo estado inicial') });
             }),
             mcq('O que lock faz quando outra thread possui o guard?', ['Espera a liberação da trava', 'Copia o inteiro para contornar a trava', 'Descarta o dado de outra thread', 'Sempre produz um erro de compilação'], 0, 'lock é bloqueante: espera conseguir a trava. Seu Result também informa envenenamento, que pode ocorrer quando há panic durante a região protegida.'),
             codePuzzle('Dentro de main que retorna Result<(), &\'static str>, monte um incremento de 2 para 5 e libere a trava explicitamente. Importe std::sync::Mutex.', [
@@ -379,7 +376,7 @@ fn main() {
               'println!("{}", *g);',
               'drop(g);',
               'Ok(())',
-            ], ['let g = m.lock();', 'g += 3;'], 'A chamada lock é tratada por map_err e ?. O guard mutável permite alterar o dado: 2 + 3 = 5. Após imprimir, drop(g) libera a trava; Ok encerra a função com sucesso.'),
+            ], ['let g = m.unlock();', 'g += 3;'], 'A chamada lock é tratada por map_err e ?. O guard mutável permite alterar o dado: 2 + 3 = 5. Após imprimir, drop(g) libera a trava; Mutex não possui método unlock (E0599). Ok encerra a função com sucesso.'),
           ],
         },
         {
@@ -408,7 +405,7 @@ fn main() {
               'let b = m.lock().map_err(|_| "trava")?;',
               'println!("{}", *b);',
               'Ok(())',
-            ], ['drop(m);', 'let b = a;'], 'O primeiro guard altera 4 para 5. É necessário descartá-lo antes do segundo lock no mesmo mutex. b é o novo guard, usado apenas para ler e imprimir 5.'),
+            ], ['drop(m);', 'let b = a.lock();'], 'O primeiro guard altera 4 para 5. É necessário descartá-lo antes do segundo lock no mesmo mutex. b é o novo guard, usado apenas para ler e imprimir 5. lock é chamado no mutex m, não no guard a: a.lock() causa E0599.'),
           ],
         },
       ],
@@ -445,7 +442,7 @@ fn main() {
               '    .map_err(|_| "pânico")?;',
               'println!("{n}");',
               'Ok(())',
-            ], ['let work = move || *a;', 'let work = move || b.len();'], 'a e b são donos do mesmo inteiro. A closure captura b por valor; spawn verifica Send. join devolve 3 e a principal o imprime. Capturar a não cumpre a tarefa pedida, que deixa a na principal; o inteiro não possui len.'),
+            ], ['let work = || *b;', 'let work = move || b.len();'], 'a e b são donos do mesmo inteiro. A closure captura b por valor; spawn verifica Send. join devolve 3 e a principal o imprime. Sem move, a closure empresta b e spawn causa E0373; o inteiro não possui len.'),
           ],
         },
         {
@@ -480,7 +477,7 @@ fn main() {
                 'let checked = sync(a);',
                 'let n = Arc::strong_count(&checked);',
                 'println!("{n}");',
-              ], ['let a = std::rc::Rc::new(m);', 'let m = std::cell::RefCell::new(3);'], 'sync devolve o valor recebido, exigindo que seu tipo seja Sync. Arc<Mutex<i32>> satisfaz a restrição e tem apenas um dono forte, agora chamado checked. O programa imprime 1. As variantes com Rc ou RefCell não satisfazem a restrição, produzindo E0277.'),
+              ], ['let a = std::rc::Rc::new(m);', 'let m = sync(\n    std::cell::RefCell::new(3));'], 'sync devolve o valor recebido, exigindo que seu tipo seja Sync. Arc<Mutex<i32>> satisfaz a restrição e tem apenas um dono forte, agora chamado checked. O programa imprime 1. As variantes com Rc ou RefCell não satisfazem a restrição, produzindo E0277.'),
               visual: code(`fn sync<T: Sync>(value: T) -> T {
     value
 }`, [1], 'Função disponível antes de main'),

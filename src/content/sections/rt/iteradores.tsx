@@ -472,7 +472,7 @@ export const rustIteradores: UnitDef = {
           exercises: [
             fill(
               'Complete a assinatura para aceitar qualquer closure que receba um `i32`, possa ser chamada várias vezes sem mutação e devolva `bool`:',
-              'fn test_val<F: ___(i32) -> ___>(x: i32, f: F) -> bool {\n    f(x)\n}',
+              'fn test_val<F: ___(i32) -> ___>(\n    x: i32,\n    f: F,\n) -> bool {\n    f(x)\n}',
               ['Fn', 'bool'],
               ['FnOnce', 'i32', 'mut'],
               'O trait `Fn(i32) -> bool` descreve um chamável por referência imutável que recebe `i32` e devolve `bool`.',
@@ -815,8 +815,7 @@ export const rustIteradores: UnitDef = {
                 '        if self.n == 0 {\n            return None;\n        }\n        let out = self.n;',
                 '        self.n -= 1;',
                 '        Some(out)',
-                '    }',
-                '}',
+                '    }\n}',
               ],
               [
                 '    fn next(self) -> Option<u32> {',
@@ -987,7 +986,7 @@ export const rustIteradores: UnitDef = {
           card: [
             {
               title: 'Consumidores: fold, collect, sum, any, all, find e max_by_key',
-              body: 'Um **consumidor** puxa itens do iterador até produzir um resultado final:\n\n• **`collect()`**: junta os itens numa coleção (`Vec<T>`, `String`, `HashSet`...). Como pode construir vários tipos, exige tipo anotado na variável ou *turbofish* `.collect::<Vec<_>>()`.\n• **`fold(init, |acc, x| ...)`**: reduz a sequência a um único valor atualizando o acumulador `acc` a cada item.\n• **`sum()`** e **`count()`**: somam todos os itens ou contam quantos existem.\n• **`any(p)`**, **`all(p)`** e **`find(p)`**: param assim que acham a resposta (curto-circuito!).\n• **`max_by_key(|x| chave)`**: devolve `Option<Self::Item>` com o elemento de maior chave.',
+              body: 'Um **consumidor** puxa itens do iterador até produzir um resultado final:\n\n• **`collect()`**: junta os itens numa coleção (`Vec<T>`, `String`, `HashSet`...). Como pode construir vários tipos, precisa que o contexto determine a coleção, por exemplo com uma anotação na variável ou *turbofish* `.collect::<Vec<_>>()`.\n• **`fold(init, |acc, x| ...)`**: reduz a sequência a um único valor atualizando o acumulador `acc` a cada item.\n• **`sum()`** e **`count()`**: somam todos os itens ou contam quantos existem.\n• **`any(p)`**, **`all(p)`** e **`find(p)`**: param assim que acham a resposta (curto-circuito!).\n• **`max_by_key(|x| chave)`**: devolve `Option<Self::Item>` com o elemento de maior chave.',
               visual: code(
                 'let v = [3, 8, 2, 10];\nlet s = v.iter().fold(0, |a, &x| a + x);\nlet neg = v.iter().any(|&x| x < 0);\nlet big = v.iter().find(|&&x| x > 5);\n// s = 23, neg = false, big = Some(&8)',
                 [2, 3, 4],
@@ -1008,8 +1007,8 @@ export const rustIteradores: UnitDef = {
               title: 'No seu computador',
               body: 'Hora do **Exercício 37** do roteiro! Crie um projeto com `cargo new iter_empresa`.\n\n1. Defina `struct Employee { name: String, salary: f64 }` e monte um `Vec<Employee>` com 4 funcionários (alguns ganhando acima de `5000.0` e outros abaixo).\n2. **Sem usar nenhum `for`**, obtenha um `Vec<&str>` (ou `Vec<String>`) com os nomes de quem ganha acima de `5000.0` usando `.iter().filter(...).map(...).collect::<Vec<_>>()`.\n3. Calcule a folha salarial total com `.iter().map(|f| f.salary).sum::<f64>()`.\n\n**Critério de pronto:** `cargo run` imprime a lista de nomes filtrados e a soma dos salários, e `cargo clippy -- -D warnings` termina sem avisos.',
               visual: code(
-                'struct Emp {\n    name: &\'static str,\n    salary: i32,\n}\nfn main() {\n    let team = [\n        Emp { name: "Ana", salary: 6200 },\n        Emp { name: "Bia", salary: 4100 },\n        Emp { name: "Leo", salary: 7500 },\n    ];\n    let top: Vec<&str> = team\n        .iter()\n        .filter(|e| e.salary > 5000)\n        .map(|e| e.name)\n        .collect();\n    let total: i32 = team\n        .iter()\n        .map(|e| e.salary)\n        .sum();\n    println!("{top:?} -> {total}");\n}',
-                [11, 13, 14, 15, 18, 19],
+                'struct Emp {\n    name: &\'static str,\n    salary: i32,\n}\nfn main() {\n    let team = [\n        Emp {\n            name: "Ana", salary: 6200,\n        },\n        Emp {\n            name: "Bia", salary: 4100,\n        },\n        Emp {\n            name: "Leo", salary: 7500,\n        },\n    ];\n    let top: Vec<&str> = team\n        .iter()\n        .filter(|e| e.salary > 5000)\n        .map(|e| e.name)\n        .collect();\n    let total: i32 = team\n        .iter()\n        .map(|e| e.salary)\n        .sum();\n    println!("{top:?} -> {total}");\n}',
+                [17, 19, 20, 21, 24, 25],
                 'Exercício 37 sem laço for',
               ),
             },

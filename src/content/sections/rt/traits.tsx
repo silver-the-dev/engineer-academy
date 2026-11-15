@@ -618,7 +618,7 @@ fn main() {
             ),
             fill(
               'Complete a implementação manual de `Display` para `Tag`:',
-              'impl fmt::___ for Tag {\n    fn fmt(&self, f: &mut fmt::Formatter<\'_>) -> fmt::Result {\n        ___!(f, "ID-{}", self.id)\n    }\n}',
+              'impl fmt::___ for Tag {\n    fn fmt(\n        &self,\n        f: &mut fmt::Formatter<\'_>,\n    ) -> fmt::Result {\n        ___!(f, "ID-{}", self.id)\n    }\n}',
               ['Display', 'write'],
               ['Debug', 'println', 'format'],
               'Implementamos `fmt::Display` e escrevemos no `Formatter` usando a macro `write!(f, ...)` sem ponto e vírgula para retornar o `fmt::Result`.',
@@ -733,10 +733,19 @@ impl Hash for User {
                 `use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 
-struct Person { cpf: String, name: String }
+struct Person {
+    cpf: String,
+    name: String,
+}
 impl std::fmt::Display for Person {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ({})", self.name, self.cpf)
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        write!(
+            f, "{} ({})",
+            self.name, self.cpf,
+        )
     }
 }
 impl PartialEq for Person {
@@ -746,18 +755,27 @@ impl PartialEq for Person {
 }
 impl Eq for Person {}
 impl Hash for Person {
-    fn hash<H: Hasher>(&self, s: &mut H) {
+    fn hash<H: Hasher>(
+        &self,
+        s: &mut H,
+    ) {
         self.cpf.hash(s);
     }
 }
 
 fn main() {
     let mut s = HashSet::new();
-    s.insert(Person { cpf: "11122233344".into(), name: "Ana".into() });
-    s.insert(Person { cpf: "11122233344".into(), name: "Bia".into() });
+    s.insert(Person {
+        cpf: "11122233344".into(),
+        name: "Ana".into(),
+    });
+    s.insert(Person {
+        cpf: "11122233344".into(),
+        name: "Bia".into(),
+    });
     println!("{}", s.len());
 }`,
-                [24, 25, 26],
+                [36, 40, 44],
                 'src/main.rs',
               ),
             },
@@ -1149,15 +1167,21 @@ impl TryFrom<&str> for Cpf {
         s: &str,
     ) -> Result<Self, Self::Error> {
         if s.len() != 11 {
-            return Err(CpfError::InvalidLen);
+            return Err(
+                CpfError::InvalidLen,
+            );
         }
-        if !s.chars().all(|c| c.is_ascii_digit()) {
-            return Err(CpfError::NotDigits);
+        if !s.chars().all(
+            |c| c.is_ascii_digit(),
+        ) {
+            return Err(
+                CpfError::NotDigits,
+            );
         }
         Ok(Cpf(s.to_string()))
     }
 }`,
-                [6, 7, 11, 14],
+                [6, 7, 11, 16],
                 'src/main.rs',
               ),
             },
@@ -1238,7 +1262,7 @@ fn main() {
             ),
             fill(
               'Complete os itens obrigatórios dentro de `impl TryFrom<&str> for Cpf`:',
-              'type ___ = CpfError;\nfn ___(s: &str) -> Result<Self, Self::Error>',
+              'type ___ = CpfError;\nfn ___(\n    s: &str,\n) -> Result<Self, Self::Error>',
               ['Error', 'try_from'],
               ['Output', 'Item', 'from'],
               'A trait `TryFrom` exige definir o tipo associado `type Error` e a função `fn try_from`.',
@@ -1452,7 +1476,7 @@ fn main() {
             codePuzzle(
               'Monte o código que cria um `Vec<Box<dyn Draw>>` com duas figuras distintas e chama `draw()` em cada uma:',
               [
-                'trait Draw { fn draw(&self); }\nstruct Circle { r: i32 }\nstruct Square { s: i32 }\nimpl Draw for Circle { fn draw(&self) { println!("Círculo: {}", self.r); } }\nimpl Draw for Square { fn draw(&self) { println!("Quadrado: {}", self.s); } }\nfn main() {\n    let shapes: Vec<Box<dyn Draw>> = vec![',
+                'trait Draw { fn draw(&self); }\nstruct Circle { r: i32 }\nstruct Square { s: i32 }\nimpl Draw for Circle {\n    fn draw(&self) {\n        println!("Círculo: {}", self.r);\n    }\n}\nimpl Draw for Square {\n    fn draw(&self) {\n        println!(\n            "Quadrado: {}", self.s,\n        );\n    }\n}\nfn main() {\n    let shapes: Vec<Box<dyn Draw>> =\n        vec![',
                 '        Box::new(Circle { r: 3 }),\n        Box::new(Square { s: 4 }),',
                 '    ];\n    for s in &shapes {',
                 '    s.draw();',
@@ -1522,7 +1546,7 @@ fn main() {
     fn duplicate(&self) -> Self;
 }
 
-// Erro E0038: retorna Self sem Self: Sized!
+// E0038: retorna Self sem Self: Sized
 fn use_object(_: &dyn BadClone) {}`,
                 [2, 6],
                 'erro_e0038.rs',
@@ -1933,7 +1957,7 @@ fn main() {
                 'Implemente os **Exercícios 20 e 38** do roteiro (`Dinheiro` com `Add`/`Sub` e gerador `Fibonacci` com `Iterator`):',
                 '• Crie `cargo new fib_iter` e abra `src/main.rs`.',
                 '• Defina `struct Fibonacci { a: u64, b: u64 }` com `fn new() -> Self { Fibonacci { a: 0, b: 1 } }`.',
-                '• Implemente `Iterator for Fibonacci` com `type Item = u64;`. Em `next(&mut self)`, guarde `let cur = self.a;`, atualize `self.a = self.b;` e `self.b = cur + self.b;`, e retorne `Some(cur)`.',
+                '• Implemente `Iterator for Fibonacci` com `type Item = u64;`. Em `next(&mut self)`, guarde `let cur = self.a;`, atualize `self.a = self.b;` e `self.b += cur;`, e retorne `Some(cur)`.',
                 '• No `main`, calcule a soma dos 10 primeiros termos com `Fibonacci::new().take(10).sum::<u64>()` e imprima o resultado. Limite o consumo: a sequência cresce além de `u64`; a adição comum causa panic com checagem de overflow (padrão em debug) ou dá a volta sem a checagem (padrão em release).',
                 '• **Critério de pronto**: `cargo run` imprime `88` (soma de `0, 1, 1, 2, 3, 5, 8, 13, 21, 34`) e `cargo clippy -- -D warnings` termina sem avisos.',
               ].join('\n'),
@@ -1945,7 +1969,7 @@ impl Iterator for Fibonacci {
     fn next(&mut self) -> Option<u64> {
         let cur = self.a;
         self.a = self.b;
-        self.b = cur + self.b;
+        self.b += cur;
         Some(cur)
     }
 }`,
@@ -2041,7 +2065,7 @@ fn main() {
               ],
               [
                 '    fn next(&self) -> Option<u32> {',
-                '    type Output = u32;',
+                '        if self.n == 0 { return 0; }',
               ],
               '`Iterator` usa `type Item = u32;` e `fn next(&mut self) -> Option<u32>` (mutável para decrementar `self.n` a cada passo).',
             ),
