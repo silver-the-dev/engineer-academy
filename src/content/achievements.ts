@@ -38,6 +38,10 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'ofi', title: 'Mão na massa', desc: '8 lições de Bancada, Soldagem e PCB', icon: '🛠️', test: (s) => sectionDone(s, 'of-', 8) },
   { id: 'lc', title: 'Hello, world!', desc: '10 lições de Linguagem C', icon: '💻', test: (s) => sectionDone(s, 'lc-', 10) },
   { id: 'mcu', title: 'Firmware no ar', desc: '10 lições de Microcontroladores', icon: '🤖', test: (s) => sectionDone(s, 'mc-', 10) },
+  { id: 'rust-base', title: 'Ferris aprova', desc: '10 lições de Fundamentos de Rust', icon: '🦀', test: (s) => sectionDone(s, 'rb-', 10) },
+  { id: 'rust-own', title: 'O borrow checker é meu amigo', desc: '10 lições de Ownership e memória', icon: '🔐', test: (s) => sectionDone(s, 'ro-', 10) },
+  { id: 'rust-tipos', title: 'Abstração de custo zero', desc: '15 lições de Tipos, traits e abstrações', icon: '🧬', test: (s) => sectionDone(s, 'rt-', 15) },
+  { id: 'rust-prat', title: 'cargo publish', desc: '15 lições de Rust na prática', icon: '📦', test: (s) => sectionDone(s, 'rp-', 15) },
 ];
 
 export function checkAchievements(state: any): string[] {

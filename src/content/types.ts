@@ -81,7 +81,7 @@ export type Unit = {
 export type UnitDef = Omit<Unit, 'lessons'> & { lessons: LessonDef[] };
 
 /** Course ("idioma" in Duolingo terms): each one has its own list of sections. */
-export type CourseId = 'mat' | 'fis' | 'emb';
+export type CourseId = 'mat' | 'fis' | 'emb' | 'rust';
 
 export type Section = {
   id: string;

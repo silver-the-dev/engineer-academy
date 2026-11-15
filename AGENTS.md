@@ -97,7 +97,7 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 
 ## Convenções para escrever conteúdo
 
-- O catálogo `src/content/review-catalog.json` guarda a revisão de cada questão, pelo ID da lição e pela posição na lista plana. O APK regenera o catálogo antes da compilação. Depois de editar conteúdo, execute `node scripts/generate-review-catalog.cjs` e inclua o arquivo resultante no commit. Para conferir o catálogo sem escrever nele, acrescente `--check`.
+- O catálogo `src/content/review-catalog.json` guarda a revisão de cada questão, pelo ID da lição e pela posição na lista plana. O build do APK (`scripts/build-apk.sh`) confere o catálogo com `--check` e falha se ele estiver desatualizado. Depois de editar conteúdo, execute `node scripts/generate-review-catalog.cjs` e inclua o arquivo resultante no commit. Para conferir o catálogo sem escrever nele, acrescente `--check`.
 - A revisão inclui enunciado, resposta, explicação, propriedades visuais e código dos callbacks. Para geradores, inclui o código do gerador e quatro variantes com sementes fixas. Gráficos e cenas 3D incluem amostras de desenho e comportamento. Se uma alteração em dependência externa afetar a questão sem mudar os dados ou as amostras, incremente `reviewRevision` na questão ou no objeto do gerador para reabrir a revisão.
 - Use `const t = String.raw` e escreva TeX entre `$…$` (ou `$$…$$`). Dentro de `t\`…\``, use uma barra só (`\frac`); em strings normais, duas (`'\\frac'`).
 - **Vírgula decimal**: `tex.ts` transforma `dígito,dígito` em vírgula decimal. Por isso pares, intervalos e conjuntos de inteiros devem ter espaço ou `\,` depois da vírgula: `$(2,\,3)$`, `$[0,\,4]$`, `$\{1, 2\}$`. Listas com 2 ou mais vírgulas seguidas de inteiros (`1,2,3`) já são protegidas.
@@ -115,8 +115,8 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 
 ## Cursos e simulador de circuitos
 
-- Uma seção pertence a um curso (`course: 'mat' | 'fis' | 'emb'`, padrão `mat`). O seletor de seção mostra um curso por vez. Prefixos de id: física `m-`, `el-`, `em-`, `ea-`, `dg-`, `of-`; embarcados `lc-`, `mc-`.
-- Código-fonte (C, Arduino) vai no visual `code(src, linhasDestacadas?, título?)` de `helpers.ts` (widget `code`, `src/components/visuals/Code.tsx`): monoespaçado, numerado, com rolagem lateral.
+- Uma seção pertence a um curso (`course: 'mat' | 'fis' | 'emb' | 'rust'`, padrão `mat`). O seletor de seção mostra um curso por vez. Prefixos de id: física `m-`, `el-`, `em-`, `ea-`, `dg-`, `of-`; embarcados `lc-`, `mc-`; Rust `rb-`, `ro-`, `rt-`, `rp-`.
+- Código-fonte (C, Arduino, Rust) vai no visual `code(src, linhasDestacadas?, título?)` de `helpers.ts` (widget `code`, `src/components/visuals/Code.tsx`): monoespaçado, numerado, com rolagem lateral.
 - Exercício prático de circuito: `circuitEx(prompt, spec, check, answerText, explain, solution)`. O `check` recebe um `CircuitValue` (`v.v(id)`, `v.i(id)`, `v.p(id)`, `v.val(id)`, `v.on(id)`, `v.burnt(id)`, `v.count(tipo)`, `v.req(a, b)`, `v.wave(id)`, `v.at(id, t)`, `v.truth(entradas, saída)`) e deve conferir o efeito elétrico com tolerância. `solution` (`{ set, on, add, remove }`) é obrigatória: o QA aplica e exige que o `check` passe, e avisa se o circuito já começa resolvido.
 - Circuito num card ou como visual de um exercício comum: `visual: circuitVisual({ comps, mode })`. Modos: `view`, `adjust` (padrão) e `build` (com `palette`).
 - Grade de até 9 × 7 células; fios ligam pelas pontas; primeiro ponto da fonte é o +, do diodo é o anodo. Valores do modelo: diodo 0,7 V, LED 1,8 a 3,0 V conforme a cor, `Vce(sat)` ≈ 0,2 V.

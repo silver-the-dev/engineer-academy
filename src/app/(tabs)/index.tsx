@@ -253,7 +253,7 @@ export default function PathScreen() {
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'center', padding: 20 }} onPress={() => setPicker(false)}>
           <Pressable style={{ backgroundColor: C.surface, borderRadius: 24, padding: 16, maxHeight: '88%' }}>
             {courses.length > 1 ? (
-              <View style={{ flexDirection: 'row', marginBottom: 14, backgroundColor: C.surface2, borderRadius: 16, padding: 4 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 14, backgroundColor: C.surface2, borderRadius: 16, padding: 4 }}>
                 {courses.map((c) => {
                   const active = c.id === courseTab;
                   return (
@@ -263,10 +263,10 @@ export default function PathScreen() {
                         tapFeedback();
                         setCourseTab(c.id);
                       }}
-                      style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, backgroundColor: active ? alpha(c.color, 0.18) : 'transparent', borderWidth: 2, borderColor: active ? c.color : 'transparent' }}
+                      style={{ ...(courses.length > 3 ? { width: '50%' as const } : { flex: 1 }), flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, backgroundColor: active ? alpha(c.color, 0.18) : 'transparent', borderWidth: 2, borderColor: active ? c.color : 'transparent' }}
                     >
-                      <Text style={{ fontSize: courses.length > 2 ? 14 : 18, marginRight: 4 }}>{c.emoji}</Text>
-                      <Text style={{ color: active ? c.color : C.textMuted, fontFamily: F.black, fontSize: courses.length > 2 ? 12 : 14 }} numberOfLines={1}>
+                      <Text style={{ fontSize: courses.length === 3 ? 14 : 18, marginRight: 4 }}>{c.emoji}</Text>
+                      <Text style={{ color: active ? c.color : C.textMuted, fontFamily: F.black, fontSize: courses.length === 3 ? 12 : 14 }} numberOfLines={1}>
                         {c.short}
                       </Text>
                     </Pressable>
