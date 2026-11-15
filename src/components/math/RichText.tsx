@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { LayoutChangeEvent, Platform, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { C, F } from '../../theme';
 import { FitMath, MathView } from './Math';
 import { texToSvg } from './tex';
@@ -8,11 +8,11 @@ import { texToSvg } from './tex';
  * Lightweight markup used by all lesson content:
  *  - paragraphs separated by a blank line, "\n" = line break
  *  - $...$ inline TeX, $$...$$ display TeX (own line)
- *  - **bold**, ==highlight==
+ *  - **bold**, ==highlight==, *italic* (a word or short phrase) and `inline code`
  *  - lines starting with "• " or "- " become bullets
  */
 type Seg =
-  | { t: 'text'; s: string; bold?: boolean; hl?: boolean }
+  | { t: 'text'; s: string; bold?: boolean; hl?: boolean; code?: boolean; italic?: boolean }
   | { t: 'math'; s: string }
   | { t: 'dmath'; s: string };
 
@@ -52,6 +52,27 @@ function parseInline(src: string): Seg[] {
         continue;
       }
     }
+    if (ch === '`') {
+      const close = src.indexOf('`', i + 1);
+      if (close > i + 1) {
+        flush();
+        // Closing punctuation stays glued to the code so it never starts the next row alone.
+        const tail = /^[,.;:!?…)\]]+/.exec(src.slice(close + 1))?.[0] ?? '';
+        out.push({ t: 'text', s: src.slice(i + 1, close) + tail, code: true });
+        i = close + 1 + tail.length;
+        continue;
+      }
+    }
+    // *italic*: the opening star follows a space or bracket and hugs the text, so "2 * 3" is left alone.
+    if (ch === '*' && src[i + 1] !== '*' && src[i - 1] !== '*' && /\S/.test(src[i + 1] ?? '') && (i === 0 || /[\s(\[“"]/.test(src[i - 1]))) {
+      const m = /^([^*\n]{0,59}[^*\s])\*(?![*\w])/.exec(src.slice(i + 1));
+      if (m) {
+        flush();
+        out.push({ t: 'text', s: m[1], bold, hl, italic: true });
+        i += m[0].length + 1;
+        continue;
+      }
+    }
     if (ch === '*' && src[i + 1] === '*') {
       flush();
       bold = !bold;
@@ -70,6 +91,8 @@ function parseInline(src: string): Seg[] {
   flush();
   return out;
 }
+
+const MONO = Platform.select({ ios: 'Menlo', default: 'monospace' });
 
 type Props = {
   children: string;
@@ -145,6 +168,8 @@ function Line({ line, size, color, align, hlColor, avail }: { line: string; size
         const st: any[] = [textStyle];
         if (sg.bold) st.push({ fontFamily: F.heavy });
         if (sg.hl) st.push({ color: hlColor, fontFamily: F.heavy });
+        if (sg.italic) st.push({ fontStyle: 'italic' });
+        if (sg.code) st.push({ fontFamily: MONO, fontSize: size * 0.9, color: C.cyan });
         if (/^\s+$/.test(w)) {
           current.push(
             <Text key={`s${si}-${wi}`} style={st}>
