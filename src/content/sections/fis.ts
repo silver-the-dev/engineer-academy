@@ -50,11 +50,30 @@ import { arduino } from './mcu/arduino';
 import { sensoresAtuadores } from './mcu/sensores';
 import { comunicacao } from './mcu/comunicacao';
 import { iot } from './mcu/iot';
-import { withPractice } from '../codePractice';
-import { cPractice } from './lc/pratica';
-import { mcuPractice } from './mcu/pratica';
+import { rustInicio } from './rb/inicio';
+import { rustVariaveis } from './rb/variaveis';
+import { rustFluxo } from './rb/fluxo';
+import { rustFuncoes } from './rb/funcoes';
+import { rustOwnership } from './ro/ownership';
+import { rustBorrowing } from './ro/borrowing';
+import { rustStrings } from './ro/strings';
+import { rustLifetimes } from './ro/lifetimes';
+import { rustStructs } from './rt/structs';
+import { rustEnums } from './rt/enums';
+import { rustErros } from './rt/erros';
+import { rustGenerics } from './rt/generics';
+import { rustTraits } from './rt/traits';
+import { rustColecoes } from './rt/colecoes';
+import { rustIteradores } from './rt/iteradores';
+import { rustModulos } from './rp/modulos';
+import { rustTestes } from './rp/testes';
+import { rustSmart } from './rp/smart';
+import { rustConcorrencia } from './rp/concorrencia';
+import { rustAvancado } from './rp/avancado';
+import { rustCli } from './rp/cli';
+import { rustProjetos } from './rp/projetos';
 
-/** Sections of the Física e Eletricidade and Sistemas Embarcados courses, in curriculum order. */
+/** Sections of the Física e Eletricidade, Sistemas Embarcados and Programação em Rust courses, in curriculum order. */
 export const FIS_SECTIONS: SectionDef[] = [
   {
     id: 'mec',
@@ -117,7 +136,7 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'C do zero até o código que conversa com o hardware',
     color: '#90BE6D',
     emoji: '💻',
-    units: [cFundamentos, cFluxo, cFuncoes, cDados, cHardware].map((unit) => withPractice(unit, cPractice)),
+    units: [cFundamentos, cFluxo, cFuncoes, cDados, cHardware],
   },
   {
     id: 'mcu',
@@ -126,6 +145,42 @@ export const FIS_SECTIONS: SectionDef[] = [
     subtitle: 'Arduino, sensores e atuadores, comunicação serial, ESP32 e IoT',
     color: '#F4A261',
     emoji: '🤖',
-    units: [arduino, sensoresAtuadores, comunicacao, iot].map((unit) => withPractice(unit, mcuPractice)),
+    units: [arduino, sensoresAtuadores, comunicacao, iot],
+  },
+  {
+    id: 'rb',
+    course: 'rust',
+    title: 'Fundamentos de Rust',
+    subtitle: 'Cargo, variáveis, tipos, controle de fluxo e funções',
+    color: '#F7764A',
+    emoji: '🦀',
+    units: [rustInicio, rustVariaveis, rustFluxo, rustFuncoes],
+  },
+  {
+    id: 'ro',
+    course: 'rust',
+    title: 'Ownership e memória',
+    subtitle: 'Dono único, empréstimos, strings, slices e lifetimes',
+    color: '#E9C46A',
+    emoji: '🔐',
+    units: [rustOwnership, rustBorrowing, rustStrings, rustLifetimes],
+  },
+  {
+    id: 'rt',
+    course: 'rust',
+    title: 'Tipos, traits e abstrações',
+    subtitle: 'Structs, enums, erros, generics, traits, coleções e iteradores',
+    color: '#8ECAE6',
+    emoji: '🧬',
+    units: [rustStructs, rustEnums, rustErros, rustGenerics, rustTraits, rustColecoes, rustIteradores],
+  },
+  {
+    id: 'rp',
+    course: 'rust',
+    title: 'Rust na prática',
+    subtitle: 'Módulos, testes, smart pointers, concorrência e projetos completos',
+    color: '#B5E48C',
+    emoji: '📦',
+    units: [rustModulos, rustTestes, rustSmart, rustConcorrencia, rustAvancado, rustCli, rustProjetos],
   },
 ];
