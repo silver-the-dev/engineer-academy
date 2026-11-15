@@ -39,13 +39,13 @@ export const rustStrings: UnitDef = {
   subtitle: 'String vs &str, fatias de memória, UTF-8 e formatação',
   source: 'The Rust Programming Language (Ed. 2024) · Cap. 4.3 e 8.2 · Desafio 50 Dias (#4, #10, #41)',
   extra: true,
-  guide: t`Em Rust, texto válido está sempre em **UTF-8** e aparece em duas formas principais:
+  guide: t`Em Rust, os tipos de texto ` + '`String`' + t` e ` + '`&str`' + t` usam **UTF-8**:
 
-• ` + '`**`String`**' + t`: dona do texto no **heap**, redimensionável, guardada na pilha como três palavras (` + '`(ptr, len, cap)`' + t`).
-• ` + '`**`&str`**' + t`: visão emprestada somente-leitura, guardada na pilha como um **ponteiro gordo** (` + '`(ptr, len)`' + t`). Literais como ` + '`"oi"`' + t` têm tipo ` + '`&\'static str`' + t`.
+• ` + '`**`String`**' + t`: dona do texto no **heap**, redimensionável, com cabeçalho de três palavras (` + '`(ptr, len, cap)`' + t`).
+• ` + '`**`&str`**' + t`: visão emprestada somente-leitura, representada por um **ponteiro gordo** (` + '`(ptr, len)`' + t`). Literais como ` + '`"oi"`' + t` têm tipo ` + '`&\'static str`' + t`. Nos exemplos locais, esses cabeçalhos ficam na pilha; isso não é uma exigência dos tipos.
 • **Deref coercion**: passar ` + '`&String`' + t` onde se espera ` + '`&str`' + t` converte automaticamente sem copiar bytes.
-• **Slices**: ` + '`&s[a..b]`' + t` (em bytes UTF-8 válidos) e ` + '`&v[a..b]`' + t` (` + '`&[T]`' + t`) emprestam um trecho contíguo; o *borrow checker* impede alterar a coleção original enquanto a fatia estiver viva (` + '`E0502`' + t`).
-• **UTF-8**: ` + '`s[0]`' + t` não compila (` + '`E0277`' + t`); ` + '`s.len()`' + t` conta **bytes** e ` + '`s.chars().count()`' + t` conta **caracteres Unicode**.
+• **Slices**: ` + '`&s[a..b]`' + t` (com limites dentro do texto e em fronteiras UTF-8) e ` + '`&v[a..b]`' + t` (` + '`&[T]`' + t`) emprestam um trecho contíguo; o *borrow checker* impede um empréstimo mutável conflitante enquanto a fatia ainda for usada mais adiante (` + '`E0502`' + t`).
+• **UTF-8**: ` + '`s[0]`' + t` não compila (` + '`E0277`' + t`); ` + '`s.len()`' + t` conta **bytes** e ` + '`s.chars().count()`' + t` conta **valores escalares Unicode**, que nem sempre correspondem a caracteres visuais.
 • **Métodos e formatação**: ` + '`push`' + t`, ` + '`push_str`' + t`, ` + '`format!`' + t`, ` + '`trim`' + t`, ` + '`split`' + t`, ` + '`to_uppercase`' + t`, ` + '`parse::<T>()`' + t` e especificadores ` + '`{:>8}`' + t`, ` + '`{:.2}`' + t` e ` + '`{:08b}`' + t`.`,
   lessons: [
     {
@@ -70,7 +70,7 @@ export const rustStrings: UnitDef = {
                 [2, 3, 4],
                 'main.rs',
               ),
-              tip: 'Em C você precisava lembrar se um char * veio de um literal ou de malloc para saber se devia chamar free. Em Rust, só String é dona do heap.',
+              tip: 'Em C você precisava lembrar se um char * veio de um literal ou de malloc para saber se devia chamar free. Entre String e &str, só String é dona do buffer no heap.',
             },
             {
               title: 'Pilha e heap: String vs &str',
@@ -325,7 +325,7 @@ cargo clippy -- -D warnings`,
                 'Erro E0308 na linha 4: o operador + não existe para String',
               ],
               0,
-              'Em Rust, `a + &b` chama `fn add(self, s: &str) -> String`: ele toma posse do primeiro operando (`a`), reaproveita seu buffer e o invalida (`error[E0382]: borrow of moved value: \`a\``).',
+              'Em Rust, `a + &b` chama `fn add(self, s: &str) -> String`: ele toma posse do primeiro operando (`a`), reaproveita seu buffer (realocando se necessário) e invalida `a` (`error[E0382]: borrow of moved value: \`a\``).',
               {
                 visual: code(
                   `fn main() {
@@ -413,7 +413,7 @@ cargo clippy -- -D warnings`,
 
 • Em texto: \`&s[a..b]\` tem tipo \`&str\` e aponta do byte \`a\` (incluso) até \`b\` (**excluso**), com tamanho \`b - a\`.
 • Atalhos de intervalo: \`&s[..b]\` (do início a \`b\`), \`&s[a..]\` (de \`a\` ao fim) e \`&s[..]\` (tudo).
-• Em arrays e \`Vec<T>\`: \`&v[1..4]\` tem tipo \`&[i32]\` e enxerga os elementos de índices 1, 2 e 3.`,
+• Em arrays \`[T; N]\` e \`Vec<T>\`: \`&v[1..4]\` tem tipo \`&[T]\` e enxerga os elementos de índices 1, 2 e 3.`,
               visual: code(
                 `fn main() {
     let s = String::from("motor_1");
@@ -579,7 +579,7 @@ fn main() {
                 [7, 8, 9],
                 'Fatia viva vs clear()',
               ),
-              tip: 'Em C ou C++, apagar ou realocar a string antes de imprimir p deixaria um ponteiro pendurado (dangling pointer). Em Rust, o erro aparece antes de rodar.',
+              tip: 'Liberar ou realocar um buffer pode deixar ponteiros pendurados em C ou C++. Em Rust, clear() preserva a capacidade, mas exige &mut String e conflita com a fatia ainda usada depois.',
             },
             {
               title: 'Tempo de vida do empréstimo da fatia (NLL)',
@@ -620,7 +620,7 @@ No \`main\`, crie \`let mut texto = String::from("motor ligado");\`, guarde \`le
             tf(
               'Uma fatia `&s[0..4]` faz uma cópia independente dos 4 bytes no heap; por isso `s.clear()` pode ser chamado antes de imprimir a fatia.',
               false,
-              'Uma slice **não** copia os dados: ela apenas aponta para o buffer de `s`. Se `s.clear()` apagasse o buffer enquanto a fatia ainda é usada, a fatia ficaria inválida — por isso o compilador proíbe.',
+              'Uma slice **não** copia os dados: ela apenas aponta para o buffer de `s`. `s.clear()` zera o tamanho sem liberar o buffer, mas exige `&mut String`, que conflita com o empréstimo imutável ainda usado depois — por isso o compilador proíbe.',
             ),
             mcq(
               'Qual erro o compilador aponta ao analisar este programa?',
@@ -695,7 +695,7 @@ No \`main\`, crie \`let mut texto = String::from("motor ligado");\`, guarde \`le
                 'Porque funções em Rust nunca podem retornar o tipo &str',
               ],
               0,
-              '`s` pertence ao escopo de `fazer_fatia` e sofre `Drop` ao fechar a chave `}`. Retornar `&s[0..3]` criaria uma referência pendurada (*dangling reference*), barrada pelo compilador (`E0106` / `E0515`). Para devolver texto novo criado na função, retorne `String`.',
+              '`s` pertence ao escopo de `fazer_fatia` e sofre `Drop` ao fechar a chave `}`. Retornar `&s[0..3]` criaria uma referência pendurada (*dangling reference*), barrada pelo compilador (`E0106`: não há lifetime de entrada do qual inferir o de retorno; explicitar um lifetime não permitiria devolver uma referência à variável local, caso de `E0515`). Para devolver texto novo criado na função, retorne `String`.',
               {
                 visual: code(
                   `fn fazer_fatia() -> &str {
@@ -768,9 +768,9 @@ fn main() {
 • ASCII (\`'a'\`, \`'7'\`, \`'_'\`): **1 byte**
 • Letras latinas acentuadas e \`'ç'\` (\`'ã'\`, \`'ç'\`, \`'é'\`, \`'ó'\`): **2 bytes**
 • Símbolos e ideogramas comuns (\`'€'\`, \`'→'\`): **3 bytes**
-• Emojis (\`'🦀'\`, \`'🧵'\`): **4 bytes**
+• Emojis como \`'🦀'\` e \`'🧵'\`: **4 bytes**
 
-Por isso, \`s.len()\` devolve o número de **bytes**, enquanto \`s.chars().count()\` conta quantos **valores escalares Unicode (\`char\`)** existem na string.`,
+Por isso, \`s.len()\` devolve o número de **bytes**, enquanto \`s.chars().count()\` conta quantos **valores escalares Unicode (\`char\`)** existem na string. Um caractere visual pode combinar vários \`char\`; por isso essa contagem e a inversão por \`chars()\` não operam por grafemas.`,
               visual: code(
                 `fn main() {
     let s = "ação";
@@ -952,7 +952,7 @@ Por isso, \`s.len()\` devolve o número de **bytes**, enquanto \`s.chars().count
 1. **Segurança**: em \`"ação"\`, o byte \`1\` é só metade do caractere \`'ç'\`. Devolver um byte solto enganaria quem esperava uma letra.
 2. **Desempenho $O(1)$**: como cada caractere UTF-8 tem de 1 a 4 bytes, descobrir o $k$-ésimo \`char\` exige varrer desde o início em $O(k)$.
 
-Já fatiar bytes com \`&s[a..b]\` é permitido em $O(1)$, mas \`a\` e \`b\` **precisam cair exatamente na fronteira entre caracteres**. Cortar um caractere ao meio (como \`&"ação"[0..2]\`) aborta em execução com \`panic!\`.`,
+Já fatiar bytes com \`&s[a..b]\` é permitido em $O(1)$, mas é preciso ter \`a <= b <= s.len()\`, e \`a\` e \`b\` **precisam cair exatamente na fronteira entre caracteres**. Cortar um caractere ao meio (como \`&"ação"[0..2]\`) aborta em execução com \`panic!\`.`,
               visual: code(
                 `fn main() {
     let s = "ação";
@@ -1094,17 +1094,18 @@ No \`main\`, chame \`inspecionar("ação")\` e \`inspecionar("coração")\`. Com
               const prefixo = 'a'.repeat(a);
               const fim = a + 2;
               return num(
-                `Na string \`let s = "${prefixo}çã";\`, cada \`'a'\` ocupa 1 byte e \`'ç'\` ocupa 2 bytes. Qual deve ser o índice inteiro \`fim\` em \`&s[0..fim]\` para que a fatia contenha exatamente \`"${prefixo}ç"\`?`,
+                `Na string \`let s = "${prefixo}çã";\`, cada \`'a'\` ocupa 1 byte e \`'ç'\` ocupa 2 bytes. Qual é o índice inteiro \`fim\` calculado pelo programa para que \`&s[0..fim]\` contenha exatamente \`"${prefixo}ç"\`?`,
                 fim,
                 `Os ${a} caracteres \`'a'\` ocupam os bytes \`0..${a}\` (${a} bytes) e o \`'ç'\` ocupa os 2 bytes seguintes (\`${a}..${fim}\`). Logo, a fronteira válida logo após \`'ç'\` é $\\text{fim} = ${a} + 2 = ${fim}$.`,
                 {
                   visual: code(
                     `fn main() {
     let s = "${prefixo}çã";
+    let fim = ${a} + 'ç'.len_utf8();
     let fatia = &s[0..fim];
     println!("{fatia}");
 }`,
-                    [2, 3],
+                    [2, 3, 4],
                     'Calculando a fronteira',
                   ),
                 },
@@ -1203,7 +1204,7 @@ No \`main\`, chame \`inspecionar("ação")\` e \`inspecionar("coração")\`. Com
                 'Um Result<&str, Error> que falha se não houver espaços',
               ],
               0,
-              '`trim()` apenas avança o início e recua o fim da fatia sobre os bytes já existentes, devolvendo um `&str` em $O(1)$ alocações.',
+              '`trim()` apenas avança o início e recua o fim da fatia sobre os bytes já existentes, devolvendo um `&str` sem alocar. O tempo depende de quantos caracteres nas pontas precisam ser examinados.',
             ),
             mcq(
               'O que este programa imprime e qual é o tipo da variável `grito`?',
@@ -1252,7 +1253,7 @@ No \`main\`, chame \`inspecionar("ação")\` e \`inspecionar("coração")\`. Com
                 'O programa não compila porque parse não aceita ::<i32>',
               ],
               0,
-              '`parse::<i32>()` exige que todos os caracteres da fatia sejam dígitos (ou sinal). Como há espaço e `\\n`, ele retorna `Err(...)`, e `r.is_err()` imprime `true`.',
+              '`parse::<i32>()` aceita um sinal opcional no início seguido de dígitos ASCII, com valor dentro da faixa de `i32`. Como há espaço e `\\n`, ele retorna `Err(...)`, e `r.is_err()` imprime `true`.',
               {
                 visual: code(
                   `fn main() {
@@ -1333,7 +1334,7 @@ No \`main\`, chame \`inspecionar("ação")\` e \`inspecionar("coração")\`. Com
 
 • \`{:>8}\` e \`{:<8}\`: alinham à **direita** (\`>\`) ou à **esquerda** (\`<\`) em um campo de largura mínima 8.
 • \`{:.2}\`: formata números de ponto flutuante com **2 casas decimais**. Pode ser combinado com largura e alinhamento: \`{:>10.2}\` (Roteiro #41).
-• \`{:08b}\`: formata um inteiro em **binário** (\`b\`) com 8 dígitos preenchidos com zeros à esquerda (\`0\`). Para hexadecimal, use \`{:x}\` ou \`{:04X}\`.`,
+• \`{:08b}\`: formata um inteiro em **binário** (\`b\`) com no mínimo 8 dígitos, preenchendo com zeros à esquerda (\`0\`) quando necessário. Para hexadecimal, use \`{:x}\` ou \`{:04X}\`.`,
               visual: code(
                 `fn main() {
     let nome = "VCC";
@@ -1433,22 +1434,22 @@ No \`main\`, chame \`inspecionar("ação")\` e \`inspecionar("coração")\`. Com
               },
             ),
             tf(
-              'No formato `format!("{:<20}{:>10.2}", nome, valor)` (exercício 41 do roteiro), `nome` é alinhado à esquerda em 20 colunas e `valor` é alinhado à direita em 10 colunas com 2 casas decimais.',
+              'No formato `format!("{:<20}{:>10.2}", nome, valor)` (exercício 41 do roteiro), `nome` é alinhado à esquerda em um campo de largura mínima 20 e `valor` (de ponto flutuante) é alinhado à direita em um campo de largura mínima 10, com 2 casas decimais.',
               true,
-              '`<20` alinha à esquerda ocupando 20 colunas e `>10.2` alinha à direita ocupando 10 colunas com 2 casas após o ponto.',
+              '`<20` alinha à esquerda com largura mínima 20 e `>10.2` alinha à direita com largura mínima 10 e 2 casas após o ponto. Valores maiores que o campo não são truncados.',
             ),
             match(
               'Associe cada especificador de formatação ao seu efeito:',
               [
-                ['{:>8}', 'Alinha à direita preenchendo com espaços até 8 colunas'],
-                ['{:<8}', 'Alinha à esquerda preenchendo com espaços até 8 colunas'],
+                ['{:>8}', 'Alinha à direita em largura mínima 8, preenchendo com espaços'],
+                ['{:<8}', 'Alinha à esquerda em largura mínima 8, preenchendo com espaços'],
                 ['{:.2}', 'Mostra número de ponto flutuante com 2 casas decimais'],
-                ['{:08b}', 'Mostra inteiro em binário com 8 bits e zeros à esquerda'],
+                ['{:08b}', 'Mostra inteiro em binário com no mínimo 8 dígitos e zeros à esquerda'],
               ],
-              '`>` alinha à direita, `<` alinha à esquerda, `.N` controla casas decimais e `08b` formata em binário de 8 dígitos.',
+              '`>` alinha à direita, `<` alinha à esquerda, `.N` controla casas decimais e `08b` formata em binário com no mínimo 8 dígitos.',
             ),
             fill(
-              'Complete a chamada para formatar o registrador `porta` em binário com 8 bits preenchidos com zeros à esquerda:',
+              'Complete a chamada para formatar o registrador `porta: u8` em binário com 8 bits preenchidos com zeros à esquerda:',
               'let bits = format!("{:___}", porta);',
               ['08b'],
               ['.2', '>8', '8x'],

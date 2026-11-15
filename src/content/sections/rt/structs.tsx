@@ -27,10 +27,10 @@ export const rustStructs: UnitDef = {
   source: 'The Rust Programming Language (edição 2024), cap. 5 · Desafio 50 Dias — Rust, módulo 3',
   extra: true,
   guide:
-    'Uma `struct` agrupa campos nomeados de tipos diferentes. Em Rust não há lixo de memória: toda instância precisa inicializar todos os campos (`E0063` se faltar algum), e a mutabilidade vale para a variável inteira (`let mut`), nunca para um campo isolado (`E0594`). Quando uma variável tem o mesmo nome do campo, use o *field init shorthand* (`Sensor { id, active: true }`); para copiar ou mover o restante de outra instância, termine com a *update syntax* (`..base`).\n\n' +
-    'O comportamento fica em blocos `impl`: métodos recebem `&self` (empréstimo de leitura), `&mut self` (empréstimo de escrita) ou `self` (consome o valor por move). Na chamada `x.metodo()`, o compilador referencia ou desreferencia `x` automaticamente — não existe o operador `->` de C em chamadas de método. Funções dentro de `impl` sem `self`, como `Self::new(...)`, são funções associadas chamadas com `::`.\n\n' +
-    'Além das structs com campos nomeados, existem *tuple structs* (`struct Meters(i32);`, ótimas para criar tipos distintos sem custo com o padrão *newtype*) e *unit-like structs* (`struct Marker;`, de zero bytes). Para inspecionar valores em depuração, adicione `#[derive(Debug)]` e use `{:?}`, `{:#?}` ou a macro `dbg!(&x)`.\n\n' +
-    'Por fim, cada campo tem sua própria posse: mover uma `String` de dentro de uma struct causa um **move parcial** (*partial move*) — a struct inteira e o campo movido não podem mais ser usados (`E0382`), mas os demais campos permanecem acessíveis. Se uma struct guardar referências (`&str`), ela precisa declarar um *lifetime* (`struct Excerpt<\'a> { text: &\'a str }`, erro `E0106` se omitido).',
+    'Uma `struct` agrupa campos nomeados de tipos diferentes. Em Rust seguro, os campos não ficam com valores não inicializados: toda instância precisa inicializar todos os campos (`E0063` se faltar algum). Para atribuir diretamente a campos de uma variável dona da instância, use `let mut` (`E0594` sem ele); não se declara `mut` por campo. Quando uma variável tem o mesmo nome do campo, use o *field init shorthand* (`Sensor { id, active: true }`); para copiar ou mover o restante de outra instância, termine com a *update syntax* (`..base`).\n\n' +
+    'O comportamento fica em blocos `impl`: métodos recebem `&self` (empréstimo de leitura), `&mut self` (empréstimo de escrita) ou `self` (por valor: move se o tipo não for `Copy`, cópia se for). Na chamada `x.metodo()`, o compilador referencia ou desreferencia `x` automaticamente — não existe o operador `->` de C em chamadas de método. Funções dentro de `impl` sem `self`, como `Self::new(...)`, são funções associadas chamadas com `::`.\n\n' +
+    'Além das structs com campos nomeados, existem *tuple structs* (`struct Meters(i32);`, ótimas para criar tipos distintos com o padrão *newtype*) e *unit-like structs* (`struct Marker;`, de zero bytes). Para inspecionar valores em depuração, adicione `#[derive(Debug)]` e use `{:?}`, `{:#?}` ou a macro `dbg!(&x)`.\n\n' +
+    'Por fim, cada campo tem sua própria posse: mover uma `String` de dentro de uma struct sem `Drop` causa um **move parcial** (*partial move*) — a struct inteira e o campo movido não podem mais ser usados (`E0382`), mas os demais campos permanecem acessíveis. Se uma struct guardar referências (`&str`), elas precisam de um *lifetime* explícito, como em `struct Excerpt<\'a> { text: &\'a str }` (erro `E0106` se omitido); também é possível usar `&\'static str` sem parâmetro genérico.',
   lessons: [
     {
       id: 'rt-struct-def',
@@ -43,7 +43,7 @@ export const rustStructs: UnitDef = {
               body:
                 'Assim como em C, uma `struct` em Rust agrupa dados relacionados sob um único tipo, mas sem precisar de `typedef` e sem risco de campos com lixo de memória.\n\n' +
                 'Para criar uma instância, informe `campo: valor` entre chaves em **qualquer ordem**. O compilador exige que **todos** os campos recebam valor (esquecer um gera o erro `E0063`).\n\n' +
-                'Para ler ou gravar um campo, use o ponto (`.`). Atenção à regra de ouro: em Rust **não existe `mut` por campo**. Ou a variável inteira é declarada com `let mut`, ou nenhum campo dela pode ser alterado (`E0594`).',
+                'Para ler ou gravar um campo, use o ponto (`.`). Atenção à regra de ouro: em Rust **não existe `mut` por campo**. Para atribuir diretamente a campos de uma variável dona da instância, declare-a com `let mut` (`E0594` sem ele). Também é possível alterar campos por uma referência `&mut T` sem que o vínculo da referência seja `mut`; tipos como `Cell` e `RefCell` permitem mutabilidade interior.',
               visual: code(
                 `struct Sensor {
     id: u8,
@@ -129,7 +129,7 @@ fn main() {
             tf(
               'Em Rust, é possível declarar apenas um campo específico como mutável dentro da definição da struct, como `struct User { id: u32, mut score: i32 }`.',
               false,
-              'Rust não permite `mut` na declaração de campos de uma `struct`. A mutabilidade pertence sempre ao vínculo (*binding*) da instância inteira: `let mut u = User { ... };`.',
+              'Rust não permite `mut` na declaração de campos de uma `struct`. Para atribuir diretamente a campos de uma variável dona da instância, usamos `let mut u = User { ... };`.',
             ),
             mcq(
               'A linha destacada impede a compilação. Qual erro o `rustc` emite e qual é a causa?',
@@ -193,12 +193,10 @@ fn main() {
             codePuzzle(
               'Monte o programa que define `Counter`, cria uma instância mutável iniciando em 10, soma 5 ao campo `count` e imprime o resultado:',
               [
-                'struct Counter { count: i32 }',
-                'fn main() {',
+                'struct Counter { count: i32 }\n\nfn main() {',
                 '    let mut c = Counter { count: 10 };',
                 '    c.count += 5;',
-                '    println!("{}", c.count);',
-                '}',
+                '    println!("{}", c.count);\n}',
               ],
               [
                 '    let c = Counter { count: 10 };',
@@ -424,14 +422,12 @@ fn main() {
             codePuzzle(
               'Monte a função `build` com *field init shorthand* e o `main` que cria `b2` a partir de `..b1` trocando `on` para `false`:',
               [
-                'fn build(id: i32) -> Badge {',
+                'struct Badge { id: i32, on: bool }\n\nfn build(id: i32) -> Badge {',
                 '    Badge { id, on: true }',
-                '}',
-                'fn main() {',
+                '}\n\nfn main() {',
                 '    let b1 = build(42);',
                 '    let b2 = Badge { on: false, ..b1 };',
-                '    println!("{} {}", b2.id, b2.on);',
-                '}',
+                '    println!("{} {}", b2.id, b2.on);\n}',
               ],
               [
                 '    let b2 = Badge { ..b1, on: false };',
@@ -495,7 +491,7 @@ fn main() {
               title: 'Comportamento em blocos impl',
               body:
                 'Rust não tem classes nem herança: os dados moram na `struct` e as ações moram num bloco `impl NomeDaStruct { ... }`.\n\n' +
-                'Dentro de `impl Rect`, o tipo `Self` (com `S` maiúsculo) é um apelido para `Rect`. O primeiro parâmetro de um método é `&self`, abreviação de `self: &Self` — um empréstimo imutável da instância que chamou o método.\n\n' +
+                'Dentro de `impl Rect`, o tipo `Self` (com `S` maiúsculo) é um apelido para `Rect`. Nos métodos de leitura abaixo, o primeiro parâmetro é `&self`, abreviação de `self: &Self` — um empréstimo imutável da instância que chamou o método.\n\n' +
                 'Diferente de C (onde ponteiros exigem `r->area`), em Rust você **sempre usa `.`**. O compilador aplica *automatic referencing and dereferencing*: se `r` for `Rect` ou `&Rect`, `r.area()` passa `&self` automaticamente!',
               visual: code(
                 `struct Rect {
@@ -599,7 +595,12 @@ fn main() {
               'Na sintaxe de método `objeto.metodo(arg)`, o receptor antes do ponto (`r1`) é emprestado automaticamente como `&self`, e os argumentos entre parênteses (`&r2`) preenchem os parâmetros seguintes (`other`).',
               {
                 visual: code(
-                  `impl Rect {
+                  `struct Rect {
+    w: u32,
+    h: u32,
+}
+
+impl Rect {
     fn fits(
         &self,
         other: &Rect,
@@ -614,7 +615,7 @@ fn main() {
     let r2 = Rect { w: 5, h: 4 };
     println!("{}", r1.fits(&r2));
 }`,
-                  [2, 14],
+                  [7, 19],
                   'Dois parâmetros',
                 ),
               },
@@ -627,13 +628,13 @@ fn main() {
               'O receptor de leitura é `&self`, e dentro do corpo acessamos os campos da instância através de `self.temp`.',
             ),
             codePuzzle(
-              'Monte o bloco `impl Rect` com o método `area` que lê `w` e `h` via `&self` e devolve `w * h`:',
+              'Monte o programa com o bloco `impl Rect` e o método `area` que lê `w` e `h` via `&self` e devolve `w * h`:',
               [
-                'impl Rect {',
+                'struct Rect { w: u32, h: u32 }\n\nimpl Rect {',
                 '    fn area(&self) -> u32 {',
                 '        self.w * self.h',
                 '    }',
-                '}',
+                '}\n\nfn main() {\n    let r = Rect { w: 3, h: 4 };\n    println!("{}", r.area());\n}',
               ],
               [
                 '    fn area(Rect) -> u32 {',
@@ -711,8 +712,8 @@ impl Meter {
               body:
                 'Todo método escolhe como recebe a instância no primeiro parâmetro:\n' +
                 '• `&self`: empresta para **leitura**.\n' +
-                '• `&mut self`: empresta para **alteração** (exige que a variável do chamador seja `let mut`, senão dá `E0596`).\n' +
-                '• `self`: toma a **posse por valor** (consome a instância; usá-la depois dá `E0382`).\n\n' +
+                '• `&mut self`: empresta para **alteração** (ao chamar sobre uma variável dona da instância, exige `let mut`, senão dá `E0596`; também pode ser chamado por uma referência `&mut T`).\n' +
+                '• `self`: recebe **por valor** (move a instância se ela não for `Copy`, e usá-la depois dá `E0382`; se for `Copy`, recebe uma cópia).\n\n' +
                 'E quando uma função dentro do `impl` **não recebe `self`**? Ela é uma **função associada** ao tipo, chamada com `::` — como `Person::new(...)`, que faz o papel de construtor em Rust! Uma mesma struct também pode ter vários blocos `impl` separados.',
               visual: code(
                 `struct Person {
@@ -742,9 +743,10 @@ fn main() {
         String::from("Ana"), 20,
     );
     p.birthday();
+    let age = p.age;
     println!(
         "{} {}",
-        p.age,
+        age,
         p.into_name()
     );
 }`,
@@ -831,27 +833,28 @@ fn main() {
     let mut p = Person::new(
         String::from("Caio"), 17,
     );
+    println!("{}", p.is_adult());
     p.birthday();
     println!(
         "{}: {} ({})",
         p.name, p.age, p.is_adult()
     );
 }`,
-                [7, 14, 18, 27],
+                [7, 14, 18, 27, 28],
                 'Exercício 14 — Person',
               ),
             },
           ],
           exercises: [
             match(
-              'Associe cada assinatura em `impl Counter` ao seu efeito sobre a instância:',
+              'Para uma struct `Counter` sem `Copy`, associe cada assinatura em `impl Counter` ao seu efeito sobre a instância:',
               [
                 ['fn value(&self) -> i32', 'Empresta só para leitura'],
                 ['fn inc(&mut self)', 'Empresta para alterar campos'],
                 ['fn into_raw(self) -> i32', 'Consome a instância por move'],
                 ['fn new() -> Self', 'Função associada chamada com ::'],
               ],
-              'O primeiro parâmetro define o contrato: `&self` lê, `&mut self` altera, `self` consome e a ausência de `self` cria uma função associada ao tipo.',
+              'O primeiro parâmetro define o contrato: `&self` lê, `&mut self` altera, `self` consome um `Counter` sem `Copy` e a ausência de `self` cria uma função associada ao tipo.',
             ),
             mcq(
               'Como devemos chamar a função associada `square` definida no bloco `impl Rect` abaixo?',
@@ -945,16 +948,15 @@ fn main() {
               'Uma `struct` pode ter quantos blocos `impl` você quiser. Isso é útil para organizar métodos ou, mais adiante, implementar métodos específicos para certos tipos genéricos.',
             ),
             codePuzzle(
-              'Monte o bloco `impl Account` com o construtor `new` e o método `deposit` que altera `balance`:',
+              'Monte o programa com o bloco `impl Account`, o construtor `new` e o método `deposit` que altera `balance`:',
               [
-                'impl Account {',
+                'struct Account { balance: i32 }\n\nimpl Account {',
                 '    fn new(balance: i32) -> Self {',
                 '        Self { balance }',
-                '    }',
-                '    fn deposit(&mut self, v: i32) {',
+                '    }\n    fn deposit(&mut self, v: i32) {',
                 '        self.balance += v;',
                 '    }',
-                '}',
+                '}\n\nfn main() {\n    let mut acc = Account::new(10);\n    acc.deposit(5);\n    println!("{}", acc.balance);\n}',
               ],
               [
                 '    fn new(&self, v: i32) -> Self {',
@@ -1022,7 +1024,7 @@ fn main() {
               title: 'Tuple structs, newtype e unit structs',
               body:
                 'Nem toda struct precisa dar nome a cada campo. Uma **tuple struct** dá um nome ao **tipo**, mas declara apenas os tipos dos campos entre parênteses: `struct Color(u8, u8, u8);`.\n\n' +
-                'Duas tuple structs com os mesmos tipos internos — como `struct Meters(i32);` e `struct Seconds(i32);` — são **tipos incompatíveis** (`E0308` se você tentar passar um onde se espera o outro). Quando ela tem um único campo, como `struct Money(i64);` (Exercício 20 do roteiro), chamamos isso de padrão **newtype**: segurança de tipo sem custo de memória!\n\n' +
+                'Duas tuple structs com os mesmos tipos internos — como `struct Meters(i32);` e `struct Seconds(i32);` — são **tipos incompatíveis** (`E0308` se você tentar passar um onde se espera o outro). Quando ela tem um único campo, como `struct Money(i64);` (Exercício 20 do roteiro), chamamos isso de padrão **newtype**: segurança de tipo sem acrescentar dados! Para garantir o mesmo layout do campo interno, use `#[repr(transparent)]`.\n\n' +
                 'Já uma **unit-like struct** (`struct Marker;`) não tem campo nenhum e ocupa **0 bytes** na memória.',
               visual: code(
                 `struct Color(u8, u8, u8);
@@ -1062,7 +1064,7 @@ fn main() {
                     ['struct Money(i64);', 'm.0', 'Newtype: impede misturar unidades'],
                   ],
                   highlight: [1],
-                  info: '`Money(i64)` ocupa exatamente os mesmos 8 bytes de um `i64`, mas impede somar dinheiro com um inteiro comum por engano.',
+                  info: '`Money(i64)` impede somar dinheiro com um inteiro comum por engano. Com `#[repr(transparent)]`, seu layout é garantidamente o mesmo do `i64` (8 bytes).',
                 },
                 {
                   label: '3. Unit-like struct',
@@ -1160,14 +1162,11 @@ fn main() {
             codePuzzle(
               'Monte o programa que declara a newtype `Money(i64)`, implementa o método `cents` e imprime o valor guardado:',
               [
-                'struct Money(i64);',
-                'impl Money {',
+                'struct Money(i64);\n\nimpl Money {',
                 '    fn cents(&self) -> i64 { self.0 }',
-                '}',
-                'fn main() {',
+                '}\n\nfn main() {',
                 '    let m = Money(250);',
-                '    println!("{}", m.cents());',
-                '}',
+                '    println!("{}", m.cents());\n}',
               ],
               [
                 '    fn cents(&self) -> i64 { self.1 }',
@@ -1248,9 +1247,9 @@ fn main() {
                 ['Recurso', 'Exige na struct', 'Saída e destino'],
                 [
                   ['"{}"', 'impl Display manual', 'Texto para usuário (stdout)'],
-                  ['"{:?}"', '#[derive(Debug)]', 'Uma linha: Point { x: 6, y: 5 }'],
-                  ['"{:#?}"', '#[derive(Debug)]', 'Várias linhas indentadas (stdout)'],
-                  ['dbg!(&p)', '#[derive(Debug)]', '[arquivo:linha] &p = ... (stderr)'],
+                  ['"{:?}"', 'Debug (derive ou impl)', 'Uma linha: Point { x: 6, y: 5 }'],
+                  ['"{:#?}"', 'Debug (derive ou impl)', 'Várias linhas indentadas (stdout)'],
+                  ['dbg!(&p)', 'Debug (derive ou impl)', '[arquivo:linha:coluna] &p = ... (stderr)'],
                 ],
                 [1, 3],
               ),
@@ -1321,7 +1320,7 @@ fn main() {
             mcq(
               'Qual é a saída exata impressa em `stdout` por este programa?',
               [
-                'Point { x: 2, y: 9 }',
+                'Point { x: 2, y: 9 } seguido de uma quebra de linha',
                 '{ "x": 2, "y": 9 }',
                 '(2, 9)',
                 'Point(2, 9)',
@@ -1359,7 +1358,7 @@ fn main() {
             tf(
               'A macro `dbg!(expr)` avalia a expressão, imprime arquivo, linha e resultado em `stderr` e devolve o valor da expressão para que o cálculo continue normalmente.',
               true,
-              'Por devolver o próprio valor avaliado, você pode envolver qualquer subexpressão com `dbg!(...)`, como `width: dbg!(3 * factor)`, sem alterar o resultado do programa.',
+              'Por devolver o próprio valor avaliado, você pode envolver uma subexpressão cujo tipo implemente `Debug` com `dbg!(...)`, como `width: dbg!(3 * factor)`, preservando o valor e acrescentando o log em `stderr`.',
             ),
             mcq(
               'Por que a última linha destacada falha com o erro `E0382` (*borrow of moved value: `u`*)?',
@@ -1370,7 +1369,7 @@ fn main() {
                 'Porque `u` precisava ser declarada com `let mut u`',
               ],
               0,
-              'Ao contrário de `println!` (que sempre empresta seus argumentos automaticamente), `dbg!(u)` recebe a posse de `u` e a devolve como retorno. Como o retorno de `dbg!(u);` foi descartado, `u` foi destruído ao fim da linha! Para apenas inspecionar sem mover, passe `dbg!(&u);`.',
+              'Ao contrário de `println!` (que empresta os valores a formatar), `dbg!(u)` recebe a posse de `u` e a devolve como retorno. Como o retorno de `dbg!(u);` foi descartado, `u` foi destruído ao fim da linha! Para apenas inspecionar sem mover, passe `dbg!(&u);`. Expressões usadas como argumentos de `println!` ainda podem mover valores ao serem avaliadas.',
               {
                 visual: code(
                   `#[derive(Debug)]
@@ -1400,12 +1399,9 @@ fn main() {
             codePuzzle(
               'Monte o programa que deriva `Debug` para a tuple struct `Pair`, usa `dbg!(3 + 4)` ao criar o primeiro campo e imprime `p` com `{:?}`:',
               [
-                '#[derive(Debug)]',
-                'struct Pair(i32, i32);',
-                'fn main() {',
+                '#[derive(Debug)]\nstruct Pair(i32, i32);\n\nfn main() {',
                 '    let p = Pair(dbg!(3 + 4), 10);',
-                '    println!("{:?}", p);',
-                '}',
+                '    println!("{:?}", p);\n}',
               ],
               [
                 '#[derive(Display)]',
@@ -1618,19 +1614,16 @@ fn main() {
             codePuzzle(
               'Monte o programa (Exercício 7 do roteiro) que deriva `Clone` e `Copy` para `Point`, copia `p1` para `p2` sem move e imprime a soma de `p1.x` e `p2.x`:',
               [
-                '#[derive(Clone, Copy)]',
-                'struct Point { x: i32, y: i32 }',
-                'fn main() {',
+                '#[derive(Clone, Copy)]\nstruct Point { x: i32, y: i32 }\n\nfn main() {',
                 '    let p1 = Point { x: 4, y: 1 };',
                 '    let p2 = p1;',
-                '    println!("{}", p1.x + p2.x);',
-                '}',
+                '    println!("{}", p1.x + p2.x);\n}',
               ],
               [
                 '#[derive(Copy)]',
                 'struct Point { x: i32, name: String }',
               ],
-              'Derivar `Copy` exige também derivar a supertrait `Clone` (`#[derive(Clone, Copy)]`), e como `i32` é `Copy`, `let p2 = p1;` copia o ponto mantendo `p1` válido.',
+              'Derivar `Copy` exige que a supertrait `Clone` também esteja implementada (aqui, por `#[derive(Clone, Copy)]`), e como `i32` é `Copy`, `let p2 = p1;` copia o ponto mantendo `p1` válido.',
             ),
             gen((rng) => {
               const code1 = randInt(rng, 10, 40);
@@ -1677,8 +1670,8 @@ fn main() {
             {
               title: 'Empréstimos de campos e lifetimes em structs',
               body:
-                'Como o *borrow checker* sabe que `p.x` e `p.y` são campos separados, você pode **emprestar campos diferentes ao mesmo tempo** (*split borrow*): por exemplo, criar `&mut p.x` e `&p.y` juntos funciona! Mas atenção: chamar um método `p.metodo()` com `&self` ou `&mut self` empresta a **struct inteira**, conflitando com referências ativas a qualquer campo (`E0502`).\n\n' +
-                'E se quisermos que uma `struct` guarde uma **referência** (`&str` ou `&[i32]`) em vez de ser dona dos dados? O compilador exige um parâmetro de **lifetime** (`\'a`): `struct Excerpt<\'a> { text: &\'a str }`. Sem `\'a`, a compilação falha com `E0106`. Isso garante que a struct nunca viva mais do que o dado emprestado!',
+                'Como o *borrow checker* sabe que `p.x` e `p.y` são campos separados, você pode **emprestar campos diferentes ao mesmo tempo** (*split borrow*): por exemplo, criar `&mut p.x` e `&p.y` juntos funciona! Mas atenção: chamar um método `p.metodo()` com `&self` ou `&mut self` empresta a **struct inteira**. Um empréstimo compartilhado de campo pode coexistir com `&self`, mas conflita com `&mut self` (`E0502`); um empréstimo mutável de campo ainda em uso conflita com ambos (`E0502` ou `E0499`). O conflito deixa de existir após o último uso da referência, mesmo antes do fim do escopo.\n\n' +
+                'E se quisermos que uma `struct` guarde uma **referência** (`&str` ou `&[i32]`) em vez de ser dona dos dados? O campo exige um **lifetime** explícito, normalmente um parâmetro (`\'a`): `struct Excerpt<\'a> { text: &\'a str }`. Omitir o lifetime da referência causa `E0106`; `&\'static str` também é válido e dispensa parâmetro genérico. Isso impede usar a referência depois que o dado emprestado deixa de ser válido!',
               visual: code(
                 `struct Excerpt<'a> {
     text: &'a str,
@@ -1704,7 +1697,7 @@ fn main() {
                 [
                   ['&mut p.x e &mut p.y juntos', 'Sim!', 'Campos disjuntos não se sobrepõem'],
                   ['&p.x vivo + chamada p.mut_method()', 'Não (E0502)', '&mut self empresta a struct p inteira'],
-                  ['struct View { s: &str } sem <\'a>', 'Não (E0106)', 'Toda referência em struct exige lifetime'],
+                  ['struct View { s: &str }', 'Não (E0106)', 'O campo precisa de lifetime explícito'],
                   ['fn name(&self) -> &str { &self.name }', 'Sim!', 'Empresta a String como &str sem mover'],
                 ],
                 [0, 1, 2],
@@ -1772,13 +1765,13 @@ fn main() {
             mcq(
               'A declaração destacada tenta guardar uma fatia `&str` numa struct sem anotar lifetime. Qual erro o compilador emite?',
               [
-                'E0106: missing lifetime specifier (exige `struct Excerpt<\'a> { text: &\'a str }`)',
+                'E0106: missing lifetime specifier (corrigível com `struct Excerpt<\'a> { text: &\'a str }`)',
                 'E0063: missing field in initializer',
                 'E0594: cannot assign to immutable field `text`',
                 'E0204: the trait `Copy` cannot be implemented',
               ],
               0,
-              'Sempre que uma `struct` guarda uma referência, ela precisa declarar um parâmetro de tempo de vida (`<\'a>`) para que o compilador garanta que a struct não sobreviva ao dado referenciado. Omiti-lo gera o erro `E0106` (*missing lifetime specifier*).',
+              'O campo `text: &str` precisa de um lifetime explícito. Para aceitar texto emprestado por um tempo de vida genérico, declaramos `<\'a>` e usamos `&\'a str`; outra opção, mais restrita, é `&\'static str`, sem parâmetro genérico. Omitir o lifetime da referência gera `E0106` (*missing lifetime specifier*).',
               {
                 visual: code(
                   `struct Excerpt {
@@ -1873,20 +1866,17 @@ fn main() {
               'Declaramos o lifetime `<\'a>` após o nome da struct e anotamos a referência como `&\'a str`.',
             ),
             codePuzzle(
-              'Monte o trecho que faz empréstimos mutáveis simultâneos dos campos disjuntos `p.a` e `p.b`, soma valores aos dois e imprime o total:',
+              'Monte o programa que faz empréstimos mutáveis simultâneos dos campos disjuntos `p.a` e `p.b`, soma valores aos dois e imprime o total:',
               [
-                'fn main() {',
+                'struct Pair { a: i32, b: i32 }\n\nfn main() {',
                 '    let mut p = Pair { a: 3, b: 4 };',
-                '    let ra = &mut p.a;',
-                '    let rb = &mut p.b;',
-                '    *ra += 2;',
-                '    *rb += 5;',
-                '    println!("{}", p.a + p.b);',
-                '}',
+                '    let ra = &mut p.a;\n    let rb = &mut p.b;',
+                '    *ra += 2;\n    *rb += 5;',
+                '    println!("{}", p.a + p.b);\n}',
               ],
               [
                 '    let p = Pair { a: 3, b: 4 };',
-                '    let rb = &mut p;',
+                '    let ra = &mut p.a;\n    let rb = &mut p;',
               ],
               'Como `p.a` e `p.b` são campos distintos de `mut p`, podemos manter `ra = &mut p.a` e `rb = &mut p.b` ativos ao mesmo tempo (ao contrário de `&mut p`, que emprestaria a struct toda).',
             ),

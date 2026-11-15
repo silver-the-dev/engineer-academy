@@ -31,10 +31,10 @@ export const rustTraits: UnitDef = {
     'Em Rust não existe herança de classes: dados vivem em `struct` e `enum`, e contratos de comportamento vivem em **traits**.',
     '• **Contrato (`trait` e `impl Trait for Tipo`)**: declara assinaturas obrigatórias e pode fornecer métodos com corpo padrão. Omitir um método obrigatório gera o erro `E0046`.',
     '• **Polimorfismo estático (`impl Trait`)**: em parâmetros (`fn f(x: &impl Trait)`), o compilador gera código especializado para cada tipo concreto (**monomorfização**); no retorno (`-> impl Trait`), todos os ramos da função precisam devolver **um único tipo concreto** (`E0308`).',
-    '• **Traits da biblioteca padrão**: `#[derive(...)]` implementa automaticamente `Debug` (`{:?}`), `Clone` (`.clone()`), `Copy` (cópia bit a bit na pilha; falha com `E0204` se houver `String` ou `Vec`), `PartialEq`, `Eq`, `PartialOrd`, `Ord`, `Default` e `Hash`. Já `Display` (`{}`) é sempre implementada à mão.',
-    '• **Regra do órfão (`E0117`)**: um bloco `impl Trait for Tipo` só é permitido se pelo menos a `Trait` ou o `Tipo` tiver sido definido na crate atual.',
+    '• **Traits da biblioteca padrão**: `#[derive(...)]` pode gerar `Debug` (`{:?}`), `Clone` (`.clone()`), `Copy` (cópia implícita dos bytes; falha com `E0204` se houver `String` ou `Vec`), `PartialEq`, `Eq`, `PartialOrd`, `Ord`, `Default` e `Hash`, respeitando os requisitos de cada trait para os campos. A biblioteca padrão não oferece `derive(Display)` para `{}`.',
+    '• **Regra do órfão**: a trait deve ser local, ou o tipo que recebe a implementação ou um argumento de tipo da trait deve ser local, respeitando as restrições sobre parâmetros genéricos. Implementar uma trait externa para um tipo externo como `Display for Vec<i32>` gera `E0117`.',
     '• **Conversões (`From`, `Into`, `TryFrom`)**: implemente `From<A> for B` para conversões infalíveis e ganhe `Into<B> for A` gratuitamente; use `TryFrom<A> for B` (que devolve `Result<Self, Self::Error>`) quando a conversão validar dados.',
-    '• **Trait objects (`&dyn Trait`, `Box<dyn Trait>`)**: usam um **ponteiro gordo** (endereço do dado + endereço da `vtable`) para despacho dinâmico, permitindo listas heterogêneas como `Vec<Box<dyn Trait>>`. Exigem compatibilidade com `dyn` (`E0038`: sem retorno `Self` por valor nem métodos genéricos).',
+    '• **Trait objects (`&dyn Trait`, `Box<dyn Trait>`)**: usam um **ponteiro gordo** (endereço do dado + endereço da `vtable`) para despacho dinâmico, permitindo listas heterogêneas como `Vec<Box<dyn Trait>>`. Exigem compatibilidade com `dyn` (`E0038`): métodos que retornam `Self` ou têm parâmetros de tipo devem ficar restritos a `Self: Sized`; a trait em si não pode exigir `Sized`.',
     '• **Operadores e tipos associados**: `a + b` chama `std::ops::Add::add` (`type Output`), e `Iterator` define `type Item` + `fn next(&mut self) -> Option<Self::Item>`, habilitando `map`, `filter`, `take` e `sum`.',
   ].join('\n'),
   lessons: [
@@ -207,9 +207,7 @@ impl Motor for Fan {
             codePuzzle(
               'Monte a declaração da trait `Area` e sua implementação para `Square`:',
               [
-                'trait Area { fn calc(&self) -> i32; }',
-                'struct Square { side: i32 }',
-                'impl Area for Square {',
+                'trait Area { fn calc(&self) -> i32; }\nstruct Square { side: i32 }\nimpl Area for Square {',
                 '    fn calc(&self) -> i32 {',
                 '        self.side * self.side',
                 '    } }',
@@ -305,14 +303,18 @@ fn charge(b: &impl Bill) -> i32 {
               visual: code(
                 `trait Taxable {
     fn tax(&self) -> f64;
+    fn summary(&self) -> f64 {
+        self.tax() + 5.0
+    }
 }
 struct Product { price: f64 }
 struct Service { price: f64 }
 
-fn show_tax(item: &impl Taxable) {
-    println!("{:.1}", item.tax());
+fn print_tax(item: &impl Taxable) {
+    println!("{}", item.tax());
+    println!("{}", item.summary());
 }`,
-                [1, 2, 7],
+                [1, 2, 3, 11, 12, 13],
                 'src/main.rs',
               ),
             },
@@ -429,12 +431,9 @@ fn pick(ok: bool) -> impl Bill {
             codePuzzle(
               'Monte a trait `Score` com método padrão `bonus` e a função `eval` que recebe `&impl Score`:',
               [
-                'trait Score {',
-                '    fn points(&self) -> i32;',
-                '    fn bonus(&self) -> i32 {',
+                'trait Score {\n    fn points(&self) -> i32;\n    fn bonus(&self) -> i32 {',
                 '        self.points() + 10',
-                '    } }',
-                'fn eval(s: &impl Score) -> i32 {',
+                '    } }\nfn eval(s: &impl Score) -> i32 {',
                 '    s.bonus() }',
               ],
               [
@@ -489,9 +488,9 @@ fn main() {
             {
               title: 'Derive, Debug, Display, Clone e Copy',
               body: [
-                'O atributo **`#[derive(...)]`** pede ao compilador que gere implementações automáticas de traits comuns da biblioteca padrão. Com `#[derive(Debug)]`, você inspeciona qualquer struct com `{:?}` em `println!`.',
+                'O atributo **`#[derive(...)]`** pede ao compilador que gere implementações automáticas de traits comuns da biblioteca padrão. Com `#[derive(Debug)]`, você inspeciona uma struct com `{:?}` em `println!`, desde que seus campos também implementem `Debug`.',
                 'Já **`std::fmt::Display`** define a formatação para o usuário final com `{}` (o equivalente ao `toString()`). Ela **nunca** pode ser derivada na biblioteca padrão: você a implementa manualmente usando `write!(f, ...)`.',
-                'Para cópias, **`Clone`** cria duplicatas explícitas com `.clone()` (podendo copiar dados no heap), enquanto **`Copy`** duplica os bytes na pilha automaticamente ao atribuir. Tipos donos de heap como `String` e `Vec<T>` não implementam `Copy` — tentar derivar `Copy` em uma struct que os contenha gera o erro `E0204`.',
+                'Para cópias, **`Clone`** cria duplicatas explícitas com `.clone()` (podendo copiar dados no heap), enquanto **`Copy`** permite copiar os bytes automaticamente ao atribuir, sem invalidar a origem, independentemente de onde o valor está armazenado. Tipos donos de heap como `String` e `Vec<T>` não implementam `Copy` — tentar derivar `Copy` em uma struct que os contenha gera o erro `E0204`.',
               ].join('\n\n'),
               visual: code(
                 `use std::fmt;
@@ -535,7 +534,7 @@ impl fmt::Display for Point {
                     label: '2. Move (String sem Copy)',
                     rows: [
                       ['let s1 = String::from("Oi");', 's1 válido', 'Heap: buffer "Oi"'],
-                      ['let s2 = s1;', 's1 MOVIDO (E0382)', 's2 assume o buffer'],
+                      ['let s2 = s1;', 's1 movido (uso posterior: E0382)', 's2 assume o buffer'],
                     ],
                     highlight: [1],
                     info: '`String` guarda ponteiro para o heap e não é `Copy`: `let s2 = s1;` move a posse para `s2`.',
@@ -633,9 +632,7 @@ fn main() {
             codePuzzle(
               'Monte o programa em que `Sensor` deriva `Debug`, `Clone` e `Copy`, permitindo usar `a` e `b` após `let b = a;`:',
               [
-                '#[derive(Debug, Clone, Copy)]',
-                'struct Sensor { id: u8, val: i32 }',
-                'fn main() {',
+                '#[derive(Debug, Clone, Copy)]\nstruct Sensor { id: u8, val: i32 }\nfn main() {',
                 '    let a = Sensor { id: 1, val: 50 };',
                 '    let b = a;',
                 '    println!("{} {}", a.val, b.val);',
@@ -679,10 +676,10 @@ fn main() {
             {
               title: 'Igualdade, ordem, Hash e regra do órfão',
               body: [
-                '• **`PartialEq` e `Eq`**: `PartialEq` habilita os operadores de igualdade e diferença. Quando derivada, compara todos os campos. `Eq` é uma trait marcadora que garante reflexividade total (todo valor é igual a si mesmo). `f64` implementa `PartialEq`, mas **não** `Eq`, porque `f64::NAN` não é igual a `f64::NAN`.',
+                '• **`PartialEq` e `Eq`**: `PartialEq` habilita os operadores de igualdade e diferença. Quando derivada, compara todos os campos. `Eq` é uma trait marcadora cujo contrato exige uma relação de equivalência, incluindo reflexividade (todo valor é igual a si mesmo); o compilador não prova essa propriedade. `f64` implementa `PartialEq`, mas **não** `Eq`, porque `f64::NAN` não é igual a `f64::NAN`.',
                 '• **`PartialOrd`, `Ord` e `Default`**: `PartialOrd` habilita `<`, `<=`, `>` e `>=`; `Default` fornece `T::default()` (zeros, coleções vazias ou um padrão seu).',
-                '• **`Hash`**: exigida junto com `Eq` nas chaves de `HashSet` e `HashMap`. Se você implementar `PartialEq` à mão (por exemplo, comparando `User` apenas pelo `cpf`), **deve** implementar `Hash` usando exatamente o mesmo campo.',
-                '• **Regra do órfão (`E0117`)**: você só pode escrever `impl Trait for Tipo` se pelo menos a `Trait` ou o `Tipo` pertencer à sua crate atual.',
+                '• **`Hash`**: exigida junto com `Eq` nas chaves de `HashSet` e `HashMap`. Valores iguais por `PartialEq` **devem** produzir o mesmo hash. Se a igualdade de `User` compara só `cpf`, usar apenas `cpf` em `Hash` atende ao contrato; incluir `name` pode violá-lo.',
+                '• **Regra do órfão**: a trait deve ser local, ou o tipo que recebe a implementação ou um argumento de tipo da trait deve ser local, respeitando as restrições sobre parâmetros genéricos. `Display for Vec<i32>` viola a regra (`E0117`).',
               ].join('\n\n'),
               visual: code(
                 `use std::hash::{Hash, Hasher};
@@ -717,7 +714,7 @@ impl Hash for User {
                   ['PartialOrd / Ord', 'Comparação de ordem (<, >)', 'sort() em Vec exige Ord; f64 exige sort_by'],
                   ['Default', 'Valor inicial T::default()', 'Números dão 0, bool dá false, String dá ""'],
                   ['Hash', 'Chave de HashSet / HashMap', 'Valores iguais por PartialEq devem gerar o mesmo hash'],
-                  ['Regra do órfão', 'Coerência entre crates', 'Trait ou Tipo precisa ser local à sua crate (E0117)'],
+                  ['Regra do órfão', 'Coerência entre crates', 'Exige trait local ou tipo local na implementação, com restrições para genéricos'],
                 ],
                 [0, 3, 4],
               ),
@@ -734,14 +731,33 @@ impl Hash for User {
               ].join('\n'),
               visual: code(
                 `use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
+
+struct Person { cpf: String, name: String }
+impl std::fmt::Display for Person {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ({})", self.name, self.cpf)
+    }
+}
+impl PartialEq for Person {
+    fn eq(&self, other: &Self) -> bool {
+        self.cpf == other.cpf
+    }
+}
+impl Eq for Person {}
+impl Hash for Person {
+    fn hash<H: Hasher>(&self, s: &mut H) {
+        self.cpf.hash(s);
+    }
+}
 
 fn main() {
     let mut s = HashSet::new();
-    s.insert(Person::new("11", "Ana"));
-    s.insert(Person::new("11", "Bia"));
-    println!("Total: {}", s.len());
+    s.insert(Person { cpf: "11122233344".into(), name: "Ana".into() });
+    s.insert(Person { cpf: "11122233344".into(), name: "Bia".into() });
+    println!("{}", s.len());
 }`,
-                [5, 6, 7],
+                [24, 25, 26],
                 'src/main.rs',
               ),
             },
@@ -814,7 +830,7 @@ impl fmt::Display for Vec<i32> {
               'Associe cada trait da biblioteca padrão à sua finalidade:',
               [
                 ['Default', 'Construir um valor padrão inicial com T::default()'],
-                ['Eq', 'Garantir relação de equivalência reflexiva sem NaN'],
+                ['Eq', 'Declarar que a igualdade é uma relação de equivalência, inclusive reflexiva'],
                 ['Hash', 'Alimentar o Hasher para chaves de HashSet e HashMap'],
                 ['PartialOrd', 'Comparar valores com operadores de ordem (<, >)'],
               ],
@@ -823,23 +839,20 @@ impl fmt::Display for Vec<i32> {
             mcq(
               'Você implementou `PartialEq` à mão para `Person` comparando apenas o campo `cpf`, mas manteve `#[derive(Hash)]` (que inclui `cpf` e `name` no hash). O que acontece num `HashSet<Person>`?',
               [
-                'Viola o contrato de Hash: duas pessoas iguais terão hashes diferentes e o HashSet falhará ao achar duplicatas.',
+                'Pode violar o contrato de Hash: pessoas iguais por cpf podem ter hashes diferentes, e a detecção de duplicatas deixa de ser garantida.',
                 'O compilador ignora automaticamente o campo name dentro do derive(Hash).',
                 'O programa funciona normalmente porque HashSet não usa PartialEq.',
                 'O HashSet ordena as pessoas em ordem alfabética pelo nome.',
               ],
               0,
-              'O contrato de `Hash` exige que, se dois valores são considerados iguais por `PartialEq`, eles produzam **obrigatoriamente** o mesmo hash. Por isso, ao personalizar `PartialEq` por `cpf`, `Hash` também deve usar apenas `cpf`.',
+              'O contrato de `Hash` exige que valores iguais por `PartialEq` produzam **obrigatoriamente** o mesmo hash. Usar só `cpf` atende ao contrato. Incluir nomes diferentes pode gerar hashes diferentes (colisões também são possíveis), violando essa garantia.',
             ),
             codePuzzle(
               'Monte a implementação manual de `PartialEq` para `Badge` que compara apenas o campo `id`:',
               [
-                'struct Badge { id: u32, tag: String }',
-                'impl PartialEq for Badge {',
-                '    fn eq(&self, other: &Self) -> bool {',
+                'struct Badge { id: u32, tag: String }\nimpl PartialEq for Badge {\n    fn eq(&self, other: &Self) -> bool {',
                 '        self.id == other.id',
-                '    }',
-                '}',
+                '    } }',
               ],
               [
                 '    fn eq(self, other: Self) -> bool {',
@@ -928,7 +941,7 @@ fn main() {
                       ['Destino', '—', '—'],
                     ],
                     highlight: [0],
-                    info: 'Temos `d` do tipo `Km(3)` na pilha.',
+                    info: 'Temos `d` do tipo `Km`, com valor `Km(3)`, na pilha.',
                   },
                   {
                     label: 'Passo 2: Chamada .into()',
@@ -971,11 +984,11 @@ fn main() {
               {
                 visual: code(
                   `struct Mins(i32);
-struct Secs(i32);
+struct Secs(i64);
 
 impl From<Mins> for Secs {
     fn from(m: Mins) -> Self {
-        Secs(m.0 * 60)
+        Secs(i64::from(m.0) * 60)
     }
 }
 fn main() {
@@ -995,20 +1008,20 @@ fn main() {
             mcq(
               'Por que a linha `let x = 10.into();` isolada abaixo não compila?',
               [
-                'Erro E0282: faltam anotações de tipo para o compilador saber qual é o tipo de destino de x.',
+                'Erro E0283: faltam anotações de tipo para o compilador escolher a conversão para o tipo de destino de x.',
                 'O tipo i32 não implementa a trait Into para nenhum tipo.',
                 'O método into() só pode ser chamado dentro de blocos impl.',
                 'Literais inteiros não possuem métodos em Rust.',
               ],
               0,
-              'Como vários tipos implementam `From<i32>` (por exemplo, `i64` ou uma struct sua), o compilador não consegue adivinhar o tipo de `x` sem uma anotação como `let x: i64 = 10.into();` (`error[E0282]: type annotations needed`).',
+              'Como vários tipos implementam `From<i32>` (por exemplo, `i64` ou uma struct sua), o compilador não consegue escolher a conversão sem uma anotação como `let x: i64 = 10.into();` (`error[E0283]: type annotations needed`).',
               {
                 visual: code(
                   `fn main() {
     let x = 10.into();
 }`,
                   [2],
-                  'erro_e0282.rs',
+                  'erro_e0283.rs',
                 ),
               },
             ),
@@ -1022,8 +1035,7 @@ fn main() {
             order(
               'Ordene as linhas para implementar `From<(i32, i32)>` para a struct `Point`:',
               [
-                'struct Point { x: i32, y: i32 }',
-                'impl From<(i32, i32)> for Point {',
+                'struct Point { x: i32, y: i32 }\nimpl From<(i32, i32)> for Point {',
                 '    fn from(p: (i32, i32)) -> Self {',
                 '        Point { x: p.0, y: p.1 }',
                 '    } }',
@@ -1031,20 +1043,18 @@ fn main() {
               'Declaramos a struct `Point`, abrimos `impl From<(i32, i32)> for Point` e definimos `fn from` retornando `Point { x: p.0, y: p.1 }`.',
             ),
             codePuzzle(
-              'Monte a implementação de `From<i32>` para `Cents` (que multiplica reais por 100):',
+              'Monte a implementação de `From<i32>` para `Cents(i64)` (que multiplica reais por 100 sem transbordar):',
               [
-                'struct Cents(i32);',
-                'impl From<i32> for Cents {',
+                'struct Cents(i64);\nimpl From<i32> for Cents {',
                 '    fn from(reais: i32) -> Self {',
-                '        Cents(reais * 100)',
-                '    }',
-                '}',
+                '        Cents(i64::from(reais) * 100)',
+                '    } }',
               ],
               [
                 'impl Into<Cents> for i32 {',
                 '    fn from(&self) -> Self {',
               ],
-              'Implementamos `From<i32> for Cents` com `fn from(reais: i32) -> Self`, devolvendo `Cents(reais * 100)`.',
+              'Implementamos `From<i32> for Cents` com `fn from(reais: i32) -> Self`. Converter para `i64` antes de multiplicar por `100` evita overflow para qualquer entrada `i32`, mantendo a conversão infalível.',
             ),
             gen((rng) => {
               const kg = randInt(rng, 2, 9);
@@ -1057,10 +1067,10 @@ fn main() {
                 {
                   visual: code(
                     `struct Kg(i32);
-struct Grams(i32);
+struct Grams(i64);
 impl From<Kg> for Grams {
     fn from(k: Kg) -> Self {
-        Grams(k.0 * 1000)
+        Grams(i64::from(k.0) * 1000)
     }
 }
 fn main() {
@@ -1101,7 +1111,7 @@ impl TryFrom<i32> for Percent {
                 [3, 4, 8, 9, 11],
                 'try_from.rs',
               ),
-              tip: 'Quando uma struct valida seus dados no `TryFrom` e mantém o campo privado, qualquer instância existente no programa é válida por construção!',
+              tip: 'Campos privados impedem a construção direta fora do módulo que define a struct. Para preservar a validade, todas as APIs de construção e mutação precisam respeitar a mesma regra; o próprio módulo ainda pode acessar os campos diretamente.',
             },
             {
               title: 'Comparativo: From vs TryFrom',
@@ -1124,25 +1134,30 @@ impl TryFrom<i32> for Percent {
                 '• Crie `cargo new valida_cpf` e edite `src/main.rs`.',
                 '• Declare `#[derive(Debug)] struct Cpf(String);` e `#[derive(Debug)] enum CpfError { InvalidLen, NotDigits }`.',
                 '• Implemente `TryFrom<&str> for Cpf` com `type Error = CpfError;`: retorne `Err(CpfError::InvalidLen)` se `s.len() != 11`, `Err(CpfError::NotDigits)` se `!s.chars().all(|c| c.is_ascii_digit())`, e `Ok(Cpf(s.to_string()))` caso contrário.',
-                '• No `main`, teste `"12345678901"` e `"1234a678901"` usando `match` (sem `unwrap()`).',
+                '• No `main`, teste `"12345678901"` e `"1234a678901"` usando `match` (sem `unwrap()`), lendo `cpf.0` ao exibir o texto aprovado. Esta regra verifica só formato, não os dígitos verificadores de um CPF real.',
                 '• **Critério de pronto**: `cargo run` mostra o CPF válido aprovado e o inválido recusado com `NotDigits`, e `cargo clippy -- -D warnings` passa sem avisos.',
               ].join('\n'),
               visual: code(
                 `#[derive(Debug)]
 struct Cpf(String);
+#[derive(Debug)]
+enum CpfError { InvalidLen, NotDigits }
 
 impl TryFrom<&str> for Cpf {
-    type Error = &'static str;
+    type Error = CpfError;
     fn try_from(
         s: &str,
     ) -> Result<Self, Self::Error> {
         if s.len() != 11 {
-            return Err("Tamanho != 11");
+            return Err(CpfError::InvalidLen);
+        }
+        if !s.chars().all(|c| c.is_ascii_digit()) {
+            return Err(CpfError::NotDigits);
         }
         Ok(Cpf(s.to_string()))
     }
 }`,
-                [4, 5, 9],
+                [6, 7, 11, 14],
                 'src/main.rs',
               ),
             },
@@ -1231,10 +1246,7 @@ fn main() {
             codePuzzle(
               'Monte a implementação de `TryFrom<i32>` para `NonZero` que rejeita o valor `0`:',
               [
-                'struct NonZero(i32);',
-                'impl TryFrom<i32> for NonZero {',
-                "    type Error = &'static str;",
-                '    fn try_from(v: i32)',
+                'struct NonZero(i32);\nimpl TryFrom<i32> for NonZero {\n    type Error = &\'static str;\n    fn try_from(v: i32)',
                 '        -> Result<Self, Self::Error> {',
                 '        if v == 0 { Err("zero") }',
                 '        else { Ok(NonZero(v)) } } }',
@@ -1328,7 +1340,7 @@ fn total(
             },
             {
               title: 'Na memória: o ponteiro gordo (fat pointer)',
-              body: 'Avance pelos passos para ver como um `Box<dyn Employee>` guarda dois ponteiros na pilha (16 bytes em 64 bits) para alcançar o dado no heap e a `vtable`.',
+              body: 'Avance pelos passos para ver a representação atual de um `Box<dyn Employee>` local: dois ponteiros (16 bytes em um alvo de 64 bits) para alcançar o dado no heap e a `vtable`. O layout exato não é uma garantia estável da linguagem.',
               visual: stepTable(
                 ['Região', 'Campo / Conteúdo', 'Valor / Destino'],
                 [
@@ -1339,7 +1351,7 @@ fn total(
                       ['Pilha (palavra 2)', 'ptr_vtable (8 bytes)', '-> Vtable de Manager'],
                     ],
                     highlight: [0, 1],
-                    info: 'Todo `&dyn Trait` ou `Box<dyn Trait>` é um *fat pointer* de 2 palavras (16 bytes em sistemas de 64 bits).',
+                    info: 'Na implementação atual do rustc, `&dyn Trait` e `Box<dyn Trait>` usam 2 palavras (16 bytes em alvos de 64 bits). Eles também podem ser campos de valores armazenados no heap.',
                   },
                   {
                     label: '2. Heap e Vtable estática',
@@ -1376,7 +1388,7 @@ fn total(
               'A pilha precisa saber exatamente quantos bytes reservar para cada variável em tempo de compilação (`Sized`). Como um `dyn Employee` pode ser qualquer struct, ele deve ser referenciado por um ponteiro de tamanho fixo (`&dyn Employee` ou `Box<dyn Employee>`).',
             ),
             num(
-              'Em uma arquitetura de 64 bits (onde um ponteiro simples ocupa 8 bytes), quantos bytes ocupa uma referência `&dyn Employee` na pilha?',
+              'Na representação atual do rustc em um alvo de 64 bits (ponteiro simples de 8 bytes), quantos bytes ocupa uma referência `&dyn Employee`?',
               16,
               'Um ponteiro para `dyn Trait` é um *ponteiro gordo* (*fat pointer*) formado por dois ponteiros de 8 bytes: um para os dados do objeto e outro para a `vtable` (`8 + 8 = 16` bytes).',
             ),
@@ -1425,7 +1437,7 @@ fn main() {
               'let list: Vec<___<___ Sensor>> = vec![\n    Box::new(Temp),\n    Box::new(Press),\n];',
               ['Box', 'dyn'],
               ['impl', 'Vec', 'Self'],
-              'Usamos `Vec<Box<dyn Sensor>>`: `Box` aloca cada struct no heap com um ponteiro de tamanho conhecido e `dyn Sensor` habilita o despacho dinâmico.',
+              'Usamos `Vec<Box<dyn Sensor>>`: os boxes têm tamanho conhecido e `dyn Sensor` habilita o despacho dinâmico. As structs unitárias `Temp` e `Press` têm tamanho zero, por isso seus boxes não precisam alocar dados no heap.',
             ),
             match(
               'Associe cada mecanismo à sua característica em Rust:',
@@ -1440,13 +1452,11 @@ fn main() {
             codePuzzle(
               'Monte o código que cria um `Vec<Box<dyn Draw>>` com duas figuras distintas e chama `draw()` em cada uma:',
               [
-                'let shapes: Vec<Box<dyn Draw>> = vec![',
-                '    Box::new(Circle { r: 3 }),',
-                '    Box::new(Square { s: 4 }),',
-                '];',
-                'for s in &shapes {',
+                'trait Draw { fn draw(&self); }\nstruct Circle { r: i32 }\nstruct Square { s: i32 }\nimpl Draw for Circle { fn draw(&self) { println!("Círculo: {}", self.r); } }\nimpl Draw for Square { fn draw(&self) { println!("Quadrado: {}", self.s); } }\nfn main() {\n    let shapes: Vec<Box<dyn Draw>> = vec![',
+                '        Box::new(Circle { r: 3 }),\n        Box::new(Square { s: 4 }),',
+                '    ];\n    for s in &shapes {',
                 '    s.draw();',
-                '}',
+                '    } }',
               ],
               [
                 'let shapes: Vec<impl Draw> = vec![',
@@ -1504,7 +1514,7 @@ fn main() {
               title: 'Regras de dyn (E0038) e enum vs trait',
               body: [
                 'Nem toda trait pode virar um `dyn Trait`. Para ser **compatível com `dyn`** (*dyn-compatible* / *object-safe*), os métodos da trait precisam caber numa `vtable` e funcionar sem que o chamador conheça o tipo concreto. Tentar usar `dyn` numa trait incompatível gera o erro **`E0038`**.',
-                'Uma trait **não** é compatível com `dyn` se tiver:\n• Método que retorna `Self` por valor (como `Clone::clone(&self) -> Self`, pois o chamador não sabe quantos bytes reservar na pilha para `Self`).\n• Método com parâmetro de tipo genérico (`fn send<T>(&self, x: T)`).\n• Função associada sem receptor `self` (`fn new() -> Self`), a menos que ela seja restringida com `where Self: Sized`.',
+                'Entre as restrições de compatibilidade com `dyn`:\n• A trait não pode exigir `Self: Sized` (como faz `Clone`) nem ter supertraits incompatíveis com `dyn`.\n• Métodos que retornam `Self` por valor, métodos com parâmetros de tipo e funções sem receptor precisam ser excluídos do despacho com `where Self: Sized`.\n• Constantes associadas e tipos associados genéricos impedem `dyn`; métodos `async fn` e com retorno `impl Trait` também precisam da restrição `Self: Sized`.',
                 'Na modelagem (**Exercício 23**), escolha **`enum`** quando o conjunto de tipos for **fechado e conhecido** (sem `Box` extra e com `match` exaustivo), e **`dyn Trait`** quando o conjunto for **aberto** ou para injeção de dependência (`Box<dyn Notifier>`).',
               ].join('\n\n'),
               visual: code(
@@ -1512,8 +1522,8 @@ fn main() {
     fn duplicate(&self) -> Self;
 }
 
-// Erro E0038: retorna Self por valor!
-// let p: Box<dyn BadClone>;`,
+// Erro E0038: retorna Self sem Self: Sized!
+fn use_object(_: &dyn BadClone) {}`,
                 [2, 6],
                 'erro_e0038.rs',
               ),
@@ -1525,8 +1535,8 @@ fn main() {
                 ['Critério', 'enum com variantes', 'dyn Trait (Box<dyn ...>)'],
                 [
                   ['Conjunto de tipos', 'Fechado (conhecido na definição)', 'Aberto (novas structs sem mexer nas antigas)'],
-                  ['Memória em Vec', 'Contígua, sem Box por item', 'Ponteiro gordo + alocação de cada item'],
-                  ['Adicionar nova operação', 'Fácil: basta mais uma função com match', 'Exige adicionar método na trait e em todo impl'],
+                  ['Memória em Vec', 'Contígua, sem Box por item', 'Ponteiro gordo + alocação por item de tamanho não zero'],
+                  ['Adicionar nova operação', 'Fácil: basta mais uma função com match', 'Método obrigatório exige mudar os impls; método padrão pode ser herdado'],
                   ['Injeção de dependência', 'Acoplada às variantes do enum', 'Excelente (ex.: Box<dyn Notifier>)'],
                 ],
                 [0, 3],
@@ -1540,7 +1550,8 @@ fn main() {
                 '• Crie `struct EmployeeData { name: String, salary: f64 }` para guardar os campos comuns por **composição**.',
                 '• Crie `trait Employee { fn salary(&self) -> f64; fn bonus(&self) -> f64; }` e implemente para `struct Manager { data: EmployeeData }` (bônus de 20%) e `struct Developer { data: EmployeeData }` (bônus de 10%).',
                 '• Guarde um `Manager` (salário `10000.0`) e um `Developer` (salário `6000.0`) num `Vec<Box<dyn Employee>>` e some os bônus num laço.',
-                '• **Critério de pronto**: `cargo run` imprime `2600.0` (`2000.0 + 600.0`) e `cargo clippy -- -D warnings` termina sem nenhum aviso.',
+                '• Implemente o bônus usando `self.salary()` e confira que os nomes não estão vazios com `assert!(!manager.data.name.is_empty())` e `assert!(!developer.data.name.is_empty())` antes de mover os funcionários para o vetor.',
+                '• **Critério de pronto**: `cargo run` imprime `2600.0` com `println!("{:.1}", total)` (`2000.0 + 600.0`) e `cargo clippy -- -D warnings` termina sem nenhum aviso.',
               ].join('\n'),
               visual: code(
                 `struct EmployeeData {
@@ -1551,6 +1562,7 @@ struct Manager {
     data: EmployeeData,
 }
 trait Employee {
+    fn salary(&self) -> f64;
     fn bonus(&self) -> f64;
 }`,
                 [1, 6, 8],
@@ -1562,13 +1574,13 @@ trait Employee {
             mcq(
               'Por que o tipo `Box<dyn Clone>` não compila em Rust?',
               [
-                'Erro E0038: o método Clone::clone retorna Self por valor, cujo tamanho em bytes não é conhecido em compilação.',
+                'Erro E0038: Clone exige Self: Sized, o que impede sua utilização como dyn Clone.',
                 'Erro E0117: Clone pertence à biblioteca padrão e não à crate atual.',
                 'Porque Box<T> já clona todos os objetos automaticamente sem precisar de Clone.',
                 'Porque traits com apenas um método não podem usar dyn.',
               ],
               0,
-              '`Clone::clone(&self) -> Self` devolve `Self` por valor. Com um `dyn Clone`, o compilador não sabe quantos bytes o tipo concreto retornado ocuparia na pilha, emitindo `error[E0038]: the trait \'Clone\' cannot be made into an object`.',
+              '`Clone` é declarada como `pub trait Clone: Sized`. Essa exigência na própria trait impede `dyn Clone`, gerando `E0038` (trait não compatível com dyn). Seu método `clone(&self) -> Self` também devolve o tipo concreto por valor.',
             ),
             tf(
               'Uma trait que declara um método genérico `fn format_item<T>(&self, x: T) -> String` pode ser usada como `dyn Formatter`.',
@@ -1577,7 +1589,7 @@ trait Employee {
             ),
             mcq(
               'Qual cláusula permite manter uma função construtora `fn new() -> Self` dentro de uma trait sem impedir o uso de `dyn Trait` nos demais métodos?',
-              ['where Self: Sized', 'where Self: Copy', 'where Self: Clone', 'where Self: Default'],
+              ['where Self: Sized', 'where Self: Send', 'where Self: Sync', 'where Self: std::fmt::Debug'],
               0,
               'A restrição `where Self: Sized` no método diz ao compilador que aquele método específico não estará disponível em `dyn Trait` (que não é `Sized`), permitindo criar a `vtable` com os demais métodos.',
               {
@@ -1628,16 +1640,13 @@ trait Employee {
             codePuzzle(
               'Monte a struct `Service` que guarda um `Box<dyn Logger>` por composição e o aciona em `run`:',
               [
-                'trait Logger { fn log(&self, m: &str); }',
-                'struct Service {',
+                'trait Logger { fn log(&self, m: &str); }\nstruct Service {',
                 '    logger: Box<dyn Logger>,',
-                '}',
-                'impl Service {',
-                '    fn run(&self) {',
+                '}\nimpl Service {\n    fn run(&self) {',
                 '        self.logger.log("ok"); } }',
               ],
               [
-                '    logger: dyn Logger,',
+                '    logger: Box<Logger>,',
                 '        Logger::log("ok"); } }',
               ],
               'O campo `logger` usa `Box<dyn Logger>` para ter tamanho fixo na struct, e `self.logger.log("ok")` faz a chamada polimórfica.',
@@ -1810,7 +1819,7 @@ fn main() {
               'Rust nunca aplica `+` a uma struct sem que `std::ops::Add` tenha sido explicitamente implementada para ela (`error[E0369]: cannot add \'Volts\' to \'Volts\'`).',
             ),
             fill(
-              'Complete a implementação da subtração (`std::ops::Sub`) para `Money(i64)`:',
+              'Complete a implementação da subtração para `Money(i64)`, com `use std::ops::Sub;` já importado:',
               'impl Sub for Money {\n    type ___ = Self;\n    fn ___(self, rhs: Self) -> Self {\n        Money(self.0 - rhs.0)\n    }\n}',
               ['Output', 'sub'],
               ['Item', 'Error', 'add'],
@@ -1830,11 +1839,7 @@ fn main() {
             codePuzzle(
               'Monte a implementação de `std::ops::Add` para o vetor bidimensional `Vec2(i32, i32)`:',
               [
-                'use std::ops::Add;',
-                'struct Vec2(i32, i32);',
-                'impl Add for Vec2 {',
-                '    type Output = Self;',
-                '    fn add(self, r: Self) -> Self {',
+                'use std::ops::Add;\nstruct Vec2(i32, i32);\nimpl Add for Vec2 {\n    type Output = Self;\n    fn add(self, r: Self) -> Self {',
                 '        Vec2(self.0 + r.0, self.1 + r.1)',
                 '    } }',
               ],
@@ -1883,8 +1888,8 @@ fn main() {
             {
               title: 'Tipos associados e Iterator::Item',
               body: [
-                'Por que algumas traits usam um **tipo associado** (`type Item;`) em vez de um parâmetro genérico (`trait Iterator<T>`)? Com um parâmetro genérico, uma mesma struct poderia implementar `Iterator<u32>` e `Iterator<String>` ao mesmo tempo, obrigando você a anotar tipos em toda chamada.',
-                'Com o tipo associado **`type Item`**, cada tipo implementa **`Iterator`** uma única vez e fixa qual elemento ele produz. Você só precisa definir `type Item` e o método **`fn next(&mut self) -> Option<Self::Item>`**: de brinde, ganha dezenas de métodos padrão da trait `Iterator`, como `take`, `map`, `filter`, `sum` e `collect`!',
+                'Por que algumas traits usam um **tipo associado** (`type Item;`) em vez de um parâmetro genérico (`trait Iterator<T>`)? Com um parâmetro genérico, uma mesma struct poderia implementar `Iterator<u32>` e `Iterator<String>` ao mesmo tempo, podendo exigir anotações de tipo em chamadas ambíguas.',
+                'Com o tipo associado **`type Item`**, cada tipo implementa **`Iterator`** uma única vez e fixa qual elemento ele produz. Você só precisa definir `type Item` e o método **`fn next(&mut self) -> Option<Self::Item>`**: de brinde, ganha dezenas de métodos padrão da trait `Iterator`, como `take`, `map`, `filter`, `sum` e `collect`, desde que os limites de cada método sejam satisfeitos (por exemplo, `sum` exige um tipo que implemente `Sum` para os itens)!',
               ].join('\n\n'),
               visual: code(
                 `struct Step { cur: u32, max: u32 }
@@ -1929,7 +1934,7 @@ fn main() {
                 '• Crie `cargo new fib_iter` e abra `src/main.rs`.',
                 '• Defina `struct Fibonacci { a: u64, b: u64 }` com `fn new() -> Self { Fibonacci { a: 0, b: 1 } }`.',
                 '• Implemente `Iterator for Fibonacci` com `type Item = u64;`. Em `next(&mut self)`, guarde `let cur = self.a;`, atualize `self.a = self.b;` e `self.b = cur + self.b;`, e retorne `Some(cur)`.',
-                '• No `main`, calcule a soma dos 10 primeiros termos com `Fibonacci::new().take(10).sum::<u64>()` e imprima o resultado.',
+                '• No `main`, calcule a soma dos 10 primeiros termos com `Fibonacci::new().take(10).sum::<u64>()` e imprima o resultado. Limite o consumo: a sequência cresce além de `u64`; a adição comum causa panic com checagem de overflow (padrão em debug) ou dá a volta sem a checagem (padrão em release).',
                 '• **Critério de pronto**: `cargo run` imprime `88` (soma de `0, 1, 1, 2, 3, 5, 8, 13, 21, 34`) e `cargo clippy -- -D warnings` termina sem avisos.',
               ].join('\n'),
               visual: code(
@@ -1959,12 +1964,12 @@ impl Iterator for Fibonacci {
                 'fn iter(&self) -> bool',
               ],
               0,
-              '`Iterator` exige apenas `type Item` e `fn next(&mut self) -> Option<Self::Item>`. Todos os adaptadores como `map`, `filter`, `take`, `sum` e `collect` são métodos padrão construídos sobre `next`.',
+              '`Iterator` exige apenas `type Item` e `fn next(&mut self) -> Option<Self::Item>`. Adaptadores como `map`, `filter` e `take`, e consumidores como `sum` e `collect`, têm implementações padrão construídas sobre `next`.',
             ),
             mcq(
               'Por que a trait `Iterator` define `type Item;` como tipo associado em vez de ser `trait Iterator<T>`?',
               [
-                'Porque cada tipo iterador produz um único tipo de elemento, evitando que o código cliente precise anotar T em cada chamada.',
+                'Porque cada tipo iterador fixa um único tipo de elemento, simplificando a inferência de tipos no código cliente.',
                 'Porque Rust não permite traits com parâmetros genéricos.',
                 'Porque tipos associados só aceitam inteiros sem sinal.',
                 'Porque next() não pode retornar um enum genérico como Option.',
@@ -2003,9 +2008,9 @@ fn main() {
               },
             ),
             tf(
-              'Depois de implementar `type Item` e `fn next` em `impl Iterator for MeuTipo`, métodos como `.take(5)`, `.filter(...)` e `.sum()` funcionam automaticamente sem código extra.',
+              'Depois de implementar `type Item` e `fn next` em `impl Iterator for MeuTipo`, métodos como `.take(5)`, `.filter(...)` e `.sum()` ficam disponíveis sem reimplementá-los, respeitando os limites de tipos de cada método.',
               true,
-              'Esses métodos possuem implementações padrão na trait `Iterator` que chamam `self.next()` internamente.',
+              'Esses métodos possuem implementações padrão baseadas em `next`. Ainda é preciso fornecer um predicado válido para `filter` e um tipo de resultado que implemente `Sum<Self::Item>` para `sum`.',
             ),
             match(
               'Associe cada trait da biblioteca padrão ao nome do seu tipo associado:',
@@ -2029,10 +2034,7 @@ fn main() {
             codePuzzle(
               'Monte a implementação de `Iterator` para `Countdown` que entrega `n, n - 1, ..., 1` e para em `0`:',
               [
-                'struct Countdown { n: u32 }',
-                'impl Iterator for Countdown {',
-                '    type Item = u32;',
-                '    fn next(&mut self) -> Option<u32> {',
+                'struct Countdown { n: u32 }\nimpl Iterator for Countdown {\n    type Item = u32;\n    fn next(&mut self) -> Option<u32> {',
                 '        if self.n == 0 { return None; }',
                 '        let v = self.n; self.n -= 1;',
                 '        Some(v) } }',

@@ -11,11 +11,11 @@ export const rustOwnership: UnitDef = {
   source: 'The Rust Programming Language (ed. 2024), cap. 4.1 · Desafio 50 Dias — Rust, Módulo 2',
   extra: true,
   guide:
-    'Em Rust, a memória é gerenciada em tempo de compilação pelo sistema de **ownership** (posse), sem coletor de lixo e sem chamadas manuais a `free()`.\n\n' +
+    'Em Rust, o sistema de **ownership** (posse) verifica o uso dos valores em tempo de compilação; a alocação e a liberação da memória acontecem em execução, sem coletor de lixo e sem chamadas manuais a `free()` nestes exemplos.\n\n' +
     '• **As três regras do ownership**: (1) cada valor tem um **dono** (*owner*); (2) só pode existir **um único dono** por vez; (3) quando o dono sai de escopo (`}`), o valor é descartado automaticamente (**drop**).\n' +
-    '• **Pilha vs. heap**: tipos de tamanho fixo conhecido em compilação (`i32`, `f64`, `bool`, `char`, tuplas e arrays de tipos fixos) ficam na **pilha** (*stack*). Tipos que crescem ou têm tamanho dinâmico (`String`, `Vec<T>`, `Box<T>`) guardam um cabeçalho na pilha (`ptr`, `len`, `capacity`) e os dados no **heap**.\n' +
-    '• **Move vs. Copy vs. Clone**: atribuir ou passar por valor um tipo dono de memória no heap (`let s2 = s1;`) **move** a posse para `s2` e invalida `s1` (usá-la depois gera o erro **E0382**). Para duplicar o heap explicitamente, usa-se `.clone()`. Tipos simples na pilha implementam a trait `Copy` e são copiados sem invalidar a variável original.\n' +
-    '• **Escopo, RAII e funções**: ao sair de escopo, o compilador invoca `Drop::drop` na ordem inversa da declaração (LIFO). Para liberar antes do fim do bloco, passa-se o valor para `drop(v)`. Funções que recebem posse podem devolvê-la pelo valor de retorno.',
+    '• **Pilha vs. heap**: nos diagramas desta unidade, representamos as variáveis locais na **pilha** (*stack*). `String` e `Vec<T>` têm tamanho fixo e guardam `ptr`, `len` e `capacity`; seus buffers podem crescer no **heap**. `Box<T>` também tem tamanho fixo: para `T: Sized`, guarda um único ponteiro para o valor no heap. O tipo sozinho não determina onde um valor fica: um `i32` também pode estar no heap, e otimizações podem manter valores em registradores ou eliminá-los.\n' +
+    '• **Move vs. Copy vs. Clone**: atribuir ou passar por valor um tipo não-`Copy`, como `String` (`let s2 = s1;`), **move** a posse para `s2` e invalida `s1` (tentar lê-la antes de reinicializá-la gera **E0382**). `.clone()` duplica uma `String` explicitamente. É a trait `Copy`, e não a região da memória, que permite copiar um valor sem invalidar a variável original.\n' +
+    '• **Escopo, RAII e funções**: ao sair normalmente de um bloco, as variáveis locais que ainda possuem valores são descartadas na ordem inversa da declaração (LIFO), chamando `Drop::drop` se o tipo o implementar e descartando seus campos. Para liberar antes do fim do bloco, passa-se o valor para `drop(v)`. Funções que recebem posse podem devolvê-la pelo valor de retorno.',
   lessons: [
     {
       id: 'ro-own-pilha',
@@ -26,7 +26,7 @@ export const rustOwnership: UnitDef = {
             {
               title: 'Memória em ordem: a pilha',
               body:
-                'Em Rust, saber se um valor mora na **pilha** (*stack*) ou no **heap** determina como a linguagem copia ou transfere esse valor.\n\n' +
+                'Em Rust, a **pilha** (*stack*) e o **heap** são regiões de memória; quem determina se uma atribuição copia ou move um valor é a trait `Copy`. Aqui usamos o modelo de variáveis locais na pilha, desconsiderando otimizações.\n\n' +
                 'A pilha funciona no modelo **LIFO** (*last in, first out* — último a entrar, primeiro a sair). Quando uma função é chamada, um quadro (*stack frame*) é empilhado para guardar suas variáveis locais; quando a função retorna, esse quadro é desempilhado de uma só vez.\n\n' +
                 'Para morar diretamente na pilha, o tipo precisa ter **tamanho fixo e conhecido em tempo de compilação**, como `i32` (4 bytes), `u64` (8 bytes), `f64` (8 bytes), `bool` (1 byte), `char` (4 bytes) e arrays fixos `[i32; 3]`.',
               visual: code(
@@ -78,7 +78,7 @@ fn main() {
               'O compilador calcula o deslocamento exato de cada variável no quadro de pilha; por isso exige tamanho conhecido e fixo em compilação.',
             ),
             num(
-              'Sabendo que `i32` ocupa 4 bytes e `bool` ocupa 1 byte, quantos bytes as três variáveis locais de `main` somam na pilha?',
+              'Sabendo que `i32` ocupa 4 bytes e `bool` ocupa 1 byte, qual é a soma dos tamanhos dos três valores locais de `main`, sem contar alinhamento nem otimizações?',
               9,
               'Temos duas variáveis `i32` ($2 \\times 4 = 8$ bytes) e uma variável `bool` ($1$ byte), totalizando $8 + 1 = 9$ bytes.',
               {
@@ -207,7 +207,7 @@ fn main() {
             {
               title: 'No seu computador 💻',
               body:
-                'Crie um projeto com `cargo new pilha_heap` e faça o experimento do exercício 12 do roteiro: crie um `Vec<i32>` vazio com `Vec::new()`, adicione os números de `1` a `8` com `push` e imprima `len()` e `capacity()` a cada passo para ver o buffer do heap dobrar quando enche.',
+                'Crie um projeto com `cargo new pilha_heap` e faça o experimento do exercício 12 do roteiro: crie um `Vec<i32>` vazio com `Vec::new()`, adicione os números de `1` a `8` com `push` e imprima `len()` e `capacity()` a cada passo para observar o crescimento do buffer do heap quando enche.',
               visual: code(
                 `fn main() {
     let mut v = Vec::new();
@@ -223,7 +223,7 @@ fn main() {
                 [2, 4, 7, 8],
                 'src/main.rs',
               ),
-              tip: 'Critério de pronto: ao rodar cargo run, len cresce de 1 até 8 enquanto cap salta em potências de 2 (4, 8...); cargo clippy -- -D warnings deve terminar sem avisos.',
+              tip: 'Critério de pronto: ao rodar cargo run, len cresce de 1 até 8 e cap é sempre pelo menos len. A capacidade pode crescer em saltos, mas Rust não garante que dobre nem valores específicos (como 4 e 8); cargo clippy -- -D warnings deve terminar sem avisos.',
             },
           ],
           exercises: [
@@ -275,7 +275,7 @@ fn main() {
               'Primeiro o alocador reserva espaço no heap, depois os bytes do texto são copiados para lá e, por fim, o cabeçalho na pilha recebe o ponteiro, o tamanho e a capacidade.',
             ),
             multi(
-              'Quais destes tipos guardam seu conteúdo dinâmico principal no **heap**?',
+              'Entre uma `String` não vazia, um `Vec<i32>` com elementos, um `Box<u64>` e um `i32` local, quais guardam os dados apontados no **heap**?',
               ['String', 'Vec<i32>', 'Box<u64>', 'i32'],
               [0, 1, 2],
               '`String`, `Vec<i32>` e `Box<u64>` alocam dados no heap e guardam apenas o cabeçalho/ponteiro na pilha. Já `i32` é um inteiro primitivo de 4 bytes que fica direto na pilha.',
@@ -366,7 +366,7 @@ fn main() {
             {
               title: 'O que muda na memória durante o move',
               body:
-                'Em `let s2 = s1;`, o Rust **não** copia os bytes do texto no heap (o que seria lento para textos grandes). Ele copia apenas os 24 bytes do cabeçalho na pilha (`ptr`, `len`, `capacity`) para `s2` e invalida `s1`. Assim, apenas `s2` liberará o heap no fim do escopo.',
+                'Em `let s2 = s1;`, o Rust **não** copia os bytes do texto no heap (o que seria lento para textos grandes). No modelo de pilha, transfere apenas o cabeçalho (`ptr`, `len`, `capacity`: 24 bytes em 64 bits) para `s2` e invalida `s1`; a cópia física do cabeçalho pode ser eliminada por otimização. Assim, apenas `s2` liberará o heap no fim do escopo.',
               visual: table(
                 ['Local', 'Estado após let s2 = s1;', 'Aponta para'],
                 [
@@ -628,7 +628,7 @@ fn main() {
               },
             ),
             match(
-              'Associe cada código ou operação ao seu efeito em Rust:',
+              'Associe cada código ou operação ao seu efeito em Rust, considerando que `s` ainda possui o valor antigo na reatribuição:',
               [
                 ['Erro E0382', 'Uso de variável cujo valor já foi movido'],
                 ['Erro E0384', 'Tentativa de reatribuir variável sem mut'],
@@ -695,8 +695,8 @@ fn main() {
             {
               title: 'Cópia profunda explícita: .clone()',
               body:
-                'Quando você realmente precisa de duas variáveis `String` ou `Vec` independentes, cada uma dona de seu próprio buffer no heap, chame o método **`.clone()`**.\n\n' +
-                'Diferente do move (que copia apenas o cabeçalho na pilha), `let s2 = s1.clone();` pede um **novo bloco no heap** e duplica todos os bytes do conteúdo. Como copiar dados no heap pode custar tempo e memória, Rust exige que essa chamada seja sempre visível no código.',
+                'Quando você realmente precisa de duas variáveis `String` ou `Vec` independentes, cada uma dona de seu próprio buffer no heap, chame o método **`.clone()`**. Buffers vazios e vetores de elementos de tamanho zero não precisam de alocação.\n\n' +
+                'Diferente do move (que transfere apenas o cabeçalho), para uma `String` não vazia, `let s2 = s1.clone();` pede um **novo bloco no heap** e duplica todos os bytes do conteúdo. Essa cópia pode custar tempo e memória. Em geral, `Clone` depende do tipo: não significa sempre cópia profunda (em um `Vec<T>`, cada elemento é clonado conforme seu próprio tipo).',
               visual: code(
                 `fn main() {
     let s1 = String::from("matriz");
@@ -723,7 +723,7 @@ fn main() {
           ],
           exercises: [
             mcq(
-              'O que o método `.clone()` faz ao ser chamado em `let s2 = s1.clone();` para uma `String`?',
+              'O que o método `.clone()` faz ao ser chamado em `let s2 = s1.clone();` para uma `String` não vazia?',
               [
                 'Aloca um segundo buffer no heap, copia os bytes do texto e mantém s1 e s2 válidas',
                 'Apenas transfere a posse de s1 para s2 e invalida s1',
@@ -849,8 +849,8 @@ fn main() {
             {
               title: 'Tipos Copy: cópia automática na pilha',
               body:
-                'Por que `let x = 5; let y = x;` **não** invalida `x`? Porque tipos simples que vivem inteiramente na pilha implementam a trait **`Copy`**.\n\n' +
-                'Quando um tipo é `Copy`, atribuir ou passar por valor duplica os bytes diretamente na pilha e a variável original continua válida. São `Copy` por padrão:\n' +
+                'Por que `let x = 5; let y = x;` **não** invalida `x`? Porque o tipo inteiro de `x` implementa a trait **`Copy`**, independentemente da região de memória onde está.\n\n' +
+                'Quando um tipo é `Copy`, atribuir ou passar por valor copia o valor e a variável original continua válida; o compilador pode otimizar a cópia física dos bytes. São `Copy` por padrão:\n' +
                 '• Todos os inteiros (`i8`, `i32`, `u64`, `usize`...) e pontos flutuantes (`f32`, `f64`).\n' +
                 '• Booleanos (`bool`) e caracteres Unicode (`char`).\n' +
                 '• Arrays `[T; N]` e tuplas `(T1, T2)` **somente se** todos os seus elementos também forem `Copy`.',
@@ -869,7 +869,7 @@ fn main() {
             {
               title: '#[derive(Clone, Copy)] em structs',
               body:
-                'Suas próprias `struct`s **não** são `Copy` por padrão: atribuir `let p2 = p1;` move `p1`! Mas se todos os campos da `struct` forem `Copy`, basta colocar `#[derive(Clone, Copy)]` acima dela para que ela passe a ser copiada automaticamente.\n\n' +
+                'Suas próprias `struct`s **não** são `Copy` por padrão: atribuir `let p2 = p1;` move `p1`! Mas se todos os campos da `struct` forem `Copy` e ela não implementar `Drop`, basta colocar `#[derive(Clone, Copy)]` acima dela para que ela passe a ser copiada automaticamente.\n\n' +
                 'Se algum campo não for `Copy` (como `String`), tentar derivar `Copy` falha com o erro **E0204**.',
               visual: code(
                 `#[derive(Clone, Copy)]
@@ -982,19 +982,20 @@ struct Aluno {
             ),
             fill(
               'Complete o atributo para que uma `struct` só de campos numéricos implemente cópia automática na atribuição:',
-              '#[derive(___, ___)]',
-              ['Clone', 'Copy'],
-              ['Drop', 'Move'],
-              '`Copy` tem `Clone` como supertrait, por isso sempre derivamos os dois juntos com `#[derive(Clone, Copy)]`.',
+              '#[derive(Clone, ___)]',
+              ['Copy'],
+              ['Drop', 'Move', 'Clone'],
+              '`Copy` tem `Clone` como supertrait. Aqui derivamos os dois juntos com `#[derive(Clone, Copy)]`; a ordem inversa também seria válida.',
             ),
             codePuzzle(
-              'Monte a definição da `struct Par` copiável e o trecho que cria `p1`, copia para `p2` por atribuição e imprime a soma `p1.a + p2.b`:',
+              'Monte o programa com a `struct Par` copiável e a função `main` que cria `p1`, copia para `p2` por atribuição e imprime a soma `p1.a + p2.b`:',
               [
                 '#[derive(Clone, Copy)]',
-                'struct Par { a: i32, b: i32 }',
+                'struct Par { a: i32, b: i32 }\n\nfn main() {',
                 'let p1 = Par { a: 4, b: 6 };',
                 'let p2 = p1;',
                 'println!("{}", p1.a + p2.b);',
+                '}',
               ],
               [
                 '#[derive(Drop, Copy)]',
@@ -1041,7 +1042,7 @@ fn main() {
               title: 'Escopo e limpeza automática (RAII)',
               body:
                 'O **escopo** de uma variável começa na linha `let` onde ela é declarada e vai até a chave de fechamento **`}`** do bloco em que ela vive.\n\n' +
-                'Pela 3ª regra do ownership, assim que o dono sai de escopo, o Rust chama automaticamente o destrutor da trait **`Drop`** (padrão conhecido como **RAII** — *Resource Acquisition Is Initialization*), liberando a memória do heap no ponto exato.\n\n' +
+                'Pela 3ª regra do ownership, ao sair normalmente do escopo, os valores ainda pertencentes às variáveis são descartados. Rust chama **`Drop::drop`** quando o tipo implementa **`Drop`** e também descarta seus campos (padrão conhecido como **RAII** — *Resource Acquisition Is Initialization*). Em uma `String`, isso libera o buffer no heap.\n\n' +
                 'Quando há várias variáveis no mesmo bloco, elas sofrem `drop` na **ordem inversa da declaração** (LIFO: a última criada é a primeira a ser destruída).',
               visual: code(
                 `fn main() {
@@ -1055,7 +1056,7 @@ fn main() {
                 [4, 6, 8],
                 'Escopo de blocos',
               ),
-              tip: 'Em C, esquecer um free() vaza memória e chamar free() cedo demais cria ponteiro pendurado. Em Rust, o compilador insere o drop exatamente no "}" final de cada escopo.',
+              tip: 'Em C, esquecer um free() vaza memória e chamar free() cedo demais cria ponteiro pendurado. Em Rust, a limpeza automática acompanha a saída do escopo, inclusive por return antes do "}" final, para os valores que ainda pertencem às variáveis.',
             },
             {
               title: 'Ordem inversa de destruição (LIFO)',
@@ -1075,7 +1076,7 @@ fn main() {
           ],
           exercises: [
             mcq(
-              'Em que momento exato o Rust libera automaticamente a memória do heap pertencente a uma variável `String`?',
+              'Ao chegar normalmente ao fim de um bloco, sem move, reatribuição nem descarte antecipado, quando o Rust libera o buffer de uma `String` local?',
               [
                 'Na chave de fechamento "}" do escopo da variável que é sua dona atual',
                 'Apenas quando o sistema operacional encerra o processo inteiro',
@@ -1083,7 +1084,7 @@ fn main() {
                 'Nunca automaticamente: é obrigatório chamar free() antes do return',
               ],
               0,
-              'Rust não usa coletor de lixo: o compilador insere a chamada a `Drop::drop` exatamente na chave `}` onde a variável dona sai de escopo.',
+              'Rust não usa coletor de lixo: ao chegar ao `}` do bloco, a limpeza automática da `String` descarta seu campo `Vec<u8>`, liberando o buffer no heap.',
             ),
             tf(
               'Se um bloco declara primeiro `let a = String::from("1");` e depois `let b = String::from("2");`, ao final desse bloco `b` sofre `drop` antes de `a`.',
@@ -1146,21 +1147,23 @@ fn main() {
               },
             ),
             fill(
-              'Complete a regra que relaciona destrutores e cópia automática (erro E0184):',
-              'Quando o dono sai de escopo, o compilador executa a trait ___; por isso um tipo com destrutor próprio nunca pode implementar a trait ___.',
+              'Complete a regra que relaciona destrutores próprios e cópia automática (erro E0184):',
+              'Um destrutor próprio é implementado pela trait ___; um tipo que a implementa nunca pode implementar também a trait ___.',
               ['Drop', 'Copy'],
               ['Clone', 'Sized'],
-              'A limpeza automática usa a trait `Drop`. O compilador proíbe implementar `Drop` e `Copy` no mesmo tipo (**E0184**) porque uma cópia implícita de bits levaria a liberar o mesmo recurso duas vezes.',
+              'O compilador proíbe implementar `Drop` e `Copy` no mesmo tipo (**E0184**): copiar implicitamente os bits de um dono de recursos poderia levar a liberar o mesmo recurso duas vezes. Tipos sem `Drop` próprio ainda podem ter campos que precisam ser descartados.',
             ),
             codePuzzle(
-              'Monte o trecho em que um bloco interno cria a `String` temporária `temp`, soma o tamanho dela a `total` e encerra o bloco para descartar `temp` antes do `println!`:',
+              'Monte a função `main` em que um bloco interno cria a `String` temporária `temp`, soma o tamanho dela a `total` e encerra o bloco para descartar `temp` antes do `println!`:',
               [
+                'fn main() {',
                 'let mut total = 0;',
                 '{',
                 '    let temp = String::from("bloco");',
                 '    total += temp.len();',
                 '}',
                 'println!("{total}");',
+                '}',
               ],
               [
                 'println!("{temp}");',
@@ -1203,7 +1206,7 @@ fn main() {
               title: 'Liberando cedo com drop(v)',
               body:
                 'Às vezes queremos liberar um valor pesado (ou soltar um bloqueio) **antes** de chegar ao `}` final da função.\n\n' +
-                'Rust proíbe chamar o método `v.drop()` diretamente (erro **E0040**: `explicit use of destructor method`), porque o compilador chamaria `drop` de novo no fim do bloco, causando *double free*. A forma correta é chamar a função **`drop(v)`** (`std::mem::drop`), que recebe `v` por valor (tomando a posse) e o descarta imediatamente quando seu próprio escopo vazio termina!',
+                'Rust proíbe chamar o método `Drop::drop` diretamente, como em `v.drop()` para um `Vec` (erro **E0040**: `explicit use of destructor method`), porque o compilador chamaria o destrutor de novo no fim do bloco, podendo causar *double free*. A forma correta é chamar a função **`drop(v)`** (`std::mem::drop`), que recebe `v` por valor (tomando a posse se não for `Copy`) e o descarta imediatamente quando seu próprio escopo vazio termina!',
               visual: code(
                 `fn main() {
     let v = vec![1, 2, 3, 4];
@@ -1253,10 +1256,10 @@ fn main() {
           ],
           exercises: [
             mcq(
-              'O que acontece ao tentar chamar o método destrutor diretamente com `s.drop()` como no código abaixo?',
+              'O que acontece ao tentar chamar o método destrutor diretamente com `s.drop()` neste `Vec<i32>`?',
               [
                 'Não compila: erro E0040 (explicit use of destructor method); deve-se usar drop(s)',
-                'Compila e libera a String normalmente na linha 3',
+                'Compila e libera o vetor normalmente na linha 3',
                 'Não compila: erro E0384 porque s não deveria ser mut',
                 'Compila, mas ignora a linha 3 em modo release',
               ],
@@ -1265,7 +1268,7 @@ fn main() {
               {
                 visual: code(
                   `fn main() {
-    let mut s = String::from("teste");
+    let mut s = vec![1, 2, 3];
     s.drop();
 }`,
                   [3],
@@ -1274,7 +1277,7 @@ fn main() {
               },
             ),
             mcq(
-              'Veja a implementação real de `std::mem::drop` na biblioteca padrão do Rust. Por que essa função de corpo vazio libera o valor passado?',
+              'Veja a implementação de `std::mem::drop`. Por que essa função de corpo vazio descarta um valor não-`Copy` passado por valor, como uma `String`?',
               [
                 'Porque ela recebe _x por valor (tomando a posse) e seu escopo termina imediatamente no "}", descartando _x',
                 'Porque o nome _x aciona um coletor de lixo especial em tempo de execução',
@@ -1282,7 +1285,7 @@ fn main() {
                 'Porque ela transforma o tipo T em Copy antes de retornar',
               ],
               0,
-              '`pub fn drop<T>(_x: T) {}` usa as próprias regras de ownership do Rust: ao chamar `drop(v)`, a posse move para `_x`, que sai de escopo imediatamente ao fechar `{}` e sofre `Drop`!',
+              '`pub fn drop<T>(_x: T) {}` usa as próprias regras de ownership do Rust: para um valor não-`Copy`, `drop(v)` move a posse para `_x`, que sai de escopo ao fechar `{}` e é descartado. Para um valor `Copy`, apenas uma cópia é passada e a variável original continua válida.',
               {
                 visual: code(
                   `pub fn drop<T>(_x: T) {}`,
@@ -1397,7 +1400,7 @@ fn main() {
               title: 'Passar argumento funciona como atribuir',
               body:
                 'Passar uma variável para uma função segue **exatamente** a mesma mecânica da atribuição `let`:\n' +
-                '• Se o parâmetro **não é `Copy`** (como `fn consumir(texto: String)`), a posse **move** do argumento para o parâmetro `texto`. Ao terminar a função, `texto` sai de escopo e sofre `drop` lá dentro!\n' +
+                '• Se o parâmetro **não é `Copy`** (como `fn consumir(texto: String)`), a posse **move** do argumento para o parâmetro `texto`. Se ele não for movido adiante, `texto` sai de escopo e sofre `drop` ao terminar a função!\n' +
                 '• Se o parâmetro **é `Copy`** (como `fn mostrar(n: i32)`), o valor é copiado na pilha e a variável original em `main` continua válida.',
               visual: code(
                 `fn consumir(texto: String) {
@@ -1436,7 +1439,7 @@ fn main() {
           ],
           exercises: [
             mcq(
-              'O que acontece com uma variável `s: String` declarada em `main` quando chamamos `processar(s);` para `fn processar(entrada: String)`?',
+              'O que acontece com uma variável `s: String` declarada em `main` quando chamamos `processar(s);` para `fn processar(entrada: String)`, cujo corpo apenas imprime `entrada`?',
               [
                 'A posse move para o parâmetro entrada, e o buffer no heap é liberado quando processar termina',
                 'Uma cópia profunda automática é feita no heap antes de entrar na função',
@@ -1489,7 +1492,7 @@ fn main() {
               'Em `imprimir(nome.clone());`, a função consome o clone enquanto `nome` continua válida em `main`, podendo então ser movida na segunda chamada `imprimir(nome);`.',
             ),
             match(
-              'Dada uma função `fn f(x: T)` que não retorna valor, associe cada tipo `T` ao efeito da chamada `f(a);`:',
+              'Dada uma função `fn f(x: T)` que apenas lê `x` e o deixa sair de escopo ao retornar, associe cada tipo `T` ao efeito da chamada `f(a);`:',
               [
                 ['T = String', 'Move a para x; a fica inválida após a chamada'],
                 ['T = Vec<i32>', 'Move o vetor para x; o buffer sofre drop no fim de f'],
@@ -1500,15 +1503,15 @@ fn main() {
             ),
             fill(
               'Complete a regra sobre passagem de argumentos não-`Copy` para funções:',
-              'Passar uma String por valor transfere a ___ para o parâmetro; usar a variável original após a chamada causa o erro ___.',
+              'Passar uma String por valor transfere a ___ para o parâmetro; tentar ler a variável original sem reinicializá-la causa o erro ___.',
               ['posse', 'E0382'],
               ['capacidade', 'E0384'],
-              'A chamada por valor move a **posse** (*ownership*) para o parâmetro da função, e qualquer uso posterior da variável original no chamador dispara **E0382**.',
+              'A chamada por valor move a **posse** (*ownership*) para o parâmetro da função. Tentar ler a variável original no chamador antes de reinicializá-la dispara **E0382**.',
             ),
             codePuzzle(
-              'Monte a função `main` que cria `msg`, passa um clone na primeira chamada de `consumir` (preservando `msg`) e move `msg` na segunda chamada:',
+              'Monte o programa que define `consumir` e, em `main`, cria `msg`, passa um clone na primeira chamada (preservando `msg`) e move `msg` na segunda chamada:',
               [
-                'fn main() {',
+                'fn consumir(texto: String) { println!("{texto}"); }\n\nfn main() {',
                 '    let msg = String::from("ok");',
                 '    consumir(msg.clone());',
                 '    consumir(msg);',
@@ -1553,7 +1556,7 @@ fn main() {
             {
               title: 'Devolvendo a posse pelo retorno',
               body:
-                'Retornar um valor de uma função também transfere a posse: em vez de sofrer `drop` no fim da função, o valor é **movido para a variável que recebe o retorno** no chamador.\n\n' +
+                'Retornar um valor não-`Copy` de uma função também transfere a posse: em vez de sofrer `drop` no fim da função, o valor é **movido para a variável que recebe o retorno** no chamador.\n\n' +
                 'Assim, uma função pode receber a posse de uma `String`, modificá-la e **devolver a posse** pelo retorno para que o chamador continue usando o texto!',
               visual: code(
                 `fn enfatizar(mut s: String) -> String {
@@ -1616,7 +1619,7 @@ fn main() {
           ],
           exercises: [
             mcq(
-              'No programa abaixo, quantas vezes o buffer `"dados"` é copiado no heap e em que momento ele finalmente sofre `drop`?',
+              'Após a criação da `String` no programa abaixo, quantas vezes a passagem e o retorno de `identidade` duplicam seu buffer no heap e quando ele sofre `drop`?',
               [
                 'Zero cópias no heap; o buffer sofre drop uma única vez no fim de main, quando b sai de escopo',
                 'Duas cópias no heap: uma ao entrar em identidade e outra ao retornar',
@@ -1624,7 +1627,7 @@ fn main() {
                 'Uma cópia no heap no momento do retorno para b',
               ],
               0,
-              'Tanto a entrada quanto o retorno de `identidade` fazem apenas *move* do cabeçalho na pilha. Os bytes no heap nunca são copiados e sofrem `drop` uma única vez quando `b` sai de escopo no fim de `main`.',
+              'Tanto a entrada quanto o retorno de `identidade` fazem apenas *move* do cabeçalho. Essas transferências não duplicam os bytes no heap, e o buffer sofre `drop` uma única vez quando `b` sai de escopo no fim de `main`. A criação inicial com `String::from` copia os bytes do literal para o heap.',
               {
                 visual: code(
                   `fn identidade(s: String) -> String {

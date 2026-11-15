@@ -39,16 +39,16 @@ const compileStepper = (): VisualSpec => {
 
 const cargoWorkflowStepper = (): VisualSpec => {
   const rows = [
-    ['cargo check', 'Muito rápida', 'Nenhum (só valida)', 'Achar erros enquanto programa'],
+    ['cargo check', 'Muito rápida', 'Metadados (sem executável final)', 'Achar erros enquanto programa'],
     ['cargo fmt', 'Instantânea', 'Reescreve .rs', 'Padronizar 4 espaços e estilo'],
-    ['cargo clippy', 'Rápida', 'Nenhum (analisa)', 'Caçar maus hábitos e avisos'],
-    ['cargo build --release', 'Mais lenta', 'target/release/', 'Binário final super otimizado'],
+    ['cargo clippy', 'Rápida', 'Metadados (sem executável final)', 'Caçar maus hábitos e avisos'],
+    ['cargo build --release', 'Geralmente mais lenta', 'target/release/', 'Binário com otimizações'],
   ];
   const infos = [
     '1. `cargo check` confere tipos e empréstimos sem gastar tempo gerando o executável.',
     '2. `cargo fmt` formata todo o projeto automaticamente segundo o padrão oficial.',
     '3. `cargo clippy -- -D warnings` aponta melhorias e trata qualquer aviso como erro.',
-    '4. `cargo build --release` aplica otimizações pesadas para rodar em velocidade máxima.',
+    '4. `cargo build --release` ativa otimizações para melhorar o desempenho; o ganho depende do programa.',
   ];
   return {
     name: 'stepper',
@@ -96,8 +96,8 @@ const printlnStepper = (): VisualSpec => {
   ];
   const infos = [
     'A execução começa na abertura de `fn main()`.',
-    'Na linha 2, `volts` guarda o inteiro `12` na pilha (stack).',
-    'Na linha 3, `pins` guarda o array `[2, 4]` na pilha.',
+    'Na linha 2, `volts` guarda o inteiro `12`. O compilador pode mantê-lo em registradores ou otimizar seu armazenamento.',
+    'Na linha 3, `pins` guarda o array `[2, 4]`. Seu armazenamento físico também pode ser otimizado.',
     'Na linha 4, `{}` usa a formatação `Display` e imprime `V = 12 V`.',
     'Na linha 5, `{:?}` usa a formatação `Debug` para inspecionar o array: `Pinos: [2, 4]`.',
   ];
@@ -111,7 +111,7 @@ const printlnStepper = (): VisualSpec => {
           <CodeBlock width={width} code={src} highlight={highlights[k]} title="src/main.rs" />
           <TableView
             width={width}
-            head={['Variável (pilha)', 'Valor', 'Saída no terminal']}
+            head={['Variável', 'Valor', 'Saída no terminal']}
             rows={memRows[k]}
           />
         </>
@@ -171,10 +171,10 @@ export const rustInicio: UnitDef = {
   extra: true,
   guide: [
     '• **Compilação antecipada (AOT)**: o `rustc` traduz arquivos `.rs` diretamente para código de máquina nativo, sem precisar de máquina virtual nem coletor de lixo (GC).',
-    '• **Segurança em tempo de compilação**: erros que em C causam comportamento indefinido em produção (ponteiro pendurado, uso após liberação, corrida de dados) são barrados pelo compilador antes de gerar o executável.',
+    '• **Segurança em tempo de compilação**: em Rust seguro, o compilador impede referências penduradas, uso após liberação e corridas de dados. Código `unsafe` exige que o programador preserve essas garantias.',
     '• **Ecossistema Cargo**: `cargo new` cria o pacote (`Cargo.toml` + `src/main.rs`), `cargo check` valida rápido, `cargo run` compila e executa, `cargo build --release` otimiza, `cargo fmt` formata e `cargo clippy -- -D warnings` exige zero avisos.',
     '• **Anatomia básica**: todo executável começa em `fn main()`. A macro `println!` (com `!`) usa `{}` para exibição (`Display`) e `{:?}` para depuração (`Debug`).',
-    '• **Lendo o compilador**: diagnósticos trazem código `E0xxx` (consultável com `rustc --explain E0xxx`), posição `--> arquivo:linha:coluna`, sublinhado `^^^` e sugestão `help:`.',
+    '• **Lendo o compilador**: diagnósticos podem trazer código `E0xxx` (consultável com `rustc --explain E0xxx`), posição `--> arquivo:linha:coluna`, sublinhado `^^^` e sugestão `help:`. Nem todo erro tem código ou sugestão.',
   ].join('\n'),
   lessons: [
     {
@@ -202,7 +202,7 @@ export const rustInicio: UnitDef = {
                 [1, 3],
                 'main.rs',
               ),
-              tip: 'Diferente de linguagens interpretadas linha a linha, em Rust nenhum código executável é gerado se houver qualquer erro de sintaxe, de tipo ou de memória.',
+              tip: 'Erros de sintaxe, de tipo ou de empréstimos impedem a compilação. Isso não elimina todas as falhas em execução: um índice fora dos limites, por exemplo, pode causar panic.',
             },
             {
               title: 'Do código-fonte à execução',
@@ -314,7 +314,7 @@ export const rustInicio: UnitDef = {
                 '• **C e C++**: controle total da memória e velocidade máxima, mas um descuido cria ponteiros pendurados, leitura fora de vetor ou vazamentos que só explodem em produção.',
                 '• **Linguagens com Coletor de Lixo (GC)** (Java, Python, Go): evitam acessos inválidos vigiando e limpando a memória enquanto o programa roda, pagando custo de tempo e memória.',
                 '',
-                'O **Rust** resolve esse dilema movendo a verificação para o **compilador**: cada valor tem um único dono (*ownership*), a memória é liberada automaticamente no fim do escopo e variáveis são **imutáveis por padrão** (`let`). Para permitir alteração, você declara explicitamente `let mut`.',
+                'O **Rust** resolve esse dilema movendo a verificação de posse e empréstimos para o **compilador**: cada valor tem um dono (*ownership*), e o descarte normalmente ocorre quando o dono sai do escopo. Destrutores e desalocação ainda têm custo em execução, e Rust seguro permite vazamentos. Variáveis são **imutáveis por padrão** (`let`). Para permitir alteração, você declara explicitamente `let mut`.',
               ].join('\n'),
               visual: code(
                 [
@@ -335,9 +335,9 @@ export const rustInicio: UnitDef = {
               visual: table(
                 ['Critério', 'C', 'Com GC', 'Rust'],
                 [
-                  ['Limpeza de memória', 'Manual (free)', 'Pausas do GC', 'Automática no escopo'],
-                  ['Ponteiro pendurado', 'Bug em execução', 'Evitado pelo GC', 'Não compila'],
-                  ['Custo em execução', 'Zero', 'Consome CPU/RAM', 'Zero'],
+                  ['Limpeza de memória', 'Manual no heap (free)', 'Coleta em execução', 'Automática via drop'],
+                  ['Ponteiro pendurado', 'Bug em execução', 'Evitado no código seguro', 'Referência barrada em Rust seguro'],
+                  ['Custo da limpeza', 'free tem custo', 'GC consome CPU/RAM', 'Destrutores e desalocação têm custo'],
                   ['Variáveis por padrão', 'Mutáveis', 'Mutáveis', 'Imutáveis (let)'],
                 ],
                 [1, 2],
@@ -374,7 +374,7 @@ export const rustInicio: UnitDef = {
                 'Ignorando erros de memória durante a compilação e reiniciando o programa se ele travar',
               ],
               0,
-              'O verificador de empréstimos (*borrow checker*) do `rustc` valida os acessos em tempo de compilação e insere a liberação exata no fim do escopo de cada dono, com custo zero em execução.',
+              'O verificador de empréstimos (*borrow checker*) do `rustc` valida os empréstimos em tempo de compilação, sem custo dessa análise em execução. O descarte normalmente ocorre no fim do escopo do dono; executar destrutores e liberar memória tem custo.',
             ),
             tf(
               'Em Rust, uma variável criada com `let x = 10;` pode ter seu valor alterado livremente nas linhas seguintes sem usar nenhuma palavra-chave extra.',
@@ -407,7 +407,7 @@ export const rustInicio: UnitDef = {
             ),
             fill(
               'Complete a comparação entre C e Rust:',
-              'Um ponteiro pendurado que em C causaria comportamento indefinido na execução vira um erro de ___ apontado pelo ___ em Rust.',
+              'Um uso após liberação que em C causaria comportamento indefinido vira um erro de ___ apontado pelo ___ ao usar referências em Rust seguro.',
               ['compilação', 'compilador'],
               ['execução', 'usuário', 'coletor'],
               'O Rust move a caça a bugs de memória do tempo de execução (com ASan ou depurador) para o tempo de compilação.',
@@ -415,23 +415,23 @@ export const rustInicio: UnitDef = {
             multi(
               'Quais das afirmações abaixo são garantias reais do Rust em código seguro (sem `unsafe`)?',
               [
-                'Memória liberada automaticamente quando o dono sai de escopo, sem pausas de coletor de lixo',
+                'Segurança de memória sem exigir coletor de lixo em execução',
                 'Bloqueio em tempo de compilação de referências penduradas (*dangling references*)',
                 'Prevenção de corridas de dados (*data races*) entre threads já na compilação',
                 'Correção automática de fórmulas de física digitadas errado pelo engenheiro',
               ],
               [0, 1, 2],
-              'O compilador garante memória válida, liberação determinística e ausência de *data races*, mas a lógica matemática do problema continua sendo responsabilidade do programador.',
+              'Rust seguro impede referências inválidas e *data races* sem exigir GC, mas permite vazamentos de memória. A lógica matemática do problema continua sendo responsabilidade do programador.',
             ),
             match(
               'Relacione o recurso de C ao equivalente seguro usado em Rust (conforme o Mapa C → Rust):',
               [
                 ['malloc / free manual', 'Ownership e liberação automática no fim do escopo'],
-                ['Ponteiro pendurado', 'Recusado ao compilar pelo borrow checker'],
-                ['Ponteiro NULL', 'Enum Option<T> (não existe valor nulo)'],
+                ['Ponteiro pendurado', 'Referência pendurada recusada em Rust seguro'],
+                ['Ponteiro NULL', 'Option<&T> para ausência; referências não são nulas'],
                 ['Variável mutável por padrão', 'Imutável com let; mutável só com let mut'],
               ],
-              'Rust substitui convenções manuais de C por regras checadas pelo compilador antes de gerar o binário.',
+              'Rust substitui convenções manuais de C por regras checadas pelo compilador. Ponteiros brutos podem ser nulos; referências válidas (`&T`) não podem.',
             ),
             codePuzzle(
               'Monte o programa que declara a rotação mutável `rpm` começando em `1000`, soma `500` a ela e imprime o valor final:',
@@ -491,7 +491,7 @@ export const rustInicio: UnitDef = {
                 '',
                 'Em Rust, tudo vem integrado:',
                 '• **`rustup`**: instala e atualiza as versões do Rust (como a *toolchain* `stable` e a documentação offline `rustup doc`).',
-                '• **`cargo`**: é o gerenciador de projetos, compilador, baixador de pacotes (*crates*), executor de testes e verificador de qualidade.',
+                '• **`cargo`**: gerencia projetos, invoca o compilador `rustc`, baixa pacotes (*crates*), executa testes e integra ferramentas de qualidade.',
                 '',
                 'Ao rodar `cargo new ola`, o Cargo cria uma pasta `ola/` pronta para usar, com o manifesto `Cargo.toml` (configurado na **edição 2024**) e o código inicial em `src/main.rs`.',
               ].join('\n'),
@@ -507,7 +507,7 @@ export const rustInicio: UnitDef = {
                 [2, 4],
                 'Cargo.toml',
               ),
-              tip: 'Nunca misture arquivos `.rs` soltos na raiz do projeto: o Cargo espera que o código-fonte fique organizado dentro da subpasta `src/`.',
+              tip: 'Por convenção, o Cargo procura o programa em `src/main.rs`. Outros caminhos podem ser configurados no `Cargo.toml`.',
             },
             {
               title: 'Mapa da pasta criada pelo Cargo',
@@ -518,7 +518,7 @@ export const rustInicio: UnitDef = {
                   ['Cargo.toml', 'Manifesto: nome, versão, edição 2024 e dependências'],
                   ['src/main.rs', 'Código-fonte principal do seu programa'],
                   ['target/debug/', 'Executável rápido para desenvolvimento e testes'],
-                  ['target/release/', 'Executável otimizado para velocidade máxima'],
+                  ['target/release/', 'Executável compilado com otimizações'],
                   ['Cargo.lock', 'Trava versões exatas das dependências (gerado sozinho)'],
                 ],
                 [0, 1],
@@ -530,7 +530,7 @@ export const rustInicio: UnitDef = {
               'Qual comando cria um novo pacote executável chamado `ola` já com `Cargo.toml` e `src/main.rs`?',
               ['`cargo new ola`', '`rustc new ola`', '`rustup init ola`', '`cargo run ola`'],
               0,
-              'O comando `cargo new ola` cria a pasta `ola/` com o manifesto `Cargo.toml`, a subpasta `src/` contendo `main.rs` e já inicializa um repositório Git.',
+              'O comando `cargo new ola` cria a pasta `ola/` com o manifesto `Cargo.toml` e `src/main.rs`. Por padrão, também inicializa Git se a pasta não estiver dentro de um repositório existente.',
             ),
             tf(
               'Em um projeto gerenciado pelo Cargo, o arquivo `Cargo.toml` fica na raiz do projeto e o código principal fica em `src/main.rs`.',
@@ -573,7 +573,7 @@ export const rustInicio: UnitDef = {
               '`rustup` cuida da instalação do Rust; no projeto, você edita `Cargo.toml` e `src/main.rs`, enquanto o Cargo mantém o `Cargo.lock`.',
             ),
             fill(
-              'Complete os comandos para atualizar a toolchain e abrir o livro oficial offline:',
+              'Complete os comandos para atualizar a toolchain e abrir a documentação offline:',
               'Para atualizar o Rust rodamos `rustup ___`, e para abrir a documentação instalada no navegador usamos `rustup ___`.',
               ['update', 'doc'],
               ['build', 'new', 'clean'],
@@ -632,7 +632,7 @@ export const rustInicio: UnitDef = {
               title: 'check, build, run e qualidade',
               body: [
                 'No dia a dia, você vai usar cinco comandos do Cargo o tempo todo:',
-                '• **`cargo check`**: verifica se o código compila **sem gerar o binário**. É muito mais rápido que `build` para checar se você acertou os tipos!',
+                '• **`cargo check`**: verifica tipos e empréstimos **sem gerar o executável final**, mas salva metadados. Costuma ser mais rápido que `build`; alguns erros só aparecem na geração de código feita pelo `build`.',
                 '• **`cargo run`**: compila (se algo mudou) e já roda o executável.',
                 '• **`cargo build`** vs. **`cargo build --release`**: o `build` comum compila rápido em `target/debug/`; já `--release` otimiza fundo o código de máquina e grava em `target/release/`.',
                 '• **`cargo fmt`** e **`cargo clippy -- -D warnings`**: o `fmt` alinha e formata seu código; o `clippy` é o *linter* que aponta armadilhas e, com `-- -D warnings`, recusa qualquer aviso (como `-Wall -Wextra -Werror` em C).',
@@ -648,7 +648,7 @@ export const rustInicio: UnitDef = {
                 [1, 3, 5],
                 'Comandos do Cargo',
               ),
-              tip: 'Para adicionar uma biblioteca externa (*crate*) ao projeto, basta rodar `cargo add nome_da_crate`: o Cargo atualiza o `Cargo.toml` e baixa tudo sozinho.',
+              tip: 'Para adicionar uma biblioteca externa (*crate*) ao projeto, rode `cargo add nome_da_crate`: o Cargo atualiza o `Cargo.toml`. Ao compilar, ele baixa as dependências necessárias.',
             },
             {
               title: 'Fluxo de trabalho com o Cargo',
@@ -687,9 +687,9 @@ export const rustInicio: UnitDef = {
               '`cargo check` executa toda a verificação de tipos, sintaxe e *borrow checker*, mas não gasta tempo gerando código de máquina final.',
             ),
             tf(
-              'O comando `cargo build --release` demora mais para compilar do que `cargo build`, mas gera um executável mais rápido na pasta `target/release/`.',
+              'Por padrão, `cargo build --release` ativa otimizações e grava o executável em `target/release/`, geralmente gastando mais tempo na compilação que `cargo build`.',
               true,
-              'O perfil `release` ativa otimizações agressivas do compilador para que o binário final rode na velocidade máxima em produção.',
+              'O perfil `release` ativa otimizações por padrão, mas o ganho de desempenho depende do programa e deve ser medido.',
             ),
             mcq(
               'Na linha 2 destacada abaixo, qual é o efeito de passar `-- -D warnings` para o `cargo clippy`?',
@@ -727,7 +727,7 @@ export const rustInicio: UnitDef = {
               'Por padrão, `cargo build` grava o binário em `target/___`, enquanto `cargo build --release` grava em `target/___`.',
               ['debug', 'release'],
               ['src', 'main', 'bin'],
-              'O perfil padrão é `debug` (compilação rápida com símbolos de depuração) e o perfil otimizado é `release`.',
+              'O perfil padrão se chama `dev` e usa a pasta `debug` (compilação rápida com símbolos de depuração); o perfil otimizado se chama `release`.',
             ),
             multi(
               'O que acontece quando você altera `src/main.rs` e roda `cargo run` no terminal?',
@@ -804,7 +804,7 @@ export const rustInicio: UnitDef = {
                 [1, 2],
                 'src/main.rs',
               ),
-              tip: 'Por que `println!` é uma macro e não uma função? Porque funções em Rust têm número e tipo fixos de argumentos, enquanto a macro `println!` aceita quantos valores você quiser e verifica os marcadores `{}` em tempo de compilação!',
+              tip: 'Por que `println!` é uma macro e não uma função? Porque funções comuns em Rust têm número fixo de argumentos, enquanto a macro `println!` aceita vários valores de tipos diferentes e verifica os marcadores de formatação em tempo de compilação!',
             },
             {
               title: 'Do C para o Rust: Olá, mundo',
@@ -871,7 +871,7 @@ export const rustInicio: UnitDef = {
             ),
             mcq(
               'Observe o uso de `print!` (linha 2) e `println!` (linha 3). Qual texto aparece na primeira linha da saída?',
-              ['` Setor A: OK` (ou seja, `Setor A: OK` na mesma linha)', '`Setor A: ` apenas', '`OK` apenas', 'Erro de compilação porque `print!` não existe'],
+              ['`Setor A: OK` na mesma linha', '`Setor A: ` apenas', '`OK` apenas', 'Erro de compilação porque `print!` não existe'],
               0,
               'Na linha 2, `print!("Setor A: ");` imprime o texto e permanece na mesma linha. Na linha 3, `println!("OK");` completa a linha formando `Setor A: OK` e só depois quebra a linha.',
               {
@@ -909,7 +909,7 @@ export const rustInicio: UnitDef = {
                 '    println("Status: {}", msg);',
                 '    let msg = "Bateria OK"',
               ],
-              'Toda instrução dentro de `main` termina com `;` e a macro `println!` precisa do ponto de exclamação `!`.',
+              'A declaração `let msg = "Bateria OK";` exige `;`, e a macro `println!` exige `!`. Uma chamada de `println!` no fim do bloco pode ficar sem `;`, pois retorna `()`.',
             ),
             gen((rng) => {
               const n = randInt(rng, 2, 6);
@@ -952,7 +952,7 @@ export const rustInicio: UnitDef = {
             },
             {
               title: 'Execução passo a passo do println!',
-              body: 'Use os botões **◀** e **▶** para acompanhar como as variáveis ficam na pilha e o que cada marcador (`{}` e `{:?}`) envia para o terminal.',
+              body: 'Use os botões **◀** e **▶** para acompanhar os valores das variáveis e o que cada marcador (`{}` e `{:?}`) envia para o terminal.',
               visual: printlnStepper(),
             },
             {
@@ -1009,7 +1009,7 @@ export const rustInicio: UnitDef = {
                 'Porque `{:?}` converte os números para ponto flutuante',
               ],
               0,
-              'Tipos compostos como arrays `[T; N]` e tuplas não têm uma única forma óbvia de exibição para o usuário final (`Display`), mas implementam `Debug` para inspeção com `{:?}`.',
+              'Arrays e tuplas de inteiros não implementam `Display`, mas implementam `Debug` para inspeção com `{:?}`. Para outros elementos, a implementação de `Debug` depende de eles também implementarem essa trait.',
               {
                 visual: code(
                   [
@@ -1048,12 +1048,12 @@ export const rustInicio: UnitDef = {
               'Em Rust você não decora letras por tipo numérico (`%d`, `%f`): usa `{}` para `Display` e `{:?}` para `Debug`.',
             ),
             match(
-              'Associe cada chamada de `println!` à saída exata que ela produz no terminal:',
+              'Associe cada chamada de `println!` ao texto que ela produz no terminal (todas acrescentam uma quebra de linha ao final):',
               [
                 ['println!("{}", 42);', '42'],
                 ['println!("{:?}", [1, 2]);', '[1, 2]'],
-                ['println!("{:?}", "Oi");', '"Oi" (mostra as aspas)'],
-                ['println!("{{ok}}");', '{ok} (chaves literais)'],
+                ['println!("{:?}", "Oi");', '"Oi"'],
+                ['println!("{{ok}}");', '{ok}'],
               ],
               'Com `{}` vemos o valor limpo; com `{:?}` vemos a estrutura de depuração (incluindo colchetes de arrays e aspas de strings); e `{{` / `}}` escapam chaves literais.',
             ),
@@ -1066,7 +1066,7 @@ export const rustInicio: UnitDef = {
                 'Compila e imprime `10 e 10` repetindo o argumento',
               ],
               0,
-              'Como `println!` é uma macro checada em compilação, qualquer diferença entre o número de `{}` e os argumentos fornecidos impede a compilação na hora.',
+              'Neste caso, os dois marcadores `{}` exigem dois argumentos posicionais, mas só foi passado um. O compilador detecta a falta; argumentos nomeados ou índices explícitos podem reutilizar valores em outros formatos.',
               {
                 visual: code(
                   [
@@ -1090,7 +1090,7 @@ export const rustInicio: UnitDef = {
               ],
               [
                 '    println!("{}", pins);',
-                '    println!("{:?}", pins)',
+                '    println!("{:?}", pin);',
                 '    let base = 10',
               ],
               'Primeiro criamos `base`, depois usamos `base` para montar o array `pins` e por fim imprimimos `pins` com `{:?}` (já que arrays exigem `Debug`).',
@@ -1133,11 +1133,11 @@ export const rustInicio: UnitDef = {
               body: [
                 'Em muitas linguagens, mensagens de erro parecem charadas. No Rust, ler os diagnósticos do `rustc` faz parte do estudo: eles foram desenhados para ensinar.',
                 '',
-                'Toda mensagem de erro traz quatro pistas:',
+                'O diagnóstico abaixo, abreviado, traz quatro pistas comuns (nem todo erro tem código ou sugestão):',
                 '1. **Código `E0xxx` e resumo**: ex. `error[E0384]: cannot assign twice to immutable variable`. Você pode rodar `rustc --explain E0384` para ver um guia completo no terminal.',
                 '2. **Seta `-->`**: indica `arquivo:linha:coluna` exatos do problema (`src/main.rs:3:5`).',
                 '3. **Marcações `-` e `^^^`**: mostram onde a variável nasceu e onde a regra foi quebrada.',
-                '4. **Sugestão `help:`**: mostra o código pronto que corrige o defeito!',
+                '4. **Sugestão `help:`**: quando presente, propõe uma possível correção. Confira se ela corresponde à sua intenção.',
               ].join('\n'),
               visual: code(
                 [
@@ -1196,7 +1196,7 @@ export const rustInicio: UnitDef = {
               'As linhas `help:` do compilador Rust mostram frequentemente a linha exata já reescrita (por exemplo, adicionando `mut` ou `!`).',
             ),
             mcq(
-              'Ao compilar o programa abaixo, o `rustc` emite `error[E0423]: expected function, found macro println`. O que o `help:` sugere fazer na linha 2?',
+              'Ao compilar o programa abaixo, o `rustc` emite `E0423`: esperava uma função, mas encontrou a macro `println`. O que o `help:` sugere fazer na linha 2?',
               [
                 'Usar `!` para invocar a macro: `println!("Ativo");`',
                 'Trocar `println` por `printf`',
@@ -1204,7 +1204,7 @@ export const rustInicio: UnitDef = {
                 'Trocar `fn main()` por `int main()`',
               ],
               0,
-              'Sem o `!`, o compilador procura uma função chamada `println`, encontra a macro de mesmo nome (`E0423`) e sugere em `help: use ! to invoke the macro: println!`.',
+              'Sem o `!`, o compilador procura uma função chamada `println`, encontra a macro de mesmo nome (`E0423`) e sugere usar `!` para invocá-la.',
               {
                 visual: code(
                   [
@@ -1225,17 +1225,17 @@ export const rustInicio: UnitDef = {
               '`E0425` (*cannot find value in this scope*) aparece quando você usa o nome de uma variável que ainda não foi declarada ou teve o nome digitado com erro.',
             ),
             order(
-              'Ordene as 4 partes de um diagnóstico do `rustc` na sequência em que aparecem de cima para baixo no terminal:',
+              'Ordene as 4 partes do diagnóstico `E0384` mostrado no card na sequência em que aparecem de cima para baixo no terminal:',
               [
                 'Cabeçalho error[E0xxx] com o resumo do problema',
                 'Seta --> com arquivo, linha e coluna',
                 'Trecho numerado do código com sublinhado ^^^',
                 'Dica help: mostrando como corrigir a linha',
               ],
-              'O compilador sempre começa pelo código e resumo (`error[E0xxx]`), aponta onde está (`-->`), desenha o trecho com `^^^` e fecha com a sugestão `help:`.',
+              'Neste diagnóstico, o compilador começa pelo código e resumo (`error[E0384]`), aponta onde está (`-->`), desenha o trecho com `^^^` e apresenta a sugestão `help:`.',
             ),
             codePuzzle(
-              'O compilador apontou `E0384` (variável `count` sem `mut`) e `E0423` (`println` sem `!`). Monte o programa já **corrigido**:',
+              'Corrija a variável `count` sem `mut` (`E0384`) e `println` sem `!` (`E0423`). Monte o programa que começa com `count = 1`, soma `1` e só então imprime `2`:',
               [
                 'fn main() {',
                 '    let mut count = 1;',
@@ -1286,7 +1286,7 @@ export const rustInicio: UnitDef = {
                 '• **`E0425`**: usou um nome de variável que não existe ou foi digitado errado (`cannot find value`).',
                 '• **`E0384`**: tentou mudar o valor de uma variável criada sem `mut` (`cannot assign twice`).',
                 '• **`E0308`**: entregou um tipo onde o compilador esperava outro (`mismatched types`, ex.: atribuir `"dez"` a um `i32`).',
-                '• **`E0277`**: tentou imprimir com `{}` um tipo que só aceita `{:?}` (`doesn\'t implement Display`).',
+                '• **`E0277`**: uma trait exigida não foi implementada. Ex.: imprimir com `{}` uma tupla de inteiros que implementa `Debug`, mas não `Display`.',
               ].join('\n'),
               visual: code(
                 [
@@ -1300,7 +1300,7 @@ export const rustInicio: UnitDef = {
                 [3, 5],
                 'Exemplos de E0308 e E0277',
               ),
-              tip: 'Quando você erra uma letra no nome de uma variável (`E0425`), o próprio `help:` procura nomes parecidos no escopo e pergunta: `help: a local variable with a similar name exists`!',
+              tip: 'Quando você erra uma letra no nome de uma variável (`E0425`), o compilador pode sugerir no `help:` um nome parecido que exista no escopo.',
             },
             {
               title: 'Tabela de consulta rápida: códigos E0xxx',
@@ -1324,7 +1324,7 @@ export const rustInicio: UnitDef = {
                 '1. No `src/main.rs`, provoque de propósito um `E0423` (apague o `!` de `println!`), rode `cargo check` e leia o `help:`.',
                 '2. Corrija o `!`, crie `let x = 5;` e na linha de baixo escreva `x = 6;`. Rode `cargo check` para ver o `E0384`.',
                 '3. No terminal, execute `rustc --explain E0384` e `rustc --explain E0308`.',
-                '4. Corrija com `let mut x = 5;`, imprima `x` e valide tudo com `cargo clippy -- -D warnings` e `cargo run`.',
+                '4. Corrija com `let mut x = 5;` e imprima `x` antes e depois de `x = 6;`, para ler os dois valores atribuídos. Valide tudo com `cargo clippy -- -D warnings` e `cargo run`.',
                 '',
                 '**Critério de pronto**: você inspecionou os erros no terminal, corrigiu o código e `cargo clippy -- -D warnings` passou sem nenhum aviso ou erro.',
               ].join('\n'),
@@ -1389,7 +1389,7 @@ export const rustInicio: UnitDef = {
               },
             ),
             mcq(
-              'Na linha 3 destacada, o compilador recusa o código com `error[E0277]: (i32, i32) doesn\'t implement std::fmt::Display`. Como corrigir?',
+              'Na linha 3 destacada, o compilador recusa o código com `E0277`, pois a tupla não implementa `Display`. Como corrigir?',
               [
                 'Trocando `{}` por `{:?}` na string do `println!` para usar a formatação `Debug`',
                 'Apagando o ponto de exclamação `!` de `println!`',
@@ -1430,7 +1430,7 @@ export const rustInicio: UnitDef = {
                 'Falta a instrução `return 0;` após a linha 4',
               ],
               [0, 1],
-              'Há dois erros de compilação: `limit` precisava ser `let mut limit = 100;` (`E0384`) e `println` precisava do `!` (`println!("{}", limit);`, `E0423`).',
+              'Há dois defeitos: `limit` precisa de `let mut limit = 100;` (`E0384`) e `println` precisa do `!` (`E0423`). O compilador pode interromper a análise no primeiro defeito; corrija-o e compile novamente para ver os demais.',
               {
                 visual: code(
                   [
@@ -1453,7 +1453,7 @@ export const rustInicio: UnitDef = {
               '`E0277` indica que o tipo não implementa a trait exigida (`Display` para `{}`), sugerindo `{:?}` (`Debug`).',
             ),
             codePuzzle(
-              'O rascunho tinha três erros (`E0308`, `E0384` e `E0277`). Monte a versão **correta** que calcula `sum`, monta a tupla `pair` e a imprime:',
+              'O rascunho tinha três erros (`E0308`, `E0384` e `E0277`). Monte a versão **correta** que começa com `sum = 10`, soma `20`, monta `pair = (sum, 50)` e imprime `(30, 50)`:',
               [
                 'fn main() {',
                 '    let mut sum: i32 = 10;',
@@ -1474,7 +1474,7 @@ export const rustInicio: UnitDef = {
               const b = randInt(rng, 15, 50);
               const ans = a + b;
               return num(
-                'Após aplicar a sugestão `help: consider making this binding mutable: mut total` no código abaixo, qual número ele imprime ao rodar?',
+                'O código abaixo já foi corrigido com `let mut`, como sugerido pelo compilador. Qual número ele imprime ao rodar?',
                 ans,
                 `Com \`let mut total: i32 = ${a};\`, a reatribuição na linha 3 passa a compilar e calcula ${a} + ${b} = ${ans}.`,
                 {

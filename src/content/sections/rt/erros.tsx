@@ -48,8 +48,8 @@ export const rustErros: UnitDef = {
   guide:
     'Rust divide as falhas em duas categorias:\n\n' +
     '• **Erros irrecuperáveis (`panic!`)**: sintomas de **bugs do programador** (como acessar um índice fora do vetor ou violar uma invariante com `assert!`). Por padrão, o pânico faz o **desenrolamento da pilha** (*unwinding*), executando o `Drop` de cada variável local antes de encerrar a thread, ou aborta imediatamente se `panic = "abort"` estiver no `Cargo.toml`. Use `RUST_BACKTRACE=1` para inspecionar a pilha de chamadas.\n' +
-    '• **Erros recuperáveis (`Result<T, E>`)**: falhas esperadas do mundo externo (arquivo inexistente, texto inválido, saldo insuficiente). O enum tem as variantes `Ok(T)` e `Err(E)`, e o compilador exige que você trate ambas.\n' +
-    '• **Operador `?`**: colocado após um `Result` (ou `Option`), desembrulha o valor em caso de sucesso ou retorna o erro imediatamente da função atual, convertendo-o via `From::from`. Pode ser usado no `main` quando ele retorna `Result<(), Box<dyn std::error::Error>>`.\n' +
+    '• **Erros recuperáveis (`Result<T, E>`)**: falhas esperadas do mundo externo (arquivo inexistente, texto inválido, saldo insuficiente). O enum tem as variantes `Ok(T)` e `Err(E)`. Um `match` precisa ser exaustivo; descartar o retorno sem usá-lo gera um aviso por padrão.\n' +
+    '• **Operador `?`**: colocado após um `Result`, desembrulha `Ok` ou retorna `Err` imediatamente, convertendo o erro via `From::from`. Com `Option`, extrai `Some` ou retorna `None`, em uma função com retorno compatível. Pode ser usado no `main` quando ele retorna `Result<(), Box<dyn std::error::Error>>`.\n' +
     '• **Erros próprios e crates**: bibliotecas definem um `enum` de erro implementando `Debug`, `Display` e `std::error::Error` (ou derivando com `thiserror`), enquanto aplicações costumam agregar erros variados com `anyhow::Result<T>`.\n' +
     '• **Boas práticas**: evite `unwrap()` e `expect()` em código de produção (reserve-os para testes `#[test]` ou invariantes provadas) e use tipos próprios (*newtypes* + `TryFrom`) para validar dados na fronteira do sistema.',
   lessons: [
@@ -63,7 +63,7 @@ export const rustErros: UnitDef = {
               title: 'Quando tudo dá errado: panic!',
               body:
                 'Em C, quando uma função encontra um estado impossível, você chama `abort()` ou deixa um bug invadir a memória vizinha. Em Rust, falhas são divididas em **recuperáveis** (tratadas com `Result`) e **irrecuperáveis** (tratadas com a macro `panic!`).\n\n' +
-                'Quando `panic!("mensagem")` executa, o programa imprime a mensagem com arquivo e linha e, por padrão, inicia o **desenrolamento da pilha** (*unwinding*): ele sobe cada função ativa chamando o destrutor (`Drop`) das variáveis locais donas de memória (como `String` e `Vec`).\n\n' +
+                'Quando `panic!("mensagem")` executa, o hook padrão imprime em stderr a mensagem com arquivo e linha e, por padrão, inicia o **desenrolamento da pilha** (*unwinding*): ele sobe cada função ativa chamando o destrutor (`Drop`) das variáveis locais donas de memória (como `String` e `Vec`).\n\n' +
                 'Se você quiser um executável menor (comum em sistemas embarcados), basta configurar `panic = "abort"` em `[profile.release]` no `Cargo.toml` para encerrar o processo na hora, deixando a limpeza para o sistema operacional.',
               visual: code(
                 `fn set_speed(rpm: i32) {
@@ -148,7 +148,7 @@ fn main() {
                 'Reinicia a função `main` desde o começo',
               ],
               0,
-              'Por padrão, `panic!` desenrola a pilha (*unwinding*), chamando os destrutores (`Drop`) das variáveis locais de cada função antes de abortar a thread.',
+              'Por padrão, `panic!` desenrola a pilha (*unwinding*), chamando os destrutores (`Drop`) das variáveis locais de cada função antes de encerrar a thread, se o pânico não for capturado.',
             ),
             tf(
               'Em Rust, `panic!` deve ser usado como mecanismo padrão para tratar erros esperados, como um arquivo de configuração que ainda não existe.',
@@ -222,7 +222,7 @@ fn main() {
               );
             }),
             order(
-              'Ordene o que acontece quando uma função interna chama `panic!` com a configuração padrão (*unwind*):',
+              'Ordene o que acontece quando uma função chamada por `main` entra em `panic!`, sem captura do pânico, com o hook padrão e a configuração *unwind*:',
               [
                 'A macro panic! interrompe a execução normal na linha da falha',
                 'A mensagem do pânico e a posição no arquivo são exibidas',
@@ -237,8 +237,7 @@ fn main() {
                 'fn check_pin(pin: u8) {',
                 '    if pin > 13 {',
                 '        panic!("pino invalido");',
-                '    }',
-                '    println!("pino {pin} ok");',
+                '    }\n    println!("pino {pin} ok");',
                 '}',
               ],
               [
@@ -254,12 +253,12 @@ fn main() {
             {
               title: 'Limites de vetor, asserts e backtrace',
               body:
-                'Em C, acessar `v[10]` num vetor de 3 posições lê lixo da memória (*buffer overread*), uma brecha clássica de segurança. Em Rust, o acesso por colchetes verifica o tamanho em tempo de execução e dispara `panic!` imediatamente se o índice estiver fora de `0..v.len()`.\n\n' +
+                'Em C, acessar `v[10]` num vetor de 3 posições causa comportamento indefinido: pode ler memória indevida ou derrubar o programa, além de ser uma brecha de segurança. Em Rust, o acesso por colchetes verifica o tamanho em tempo de execução e dispara `panic!` imediatamente se o índice estiver fora de `0..v.len()`.\n\n' +
                 'No seu próprio código, você também pode proteger invariantes com macros que entram em pânico quando a condição falha:\n' +
                 '• `assert!(cond)` — exige que `cond` seja `true`\n' +
                 '• `assert_eq!(a, b)` e `assert_ne!(a, b)` — exigem `a == b` ou `a != b` e imprimem os dois valores se falharem\n' +
                 '• `todo!()` e `unreachable!()` — marcam código ainda não escrito ou ramos que a lógica garante serem inalcançáveis\n\n' +
-                'Para descobrir toda a sequência de chamadas que levou ao pânico, rode o programa com `RUST_BACKTRACE=1 cargo run`.',
+                'Para investigar as chamadas que levaram ao pânico, rode `RUST_BACKTRACE=1 cargo run` (pilha resumida); para pedir a versão completa, use `RUST_BACKTRACE=full cargo run`.',
               visual: code(
                 `fn main() {
     let v = vec![10, 20, 30];
@@ -285,11 +284,11 @@ fn main() {
                 `$ cargo new panico && cd panico
 $ RUST_BACKTRACE=1 cargo run
 thread 'main' panicked at
-src/main.rs:3:20:
-index out of bounds: len is 3
+src/main.rs:<linha>:<coluna>:
+index out of bounds: the len is 3 but the index is 10
 $ cargo clippy -- -D warnings`,
                 [2, 4, 5],
-                'Terminal',
+                'Terminal (saída resumida; posição varia)',
               ),
             },
           ],
@@ -321,11 +320,11 @@ $ cargo clippy -- -D warnings`,
               'Enquanto `v[i]` exige que o índice exista e entra em pânico se não existir, `v.get(i)` devolve `Option<&T>`: `Some(&valor)` ou `None`.',
             ),
             fill(
-              'Qual variável de ambiente ativa a exibição da pilha de chamadas completa quando um programa Rust entra em pânico?',
+              'Qual variável de ambiente ativa a exibição da pilha de chamadas resumida quando um programa Rust entra em pânico?',
               '___=1 cargo run',
               ['RUST_BACKTRACE'],
               ['RUST_TRACE', 'CARGO_PANIC', 'RUST_DEBUG'],
-              '`RUST_BACKTRACE=1` instrui o runtime do Rust a imprimir todas as funções na pilha até a linha exata onde ocorreu o `panic!`.',
+              '`RUST_BACKTRACE=1` habilita a pilha resumida do hook padrão de pânico; `RUST_BACKTRACE=full` pede a versão completa. Nomes e linhas dependem das informações de depuração disponíveis.',
             ),
             mcq(
               'Qual das linhas destacadas dispara `panic!` quando `main` é executada?',
@@ -391,18 +390,17 @@ $ cargo clippy -- -D warnings`,
               [
                 ['assert!(cond)', 'Entra em pânico se a expressão booleana for false'],
                 ['assert_eq!(a, b)', 'Entra em pânico se a != b, imprimindo ambos os valores'],
-                ['todo!()', 'Marca um trecho ainda não implementado que compila, mas aborta se chamado'],
-                ['unreachable!()', 'Sinaliza ao compilador e ao leitor um ramo que nunca deve executar'],
+                ['todo!()', 'Marca um trecho ainda não implementado que entra em pânico se chamado'],
+                ['unreachable!()', 'Documenta um ramo que não deveria executar e entra em pânico se alcançado'],
               ],
-              'Essas quatro macros documentam e verificam invariantes no código; se acionadas em execução, disparam `panic!` com uma mensagem clara.',
+              '`assert!` e `assert_eq!` entram em pânico apenas se a verificação falhar. Já `todo!` e `unreachable!` sempre entram em pânico quando executadas; `unreachable!` não permite ao compilador presumir que o ramo é impossível.',
             ),
             codePuzzle(
-              'Monte a função `avg` que primeiro guarda o tamanho em `n`, exige `assert!(n > 0)`, soma os elementos em `sum` e devolve `sum / n`:',
+              'Monte a função `avg` que, para uma fatia de até 100 inteiros não negativos cuja soma cabe em `i32`, guarda o tamanho em `n`, exige `assert!(n > 0)`, soma os elementos em `sum` e devolve `sum / n`:',
               [
                 'fn avg(v: &[i32]) -> i32 {',
                 '    let n = v.len() as i32;',
-                '    assert!(n > 0);',
-                '    let sum: i32 = v.iter().sum();',
+                '    assert!(n > 0);\n    let sum: i32 = v.iter().sum();',
                 '    sum / n',
                 '}',
               ],
@@ -429,7 +427,7 @@ $ cargo clippy -- -D warnings`,
                 'Em Rust, operações que podem falhar devolvem o enum genérico `Result<T, E>`, já incluído no prelúdio padrão:\n' +
                 '• `Ok(valor)` — a operação deu certo e carrega o resultado de tipo `T`\n' +
                 '• `Err(erro)` — a operação falhou e carrega o motivo de tipo `E`\n\n' +
-                'Como `Result<i32, &str>` e `i32` são tipos diferentes, tentar somar `1` direto ao retorno sem tratar o erro nem sequer compila (`E0308`). E ao abrir o `Result` com `match`, o compilador exige que você cubra tanto `Ok` quanto `Err` (`E0004`).',
+                'Como `Result<i32, &str>` e `i32` são tipos diferentes, tentar somar `1` direto ao retorno sem tratar o erro nem sequer compila (`E0369`: a soma não é implementada para esses operandos). E ao abrir o `Result` com `match`, o compilador exige que você cubra tanto `Ok` quanto `Err` (`E0004`).',
               visual: code(
                 `fn divide(
     a: i32,
@@ -438,11 +436,11 @@ $ cargo clippy -- -D warnings`,
     if b == 0 {
         Err("divisao por zero")
     } else {
-        Ok(a / b)
+        a.checked_div(b).ok_or("overflow")
     }
 }`,
                 [4, 6, 8],
-                'Result na assinatura',
+                'Result na assinatura (inclui overflow de MIN / -1)',
               ),
               tip: 'Se você chamar uma função que devolve `Result` e ignorar o valor de retorno (`divide(10, 2);`), o compilador emite o aviso `unused_must_use` porque `Result` é marcado com `#[must_use]`.',
             },
@@ -452,9 +450,9 @@ $ cargo clippy -- -D warnings`,
               visual: table(
                 ['Linguagem', 'Como devolve falha', 'Se o programador esquecer'],
                 [
-                  ['C', 'Código -1, NULL ou errno', 'Compila e usa lixo em silêncio'],
-                  ['C++ / Java', 'Exceção (throw)', 'Aborta em produção se não houver catch'],
-                  ['Rust', 'Enum Result<T, E>', 'Não compila (E0308 / E0004)'],
+                  ['C', 'Código -1, NULL ou errno', 'Em geral compila; o retorno pode ser ignorado'],
+                  ['C++ / Java', 'Exceção (throw)', 'Sem captura: termina thread/processo; Java também tem exceções verificadas'],
+                  ['Rust', 'Enum Result<T, E>', 'Ignorar: aviso; match incompleto: E0004'],
                 ],
                 [2],
               ),
@@ -470,10 +468,10 @@ $ cargo clippy -- -D warnings`,
             tf(
               'Um valor do tipo `Result<i32, String>` pode ser somado diretamente com um `i32` sem precisar extrair o conteúdo de `Ok`.',
               false,
-              '`Result<i32, String>` é um enum que pode conter um erro, não um `i32`. O compilador recusa a soma com erro de tipos incompatíveis (`E0308`) até que você trate o `Result`.',
+              '`Result<i32, String>` é um enum que pode conter um erro, não um `i32`. O compilador recusa a soma com `E0369`: a operação `+` não é implementada entre `Result<i32, String>` e `i32`. É preciso extrair o valor de sucesso.',
             ),
             mcq(
-              'Este código compila? Se não, qual erro o compilador aponta na linha 6 destacada?',
+              'Este código compila? Se não, qual erro o compilador aponta na linha 7 destacada?',
               [
                 'Não compila (`E0308: mismatched types`): esperava `Result<i32, &str>`, mas encontrou `i32`; faltou embrulhar em `Ok(n / 2)`',
                 'Compila normalmente e converte `n / 2` em `Ok(n / 2)` sozinho',
@@ -507,15 +505,20 @@ $ cargo clippy -- -D warnings`,
                 'Erro `E0502`, pois há empréstimo mutável e imutável ao mesmo tempo',
               ],
               0,
-              'O `match` em Rust é obrigatório e exaustivo. Cobrir apenas `Ok(v)` deixa a variante `Err(_)` descoberta, gerando `error[E0004]: non-exhaustive patterns: \'Err(_)\' not covered`.',
+              'Todo `match` em Rust precisa ser exaustivo. Cobrir apenas `Ok(v)` deixa a variante `Err(_)` descoberta, gerando `error[E0004]: non-exhaustive patterns: \'Err(_)\' not covered`.',
               {
                 visual: code(
-                  `fn main() {
+                  `fn divide(a: i32, b: i32)
+-> Result<i32, &'static str> {
+    a.checked_div(b).ok_or("divisao invalida")
+}
+
+fn main() {
     match divide(10, 2) {
         Ok(v) => println!("{v}"),
     }
 }`,
-                  [2, 3, 4],
+                  [7, 8, 9],
                   'Match incompleto',
                 ),
               },
@@ -569,22 +572,22 @@ fn main() {
                 ['Esquecer o braço Err(e) no match', 'Erro E0004: padrões não exaustivos (non-exhaustive patterns)'],
                 ['Chamar divide(4, 2); sem usar o retorno', 'Aviso unused_must_use alertando que o Result foi descartado'],
               ],
-              'O sistema de tipos e o atributo `#[must_use]` garantem que nenhum erro passe despercebido em tempo de compilação.',
+              'O sistema de tipos rejeita usos incompatíveis e padrões não exaustivos; `#[must_use]` avisa sobre retornos ignorados. O aviso pode ser suprimido, por exemplo com `let _ = divide(4, 2);`.',
             ),
             codePuzzle(
-              'Monte o corpo de `safe_rem(a: i32, b: i32)` que devolve `Err("zero")` quando `b == 0` e `Ok(a % b)` caso contrário:',
+              'Monte o corpo de `fn safe_rem(a: i32, b: i32) -> Result<i32, &\'static str>`: devolva `Err("zero")` se `b == 0`; caso contrário, use `checked_rem` para devolver `Ok(resto)` ou `Err("overflow")`:',
               [
                 '    if b == 0 {',
                 '        Err("zero")',
                 '    } else {',
-                '        Ok(a % b)',
+                '        a.checked_rem(b).ok_or("overflow")',
                 '    }',
               ],
               [
                 '        a % b',
                 '        return "zero";',
               ],
-              'Os dois ramos do `if / else` precisam devolver o mesmo tipo `Result<i32, &\'static str>`: o primeiro com `Err("zero")` e o segundo com `Ok(a % b)`.',
+              'Os dois ramos devolvem `Result<i32, &\'static str>`. `checked_rem` também trata `i32::MIN % -1`, que entraria em pânico mesmo em release; `ok_or("overflow")` transforma esse `None` em erro.',
             ),
           ],
         },
@@ -595,7 +598,7 @@ fn main() {
               body:
                 'Além do `match`, `Result<T, E>` oferece métodos que deixam os casos comuns bem concisos:\n' +
                 '• `.is_ok()` e `.is_err()` — emprestam `&self` e devolvem `bool` sem consumir o `Result`\n' +
-                '• `.unwrap_or(padrao)` — devolve o valor de `Ok(v)` ou o valor `padrao` se for `Err` (nunca entra em pânico!)\n' +
+                '• `.unwrap_or(padrao)` — devolve o valor de `Ok(v)` ou o valor `padrao` se for `Err`; o argumento `padrao` é avaliado antes da chamada\n' +
                 '• `.unwrap_or_else(|e| ...)` — calcula o valor substituto sob demanda usando uma closure\n\n' +
                 '**Atenção ao ownership:** fazer `match res { Ok(s) => ..., Err(e) => ... }` quando `res` guarda uma `String` **move** o conteúdo para dentro do braço. Se você quiser apenas inspecionar `res` sem movê-lo, faça `match &res` ou `match res.as_ref()`, que converte `&Result<T, E>` em `Result<&T, &E>`.',
               visual: code(
@@ -607,11 +610,11 @@ fn main() {
                 [2, 3],
                 'unwrap_or com valor padrão',
               ),
-              tip: 'Use `.unwrap_or(padrao)` quando o valor substituto é uma constante simples, e `.unwrap_or_else(|| caro())` quando calculá-lo exige uma chamada que só deve rodar se der erro.',
+              tip: 'Use `.unwrap_or(padrao)` quando o valor substituto é uma constante simples, e `.unwrap_or_else(|_| caro())` quando calculá-lo exige uma chamada que só deve rodar se der erro.',
             },
             {
               title: 'Passo a passo: match por valor vs as_ref()',
-              body: 'Veja no passo a passo por que inspecionar um `Result<String, String>` com `.as_ref()` preserva o dono original:',
+              body: 'Veja no passo a passo por que inspecionar um `Result<String, &str>` com `.as_ref()` preserva o dono original:',
               visual: traceStepper({
                 title: 'Posse de Result<String, &str>',
                 src: `fn main() {
@@ -645,7 +648,7 @@ fn main() {
                     rows: [['r', 'Result<String, &str>', 'dona de "ativo" (válida!)']],
                     highlightRow: [0],
                     label: 'Passo 3: reuso de r',
-                    info: 'O empréstimo de `s` terminou na linha 6, então `r` continua válida na linha 7! Sem `.as_ref()`, a linha 7 falharia com `E0382`.',
+                    info: 'O último uso de `s` ocorre na linha 5; com NLL, o empréstimo já pode terminar ali. `r` continua válida na linha 7! Sem `.as_ref()`, a linha 7 falharia com `E0382`.',
                   },
                 ],
               }),
@@ -656,7 +659,7 @@ fn main() {
                 'Pratique o tratamento exaustivo de `Result` no Cargo:\n\n' +
                 '• Crie um projeto com `cargo new conversor`.\n' +
                 '• Escreva `fn parse_and_div(txt: &str, div: i32) -> Result<i32, String>` que converte `txt.trim().parse::<i32>()` usando `match` e depois verifica se `div == 0`.\n' +
-                '• No `main`, teste três chamadas: `("100", 4)`, `("abc", 4)` e `("100", 0)`, imprimindo o sucesso ou a mensagem de erro com `match`.\n\n' +
+                '• O trecho abaixo pressupõe essa implementação de `parse_and_div`. No `main`, teste três chamadas: `("100", 4)`, `("abc", 4)` e `("100", 0)`, imprimindo o sucesso ou a mensagem de erro com `match`.\n\n' +
                 '**Critério de pronto:** as três chamadas imprimem `Ok: 25`, `Erro: numero invalido` e `Erro: divisao por zero`, sem nenhum `unwrap()` no código e com `cargo clippy -- -D warnings` limpo.',
               visual: code(
                 `fn main() {
@@ -709,7 +712,7 @@ fn main() {
             mcq(
               'Por que a linha 8 destacada não compila?',
               [
-                'Erro `E0382` (`borrow of moved value: \'res\'`): o `match res` moveu a `String` para `s` na linha 4',
+                'Erro `E0382` (`borrow of partially moved value`): o `match res` move a `String` para `s` ou `e` nas linhas 5 e 6',
                 'Erro `E0004`: faltou um terceiro braço no `match`',
                 'Erro `E0308`: `println!` não aceita `{:?}` com `Result`',
                 'Erro `E0502`: `s` e `e` são referências mutáveis simultâneas',
@@ -771,7 +774,7 @@ fn main() {
                 '`res.expect("valor ausente")`',
               ],
               [0, 1],
-              '`unwrap_or` e `unwrap_or_else` devolvem um valor substituto quando `res` é `Err`, nunca entrando em pânico. Já `unwrap()` e `expect(...)` abortam em pânico se `res` for `Err`.',
+              'Nas duas opções corretas, o substituto é um literal e não causa pânico. Em geral, o argumento de `unwrap_or` ou a closure de `unwrap_or_else` pode entrar em pânico ao ser avaliado. Já `unwrap()` e `expect(...)` abortam em pânico se `res` for `Err`.',
             ),
             order(
               'Ordene o que acontece na avaliação de `let v = "25".parse::<i32>()` seguido de um `match v`:',
@@ -787,8 +790,7 @@ fn main() {
               'Monte o trecho que converte `"25"` com `parse::<i32>()`, trata primeiro `Ok(n)` dobrando o número e depois `Err(_)` devolvendo `0`, e imprime `dob`:',
               [
                 'let dob = match "25".parse::<i32>() {',
-                '    Ok(n) => n * 2,',
-                '    Err(_) => 0,',
+                '    Ok(n) => n * 2,\n    Err(_) => 0,',
                 '};',
                 'println!("{dob}");',
               ],
@@ -815,7 +817,7 @@ fn main() {
                 'Escrever um `match` inteiro para cada linha que pode falhar deixaria o código enorme. Por isso o Rust tem o operador `?`, colocado logo após uma expressão que devolve `Result<T, E>`:\n' +
                 '• Se o resultado for `Ok(v)`, o `?` extrai `v` e o código continua na mesma linha.\n' +
                 '• Se o resultado for `Err(e)`, o `?` **retorna imediatamente da função inteira** entregando `Err(From::from(e))` para quem chamou!\n\n' +
-                'Se a função chegar até o fim sem tropeçar em nenhum `?`, você ainda precisa embrulhar o valor final em `Ok(...)`.',
+                'Se a função chegar até o fim sem tropeçar em nenhum `?`, o retorno de sucesso ainda precisa ser um `Result`, por exemplo `Ok(valor)`.',
               visual: code(
                 `use std::num::ParseIntError;
 
@@ -840,7 +842,7 @@ fn sum_strs(
                 src: `fn sum_strs(
     a: &str,
     b: &str,
-) -> Result<i32, ParseIntError> {
+) -> Result<i32, std::num::ParseIntError> {
     let x: i32 = a.parse()?;
     let y: i32 = b.parse()?;
     Ok(x + y)
@@ -898,7 +900,7 @@ fn main() {
               'O operador `?` propaga a falha: em caso de `Err(e)`, ele faz um `return Err(From::from(e))` imediato para quem chamou a função.',
             ),
             tf(
-              'Mesmo usando `?` nas linhas internas de uma função que retorna `Result<i32, E>`, a última expressão de sucesso ainda precisa ser escrita como `Ok(valor)`.',
+              'Mesmo usando `?` nas linhas internas de uma função que retorna `Result<i32, E>`, devolver apenas um `i32` no caminho de sucesso não basta: o retorno precisa ser um `Result`, como `Ok(valor)`.',
               true,
               'O `?` desembrulha os valores intermediários, mas o tipo de retorno da função continua sendo `Result<i32, E>`. Por isso o retorno final de sucesso deve ser `Ok(valor)`.',
             ),
@@ -939,7 +941,7 @@ fn main() {
             ),
             fill(
               'Complete a função para extrair `n` de `s.parse()` propagando erros e devolver o triplo em caso de sucesso:',
-              'fn triple(s: &str) -> Result<i32, ParseIntError> {\n    let n: i32 = s.parse()___;\n    ___(n * 3)\n}',
+              'fn triple(s: &str) -> Result<i32, std::num::ParseIntError> {\n    let n: i32 = s.parse()___;\n    ___(n * 3)\n}',
               ['?', 'Ok'],
               ['!', 'unwrap', 'Some'],
               'O `?` após `s.parse()` desembrulha o `i32` ou retorna o `Err`, e `Ok(n * 3)` embrulha o resultado final no `Result`.',
@@ -994,7 +996,7 @@ fn main() {
               'As chamadas encadeadas são avaliadas da esquerda para a direita: primeiro `trim()`, depois `parse()` e então o `?` desembrulha o `Ok(40)`.',
             ),
             codePuzzle(
-              'Monte o corpo da função que remove espaços de `s` com `trim()`, converte para `i32` usando `?` e devolve o dobro em `Ok`:',
+              'Monte o corpo de `fn double(s: &str) -> Result<i32, std::num::ParseIntError>`, que remove espaços com `trim()`, converte com `?` e devolve o dobro em `Ok` (suponha que o dobro cabe em `i32`):',
               [
                 '    let clean = s.trim();',
                 '    let n: i32 = clean.parse()?;',
@@ -1039,7 +1041,7 @@ fn main()
                 [6, 12, 15],
                 '? com ok_or e no main',
               ),
-              tip: '`Box<dyn std::error::Error>` lê-se "qualquer tipo de erro que implemente a trait `Error`", permitindo usar `?` tanto em erros de arquivo quanto em erros de `parse` na mesma função.',
+              tip: '`Box<dyn std::error::Error>` guarda um erro com despacho dinâmico e, neste retorno, exige que ele seja `\'static`. Aceita via `?` erros concretos como `io::Error` e `ParseIntError`; não exige `Send` nem `Sync`.',
             },
             {
               title: 'No seu computador: somador de arquivo com ? (Exercício 25)',
@@ -1176,10 +1178,10 @@ fn main() {
               'Esses quatro métodos fazem a ponte limpa entre `Option` e `Result` quando você precisa combinar APIs diferentes com `?`.',
             ),
             codePuzzle(
-              'Monte a função `main` que retorna `Result<(), Box<dyn Error>>`, converte `"42"` com `?`, imprime o número e encerra com sucesso:',
+              'Monte a função `main` que retorna `Result<(), Box<dyn std::error::Error>>`, converte `"42"` com `?`, imprime o número e encerra com sucesso:',
               [
                 'fn main()',
-                '-> Result<(), Box<dyn Error>> {',
+                '-> Result<(), Box<dyn std::error::Error>> {',
                 '    let n: i32 = "42".parse()?;',
                 '    println!("{n}");',
                 '    Ok(())',
@@ -1247,7 +1249,7 @@ impl Error for AccountError {}`,
               visual: table(
                 ['Trait', 'Como implementar', 'O que habilita'],
                 [
-                  ['fmt::Debug', '#[derive(Debug)]', 'Imprimir com {:?} e usar em assert_eq!'],
+                  ['fmt::Debug', '#[derive(Debug)]', 'Imprimir com {:?}; assert_eq! também exige PartialEq'],
                   ['fmt::Display', 'impl fmt::Display', 'Mensagem amigável para o usuário com {}'],
                   ['error::Error', 'impl Error (exige Debug + Display)', 'Usar em Box<dyn Error> e encadear causas'],
                   ['PartialEq', '#[derive(PartialEq)]', 'Comparar erros com == nos testes'],
@@ -1300,24 +1302,32 @@ fn main() {
               },
             ),
             mcq(
-              'O que acontece ao compilar o `match` destacado sobre o retorno de `withdraw` (que devolve `Result<i32, AccountError>`)?',
+              'O que acontece ao compilar o `match` destacado sobre `res: Result<i32, AccountError>`?',
               [
                 'Não compila com `E0004` (`non-exhaustive patterns`), pois falta cobrir `Err(AccountError::BadAmount)`',
-                'Compila normalmente porque `NoFunds` é a primeira variante',
+                'Compila normalmente porque `res` foi inicializado com `Ok(50)`',
                 'Não compila com `E0308`, pois `Ok(bal)` não é um número',
-                'Entra em pânico apenas se o valor sacado for negativo',
+                'Compila, mas entra em pânico ao imprimir o saldo',
               ],
               0,
               'Essa é a grande vantagem de um `enum` de erro: o compilador recusa o `match` com `error[E0004]: non-exhaustive patterns: \'Err(AccountError::BadAmount)\' not covered` até que todas as variantes sejam tratadas.',
               {
                 visual: code(
-                  `match withdraw(100, 50) {
-    Ok(bal) => println!("saldo: {bal}"),
-    Err(AccountError::NoFunds) => {
-        println!("sem saldo");
+                  `enum AccountError {
+    NoFunds,
+    BadAmount,
+}
+
+fn main() {
+    let res: Result<i32, AccountError> = Ok(50);
+    match res {
+        Ok(bal) => println!("saldo: {bal}"),
+        Err(AccountError::NoFunds) => {
+            println!("sem saldo");
+        }
     }
 }`,
-                  [1, 3],
+                  [8, 10],
                   'Variante esquecida no match',
                 ),
               },
@@ -1379,7 +1389,7 @@ fn main() {
               'Juntos, esses quatro blocos formam um tipo de erro idiomático em Rust puro, sem depender de nenhuma biblioteca externa.',
             ),
             codePuzzle(
-              'Monte o corpo de `withdraw`: retorne `Err(AccountError::BadAmount)` se `amt <= 0`, `Err(AccountError::NoFunds)` se `amt > bal` e `Ok(bal - amt)` caso contrário:',
+              'Usando o `enum AccountError` do card, monte o corpo de `fn withdraw(bal: i32, amt: i32) -> Result<i32, AccountError>`: retorne `Err(AccountError::BadAmount)` se `amt <= 0`, `Err(AccountError::NoFunds)` se `amt > bal` e `Ok(bal - amt)` caso contrário:',
               [
                 '    if amt <= 0 {',
                 '        Err(AccountError::BadAmount)',
@@ -1406,7 +1416,7 @@ fn main() {
                 'Lembre-se de que o operador `?` chama `From::from(erro)`! Se você implementar `From<ParseIntError> for AppError` e `From<io::Error> for AppError`, o `?` converte cada erro para o seu `AppError` automaticamente. Para casos pontuais, você também pode usar `.map_err(AppError::Parse)?`.\n\n' +
                 'No dia a dia (**Exercício 27** do roteiro), duas crates eliminam o código repetitivo:\n' +
                 '• **`thiserror`**: gera `Display`, `Error` e `From` com atributos `#[error("...")]` e `#[from]`. Convenção: use em **bibliotecas**.\n' +
-                '• **`anyhow`**: fornece `anyhow::Result<T>`, que aceita qualquer erro e permite anexar contexto com `.context("falha ao ler config")?`. Convenção: use em **aplicações** (`main`).',
+                '• **`anyhow`**: fornece `anyhow::Result<T>`, que agrega erros que implementam `Error + Send + Sync + \'static`. Para anexar contexto a um `Result` com `.context("falha ao ler config")?`, importe `use anyhow::Context;`. Convenção: use em **aplicações** (`main`).',
               visual: code(
                 `use std::num::ParseIntError;
 
@@ -1438,7 +1448,7 @@ fn read_num(
             },
             {
               title: 'Passo a passo: o ? acionando From::from',
-              body: 'Veja passo a passo como `s.parse()?` transforma um `ParseIntError` em `AppError::Parse` sem precisar de `map_err`:',
+              body: 'Usando o `use std::num::ParseIntError;` e o `enum AppError` do card anterior, veja como `s.parse()?` transforma o erro em `AppError::Parse` sem `map_err`:',
               visual: traceStepper({
                 title: 'read_num("abc")',
                 src: `impl From<ParseIntError> for AppError {
@@ -1476,7 +1486,7 @@ fn read_num(
                     rows: [['3. AppError::from(e)', 'AppError::Parse(e)', 'AppError']],
                     highlightRow: [0],
                     label: 'Passo 3: From::from',
-                    info: 'O operador `?` enxerga que a função retorna `AppError` e chama `AppError::from(e)` automaticamente!',
+                    info: 'O operador `?` enxerga que a função retorna `Result<i32, AppError>` e chama `AppError::from(e)` automaticamente!',
                   },
                   {
                     line: [13],
@@ -1608,7 +1618,7 @@ fn main() {
               [
                 ['thiserror', 'Criar enums de erro bem tipados em uma biblioteca reutilizável'],
                 ['anyhow', 'Juntar erros variados e adicionar mensagens de contexto no binário principal'],
-                ['Box<dyn Error>', 'Tipo dinâmico da biblioteca padrão que aceita qualquer Error sem crates externas'],
+                ['Box<dyn Error>', 'Caixa com despacho dinâmico; no retorno mostrado aceita erros concretos Error + \'static'],
                 ['map_err', 'Converter o erro de uma chamada específica antes do ? sem implementar From'],
               ],
               'Conhecer as quatro opções permite escolher desde o Rust 100% padrão (`enum` + `From` ou `Box<dyn Error>`) até as crates padrão da indústria (`thiserror` e `anyhow`).',
@@ -1624,7 +1634,7 @@ fn main() {
               'O operador `?` combina o desvio condicional de erro com a chamada automática a `From::from`.',
             ),
             codePuzzle(
-              'Monte a implementação de `From<ParseIntError> for AppError` que embrulha o erro recebido na variante `AppError::Parse(e)`:',
+              'Com o `use std::num::ParseIntError;` e o `enum AppError` do card, monte `From<ParseIntError> for AppError`, que embrulha o erro em `AppError::Parse(e)`:',
               [
                 'impl From<ParseIntError> for AppError {',
                 '    fn from(e: ParseIntError) -> Self {',
@@ -1654,7 +1664,7 @@ fn main() {
                 'Tanto `Result<T, E>` quanto `Option<T>` possuem dois métodos de atalho que extraem o valor interno ou entram em pânico na hora se não houver valor:\n' +
                 '• `.unwrap()` — devolve `v` se for `Ok(v)`/`Some(v)` ou chama `panic!` com uma mensagem genérica.\n' +
                 '• `.expect("motivo")` — faz o mesmo, mas exibe a sua mensagem junto com o erro, documentando **por que** você tinha certeza de que aquela operação não falharia.\n\n' +
-                '**Regra do Desafio 50 Dias (Módulo 4):** em código de produção, `unwrap()` e `expect()` escondem erros que deveriam ser tratados com `Result` e `?`. Por isso, reserve-os para **testes automatizados** (`#[test]`, onde entrar em pânico é justamente como o teste falha!) ou para literais fixos validados na mão.',
+                'O módulo de testes abaixo pressupõe uma `Account` com `new`, `withdraw` e `balance` implementados; `withdraw` só altera o saldo em caso de sucesso.\n\n**Regra do Desafio 50 Dias (Módulo 4):** em código de produção, `unwrap()` e `expect()` escondem erros que deveriam ser tratados com `Result` e `?`. Por isso, reserve-os para **testes automatizados** (`#[test]`, onde entrar em pânico é justamente como o teste falha!) ou para literais fixos validados na mão.',
               visual: code(
                 `#[cfg(test)]
 mod tests {
@@ -1704,10 +1714,10 @@ mod tests {
             tf(
               'Dentro de uma função marcada com `#[test]`, usar `.unwrap()` ou `.expect()` é adequado porque um teste em Rust falha justamente quando ocorre um `panic!`.',
               true,
-              'O executor do `cargo test` roda cada `#[test]` e considera que o teste passou se ele terminar normalmente, ou que falhou se ele entrar em pânico (`assert!`, `assert_eq!`, `unwrap`, `expect`).',
+              'Em testes comuns que retornam `()`, um pânico não capturado reprova o teste. A exceção é `#[should_panic]`, que exige um pânico; testes que retornam `Result` também falham ao retornar `Err`.',
             ),
             mcq(
-              'O que acontece ao rodar `cargo test` com o teste abaixo?',
+              'Considerando a função `withdraw(bal, amt) -> Result<i32, AccountError>` da lição anterior, que rejeita saques acima do saldo, o que acontece ao rodar `cargo test` com o teste abaixo?',
               [
                 'O teste **passa**, pois `withdraw(100, 500)` retorna `Err` e `.is_err()` avalia para `true`',
                 'O teste **falha**, pois `withdraw(100, 500)` retorna `Err`',
@@ -1741,7 +1751,7 @@ fn reject_overdraft() {
               const saq = randInt(rng, 30, 80);
               const finalBal = init + dep - saq;
               return num(
-                'Qual número deve estar no `assert_eq!` da linha 6 para que este teste unitário passe?',
+                'Usando `withdraw(bal, amt)` da lição anterior, qual número deve estar no `assert_eq!` da linha 6 para que este teste passe?',
                 finalBal,
                 `O saldo começa em \`${init}\`, soma \`${dep}\` (\`${init + dep}\`) e desconta o saque válido de \`${saq}\`, terminando em \`${init} + ${dep} - ${saq} = ${finalBal}\`.`,
                 {
@@ -1781,13 +1791,12 @@ fn account_flow() {
               'Com `assert!`, `assert_eq!`, `expect` e `#[should_panic]` você testa tanto os caminhos felizes quanto os erros esperados sem instalar nenhuma biblioteca externa.',
             ),
             codePuzzle(
-              'Monte um teste unitário marcado com `#[test]` que cria `let mut acc = Account::new(100);`, primeiro verifica que `acc.withdraw(250)` retorna erro e depois confirma que o saldo continua `100`:',
+              'Dada uma `Account` cujos métodos `new`, `withdraw` e `balance` preservam o saldo quando o saque falha, monte um teste `#[test]` que cria `let mut acc = Account::new(100);`, primeiro verifica que `acc.withdraw(250)` retorna erro e depois confirma que o saldo continua `100`:',
               [
                 '#[test]',
                 'fn overdraft_keeps_balance() {',
                 '    let mut acc = Account::new(100);',
-                '    assert!(acc.withdraw(250).is_err());',
-                '    assert_eq!(acc.balance(), 100);',
+                '    assert!(acc.withdraw(250).is_err());\n    assert_eq!(acc.balance(), 100);',
                 '}',
               ],
               [
@@ -1806,7 +1815,7 @@ fn account_flow() {
                 'A seção 9.3 do livro e os **Exercícios 14 e 35** do roteiro mostram a melhor prática de todas: **usar o sistema de tipos para tornar estados inválidos impossíveis**.\n\n' +
                 '• Se uma idade vai de 0 a 255, use `u8` em vez de `i32`: idade negativa deixa de existir sem nenhum `if`!\n' +
                 '• Se um palpite (`Guess`) precisa estar entre `1` e `100` (ou um `Cpf` precisa ter 11 dígitos), crie uma `struct` com **campo privado** e valide uma única vez no construtor `Guess::new(v) -> Result<Guess, ...>` ou implementando a trait `TryFrom`.\n\n' +
-                'Como o campo `value` é privado, ninguém fora do módulo consegue criar um `Guess` inválido (`E0451`). Todas as funções que recebem `Guess` sabem, por construção, que o número já está entre `1` e `100`!',
+                'Como o campo `value` é privado, código fora do módulo e de seus descendentes não pode construí-lo diretamente (`E0451`). A implementação dentro desse módulo também precisa preservar a invariante; assim, funções que recebem `Guess` podem confiar no intervalo `1..=100`.',
               visual: code(
                 `pub struct Guess {
     value: i32, // privado!
@@ -1833,7 +1842,7 @@ impl Guess {
             },
             {
               title: 'Passo a passo: validando na fronteira',
-              body: 'Veja no `stepper` como validar na entrada do sistema evita repetir checagens em todas as funções internas:',
+              body: 'Usando a `Guess` e seu construtor do card anterior, veja como validar na entrada evita repetir checagens nas funções internas:',
               visual: traceStepper({
                 title: 'Fronteira vs Domínio',
                 src: `fn apply_discount(g: Guess) -> i32 {
@@ -1890,7 +1899,7 @@ test tests::saque_sem_saldo ... ok
 test result: ok. 3 passed; 0 failed
 $ cargo clippy -- -D warnings`,
                 [1, 7, 8],
-                'Rodando a suíte nativa',
+                'Rodando a suíte nativa (saída resumida; ordem pode variar)',
               ),
             },
           ],
@@ -1914,7 +1923,7 @@ $ cargo clippy -- -D warnings`,
             mcq(
               'Se `Guess` está no módulo `game` com campo `value` privado, o que acontece ao compilar a linha 8 destacada?',
               [
-                'Não compila com `E0451` (`field \'value\' of struct \'game::Guess\' is private`); é preciso chamar `game::Guess::new(500)`',
+                'Não compila com `E0451` (`field \'value\' of struct \'game::Guess\' is private`); o campo não pode ser inicializado diretamente fora de `game`',
                 'Compila normalmente e trunca `500` para `100`',
                 'Compila, mas entra em pânico na linha 8',
                 'Não compila com `E0382`, pois `500` foi movido',
@@ -1938,8 +1947,8 @@ fn main() {
               },
             ),
             fill(
-              'Complete a implementação da trait padrão para conversões que podem falhar (Exercício 35):',
-              'impl std::convert::___<&str> for Cpf {\n    type Error = &\'static str;\n    fn ___(s: &str) -> Result<Self, Self::Error> {\n        if s.len() == 11 { Ok(Cpf(s.to_string())) } else { Err("invalido") }\n    }\n}',
+              'Dada `struct Cpf(String);`, complete a conversão que exige 11 dígitos ASCII (sem validar os dígitos verificadores do CPF):',
+              'impl std::convert::___<&str> for Cpf {\n    type Error = &\'static str;\n    fn ___(s: &str) -> Result<Self, Self::Error> {\n        if s.len() == 11 && s.bytes().all(|b| b.is_ascii_digit()) { Ok(Cpf(s.to_string())) } else { Err("invalido") }\n    }\n}',
               ['TryFrom', 'try_from'],
               ['From', 'from', 'Into'],
               'Enquanto `From::from` é para conversões infalíveis, `TryFrom::try_from` define conversões que validam a entrada e retornam `Result<Self, Self::Error>`.',
@@ -1997,7 +2006,7 @@ fn main() {
               'Validar uma única vez na fronteira libera todo o núcleo do programa de checagens repetidas.',
             ),
             codePuzzle(
-              'Monte o método `Guess::new` que rejeita valores fora de `1..=100` com `None` e devolve `Some(Guess { value: v })` quando válido:',
+              'Dada `struct Guess { value: i32 }` sem implementação anterior de `new`, monte `Guess::new`, que rejeita valores fora de `1..=100` com `None` e devolve `Some(Guess { value: v })` quando válido:',
               [
                 'impl Guess {',
                 '    pub fn new(v: i32) -> Option<Self> {',

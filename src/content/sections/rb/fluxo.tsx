@@ -29,9 +29,9 @@ export const rustFluxo: UnitDef = {
   extra: true,
   guide:
     'Em Rust, condições de `if` e `while` precisam ter tipo `bool` (inteiros não são convertidos automaticamente: erro `E0308`).\n\n' +
-    '• **Tudo é expressão:** `let y = if cond { a } else { b };` e `let s = match x { ... };` devolvem valor. Os dois ramos precisam ter o **mesmo tipo** e a expressão final de cada bloco vai **sem ponto e vírgula**.\n' +
+    '• **if e match são expressões:** `let y = if cond { a } else { b };` e `let s = match x { ... };` devolvem valor. Os ramos precisam ter **tipos compatíveis** (podem ocorrer coerções para um tipo comum), e a expressão final de cada bloco vai **sem ponto e vírgula** para devolver seu valor.\n' +
     '• **Laços:** `loop` repete até `break` e pode devolver um valor com `break expr;`. Rótulos como `\'outer: loop` permitem que `break \'outer` ou `continue \'outer` atuem no laço externo.\n' +
-    '• **Intervalos no `for`:** `a..b` vai de `a` até `b - 1` (fim exclusivo); `a..=b` inclui `b` (fim inclusivo). Use `.rev()` para inverter a ordem e `.step_by(k)` para avançar de `k` em `k`.\n' +
+    '• **Intervalos no `for`:** `a..b` vai de `a` até antes de `b` (fim exclusivo; vazio se `a >= b`); `a..=b` inclui `b` (fim inclusivo; vazio se `a > b`). Use `.rev()` para inverter a ordem e `.step_by(k)` para avançar de `k` em `k`, com `k > 0`.\n' +
     '• **`match` exaustivo:** compara um valor com padrões (`0`, `1 | 2`, `0..=4`, `_`), não cai de um braço para o próximo e obriga a cobrir todos os casos possíveis (`E0004`).',
   lessons: [
     {
@@ -43,7 +43,7 @@ export const rustFluxo: UnitDef = {
             {
               title: 'A condição precisa ser bool',
               body:
-                'Em Rust, a condição de um `if` não leva parênteses em volta, mas as chaves `{ }` do bloco são obrigatórias.\n\n' +
+                'Em Rust, a condição de um `if` não precisa de parênteses em volta, mas as chaves `{ }` do bloco são obrigatórias.\n\n' +
                 'Diferente de C — onde `0` é falso e qualquer outro número é verdadeiro —, o compilador do Rust exige que a condição seja estritamente do tipo `bool`. Escrever `if n` com um inteiro gera o erro `E0308` (`mismatched types: expected bool, found integer`).',
               visual: code(
                 `fn main() {
@@ -189,15 +189,13 @@ export const rustFluxo: UnitDef = {
             codePuzzle(
               'Monte a estrutura condicional que imprime `"critico"` quando `temp >= 80` e `"normal"` caso contrário.',
               [
-                'let temp = 85;',
-                'if temp >= 80 {',
-                '    println!("critico");',
-                '} else {',
-                '    println!("normal");',
-                '}',
+                'fn main() {\n    let temp = 85;',
+                '    if temp >= 80 {\n        println!("critico");',
+                '    } else {\n        println!("normal");',
+                '    }\n}',
               ],
-              ['if temp {', '    println!("normal")'],
-              'A condição precisa ser uma comparação booleana (`temp >= 80`), e cada `println!` dentro dos blocos termina com `;`.',
+              ['    if temp {\n        println!("critico");', '    } else {\n        println!(normal);'],
+              'A condição precisa ser booleana (`temp >= 80`), e o texto de `println!` vai entre aspas. Aqui usamos `;` após cada chamada; no fim de um bloco, `println!` também pode aparecer sem `;`, pois devolve `()`.',
             ),
             mcq(
               'Por que este programa imprime `"multiplo de 2"` em vez de `"multiplo de 4"` para `n = 8`?',
@@ -233,7 +231,7 @@ export const rustFluxo: UnitDef = {
                 'Em Rust, blocos e `if` são **expressões**: eles produzem um valor. Assim, podemos inicializar uma variável imutável direto com `let kind = if ... { ... } else { ... };` (Desafio 50 Dias #3).\n\n' +
                 'Repare em duas regras fundamentais:\n' +
                 '• A última expressão de cada bloco vai **sem `;`** (para devolver o valor), mas a declaração `let ... = ...;` termina com `;` depois do `}`.\n' +
-                '• Os dois ramos precisam devolver **exatamente o mesmo tipo**, pois toda variável em Rust tem um único tipo definido na compilação.',
+                '• Os dois ramos precisam produzir valores de **tipos compatíveis**: Rust pode aplicar coerções para um tipo comum, mas não converte automaticamente inteiros em texto. Toda variável tem um único tipo definido na compilação.',
               visual: code(
                 `fn main() {
     let n = 7;
@@ -267,7 +265,7 @@ export const rustFluxo: UnitDef = {
               body:
                 'Crie um projeto com `cargo new paridade`, entre na pasta e edite `src/main.rs`:\n\n' +
                 '• Crie uma variável `n` e use `let tipo = if n % 2 == 0 { "par" } else { "ímpar" };` para classificar o número sem usar `mut`.\n' +
-                '• Calcule também o valor absoluto de um `x: i32` com `let abs = if x < 0 { -x } else { x };`.\n' +
+                '• Calcule também o valor absoluto de um `x: i32` com `let abs = if x < 0 { -x } else { x };`. Escolha `x > i32::MIN`: o módulo de `i32::MIN` não cabe em `i32`.\n' +
                 '• **Critério de pronto:** `cargo run` imprime o número, seu módulo e se é par ou ímpar, e `cargo clippy -- -D warnings` termina sem nenhum aviso.',
               visual: code(
                 `fn main() {
@@ -364,13 +362,13 @@ export const rustFluxo: UnitDef = {
             mcq(
               'Por que a atribuição abaixo não compila?',
               [
-                'Erro E0317: um `if` usado para produzir um valor precisa ter um ramo `else`',
+                'Erro E0317: este `if` precisa de `else` para produzir um inteiro',
                 'Erro E0384: `bonus` precisaria ser `let mut bonus`',
                 'Erro E0004: `sales` precisa ser do tipo `bool`',
                 'Porque `50` deveria terminar com ponto e vírgula',
               ],
               0,
-              'Se `sales > 100` fosse `false`, `bonus` ficaria sem valor. Por isso o compilador exige um bloco `else` do mesmo tipo e emite `error[E0317]: if may be missing an else clause`.',
+              'Sem `else`, um `if` tem tipo `()`. Como o ramo aqui termina em `50` (inteiro), há incompatibilidade e o compilador emite `error[E0317]: if may be missing an else clause`. Um `if` que devolve `()` pode ser usado em `let` sem `else`.',
               {
                 visual: code(
                   `fn main() {
@@ -391,7 +389,7 @@ export const rustFluxo: UnitDef = {
                 ['`let y = if x > 0 { 1 } else { "um" };`', 'Erro `E0308`: ramos de tipos distintos'],
                 ['`let y = if x > 0 { 1 };`', 'Erro `E0317`: `if` sem `else` em valor'],
               ],
-              'Em Rust, a condição é sempre `bool`, e um `if` que produz valor exige `else` com o mesmo tipo nos dois ramos.',
+              'Nesses trechos, a condição precisa ser `bool`, e um `if` que produz um inteiro exige `else` com tipo compatível. Sem `else`, o tipo do `if` é `()`.',
             ),
             gen((rng) => {
               const a = randInt(rng, 2, 9);
@@ -421,13 +419,13 @@ export const rustFluxo: UnitDef = {
             codePuzzle(
               'Monte a atribuição que usa `if` como expressão para definir `rate` (10 se `vip` for `true`, 25 caso contrário) e imprimir seu valor.',
               [
-                'let vip = true;',
-                'let rate = if vip {',
-                '    10',
-                '} else {',
-                '    25',
-                '};',
-                'println!("{rate}");',
+                'fn main() {\n    let vip = true;',
+                '    let rate = if vip {',
+                '        10',
+                '    } else {',
+                '        25',
+                '    };',
+                '    println!("{rate}");\n}',
               ],
               ['    10;', '}'],
               'Os valores `10` e `25` não levam `;` dentro dos blocos, mas o `let rate = ...;` precisa do `;` fechando a declaração na linha `};`.',
@@ -466,7 +464,7 @@ export const rustFluxo: UnitDef = {
               title: 'loop e break com valor',
               body:
                 'Rust tem um laço dedicado para repetir até que você mande parar: `loop { ... }`. Diferente de `while true`, o compilador sabe com certeza que o corpo do `loop` começa a executar.\n\n' +
-                'Por isso, o `loop` também é uma expressão que pode devolver um resultado: basta colocar o valor depois do `break`, como `break n + 1;`. Já o laço `while cond { ... }` testa uma condição `bool` antes de cada passagem e **não** pode devolver valor pelo `break` (erro `E0571`).',
+                'Por isso, o `loop` também é uma expressão que pode devolver um resultado: basta colocar o valor depois do `break`, como `break n + 1;`. Já o laço `while cond { ... }` testa uma condição `bool` antes de cada passagem e **não** pode devolver valor por um `break` que encerra esse `while` (erro `E0571`).',
               visual: code(
                 `fn main() {
     let mut n = 1;
@@ -481,7 +479,7 @@ export const rustFluxo: UnitDef = {
                 [3, 6],
                 'loop devolvendo valor',
               ),
-              tip: 'Toda variável alterada dentro de um laço (`n *= 2`, `i += 1`) precisa ser declarada com `let mut`. Sem `mut`, o compilador aponta o erro `E0384`.',
+              tip: 'Para reatribuir contadores inteiros já inicializados (`n *= 2`, `i += 1`), declare-os com `let mut`. Sem `mut`, essas reatribuições geram o erro `E0384`.',
             },
             {
               title: 'Rastreando o loop passo a passo',
@@ -565,13 +563,13 @@ export const rustFluxo: UnitDef = {
             mcq(
               'Qual erro o compilador aponta na linha destacada?',
               [
-                'E0571: `break` com valor não é permitido dentro de um laço `while`',
+                'E0571: `break` com valor não pode encerrar um laço `while`',
                 'E0308: `30` não é do tipo `bool`',
                 'E0384: `i` não pode ser comparada com `3`',
                 'E0004: falta um ramo `else` depois do `if`',
               ],
               0,
-              'Como a condição de um `while` pode começar `false`, o compilador não sabe o que o laço devolveria se nunca entrasse no corpo. Por isso `break 30;` num `while` gera `error[E0571]: break with value from a while loop`. Para devolver valor, use `loop`.',
+              'Como a condição de um `while` pode começar `false`, o compilador não sabe o que o laço devolveria se nunca entrasse no corpo. Por isso `break 30;` encerrando esse `while` gera `error[E0571]: break with value from a while loop`. Um `break` rotulado dentro do `while` pode devolver valor a um `loop` externo.',
               {
                 visual: code(
                   `fn main() {
@@ -635,16 +633,16 @@ export const rustFluxo: UnitDef = {
             codePuzzle(
               'Monte o trecho que acumula `n` em um `loop` e devolve `n * 2` para `res` assim que `n` chega a `5`.',
               [
-                'let mut n = 0;',
-                'let res = loop {',
-                '    n += 1;',
-                '    if n == 5 {',
-                '        break n * 2;',
-                '    }',
-                '};',
+                'fn main() {\n    let mut n = 0;',
+                '    let res: i32 = loop {',
+                '        n += 1;',
+                '        if n == 5 {',
+                '            break n * 2;',
+                '        }\n    };',
+                '    println!("{res}");\n}',
               ],
-              ['let n = 0;', '        break;'],
-              'O contador `n` exige `let mut`, o `break n * 2;` entrega o valor do `loop` e a declaração `let res = loop { ... };` fecha com `;`.',
+              ['fn main() {\n    let n = 0;', '            break;'],
+              'O contador `n` exige `let mut`, o `break n * 2;` entrega o inteiro ao `loop` e inicializa `res: i32`. Um `break;` sem valor devolveria `()`, incompatível com `i32`. O programa imprime `10`.',
             ),
             num(
               'O comando `continue` pula o resto da iteração atual. Qual é o valor final de `sum`?',
@@ -842,17 +840,16 @@ export const rustFluxo: UnitDef = {
               );
             }),
             codePuzzle(
-              'Monte os dois laços aninhados em que o laço interno usa `break \'top ans;` para encerrar o laço externo devolvendo `ans`.',
+              'Monte os dois laços aninhados em que o laço interno usa `break \'top ans;` para encerrar o laço externo devolvendo `ans`. O programa deve imprimir `5`.',
               [
-                'let mut ans = 1;',
-                "let val = 'top: loop {",
-                '    loop {',
-                '        ans += 4;',
-                "        break 'top ans;",
-                '    }',
-                '};',
+                "fn main() {\n    let val = 'top: loop {",
+                '        loop {\n            let mut ans = 1;',
+                '            ans += 4;',
+                "            break 'top ans;",
+                '        }\n    };',
+                '    println!("{val}");\n}',
               ],
-              ['let val = top: loop {', '        break top ans;'],
+              ['fn main() {\n    let val = top: loop {', '            break top ans;'],
               'O rótulo na definição do laço leva apóstrofo e dois-pontos (`\'top: loop`), e no `break` leva apenas o apóstrofo (`break \'top ans;`).',
             ),
             num(
@@ -892,9 +889,9 @@ export const rustFluxo: UnitDef = {
             {
               title: 'for com intervalos a..b e a..=b',
               body:
-                'Em C escrevemos `for (int i = 0; i < n; i++)` e qualquer descuido entre `<` e `<=` lê memória fora do lugar. Em Rust, o `for` percorre diretamente um **intervalo (range)** ou uma coleção:\n\n' +
-                '• `a..b` gera os inteiros de `a` até **`b - 1`** (limite superior **exclusivo**).\n' +
-                '• `a..=b` gera os inteiros de `a` até **`b`** (limite superior **inclusivo**).\n\n' +
+                'Em C escrevemos `for (int i = 0; i < n; i++)`; ao usar `i` como índice de um array de tamanho `n`, trocar `<` por `<=` pode causar acesso fora dos limites. Em Rust, o `for` percorre diretamente um **intervalo (range)** ou uma coleção:\n\n' +
+                '• `a..b` gera os inteiros de `a` até antes de **`b`** (limite superior **exclusivo**); é vazio se `a >= b`.\n' +
+                '• `a..=b` gera os inteiros de `a` até **`b`** (limite superior **inclusivo**); é vazio se `a > b`.\n\n' +
                 'Veja no código o fatorial do **Desafio 50 Dias #2**, escrito com `u64` e `1..=n`:',
               visual: code(
                 `fn main() {
@@ -1039,14 +1036,13 @@ export const rustFluxo: UnitDef = {
               );
             }),
             codePuzzle(
-              'Monte a função `fatorial(n: u64) -> u64` usando um intervalo inclusivo (Desafio 50 Dias #2).',
+              'Monte a função `fatorial(n: u64) -> u64` para `0 <= n <= 20`, usando um intervalo inclusivo (Desafio 50 Dias #2).',
               [
                 'fn fatorial(n: u64) -> u64 {',
                 '    let mut fact = 1;',
                 '    for i in 1..=n {',
                 '        fact *= i;',
-                '    }',
-                '    fact',
+                '    }\n    fact',
                 '}',
               ],
               ['    for i in 1..n {', '    let fact = 1;'],
@@ -1072,7 +1068,7 @@ export const rustFluxo: UnitDef = {
               body:
                 'Os intervalos do Rust podem ser combinados com métodos que mudam a forma de percorrer:\n\n' +
                 '• `(a..b).rev()` **inverte** a ordem (do fim para o começo).\n' +
-                '• `(a..b).step_by(k)` avança de **`k` em `k`** a partir do primeiro elemento.\n' +
+                '• `(a..b).step_by(k)` avança de **`k` em `k`** a partir do primeiro elemento; `k` precisa ser maior que zero (com `0`, ocorre `panic`).\n' +
                 '• E para percorrer um array como `let v = [10, 20, 30];`, basta fazer `for x in v` — sem índices manuais!',
               visual: code(
                 `fn main() {
@@ -1165,7 +1161,7 @@ fn main() {
               },
             ),
             num(
-              'Qual é o último valor de `x` somado em `last` neste laço?',
+              'Qual é o último valor de `x` atribuído a `last` neste laço?',
               10,
               'O intervalo `2..=10` é inclusivo no `10`. Pulando de `4` em `4` a partir de `2`, o iterador produz `2`, `6` e `10`.',
               {
@@ -1240,8 +1236,7 @@ fn main() {
                 '    let mut sum = 0;',
                 '    for v in vals {',
                 '        sum += v;',
-                '    }',
-                '    sum',
+                '    }\n    sum',
                 '}',
               ],
               ['    for v in 0..vals {', '        sum = v;'],
@@ -1278,7 +1273,7 @@ fn main() {
               title: 'match: seleção exaustiva',
               body:
                 'O `match` do Rust lembra o `switch` de C, mas com superpoderes e segurança de compilação:\n\n' +
-                '• Os braços (`padrao => expressao,`) são testados **de cima para baixo** e apenas o primeiro que casar executa — **não existe queda automática (fallthrough)** nem `break`.\n' +
+                '• Os braços (`padrao => expressao,`) são testados **de cima para baixo** e apenas o primeiro que casar executa — **não existe queda automática (fallthrough)** e não é preciso `break` para encerrar um braço.\n' +
                 '• O compilador exige que o `match` seja **exaustivo**: todos os valores possíveis do tipo precisam estar cobertos (senão ocorre o erro `E0004`).\n' +
                 '• O padrão curinga `_` significa **"qualquer outro valor"** e costuma fechar o `match`.',
               visual: code(
@@ -1380,7 +1375,7 @@ fn main() {
                 'Porque `match` não pode ser usado dentro de `let`',
               ],
               0,
-              'Assim como no `if`, todos os braços de um `match` usado como expressão precisam produzir o mesmo tipo. Misturar `100` (`i32`) e `"erro"` (`&str`) gera `error[E0308]: match arms have incompatible types`.',
+              'Assim como no `if`, os braços de um `match` precisam ter tipos compatíveis, possivelmente por coerção para um tipo comum. Misturar `100` (`i32`) e `"erro"` (`&str`) gera `error[E0308]: match arms have incompatible types`.',
               {
                 visual: code(
                   `fn main() {
@@ -1425,15 +1420,14 @@ fn main() {
             codePuzzle(
               'Monte a expressão `match` que converte `gear` em velocidade máxima, cobrindo qualquer outro valor com `0`.',
               [
-                'let gear = 2;',
-                'let max_v = match gear {',
-                '    1 => 20,',
-                '    2 => 45,',
-                '    _ => 0,',
-                '};',
+                'fn main() {\n    let gear = 2;',
+                '    let max_v = match gear {',
+                '        1 => 20,\n        2 => 45,\n        _ => 0,',
+                '    };',
+                '    println!("{max_v}");\n}',
               ],
-              ['    default => 0,', '}'],
-              'Em Rust usamos `_ => 0,` para o caso geral, e o `let max_v = match gear { ... };` fecha com `;`.',
+              ['        1 => 20,\n        2 => 45,\n        default: 0,', '    } else {'],
+              'Em Rust usamos `_ => 0,` para o caso geral, e o `let max_v = match gear { ... };` fecha com `;`. `default: 0,` não é um braço válido; `default => 0,` seria válido, mas criaria uma variável chamada `default`.',
             ),
             num(
               'Em vez de `_`, o último braço pode usar um nome (`other`) para usar o valor! O que é impresso?',
@@ -1643,15 +1637,11 @@ fn main() {
               [
                 "fn status(grade: u8) -> &'static str {",
                 '    match grade {',
-                '        0..=4 => "reprovado",',
-                '        5..=6 => "recuperação",',
-                '        7..=10 => "aprovado",',
-                '        _ => "inválida",',
-                '    }',
-                '}',
+                '        0..=4 => "reprovado",\n        5..=6 => "recuperação",\n        7..=10 => "aprovado",\n        _ => "inválida",',
+                '    }\n}',
               ],
-              ['    };', '        7..10 => "aprovado",'],
-              'Padrões de intervalo usam `..=` (`7..=10`), e o `match` no fim da função vai sem `;` (`}` na linha 7) para devolver o `&\'static str`.',
+              ['    };\n}', '        0..=4 => "reprovado",\n        5..=6 => "recuperação",\n        7..10 => "aprovado",\n        _ => "inválida",'],
+              '`7..10` é um padrão válido, mas exclui `10`, classificando essa nota como "inválida". Por isso usamos `7..=10`. O `match` no fim da função vai sem `;` para devolver o `&\'static str`.',
             ),
             num(
               'Juntando `for`, intervalos e `match`: qual é o valor final de `pts`?',

@@ -24,9 +24,9 @@ export const rustIteradores: UnitDef = {
   source: 'The Rust Programming Language (Edição 2024), cap. 13 · Desafio 50 Dias — Rust, módulo 6 (ex. 36 a 38)',
   extra: true,
   guide:
-    'Uma **closure** `|x| x + 1` é uma função anônima que infere tipos pelo uso e pode capturar variáveis do escopo onde nasceu: por referência imutável (`&T`, trait `Fn`), por referência mutável (`&mut T`, trait `FnMut`) ou tomando posse (`T` ou `move`, trait `FnOnce`).\n\n' +
-    'Um **iterador** é qualquer tipo que implementa o trait `Iterator`, definindo `type Item` e `fn next(&mut self) -> Option<Self::Item>`. A partir de uma coleção, `.iter()` entrega `&T`, `.iter_mut()` entrega `&mut T` e `.into_iter()` consome a coleção entregando `T`.\n\n' +
-    '**Adaptadores** como `map`, `filter`, `take`, `skip`, `rev`, `enumerate`, `zip` e `chain` são **preguiçosos**: só montam o pipeline e não executam nada até que um **consumidor** (`collect`, `sum`, `fold`, `count`, `any`, `all`, `find`, `max_by_key` ou um laço `for`) puxe os elementos. Após a compilação, toda a cadeia vira um único laço otimizado sem alocações intermediárias (abstração de custo zero).',
+    'Uma **closure** `|x| x + 1` é uma função anônima que infere tipos pelo uso e pode capturar variáveis do escopo onde nasceu: por referência imutável (`&T`), por referência mutável (`&mut T`) ou por valor (`T`, inclusive com `move`). Os traits `Fn`, `FnMut` e `FnOnce` dependem do uso dos valores capturados no corpo: uma closure `move` também pode implementar `Fn` ou `FnMut`.\n\n' +
+    'Um **iterador** é qualquer tipo que implementa o trait `Iterator`, definindo `type Item` e `fn next(&mut self) -> Option<Self::Item>`. Em um `Vec<T>`, `.iter()` entrega `&T`, `.iter_mut()` entrega `&mut T` e `.into_iter()` consome o vetor entregando `T`.\n\n' +
+    '**Adaptadores** como `map`, `filter`, `take`, `skip`, `rev`, `enumerate`, `zip` e `chain` são **preguiçosos**: só montam o pipeline e não processam itens até que um **consumidor** (`collect`, `sum`, `fold`, `count`, `any`, `all`, `find`, `max_by_key` ou um laço `for`) puxe os elementos. Esses adaptadores não criam vetores intermediários por si mesmos. Com otimizações habilitadas, a cadeia pode virar código tão eficiente quanto um laço manual (abstração de custo zero); essa otimização não é garantida em toda compilação.',
   lessons: [
     {
       id: 'rt-iter-closure',
@@ -36,7 +36,7 @@ export const rustIteradores: UnitDef = {
           card: [
             {
               title: 'Funções anônimas com |...|',
-              body: 'Uma **closure** é uma função anônima que você pode guardar numa variável ou passar como argumento. Os parâmetros ficam entre barras verticais `|x|`, e não entre parênteses.\n\nDiferente de `fn`, você quase nunca precisa anotar os tipos: o compilador deduz tudo na primeira chamada e trava aquela assinatura.',
+              body: 'Uma **closure** é uma função anônima que você pode guardar numa variável ou passar como argumento. Os parâmetros ficam entre barras verticais `|x|`, e não entre parênteses.\n\nDiferente de `fn`, você quase nunca precisa anotar os tipos: o compilador deduz os tipos pelo contexto e pelas chamadas, fixando uma única assinatura.',
               visual: code(
                 'let add_one = |x| x + 1;\nlet sum = |a, b| a + b;\nlet fixed = || 42;\n\nlet r = sum(add_one(4), fixed());\nprintln!("{r}"); // 47',
                 [1, 2, 3],
@@ -46,7 +46,7 @@ export const rustIteradores: UnitDef = {
             },
             {
               title: 'Como o compilador trava o tipo',
-              body: 'Sem anotação explícita, a primeira chamada fixa os tipos dos parâmetros e do retorno. Tentar chamar a mesma closure depois com outro tipo gera o erro `E0308` (`mismatched types`).',
+              body: 'Sem anotação explícita, os tipos dos parâmetros e do retorno são inferidos pelo uso. No exemplo abaixo, a primeira chamada determina o tipo inteiro; tentar chamar a mesma closure depois com outro tipo gera o erro `E0308` (`mismatched types`).',
               visual: trilha([
                 'Declaração: let id = |x| x; (tipo ainda em aberto).',
                 '1ª chamada: let a = id(5); fixa x: i32 -> i32.',
@@ -163,7 +163,7 @@ export const rustIteradores: UnitDef = {
               title: 'Capturando o ambiente',
               body: 'Diferente de uma `fn` comum, uma closure enxerga as variáveis do escopo onde foi criada. O compilador analisa o corpo da closure e escolhe automaticamente a captura menos restritiva:\n\n• **Empréstimo imutável (`&T`)**: quando a closure só lê a variável.\n• **Empréstimo mutável (`&mut T`)**: quando a closure altera a variável.\n• **Por valor (`T`)**: quando a closure move ou consome a variável (ou quando você escreve `move` antes de `|...|`).',
               visual: code(
-                'let limit = 10;\n// captura &limit:\nlet ok = |x| x <= limit;\n\nlet tag = String::from("RPM");\nlet take = move || println!("{tag}");',
+                'let limit = 10;\n// captura &limit:\nlet ok = |x: i32| x <= limit;\n\nlet tag = String::from("RPM");\nlet take = move || println!("{tag}");',
                 [3, 6],
                 'Captura automática e move',
               ),
@@ -182,7 +182,7 @@ export const rustIteradores: UnitDef = {
             },
             {
               title: 'No seu computador',
-              body: 'Crie um projeto com `cargo new closures_captura` e abra `src/main.rs`.\n\n1. Declare `let offset = 10;` e uma closure `aplicar_offset` que some `offset` ao parâmetro.\n2. Declare `let mut leituras = 0;` e uma closure `let mut registrar = |v: i32| { leituras += 1; v + offset };` (tente chamar as duas ao mesmo tempo e observe como a ordem dos empréstimos importa).\n3. Crie uma `String` e mova-a para dentro de uma closure `move || ...`.\n\n**Critério de pronto:** `cargo run` imprime os resultados calculados e a contagem final de `leituras`, e `cargo clippy -- -D warnings` termina sem nenhum aviso.',
+              body: 'Crie um projeto com `cargo new closures_captura` e abra `src/main.rs`.\n\n1. Declare `let offset = 10;` e uma closure `aplicar_offset` que some `offset` ao parâmetro.\n2. Declare `let mut leituras = 0;` e uma closure `let mut registrar = |v: i32| { leituras += 1; v + offset };` (tente imprimir `leituras` entre duas chamadas de `registrar` para observar o conflito de empréstimos; depois mova a impressão para após a última chamada).\n3. Crie uma `String` e mova-a para dentro de uma closure `move || ...`.\n\n**Critério de pronto:** `cargo run` imprime os resultados calculados e a contagem final de `leituras`, e `cargo clippy -- -D warnings` termina sem nenhum aviso.',
               visual: code(
                 'fn main() {\n    let offset = 10;\n    let mut count = 0;\n    let mut reg = |v: i32| {\n        count += 1;\n        v + offset\n    };\n    println!("{}", reg(25));\n    println!("total: {count}");\n}',
                 [4, 5, 6],
@@ -276,8 +276,7 @@ export const rustIteradores: UnitDef = {
               [
                 'let mut total = 10;',
                 'let mut add = |x| total += x;',
-                'add(4);',
-                'add(6);',
+                'add(4);\nadd(6);',
                 'println!("{total}");',
               ],
               [
@@ -316,7 +315,7 @@ export const rustIteradores: UnitDef = {
           card: [
             {
               title: 'Os três traits de closure',
-              body: 'A forma como uma closure usa os valores capturados determina quais dos três traits da biblioteca padrão ela implementa:\n\n• **`FnOnce`**: pode ser chamada pelo menos uma vez. Toda closure implementa `FnOnce` (as que tiram a posse de um valor capturado implementam **apenas** `FnOnce`).\n• **`FnMut`**: não move valores capturados para fora do seu corpo, mas pode alterá-los (`&mut`). Pode ser chamada várias vezes.\n• **`Fn`**: não move nem altera valores capturados (usa apenas `&` ou não captura nada). Pode ser chamada várias vezes mesmo por referência compartilhada.',
+              body: 'A forma como uma closure usa os valores capturados determina quais dos três traits da biblioteca padrão ela implementa:\n\n• **`FnOnce`**: pode ser chamada pelo menos uma vez. Toda closure implementa `FnOnce` (as que movem um valor capturado não-`Copy` para fora do corpo implementam **apenas** `FnOnce`).\n• **`FnMut`**: não move valores capturados para fora do seu corpo, mas pode alterá-los (`&mut`). Pode ser chamada várias vezes.\n• **`Fn`**: não precisa de acesso mutável ao próprio ambiente nem move valores capturados para fora. Pode ser chamada várias vezes mesmo por referência compartilhada, inclusive se capturou valores com `move`. Mutabilidade interior (como `Cell`) ainda pode permitir alterações por referência compartilhada.',
               visual: code(
                 'let mut count = 0;\nlet mut inc = || {\n    count += 1;\n    count\n};\nprintln!("{}", inc()); // 1\nprintln!("{}", inc()); // 2',
                 [2, 3, 4],
@@ -331,7 +330,7 @@ export const rustIteradores: UnitDef = {
                 [
                   ['Não captura nada ou só lê (`&T`)', '`Fn`, `FnMut`, `FnOnce`', 'Quantas quiser (sem `mut`)'],
                   ['Altera variável capturada (`&mut T`)', '`FnMut`, `FnOnce`', 'Quantas quiser (exige `let mut`)'],
-                  ['Consome/move variável capturada (`T`)', 'Apenas `FnOnce`', 'Uma única vez (consome a closure)'],
+                  ['Move valor capturado não-`Copy` para fora do corpo', 'Apenas `FnOnce`', 'Uma única vez (consome a closure)'],
                 ],
               ),
             },
@@ -379,7 +378,7 @@ export const rustIteradores: UnitDef = {
               },
             ),
             match(
-              'Para `s: String`, associe cada closure ao trait mais específico que ela consegue implementar:',
+              'Para uma variável mutável `s: String`, considere cada closure separadamente e associe ao trait mais específico que ela consegue implementar:',
               [
                 ['|| println!("{}", s.len())', 'Fn (apenas lê s por &String)'],
                 ['|| s.push_str("!")', 'FnMut (altera s por &mut String)'],
@@ -409,8 +408,7 @@ export const rustIteradores: UnitDef = {
               [
                 'let mut sum = 0;',
                 'let mut add = |x: i32| sum += x;',
-                'add(10);',
-                'add(15);',
+                'add(10);\nadd(15);',
                 'println!("{sum}");',
               ],
               [
@@ -467,7 +465,7 @@ export const rustIteradores: UnitDef = {
               visual: code(
                 'fn main() {\n    let nums = [1, 2, 3, 4];\n    let gain = 5;\n    let r1 = apply(&nums, |x| x * 2);\n    let r2 = apply(&nums, |x| x + gain);\n    println!("{r1:?} {r2:?}");\n}',
                 [4, 5],
-                'Testando apply com closures',
+                'main (junto da função apply do card anterior)',
               ),
             },
           ],
@@ -505,7 +503,7 @@ export const rustIteradores: UnitDef = {
                 'Não é permitido chamar um parâmetro genérico mais de uma vez em Rust.',
               ],
               0,
-              'O bound `F: FnOnce()` só garante que `f` pode ser chamada uma vez (por valor, movendo `f`). Na linha 3, `f` já foi movida na linha 2 (`error[E0382]: use of moved value: f`). Para chamar duas vezes, o bound deve ser `F: FnMut()` ou `F: Fn()`.',
+              'O bound `F: FnOnce()` só garante que `f` pode ser chamada uma vez (por valor, movendo `f`). Na linha 3, `f` já foi movida na linha 2 (`error[E0382]: use of moved value: f`). Para chamar duas vezes, use `F: FnMut()` com o parâmetro `mut f: F`, ou `F: Fn()`.',
               {
                 visual: code(
                   'fn run_twice<F: FnOnce()>(f: F) {\n    f();\n    f();\n}',
@@ -515,20 +513,20 @@ export const rustIteradores: UnitDef = {
               },
             ),
             mcq(
-              'Por que a chamada na linha 7 falha ao compilar?',
+              'Por que a closure na linha 6 falha ao compilar?',
               [
-                'Erro E0277: call_fn exige Fn(), mas || drop(s) move s e só implementa FnOnce().',
+                'Erro E0507: call_fn exige Fn(), mas o corpo tenta mover s para drop.',
                 'Erro E0382: s foi usada depois do drop.',
                 'Erro E0308: drop(s) devolve i32 em vez de ().',
                 'Erro E0502: s está emprestada como mutável e imutável.',
               ],
               0,
-              '`call_fn` exige `F: Fn()`, mas `|| drop(s)` consome `s: String` e só implementa `FnOnce()`. O compilador aponta `error[E0277]: expected a closure that implements the Fn trait, but this closure only implements FnOnce`.',
+              '`call_fn` exige `F: Fn()`, então a closure passada diretamente na chamada é verificada como `Fn`. Seu corpo tenta mover `s: String` para `drop(s)`, o que gera `E0507`: não se pode mover um valor capturado para fora de uma closure `Fn`. Um bound `FnOnce()` permitiria esse consumo.',
               {
                 visual: code(
                   'fn call_fn<F: Fn()>(f: F) {\n    f();\n}\nfn main() {\n    let s = String::from("oi");\n    call_fn(|| drop(s));\n}',
                   [1, 6],
-                  'Violação de trait bound E0277',
+                  'Movendo uma captura de uma closure Fn',
                 ),
               },
             ),
@@ -572,10 +570,10 @@ export const rustIteradores: UnitDef = {
               [
                 'O compilador gera um struct anônimo único para a closure |x| x + 1',
                 'O compilador monomorfiza eval criando uma versão específica para esse tipo F',
-                'O otimizador faz inlining do corpo x + 1 direto dentro de eval, sem salto indireto',
-                'O código de máquina calcula (5 + 1) * 2 diretamente nos registradores',
+                'A chamada à closure usa despacho estático; o otimizador pode fazer inlining de x + 1',
+                'Na execução, eval devolve (5 + 1) * 2, isto é, 12',
               ],
-              'Por usar generics (`F: Fn(...)`) em vez de ponteiros dinâmicos, Rust resolve tudo em tempo de compilação e elimina o custo da chamada indireta.',
+              'O tipo concreto `F` permite despacho estático. Inlining e cálculo antecipado são otimizações possíveis, mas não são garantidos, especialmente em builds de debug.',
             ),
           ],
         },
@@ -589,13 +587,13 @@ export const rustIteradores: UnitDef = {
           card: [
             {
               title: 'O método next() e os três iteradores',
-              body: 'Em Rust, todo iterador implementa o trait `Iterator`, cujo único método obrigatório é `next(&mut self) -> Option<Self::Item>`. Cada chamada a `next()` entrega `Some(item)` com o próximo elemento e avança o cursor interno; quando a sequência acaba, entrega `None`.\n\nUma coleção como `Vec<T>` oferece três métodos para criar um iterador:\n• **`.iter()`**: produz `&T` (empréstimo imutável).\n• **`.iter_mut()`**: produz `&mut T` (empréstimo mutável, altera no lugar).\n• **`.into_iter()`**: consome a coleção e produz `T` por valor.',
+              body: 'Em Rust, todo iterador implementa o trait `Iterator`, cujo único método obrigatório é `next(&mut self) -> Option<Self::Item>`. Cada chamada a `next()` entrega `Some(item)` com o próximo elemento e avança o cursor interno; quando a sequência acaba, entrega `None`. Em geral, um iterador pode voltar a entregar `Some` depois de `None`; `.fuse()` garante que isso não aconteça.\n\nUma coleção como `Vec<T>` oferece três métodos para criar um iterador:\n• **`.iter()`**: produz `&T` (empréstimo imutável).\n• **`.iter_mut()`**: produz `&mut T` (empréstimo mutável, altera no lugar).\n• **`.into_iter()`**: consome a coleção e produz `T` por valor.',
               visual: code(
                 'let v = vec![10, 20];\nlet mut it = v.iter();\nassert_eq!(it.next(), Some(&10));\nassert_eq!(it.next(), Some(&20));\nassert_eq!(it.next(), None);',
                 [2, 3, 4, 5],
                 'Avançando com next()',
               ),
-              tip: 'No Módulo 2 (exercício 13), você viu `for x in &v`, `for x in &mut v` e `for x in v`. Por trás dos panos, esses três laços chamam exatamente `v.iter()`, `v.iter_mut()` e `v.into_iter()`!',
+              tip: 'No Módulo 2 (exercício 13), você viu `for x in &v`, `for x in &mut v` e `for x in v`. O laço chama `IntoIterator::into_iter` sobre a expressão; para `v: Vec<T>`, os iteradores resultantes equivalem aos de `v.iter()`, `v.iter_mut()` e `v.into_iter()`, respectivamente.',
             },
             {
               title: 'Comparando iter, iter_mut e into_iter',
@@ -749,7 +747,7 @@ export const rustIteradores: UnitDef = {
             },
             {
               title: 'No seu computador',
-              body: 'Hora do **Exercício 38** do roteiro! Crie um projeto com `cargo new iter_fibonacci`.\n\n1. Crie `struct Fibonacci { curr: u64, next: u64 }` com `Fibonacci::new()` iniciando em `curr: 0, next: 1`.\n2. Implemente `Iterator for Fibonacci` com `type Item = u64;`. Em cada `next(&mut self)`, guarde `self.curr`, atualize o par para `(self.next, self.curr + self.next)` e devolva `Some(atual)`.\n3. No `main`, use `for x in Fibonacci::new().take(10)` para imprimir os 10 primeiros termos e calcule a soma deles com `Fibonacci::new().take(10).sum::<u64>()`.\n\n**Critério de pronto:** `cargo run` imprime os 10 termos (`0, 1, 1, 2, 3, 5, 8, 13, 21, 34`) e a soma `88`, e `cargo clippy -- -D warnings` passa sem avisos.',
+              body: 'Hora do **Exercício 38** do roteiro! Crie um projeto com `cargo new iter_fibonacci`.\n\n1. Crie `struct Fibonacci { curr: u64, next: u64 }` com `Fibonacci::new()` iniciando em `curr: 0, next: 1`.\n2. Implemente `Iterator for Fibonacci` com `type Item = u64;`. Em cada `next(&mut self)`, guarde `self.curr`, atualize o par para `(self.next, self.curr + self.next)` e devolva `Some(atual)`. Esse modelo tem capacidade limitada pelo `u64`: ao excedê-la, entra em pânico com checagens de overflow habilitadas (padrão em debug) ou faz wrap sem elas (padrão em release).\n3. No `main`, use `for x in Fibonacci::new().take(10)` para imprimir os 10 primeiros termos e calcule a soma deles com `Fibonacci::new().take(10).sum::<u64>()`.\n\n**Critério de pronto:** `cargo run` imprime os 10 termos (`0, 1, 1, 2, 3, 5, 8, 13, 21, 34`) e a soma `88`, e `cargo clippy -- -D warnings` passa sem avisos.',
               visual: code(
                 'struct Fibonacci {\n    curr: u64,\n    next: u64,\n}\nimpl Iterator for Fibonacci {\n    type Item = u64;\n    fn next(&mut self) -> Option<u64> {\n        let out = self.curr;\n        self.curr = self.next;\n        self.next += out;\n        Some(out)\n    }\n}',
                 [5, 6, 7, 11],
@@ -785,13 +783,13 @@ export const rustIteradores: UnitDef = {
             mcq(
               'No iterador `Fibonacci` do card (cujo `next` sempre devolve `Some(out)` e nunca devolve `None`), o que aconteceria se fizéssemos `let s: u64 = Fibonacci::new().sum();` sem `.take(10)`?',
               [
-                'O laço interno de sum() nunca receberia None: em debug abortaria por overflow de u64; sem overflow ficaria em laço infinito.',
+                'Com checagens de overflow, entraria em pânico; sem elas, faria wrap e nunca terminaria, pois next() não devolve None.',
                 'O compilador recusaria compilar com erro E0277 porque next() não contém a palavra None.',
                 'O método sum() pararia sozinho após 100 elementos por segurança.',
                 'Retornaria 0 imediatamente.',
               ],
               0,
-              'Um iterador cujo `next()` sempre retorna `Some` é um **iterador infinito**. Consumidores como `sum()` ou `collect()` puxam itens até encontrar `None`; por isso usamos `.take(n)` antes de consumi-lo.',
+              'Esse `next()` não tem condição de término. Com checagens de overflow (padrão em debug), a soma ou a atualização do estado entra em pânico ao ultrapassar `u64`. Sem elas (padrão em release), os valores fazem wrap e `sum()` não termina. Usar `.take(n)` limita a quantidade de itens, mas `n` também precisa ser pequeno o bastante para evitar overflow.',
             ),
             gen((rng) => {
               const n = randInt(rng, 3, 7);
@@ -812,13 +810,9 @@ export const rustIteradores: UnitDef = {
             codePuzzle(
               'Monte a implementação de `Iterator` para `Countdown { n: u32 }`, que devolve `Some(self.n)` e decrementa `self.n` enquanto `self.n > 0`, ou `None` quando chega a `0`.',
               [
-                'impl Iterator for Countdown {',
-                '    type Item = u32;',
+                'struct Countdown { n: u32 }\nimpl Iterator for Countdown {\n    type Item = u32;',
                 '    fn next(&mut self) -> Option<u32> {',
-                '        if self.n == 0 {',
-                '            return None;',
-                '        }',
-                '        let out = self.n;',
+                '        if self.n == 0 {\n            return None;\n        }\n        let out = self.n;',
                 '        self.n -= 1;',
                 '        Some(out)',
                 '    }',
@@ -831,7 +825,7 @@ export const rustIteradores: UnitDef = {
               '`next` recebe `&mut self` para poder atualizar `self.n` e embrulha o valor produzido em `Some(out)`.',
             ),
             order(
-              'Ordene o que acontece quando executamos `for x in Counter { curr: 0, max: 2 }`:',
+              'Ordene o que acontece no laço `for x in (Counter { curr: 0, max: 2 }) { println!("{x}"); }`:',
               [
                 'O laço for obtém o iterador mutável a partir de Counter',
                 '1ª chamada a next() muda curr para 1, devolve Some(1) e executa o corpo com x = 1',
@@ -1044,7 +1038,7 @@ export const rustIteradores: UnitDef = {
               },
             ),
             mcq(
-              'Por que este código falha ao compilar com `E0282` (`type annotations needed`)?',
+              'Por que este código falha ao compilar com `E0283` (`type annotations needed`)?',
               [
                 'Porque collect() é genérico sobre o tipo de coleção de saída e precisa de anotação em out ou turbofish ::<Vec<_>>().',
                 'Porque map(|x| x * 2) exige anotar o tipo de x.',
@@ -1052,7 +1046,7 @@ export const rustIteradores: UnitDef = {
                 'Porque println!("{:?}", out) não funciona com vetores.',
               ],
               0,
-              '`collect()` pode construir um `Vec<i32>`, um `VecDeque<i32>`, um `HashSet<i32>`, etc. Sem `let out: Vec<i32>` ou `.collect::<Vec<_>>()`, o compilador não sabe qual coleção escolher e emite `error[E0282]: type annotations needed`.',
+              '`collect()` pode construir um `Vec<i32>`, um `VecDeque<i32>`, um `HashSet<i32>`, etc. Sem `let out: Vec<i32>` ou `.collect::<Vec<_>>()`, o compilador não sabe qual coleção escolher e emite `error[E0283]: type annotations needed`.',
               {
                 visual: code(
                   'let v = vec![1, 2, 3];\nlet out = v\n    .into_iter()\n    .map(|x| x * 2)\n    .collect();\nprintln!("{:?}", out);',
@@ -1098,7 +1092,7 @@ export const rustIteradores: UnitDef = {
               );
             }),
             codePuzzle(
-              'Monte o pipeline que soma apenas os salários estritamente maiores que `5000` da fatia `salaries`.',
+              'Monte o pipeline que soma apenas os salários estritamente maiores que `5000` do array `salaries`.',
               [
                 'let salaries = [4200, 6000, 7500];',
                 'let payroll: i32 = salaries',
@@ -1138,7 +1132,7 @@ export const rustIteradores: UnitDef = {
           card: [
             {
               title: 'Combinando fluxos: take, skip, rev, enumerate, zip e chain',
-              body: 'O trait `Iterator` traz adaptadores poderosos para fatiar, numerar e combinar sequências sem usar índices manuais propensos a erro de *off-by-one*:\n\n• **`skip(n)`** e **`take(n)`**: pulam os primeiros `n` itens e pegam no máximo `n` itens.\n• **`rev()`**: inverte a ordem (disponível em iteradores de duas pontas, como fatias e faixas).\n• **`enumerate()`**: transforma cada `item` no par `(indice, item)` começando em `0`.\n• **`zip(outro)`**: caminha em dois iteradores ao mesmo tempo entregando pares `(a, b)`, parando assim que o menor acabar.\n• **`chain(outro)`**: emenda um segundo iterador logo após o término do primeiro.',
+              body: 'O trait `Iterator` traz adaptadores poderosos para fatiar, numerar e combinar sequências sem usar índices manuais propensos a erro de *off-by-one*:\n\n• **`skip(n)`** e **`take(n)`**: pulam os primeiros `n` itens e pegam no máximo `n` itens.\n• **`rev()`**: inverte a ordem (disponível em iteradores de duas pontas, como os de fatias e faixas finitas de inteiros).\n• **`enumerate()`**: transforma cada `item` no par `(indice, item)` começando em `0`.\n• **`zip(outro)`**: caminha em dois iteradores ao mesmo tempo entregando pares `(a, b)`, parando assim que o menor acabar.\n• **`chain(outro)`**: emenda um segundo iterador logo após o término do primeiro.',
               visual: code(
                 'let a = [10, 20, 30];\nlet b = [1, 2];\nlet dot: i32 = a\n    .iter()\n    .zip(b.iter())\n    .map(|(x, y)| x * y)\n    .sum();\n// dot = 10*1 + 20*2 = 50',
                 [5, 6, 7],
@@ -1207,11 +1201,11 @@ export const rustIteradores: UnitDef = {
               },
             ),
             fill(
-              'Complete o inversor de texto UTF-8 do Exercício 4 do roteiro:',
+              'Complete o trecho que inverte a ordem dos valores escalares Unicode de `texto`:',
               'let inv: String = texto\n    .chars()\n    .___()\n    .___();',
               ['rev', 'collect'],
               ['skip', 'zip', 'sum'],
-              '`chars()` percorre os caracteres Unicode, `rev()` inverte a ordem e `collect()` monta a nova `String` sem quebrar acentos.',
+              '`chars()` percorre valores escalares Unicode, `rev()` inverte sua ordem e `collect()` monta uma `String` com UTF-8 válido. Isso não preserva necessariamente grafemas: acentos combinantes e emojis compostos podem ser separados.',
             ),
             gen((rng) => {
               const s = randInt(rng, 1, 3);
@@ -1235,8 +1229,7 @@ export const rustIteradores: UnitDef = {
             codePuzzle(
               'Monte o cálculo do produto escalar entre `a` e `b` emparelhando os elementos com `zip`, multiplicando cada par e somando tudo.',
               [
-                'let a = [2, 3, 4];',
-                'let b = [10, 20, 30];',
+                'let a = [2, 3, 4];\nlet b = [10, 20, 30];',
                 'let dot: i32 = a.iter()',
                 '    .zip(b.iter())',
                 '    .map(|(x, y)| x * y)',
@@ -1266,7 +1259,7 @@ export const rustIteradores: UnitDef = {
           card: [
             {
               title: 'Avaliação preguiçosa e custo zero',
-              body: 'Em Rust, todos os adaptadores (`map`, `filter`, `take`, `zip`...) são **preguiçosos** (*lazy*): chamá-los apenas constrói um pequeno `struct` na pilha que descreve a etapa, **sem executar nenhuma closure e sem alocar vetores intermediários no heap**.\n\nO trabalho só acontece quando um consumidor puxa elementos com `next()`. Além disso, como cada etapa é conhecida em compilação, o otimizador (LLVM) funde toda a cadeia num único laço de máquina (**abstração de custo zero**), frequentemente eliminando até checagens de limite (*bounds checks*).',
+              body: 'Os adaptadores `map`, `filter`, `take` e `zip` são **preguiçosos** (*lazy*): construí-los não chama as closures sobre os itens e **não cria vetores intermediários no heap**. Eles guardam o estado necessário para cada etapa; o código das próprias closures ainda pode fazer alocações quando executado.\n\nO trabalho sobre os itens só acontece quando o iterador é consumido. Com os tipos concretos conhecidos e otimizações habilitadas, o otimizador (LLVM) pode transformar a cadeia em código tão eficiente quanto um laço manual (**abstração de custo zero**) e eliminar checagens de limite (*bounds checks*). Isso não garante um único laço nem o mesmo desempenho em debug e release.',
               visual: code(
                 'let mut calls = 0;\nlet s: i32 = (1..=1000)\n    .map(|x| {\n        calls += 1;\n        x * 10\n    })\n    .take(2)\n    .sum();\n// s == 30 e calls == 2 (não 1000!)',
                 [3, 7, 8],
@@ -1276,7 +1269,7 @@ export const rustIteradores: UnitDef = {
             },
             {
               title: 'Como o consumidor puxa apenas o necessário',
-              body: 'Veja por que `(1..=1000).filter(|x| x % 2 == 0).map(|x| x * 10).take(2).sum()` para no número `4` sem tocar no `5..=1000`.',
+              body: 'Veja por que `(1..=1000).filter(|x| x % 2 == 0).map(|x| x * 10).take(2).sum::<i32>()` para no número `4` sem tocar no `5..=1000`.',
               visual: trilha([
                 'sum() pede o 1º item a take(2), que pede a map, que pede a filter.',
                 'filter testa 1 (falso) e 2 (verdadeiro) -> map calcula 20 -> sum acumula 20.',
@@ -1298,7 +1291,7 @@ export const rustIteradores: UnitDef = {
             tf(
               'Em Rust, encadear `.filter(...)` seguido de `.map(...)` cria um `Vec` temporário no heap entre o `filter` e o `map`.',
               false,
-              'Adaptadores não alocam vetores intermediários: cada item é puxado um por um através de toda a tubulação diretamente nos registradores/pilha.',
+              '`filter` e `map` não criam vetores intermediários por si mesmos: os itens são processados sob demanda. As closures ainda podem fazer alocações se seu código pedir isso.',
             ),
             num(
               'Qual é o valor de `calls` ao final deste código?',
@@ -1325,7 +1318,7 @@ export const rustIteradores: UnitDef = {
               },
             ),
             mcq(
-              'Quantas alocações no heap são feitas pela cadeia `v.iter().filter(|&&x| x > 0).map(|&x| x * 2).sum::<i32>()`?',
+              'Para um `v: Vec<i32>` já criado e valores sem overflow, quantas alocações no heap são feitas pela cadeia `v.iter().filter(|&&x| x > 0).map(|&x| x * 2).sum::<i32>()`?',
               [
                 'Zero (0 alocações no heap).',
                 'Duas: uma no filter e outra no map.',
@@ -1333,7 +1326,7 @@ export const rustIteradores: UnitDef = {
                 'Uma alocação obrigatória dentro do sum.',
               ],
               0,
-              'Os adaptadores `Iter`, `Filter` e `Map` são structs pequenos guardados na pilha, e `sum()` apenas mantém um acumulador `i32` em registrador. Há zero alocações no heap.',
+              '`Iter`, `Filter` e `Map` guardam apenas o estado da iteração, e `sum()` acumula em um `i32`. Essa cadeia não exige alocações no heap; o compilador decide onde manter o estado e o acumulador.',
             ),
             gen((rng) => {
               const k = randInt(rng, 2, 5);
@@ -1380,14 +1373,14 @@ export const rustIteradores: UnitDef = {
               'Sem um consumidor (como `for`, `collect()` ou `count()`), o iterador retornado por `map` é criado e imediatamente descartado sem chamar `next()` nenhuma vez. O compilador inclusive emite um aviso `unused Map that must be used`.',
               {
                 visual: code(
-                  'fn main() {\n    let _ = (1..=3).map(|x| {\n        println!("{x}");\n        x\n    });\n}',
+                  'fn main() {\n    (1..=3).map(|x| {\n        println!("{x}");\n        x\n    });\n}',
                   [2, 3],
                   'Adaptador sem consumidor',
                 ),
               },
             ),
             order(
-              'Ordene o caminho de uma única chamada a `.next()` em `v.iter().filter(p).map(f).next()`:',
+              'Supondo que exista um item aprovado por `p`, ordene o caminho de uma chamada a `.next()` em `v.iter().filter(p).map(f).next()`:',
               [
                 'O chamador invoca next() no adaptador externo Map',
                 'Map chama next() no adaptador interno Filter pedindo um item aprovado',
