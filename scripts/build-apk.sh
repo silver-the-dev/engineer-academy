@@ -37,6 +37,9 @@ fi
 export PATH="$ANDROID_HOME/platform-tools:$PATH"
 export NODE_ENV=production
 
+# The catalog decides which questions go back to review, so it has to be regenerated and committed on purpose.
+node scripts/generate-review-catalog.cjs --check
+
 if [[ "${1:-}" == "--clean" || ! -d android ]]; then
   CI=1 npx expo prebuild --platform android --no-install --clean
 fi

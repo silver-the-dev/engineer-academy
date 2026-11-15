@@ -52,7 +52,7 @@ export function Button({ title, onPress, color = C.primary, textColor = C.white,
           }}
         >
           {icon ? <Text style={{ color: C.text, fontSize: small ? 15 : 18, marginRight: 8 }}>{icon}</Text> : null}
-          <Text style={{ color: fg, fontFamily: F.black, fontSize: small ? 14 : 17, letterSpacing: 0.8 }}>{title.toUpperCase()}</Text>
+          <Text style={{ color: fg, fontFamily: F.black, fontSize: small ? 14 : 17, letterSpacing: 0.8, textAlign: 'center', flexShrink: 1 }}>{title.toUpperCase()}</Text>
         </Animated.View>
       </View>
     </Pressable>

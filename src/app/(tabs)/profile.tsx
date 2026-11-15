@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { router } from 'expo-router';
 import { Alert, Pressable, ScrollView, Switch, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { C, F, alpha } from '../../theme';
 import { levelFromXp, useApp, useStreak } from '../../state/store';
@@ -164,6 +165,7 @@ export default function ProfileScreen() {
           if (ok) sendTestNotification();
           else Alert.alert('Permissão negada', 'Ative as notificações do Engineer Academy nas configurações do Android.');
         }} />
+        <Button title="Administração" small variant="outline" style={{ marginTop: 16 }} onPress={() => router.push('/admin')} />
         <Button title="Apagar todo o progresso" small variant="ghost" color={C.danger} style={{ marginTop: 18 }} onPress={() => Alert.alert('Apagar progresso?', 'Isso zera XP, ofensiva e lições. Não dá para desfazer.', [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Apagar', style: 'destructive', onPress: () => { s.resetAll(); syncWidget(); } },

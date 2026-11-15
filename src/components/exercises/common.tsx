@@ -5,13 +5,14 @@ import { RichText } from '../math/RichText';
 import { tapFeedback } from '../../lib/feedback';
 import { useLayoutProbe } from '../lesson/LayoutProbe';
 
-export type CheckResult = { correct: boolean; answer?: string; code?: string };
+export type CheckResult = { correct: boolean; answer?: string; code?: string; submission?: unknown; evaluationError?: string };
 
 export type ExProps<E> = {
   ex: E;
   locked: boolean;
   onReady: (ready: boolean) => void;
   registerCheck: (fn: () => CheckResult) => void;
+  captureAttempt?: boolean;
   width: number;
 };
 

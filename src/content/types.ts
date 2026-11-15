@@ -17,6 +17,8 @@ type Base = {
   explain?: string; // RichText shown in feedback
   visual?: VisualSpec;
   hint?: string;
+  /** Increment when an external dependency changes this exercise beyond the catalog probes. */
+  reviewRevision?: number;
 };
 
 export type MCQ = Base & { kind: 'mcq'; options: string[]; answer: number };
@@ -44,7 +46,7 @@ export type Interactive = Base & {
 };
 
 export type Exercise = MCQ | MultiSelect | Numeric | TrueFalse | Match | Order | Fill | Interactive;
-export type Generator = { gen: (rng: Rng) => Exercise };
+export type Generator = { gen: (rng: Rng) => Exercise; reviewRevision?: number };
 export type ExerciseSource = Exercise | Generator;
 
 /** Sub-lesson (one segment of the ring around a path node): theory, then exercises from easy to hard. */

@@ -26,6 +26,7 @@ export function ExerciseHost({
   checkRef,
   width,
   retry,
+  captureAttempt,
 }: {
   ex: Exercise;
   locked: boolean;
@@ -33,12 +34,13 @@ export function ExerciseHost({
   checkRef: React.MutableRefObject<(() => CheckResult) | null>;
   width: number;
   retry?: boolean;
+  captureAttempt?: boolean;
 }) {
   const onLayout = useLayoutProbe('exercise');
   const registerCheck = useCallback((fn: () => CheckResult) => {
     checkRef.current = fn;
   }, [checkRef]);
-  const common = { locked, onReady, registerCheck, width };
+  const common = { locked, onReady, registerCheck, width, captureAttempt };
   let body: React.ReactNode = null;
   switch (ex.kind) {
     case 'mcq':

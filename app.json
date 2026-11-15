@@ -3,7 +3,7 @@
     "name": "Engineer Academy",
     "slug": "engineer-academy",
     "scheme": "engineeracademy",
-    "version": "1.4.5",
+    "version": "1.4.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.silverio.engineeracademy",
-      "versionCode": 11,
+      "versionCode": 12,
       "adaptiveIcon": {
         "backgroundColor": "#0B1020",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -75,7 +75,10 @@
             "enableMinifyInReleaseBuilds": false
           }
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": false

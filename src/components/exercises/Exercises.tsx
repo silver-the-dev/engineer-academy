@@ -11,13 +11,13 @@ import { renderWidget } from '../visuals/registry';
 import { useLayoutProbe } from '../lesson/LayoutProbe';
 
 /* ---------------- Multiple choice ---------------- */
-export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
+export function MCQView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<MCQ>) {
   const [sel, setSel] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   useEffect(() => onReady(sel !== null), [sel, onReady]);
   registerCheck(() => {
     setChecked(true);
-    return { correct: sel === ex.answer, answer: ex.options[ex.answer] };
+    return { correct: sel === ex.answer, answer: ex.options[ex.answer], submission: captureAttempt && sel !== null ? ex.options[sel] : undefined };
   });
   const many = ex.options.length > 4 || ex.options.every((o) => o.length < 14);
   const seed = useRef(Math.floor(Math.random() * 1e9)).current;
@@ -45,7 +45,7 @@ export function MCQView({ ex, locked, onReady, registerCheck }: ExProps<MCQ>) {
 }
 
 /* ---------------- Multi select ---------------- */
-export function MultiView({ ex, locked, onReady, registerCheck }: ExProps<MultiSelect>) {
+export function MultiView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<MultiSelect>) {
   const [sel, setSel] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
   useEffect(() => onReady(sel.length > 0), [sel, onReady]);
@@ -55,7 +55,7 @@ export function MultiView({ ex, locked, onReady, registerCheck }: ExProps<MultiS
     setChecked(true);
     const a = [...ex.answers].sort().join(',');
     const b = [...sel].sort().join(',');
-    return { correct: a === b, answer: ex.answers.map((i) => ex.options[i]).join(' · ') };
+    return { correct: a === b, answer: ex.answers.map((i) => ex.options[i]).join(' · '), submission: captureAttempt ? sel.map(i => ex.options[i]) : undefined };
   });
   return (
     <View>
@@ -72,13 +72,13 @@ export function MultiView({ ex, locked, onReady, registerCheck }: ExProps<MultiS
 }
 
 /* ---------------- True / False ---------------- */
-export function TFView({ ex, locked, onReady, registerCheck }: ExProps<TrueFalse>) {
+export function TFView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<TrueFalse>) {
   const [sel, setSel] = useState<boolean | null>(null);
   const [checked, setChecked] = useState(false);
   useEffect(() => onReady(sel !== null), [sel, onReady]);
   registerCheck(() => {
     setChecked(true);
-    return { correct: sel === ex.answer, answer: ex.answer ? 'Verdadeiro' : 'Falso' };
+    return { correct: sel === ex.answer, answer: ex.answer ? 'Verdadeiro' : 'Falso', submission: captureAttempt ? sel : undefined };
   });
   const opt = (v: boolean) => {
     let st: ChoiceState = sel === v ? 'selected' : 'idle';
@@ -100,14 +100,14 @@ const KEY_ROWS = [
   ['1', '2', '3', '−'],
   ['0', ','],
 ];
-export function NumericView({ ex, locked, onReady, registerCheck }: ExProps<Numeric>) {
+export function NumericView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<Numeric>) {
   const [s, setS] = useState('');
   const [checked, setChecked] = useState<null | boolean>(null);
   useEffect(() => onReady(parseNumber(s) !== null), [s, onReady]);
   registerCheck(() => {
     const ok = checkNumeric(ex, s);
     setChecked(ok);
-    return { correct: ok, answer: `$${fmt(ex.answer)}$${ex.unit ? ' ' + ex.unit : ''}` };
+    return { correct: ok, answer: `$${fmt(ex.answer)}$${ex.unit ? ' ' + ex.unit : ''}`, submission: captureAttempt ? s : undefined };
   });
   const press = (k: string) => {
     if (locked) return;
@@ -153,7 +153,7 @@ export function NumericView({ ex, locked, onReady, registerCheck }: ExProps<Nume
 }
 
 /* ---------------- Match pairs ---------------- */
-export function MatchView({ ex, locked, onReady, registerCheck }: ExProps<Match>) {
+export function MatchView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<Match>) {
   const seed = useRef(Math.floor(Math.random() * 1e9)).current;
   const left = useMemo(() => shuffle(makeRng(seed), ex.pairs.map((p, i) => ({ t: p[0], i }))), [ex, seed]);
   const right = useMemo(() => shuffle(makeRng(seed + 7), ex.pairs.map((p, i) => ({ t: p[1], i }))), [ex, seed]);
@@ -163,7 +163,10 @@ export function MatchView({ ex, locked, onReady, registerCheck }: ExProps<Match>
   const [bad, setBad] = useState<[number, number] | null>(null);
   const misses = useRef(0);
   useEffect(() => onReady(done.length === ex.pairs.length), [done, ex.pairs.length, onReady]);
-  registerCheck(() => ({ correct: misses.current <= 1, answer: 'Revise os pares destacados' }));
+  registerCheck(() => ({
+    correct: misses.current <= 1, answer: 'Revise os pares destacados',
+    submission: captureAttempt ? { pairs: done.map(i => ex.pairs[i]), misses: misses.current } : undefined,
+  }));
   useEffect(() => {
     if (selL === null || selR === null) return;
     if (selL === selR) {
@@ -205,7 +208,7 @@ export function MatchView({ ex, locked, onReady, registerCheck }: ExProps<Match>
 }
 
 /* ---------------- Order steps ---------------- */
-export function OrderView({ ex, locked, onReady, registerCheck }: ExProps<Order>) {
+export function OrderView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<Order>) {
   const seed = useRef(Math.floor(Math.random() * 1e9)).current;
   const bank = useMemo(() => {
     let s = shuffle(makeRng(seed), ex.items.map((t, i) => ({ t, i })));
@@ -218,7 +221,7 @@ export function OrderView({ ex, locked, onReady, registerCheck }: ExProps<Order>
   registerCheck(() => {
     const ok = chosen.every((v, k) => ex.items[v] === ex.items[k]);
     setChecked(ok);
-    return { correct: ok, answer: ex.items.map((t, i) => `${i + 1}. ${t}`).join('\n') };
+    return { correct: ok, answer: ex.items.map((t, i) => `${i + 1}. ${t}`).join('\n'), submission: captureAttempt ? chosen.map(i => ex.items[i]) : undefined };
   });
   return (
     <View>
@@ -256,7 +259,7 @@ export function OrderView({ ex, locked, onReady, registerCheck }: ExProps<Order>
 }
 
 /* ---------------- Fill the blanks (word bank) ---------------- */
-export function FillView({ ex, locked, onReady, registerCheck }: ExProps<Fill>) {
+export function FillView({ ex, locked, onReady, registerCheck, captureAttempt }: ExProps<Fill>) {
   const seed = useRef(Math.floor(Math.random() * 1e9)).current;
   const bank = useMemo(() => shuffle(makeRng(seed), ex.bank.map((t, i) => ({ t, i }))), [ex, seed]);
   const parts = useMemo(() => ex.template.split('___'), [ex]);
@@ -269,7 +272,7 @@ export function FillView({ ex, locked, onReady, registerCheck }: ExProps<Fill>) 
     setChecked(ok);
     let full = '';
     parts.forEach((p, k) => (full += p + (k < slots ? `**${ex.answers[k]}**` : '')));
-    return { correct: ok, answer: full };
+    return { correct: ok, answer: full, submission: captureAttempt ? filled.map(i => i === null ? null : ex.bank[i]) : undefined };
   });
   const place = (bi: number) => {
     const k = filled.findIndex((f) => f === null);
@@ -320,7 +323,7 @@ function ProbedPressable({ part, ...props }: React.ComponentProps<typeof Pressab
 }
 
 /* ---------------- Interactive (widget-driven) ---------------- */
-export function InteractiveView({ ex, locked, onReady, registerCheck, width }: ExProps<Interactive>) {
+export function InteractiveView({ ex, locked, onReady, registerCheck, width, captureAttempt }: ExProps<Interactive>) {
   const onLayout = useLayoutProbe('widget');
   const value = useRef<any>(null);
   const [touched, setTouched] = useState(false);
@@ -328,11 +331,18 @@ export function InteractiveView({ ex, locked, onReady, registerCheck, width }: E
   useEffect(() => onReady(touched), [touched, onReady]);
   registerCheck(() => {
     let ok = false;
+    let evaluationError: string | undefined;
     try {
       ok = !!ex.check(value.current);
-    } catch {}
+    } catch (error) {
+      if (captureAttempt) evaluationError = error instanceof Error ? error.message : String(error);
+    }
     setChecked(ok);
-    return { correct: ok, answer: ex.answerText, code: !ok && ex.widget === 'code-puzzle' && Array.isArray(ex.solution) ? ex.solution.join('\n') : undefined };
+    return {
+      correct: ok, answer: ex.answerText,
+      code: !ok && ex.widget === 'code-puzzle' && Array.isArray(ex.solution) ? ex.solution.join('\n') : undefined,
+      submission: captureAttempt ? value.current : undefined, evaluationError,
+    };
   });
   return (
     <View onLayout={onLayout} pointerEvents={locked ? 'none' : 'auto'}>
@@ -340,9 +350,10 @@ export function InteractiveView({ ex, locked, onReady, registerCheck, width }: E
         ...ex.props,
         width,
         checked,
+        ...(ex.widget === 'c-lab' && { captureAttempt }),
         onChange: (v: any, ready = true) => {
           value.current = v;
-          setTouched(ready);
+          setTouched(ready || (captureAttempt === true && ex.widget === 'c-lab' && v != null));
         },
       })}
     </View>

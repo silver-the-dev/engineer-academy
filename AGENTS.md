@@ -97,6 +97,8 @@ Expo SDK 58 (`expo ~58.0.23`), React Native 0.88.1, Expo Router, Hermes, nova ar
 
 ## Convenções para escrever conteúdo
 
+- O catálogo `src/content/review-catalog.json` guarda a revisão de cada questão, pelo ID da lição e pela posição na lista plana. O APK regenera o catálogo antes da compilação. Depois de editar conteúdo, execute `node scripts/generate-review-catalog.cjs` e inclua o arquivo resultante no commit. Para conferir o catálogo sem escrever nele, acrescente `--check`.
+- A revisão inclui enunciado, resposta, explicação, propriedades visuais e código dos callbacks. Para geradores, inclui o código do gerador e quatro variantes com sementes fixas. Gráficos e cenas 3D incluem amostras de desenho e comportamento. Se uma alteração em dependência externa afetar a questão sem mudar os dados ou as amostras, incremente `reviewRevision` na questão ou no objeto do gerador para reabrir a revisão.
 - Use `const t = String.raw` e escreva TeX entre `$…$` (ou `$$…$$`). Dentro de `t\`…\``, use uma barra só (`\frac`); em strings normais, duas (`'\\frac'`).
 - **Vírgula decimal**: `tex.ts` transforma `dígito,dígito` em vírgula decimal. Por isso pares, intervalos e conjuntos de inteiros devem ter espaço ou `\,` depois da vírgula: `$(2,\,3)$`, `$[0,\,4]$`, `$\{1, 2\}$`. Listas com 2 ou mais vírgulas seguidas de inteiros (`1,2,3`) já são protegidas.
 - Números decimais gerados: sempre `fmt(x)` (vírgula pt-BR). Monômios com sinal: `term(c, 'x')`, `term(c, 'x', true)` para o primeiro termo; polinômios: `polyTex([c0, c1, c2])`. Negativo como fator: `par(n)` dá `(-3)`; fator `x-a` com o sinal certo: `xm(a)` dá `x+3` para `a=-3`.

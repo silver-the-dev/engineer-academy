@@ -18,7 +18,7 @@ function Action({ title, onPress, muted = false }: { title: string; onPress: () 
   );
 }
 
-export function CLab({ starter, entry = 'main', cases, onChange }: CChallenge & { onChange: (value: CCheck | null, ready?: boolean) => void }) {
+export function CLab({ starter, entry = 'main', cases, onChange, captureAttempt }: CChallenge & { onChange: (value: (CCheck & { source?: string }) | null, ready?: boolean) => void; captureAttempt?: boolean }) {
   const [source, setSource] = useState(starter);
   const [result, setResult] = useState<CCheck | null>(null);
   const [showHelp, setShowHelp] = useState(false);
@@ -27,7 +27,7 @@ export function CLab({ starter, entry = 'main', cases, onChange }: CChallenge & 
     Keyboard.dismiss();
     const checked = checkC(source, { entry, cases });
     setResult(checked);
-    onChange(checked, checked.passed);
+    onChange(captureAttempt ? { ...checked, source } : checked, checked.passed);
   };
   return (
     <View style={{ gap: 10 }}>
