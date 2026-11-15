@@ -27,13 +27,13 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
   const [locked, setLocked] = useScrollLockState();
   const [index, setIndex] = useState(0);
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 2 ** 31));
-  const [attempt, setAttempt] = useState(0);
   const [ready, setReady] = useState(false);
   const [feedback, setFeedback] = useState<ReviewEvaluation | null>(null);
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const inFlight = useRef(false);
+  const savedIndex = useRef(-1);
   const summary = useRef<SessionSummary>({ approved: 0, issues: 0 });
   const checkRef = useRef<(() => CheckResult) | null>(null);
   const scrollRef = useRef<React.ElementRef<typeof ScrollView>>(null);
@@ -41,6 +41,7 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
   const keyboard = useKeyboardInset();
   const question = session.questions[index];
   const materialized = useMemo(() => {
+    if (!question) return { error: 'Questão indisponível.' };
     try { return { exercise: materializeReview(question, seed) }; }
     catch (err) { return { error: err instanceof Error ? err.message : String(err) }; }
   }, [question, seed]);
@@ -50,7 +51,8 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
   const tone = feedback?.accepted == null ? C.gold : feedback.accepted ? C.success : C.danger;
 
   function check() {
-    if (!ready || !checkRef.current) return;
+    if (!ready || !checkRef.current || feedback || inFlight.current) return;
+    setError('');
     try {
       const result = checkRef.current();
       setFeedback({ accepted: result.evaluationError ? null : result.correct, submission: result.submission, error: result.evaluationError });
@@ -59,17 +61,25 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
     }
   }
 
-  function retry() {
+  function reportWithoutAnswer() {
+    if (feedback || inFlight.current) return;
+    setError('');
+    setFeedback({ accepted: null, error: materialized.error });
+  }
+
+  function returnToQuestion() {
     if (inFlight.current) return;
     setFeedback(null);
-    setReady(false);
     setError('');
-    checkRef.current = null;
-    setAttempt(n => n + 1);
+  }
+
+  function leave() {
+    if (inFlight.current) return;
+    onLeave();
   }
 
   async function save(verdict: ReviewVerdict) {
-    if (!feedback || inFlight.current) return;
+    if (!question || !feedback || inFlight.current || savedIndex.current === index) return;
     if (verdict === 'issue' && !note.trim()) {
       setError('Descreva o problema para que possa ser reproduzido.');
       setTimeout(() => sheetRef.current?.scrollToEnd({ animated: true }), 50);
@@ -84,6 +94,7 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
         exercise: exercise ? exerciseSnapshot(exercise) : { kind: 'unavailable' },
         evaluation: feedback,
       });
+      savedIndex.current = index;
       if (verdict === 'approved') summary.current.approved++;
       else summary.current.issues++;
       if (index + 1 >= session.questions.length) onFinish({ ...summary.current });
@@ -95,6 +106,7 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
       }
     } catch {
       setError('Não foi possível salvar o parecer. Tente novamente.');
+      setTimeout(() => sheetRef.current?.scrollToEnd({ animated: true }), 50);
     } finally {
       inFlight.current = false;
       setSaving(false);
@@ -104,13 +116,14 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
   function retryAfterSave() {
     setFeedback(null);
     setNote('');
+    setError('');
     setReady(false);
     checkRef.current = null;
   }
 
   // The system back button closes the pop-up first and then the round, instead of leaving the admin area.
   const back = useRef(() => {});
-  back.current = feedback ? retry : onLeave;
+  back.current = feedback ? returnToQuestion : leave;
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => { back.current(); return true; });
     return () => sub.remove();
@@ -121,10 +134,12 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
     if (keyboard && feedback) sheetRef.current?.scrollToEnd({ animated: true });
   }, [keyboard, feedback]);
 
+  if (!question) return null;
+
   return <ScrollLockProvider setLocked={setLocked}>
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Pressable onPress={onLeave} accessibilityRole="button" accessibilityLabel="Sair da rodada" hitSlop={10}>
+        <Pressable onPress={leave} disabled={saving} accessibilityRole="button" accessibilityLabel="Sair da rodada" hitSlop={10}>
           <Text style={{ color: C.textMuted, fontFamily: F.black, fontSize: 24 }}>✕</Text>
         </Pressable>
         <View style={{ flex: 1 }}><ProgressBar value={index / session.questions.length} color={C.cyan} height={10} /></View>
@@ -134,13 +149,13 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
         contentContainerStyle={[styles.body, { paddingBottom: 130 }]}>
         <Text style={styles.meta}>{question.sectionTitle} · {question.lessonTitle}</Text>
         <Text style={styles.locator}>Parte {question.part} · Questão {question.numberInPart} · {question.lessonId}#{question.index}</Text>
-        {exercise ? <ExerciseHost key={question.key + ':' + attempt} ex={exercise} locked={feedback !== null}
+        {exercise ? <ExerciseHost key={question.key + ':' + index} ex={exercise} locked={feedback !== null}
           onReady={onReady} checkRef={checkRef} width={contentWidth} captureAttempt /> : <Text style={styles.error}>Não foi possível abrir a questão.</Text>}
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
         <Button silent title="Verificar resposta" onPress={check} disabled={!ready || !!feedback} color={C.success} />
-        <Button silent small variant="ghost" title="Reportar sem responder"
-          onPress={() => setFeedback({ accepted: null, error: materialized.error })} />
+        <Button silent small variant="ghost" title="Reportar sem responder" disabled={!!feedback}
+          onPress={reportWithoutAnswer} />
       </View>
       {feedback ? <View style={styles.backdrop} accessibilityViewIsModal>
           <View style={[styles.sheet, { paddingBottom: (keyboard ? 0 : insets.bottom) + 12 }]}>
@@ -166,7 +181,7 @@ export function ReviewRun({ session, appVersion, onSave, onFinish, onLeave }: {
             <View style={{ gap: 6, marginTop: 10 }}>
               {feedback.accepted !== null ? <Button silent small title="Aprovar questão" disabled={saving} color={C.success} onPress={() => save('approved')} /> : null}
               <Button silent small title={saving ? 'Salvando…' : 'Registrar problema'} color={C.danger} disabled={saving} onPress={() => save('issue')} />
-              {keyboard ? null : <Button silent small variant="ghost" title="Voltar à questão" disabled={saving} onPress={retry} />}
+              {keyboard ? null : <Button silent small variant="ghost" title="Voltar à questão" disabled={saving} onPress={returnToQuestion} />}
             </View>
           </View>
       </View> : null}

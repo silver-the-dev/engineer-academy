@@ -83,7 +83,7 @@ export function exerciseSnapshot(ex: Exercise) {
     case 'mcq': return { ...base, options: ex.options, expected: ex.options[ex.answer] };
     case 'multi': return { ...base, options: ex.options, expected: ex.answers.map(i => ex.options[i]) };
     case 'tf': return { ...base, expected: ex.answer };
-    case 'numeric': return { ...base, expected: ex.answer, unit: ex.unit, tolerance: ex.tol };
+    case 'numeric': return { ...base, expected: ex.answer, unit: ex.unit, tolerance: ex.tol ?? Math.max(1e-6, Math.abs(ex.answer) * 1e-6) };
     case 'match': return { ...base, expected: ex.pairs };
     case 'order': return { ...base, expected: ex.items };
     case 'fill': return { ...base, template: ex.template, bank: ex.bank, expected: ex.answers };
@@ -114,6 +114,7 @@ export function reviewReport(questions: readonly ReviewQuestion[], records: read
   const current = new Map(questions.map(question => [question.key, question]));
   const activeKeys = new Set(current.keys());
   const latest = latestReviews(records);
+  const latestIndex = new Map(records.map((record, index) => [record.question.key, index]));
   const active = [...latest.values()].filter(record => activeKeys.has(record.question.key));
   return {
     format: 'engineer-academy-review',
@@ -126,12 +127,15 @@ export function reviewReport(questions: readonly ReviewQuestion[], records: read
       approved: active.filter(record => record.verdict === 'approved').length,
       issues: active.filter(record => record.verdict === 'issue').length,
     },
-    reviews: records.map(record => ({
-      ...record,
-      currentRevision: activeKeys.has(record.question.key),
-      // Where this question is now: the position saved with the record goes stale when a lesson is edited.
-      currentLocation: current.has(record.question.key) ? record.question.lessonId + '#' + current.get(record.question.key)!.index : null,
-      latestForRevision: latest.get(record.question.key) === record,
-    })),
+    reviews: records.map((record, index) => {
+      const location = current.get(record.question.key);
+      return {
+        ...record,
+        currentRevision: activeKeys.has(record.question.key),
+        // Where this question is now: the position saved with the record goes stale when a lesson is edited.
+        currentLocation: location ? location.lessonId + '#' + location.index : null,
+        latestForRevision: latestIndex.get(record.question.key) === index,
+      };
+    }),
   };
 }
