@@ -539,7 +539,7 @@ fn main() {
               '    let r = &owned;',
               '    println!("{r}");',
               '}',
-            ], ['    let owned = &s;', '    println!("{s}");'], 's move a String para owned, que se torna a dona. Só então criamos uma referência à nova dona. O objetivo exige transferir a posse, não apenas criar outra referência.'),
+            ], ['    let owned = &mut s;', '    println!("{s}");'], 's move a String para owned, que se torna a dona. Só então criamos uma referência à nova dona. O distrator com &mut s não transfere a posse e falha com E0596 porque s não é mutável.'),
             match('Associe cada situação:', [['E0106 na assinatura', 'falta uma relação de lifetime exigida pelo tipo'], ['E0515 no retorno', 'referência aponta para valor local que será descartado'], ['Retornar String', 'chamador recebe a posse do texto criado']], 'Uma assinatura bem formada ainda pode ter um corpo inválido. Retornar o valor com posse resolve o caso em que o texto precisa nascer na função e sobreviver ao retorno.'),
           ],
         },

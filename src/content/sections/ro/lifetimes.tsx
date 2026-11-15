@@ -170,7 +170,7 @@ export const rustLifetimes: UnitDef = {
               '    let r = s.as_str();',
               '    println!("{r}");',
               '}',
-            ], ['    drop(s);', '    let r = &missing;'], 'Crie a String antes de emprestar seu conteúdo, depois use r enquanto s ainda está vivo. A saída é motor. Destruir s antes do uso invalidaria o empréstimo.'),
+            ], ['    drop(s); r.len();', '    let r = &missing;'], 'Crie a String antes de emprestar seu conteúdo, depois use r enquanto s ainda está vivo. A saída é motor. Destruir s antes do uso invalidaria o empréstimo.'),
             mcq('O programa com bloco interno compila?', ['Não: n deixa de existir antes do uso de r', 'Sim: r fora do bloco prolonga n', 'Sim: inteiros locais são estáticos', 'Não: println não aceita referências'], 0, 'E0597: `n` does not live long enough. n termina no bloco interno, mas r é usado depois. Mova n para o escopo externo ou imprima r dentro do bloco.', { visual: code(dangling, [4, 5, 7], 'Não compila — E0597') }),
           ],
         },
@@ -272,7 +272,7 @@ fn main() {
               '        x',
               '    } else { y }',
               '}',
-            ], ['    } else { x }', ") -> &'static str {"], 'O parâmetro de lifetime liga ambas as entradas ao retorno. O corpo devolve o maior em bytes e escolhe y no empate. A função só retorna uma slice; não imprime nem aloca outro texto.'),
+            ], ['    } else { y.len() }', ") -> &'static str {"], 'O parâmetro de lifetime liga ambas as entradas ao retorno. O corpo devolve o maior em bytes e escolhe y no empate. len retorna usize, não uma slice. A função só retorna uma slice; não imprime nem aloca outro texto.'),
             mcq('Qual é a saída no empate?', ['bb', 'aa', 'aabb', 'O programa falha ao compilar'], 0, 'As duas slices têm 2 bytes. A condição usa > e é falsa no empate: o ramo else devolve y, que contém bb.', { visual: code(`${longest}
 fn main() {
     println!("{}", longest("aa", "bb"));
@@ -476,7 +476,7 @@ fn main() {
               '    let e = Excerpt { text: &s };',
               '    println!("{}", e.text);',
               '}',
-            ], ['    drop(s);', '    let e = Excerpt { text: s };'], 's é criada antes do empréstimo. O campo text recebe uma referência, e e.text é usado enquanto s está viva. A saída é motor; passar s por valor não corresponde ao tipo do campo.'),
+            ], ['    drop(s); e.text.len();', '    let e = Excerpt { text: s };'], 's é criada antes do empréstimo. O campo text recebe uma referência, e e.text é usado enquanto s está viva. A saída é motor; passar s por valor não corresponde ao tipo do campo.'),
             mcq('É possível usar e.text depois deste bloco interno?', ['Não: E0597, pois s foi destruída', 'Sim: a struct prolonga s', 'Sim: toda slice de String é estática', 'Não: structs não podem guardar referências'], 0, 'E0597: `s` does not live long enough. e.text é usado após o fim de s. Mantenha a String no escopo externo, use e no bloco interno ou redesenhe a struct para possuir uma String.', { visual: code(`struct Excerpt<'a> {
     text: &'a str,
 }

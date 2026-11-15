@@ -144,7 +144,7 @@ fn main() {
               [
                 '    total;',
                 'fn area(lado: i32) {',
-                '    let total = lado + lado;',
+                '    let total = lado * lado();',
               ],
               'Em Rust, a última linha da função sem ponto e vírgula (`total`) é a expressão de retorno. Se tivesse `;`, retornaria `()` em vez de `i32`.',
             ),
@@ -306,7 +306,7 @@ fn main() {
                 '}',
               ],
               [
-                '    let s = String::from("Rust");',
+                '    let s: String = "Rust";',
                 '    s.push(" 2024");',
                 '    println!("{s.len()}");',
               ],
@@ -655,9 +655,9 @@ fn main() {
                 '}',
               ],
               [
-                '    let s = String::from("A");',
-                '    let backup = &s;',
-                '    println!("{s} -> {s}");',
+                '    let s: String = "A";',
+                '    let backup: String = &s;',
+                '    println!("{backup} -> {s1}");',
               ],
               'Com `let mut s`, podemos mover o valor `"A"` para `backup` e em seguida atribuir uma nova `String` `"B"` a `s`, imprimindo `"A -> B"`.',
             ),
@@ -814,8 +814,8 @@ fn main() {
                 '}',
               ],
               [
-                '    let mut v2 = v1;',
-                '    let v2 = v1.clone();',
+                '    let mut v2: Vec<i32> = &v1;',
+                '    let v2 = v1.copy();',
                 '    v1.push(4);',
               ],
               '`let mut v2 = v1.clone();` cria um segundo vetor mutável no heap. Assim podemos fazer `v2.push(4)` e imprimir `v1` e `v2` lado a lado.',
@@ -1158,16 +1158,14 @@ fn main() {
               [
                 'fn main() {',
                 'let mut total = 0;',
-                '{',
-                '    let temp = String::from("bloco");',
+                '{\n    let temp = String::from("bloco");',
                 '    total += temp.len();',
-                '}',
-                'println!("{total}");',
+                '}\nprintln!("{total}");',
                 '}',
               ],
               [
-                'println!("{temp}");',
-                'let total = 0;',
+                'println!("{temp.len()}");',
+                'let total: usize = "0";',
                 '    temp.drop();',
               ],
               'O bloco interno `{ ... }` limita a vida de `temp`: seu tamanho é somado a `total` e, ao fechar `}`, a memória de `temp` no heap é liberada antes do `println!`.',
@@ -1187,7 +1185,7 @@ fn main() {
                     `fn main() {
     let s1 = String::from("${sa}");
     {
-        let s2 = String::from("${sb}");
+        let s2 = "${sb}".to_owned();
         println!("{}", s2.len());
     }
     println!("{s1}");
@@ -1511,14 +1509,14 @@ fn main() {
             codePuzzle(
               'Monte o programa que define `consumir` e, em `main`, cria `msg`, passa um clone na primeira chamada (preservando `msg`) e move `msg` na segunda chamada:',
               [
-                'fn consumir(texto: String) { println!("{texto}"); }\n\nfn main() {',
+                'fn consumir(texto: String) {\n    println!("{texto}");\n}\n\nfn main() {',
                 '    let msg = String::from("ok");',
                 '    consumir(msg.clone());',
                 '    consumir(msg);',
                 '}',
               ],
               [
-                '    println!("fim: {msg}");',
+                '    consumir(&msg);',
                 '    consumir(msg.copy());',
               ],
               'O clone precisa vir na primeira chamada (`consumir(msg.clone());`), pois a segunda chamada (`consumir(msg);`) move e consome `msg` definitivamente.',

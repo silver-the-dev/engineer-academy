@@ -741,16 +741,15 @@ export const rustInicio: UnitDef = {
               '`cargo run` compila incrementalmente o que mudou e só executa o programa se a compilação for bem-sucedida. Tudo acontece localmente.',
             ),
             codePuzzle(
-              'Monte a sequência de terminal para: 1) criar o projeto `motor`, 2) entrar na pasta, 3) checar sem gerar binário, 4) validar com o linter sem avisos e 5) rodar:',
+              'Monte a sequência de terminal para: 1) criar o projeto `motor`, 2) entrar na pasta, 3) compilar o executável e 4) rodar esse binário para imprimir `Hello, world!`:',
               [
                 'cargo new motor',
                 'cd motor',
-                'cargo check',
-                'cargo clippy -- -D warnings',
-                'cargo run',
+                'cargo build',
+                './target/debug/motor',
               ],
               ['gcc motor.rs -o motor', 'cargo check --delete'],
-              'Criamos o pacote com `cargo new motor`, entramos na pasta com `cd motor`, validamos com `cargo check` e `cargo clippy -- -D warnings`, e executamos com `cargo run`.',
+              'Criamos o pacote com `cargo new motor`, entramos na pasta com `cd motor`, geramos o executável com `cargo build` e rodamos `./target/debug/motor`, que imprime `Hello, world!`.',
             ),
             gen((rng) => {
               const debugMs = randInt(rng, 40, 90);
