@@ -12,29 +12,29 @@ import { loadReviewRecords, saveReviewRecord } from '../lib/reviewStorage';
 import { makeRng, shuffle } from '../lib/random';
 import { exportReviewFile } from '../lib/reviewExport';
 import { useKeyboardInset } from '../lib/useKeyboardInset';
+import { createAdminSession } from '../lib/adminAuth';
 
 const APP_VERSION = Constants.expoConfig?.version ?? 'desconhecida';
 
 export default function AdminScreen() {
   const [unlocked, setUnlocked] = useState(false);
+  const access = useRef(createAdminSession()).current;
   const insets = useSafeAreaInsets();
   const keyboard = useKeyboardInset();
   const leave = () => router.canGoBack() ? router.back() : router.replace('/profile');
-  useFocusEffect(useCallback(() => () => setUnlocked(false), []));
+  useFocusEffect(useCallback(() => () => { access.invalidate(); setUnlocked(false); }, [access]));
 
   // Listening from the start covers a sign-in that finishes after the app went to the background.
   useEffect(() => {
-    let backgroundAt: number | undefined;
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'background') backgroundAt ??= Date.now();
-      if (state === 'active') {
-        if (backgroundAt && Date.now() - backgroundAt >= 120_000) setUnlocked(false);
-        backgroundAt = undefined;
-      }
+      if (access.change(state)) setUnlocked(false);
     });
     return () => sub.remove();
-  }, []);
-  const unlock = () => { if (AppState.currentState === 'active') setUnlocked(true); };
+  }, [access]);
+  const beginSignIn = () => {
+    const attempt = access.begin();
+    return () => { if (access.canUnlock(attempt, AppState.currentState)) setUnlocked(true); };
+  };
 
   return <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
     <View style={styles.top}>
@@ -46,7 +46,7 @@ export default function AdminScreen() {
     </View>
     <View style={{ flex: 1, paddingBottom: keyboard ? keyboard + insets.bottom : 0 }}>
       {unlocked ? <ReviewDesk /> : <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-        <AdminAccess onUnlock={unlock} />
+        <AdminAccess onBeginSignIn={beginSignIn} />
       </ScrollView>}
     </View>
   </SafeAreaView>;

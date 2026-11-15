@@ -4,7 +4,7 @@ import { activateAdmin, adminConfigured, adminSupported, signInAdmin } from '../
 import { C, F } from '../../theme';
 import { Button, Card } from '../ui/Button';
 
-export function AdminAccess({ onUnlock }: { onUnlock: () => void }) {
+export function AdminAccess({ onBeginSignIn }: { onBeginSignIn: () => () => void }) {
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [reset, setReset] = useState(false);
   const [code, setCode] = useState('');
@@ -12,7 +12,6 @@ export function AdminAccess({ onUnlock }: { onUnlock: () => void }) {
   const [confirmation, setConfirmation] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [retry, setRetry] = useState(0);
   const submitting = useRef(false);
   const activating = configured === false || reset;
 
@@ -26,24 +25,29 @@ export function AdminAccess({ onUnlock }: { onUnlock: () => void }) {
         setError('Não foi possível ler o acesso salvo neste aparelho. Use o código de ativação para criar uma nova senha.');
       });
     return () => { active = false; };
-  }, [retry]);
+  }, []);
 
   async function submit() {
     if (submitting.current || !password) return;
-    if (activating && password !== confirmation) {
+    if (activating && password.normalize('NFC') !== confirmation.normalize('NFC')) {
       setError('As senhas precisam ser iguais.');
       return;
     }
     submitting.current = true;
     setBusy(true);
     setError('');
+    const unlock = onBeginSignIn();
     try {
-      if (activating) await activateAdmin(code, password);
+      if (activating) {
+        await activateAdmin(code, password);
+        setConfigured(true);
+        setReset(false);
+      }
       else await signInAdmin(password);
       setPassword('');
       setConfirmation('');
       setCode('');
-      onUnlock();
+      unlock();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível entrar.');
     } finally {
@@ -62,8 +66,7 @@ export function AdminAccess({ onUnlock }: { onUnlock: () => void }) {
 
   if (!adminSupported) return <Text style={styles.body}>Abra o aplicativo instalado para acessar a administração.</Text>;
   if (configured === null) return <View style={{ gap: 12 }}>
-    <Text style={styles.body}>{error || 'Abrindo acesso administrativo…'}</Text>
-    {error ? <Button title="Tentar novamente" onPress={() => { setError(''); setRetry(n => n + 1); }} /> : null}
+    <Text style={styles.body}>Abrindo acesso administrativo…</Text>
   </View>;
 
   return <Card style={{ gap: 14 }}>
