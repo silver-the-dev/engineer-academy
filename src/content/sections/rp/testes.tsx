@@ -142,7 +142,7 @@ export const rustTestes: UnitDef = {
             gen((rng) => {
               const s = randInt(rng, 1, 8) * 10;
               const v = randInt(rng, 1, 9) * 10;
-              return num('Que número deve substituir o comentário na comparação para o teste passar?', s + v, `O saldo começa em ${s} e aumenta ${v}: o valor esperado é ${s + v}.`, { visual: code(`#[test]\nfn deposito() {\n    let mut saldo = ${s};\n    saldo += ${v};\n    assert_eq!(saldo, /* esperado */ 0);\n}`, [5], 'Compila, mas a comparação falha') });
+              return num('Que número deve substituir o zero na comparação para o teste passar?', s + v, `O saldo começa em ${s} e aumenta ${v}: o valor esperado é ${s + v}.`, { visual: code(`#[test]\nfn deposito() {\n    let mut saldo = ${s};\n    saldo += ${v};\n    assert_eq!(saldo, /* esperado */ 0);\n}`, [5], 'Compila, mas a comparação falha') });
             }),
             { ...fill('Complete a descrição do atributo mostrado:', 'O módulo é compilado na configuração de ___.', ['testes'], ['release', 'documentação apenas', 'execução comum'], 'A condição test é ativada ao compilar o executável de testes; um build comum não inclui esse módulo.'), visual: code(unitTest, [5]) },
             mcq('O teste abaixo compila? Qual é o diagnóstico principal?', ['Não: E0308, assert exige bool.', 'Sim: números não nulos são true.', 'Não: E0382, saldo foi movido.', 'Sim: assert compara com zero.'], 0, 'E0308: `mismatched types`, expected `bool`, found integer. Rust não converte inteiro em bool. Corrija passando uma comparação, como verificar se o saldo é positivo.', { visual: code(`#[test]\nfn saldo_valido() {\n    let saldo = 100;\n    assert!(saldo);\n}`, [4], 'Erro de tipo intencional') }),

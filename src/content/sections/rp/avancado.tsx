@@ -563,8 +563,7 @@ cargo clippy -- -D warnings`, [], 'Terminal · não usa crates externas'),
     );
     println!("{bytes}");
 }`, [2, 3], 'Programa host · core também funciona com std') }),
-            codePuzzle('Monte src/lib.rs sem std: limite o ADC e converta para milivolts.', [
-              '#![no_std]',
+            codePuzzle('Com #![no_std] já no início de src/lib.rs, monte a função: limite o ADC e converta para milivolts.', [
               'pub fn millivolts(raw: u16) -> u32 {',
               '    let limited = raw.min(4095);',
               '    let wide = u32::from(limited);',
